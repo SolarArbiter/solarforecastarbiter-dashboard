@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 import pdb
 
@@ -56,13 +57,22 @@ class RootHandler(BaseHandler):
 
 class OrgHandler(BaseHandler):
     template = 'org/obs.html'
+    # check for authentication
+    # check authorized to list/view sites
 
+    # Get list of obs for organization
+    # format for tabular display, add to dict of kwargs for templating
 
 class SiteHandler(BaseHandler):
     template = 'data/site.html'
     subnav = {
         "/tep/avalon_2": "Data",
         }
+    # check authenticated&authorized
+
+    # list accessible observations for site
+    # /observations? site=avalon_2&org=tep
+    # /observations?site=<uuid> (how do we get uuid here?
 
 
 class DataDashHandler(BaseHandler):
@@ -101,19 +111,24 @@ logger=logging.getLogger()
 logger.setLevel(logging.DEBUG)
 static_files = Path(__file__).parent / 'static'
 app = Application([(r'/', RootHandler),
-                   (r'/tep', OrgHandler),
-                   (r'/tep/avalon_2', SiteHandler),
-                   (r'/tep/avalon_2/\w+', DataHandler),
-                   (r'/tep/avalon_2/\w+/trials', TrialsHandler),
-                   (r'/tep/avalon_2/\w+/access', AccessHandler),
-                   (r'/tep/avalon_2/\w+/reports', ReportsHandler),],
+                   (r'/tep/observations', OrgHandler),
+                   (r'/tep/forecasts', OrgHandler),
+                   (r'/tep/observations/avalon_2', SiteHandler),
+                   (r'/tep/observations/avalon_2/\w+', DataHandler),
+                   (r'/tep/observations/avalon_2/\w+/trials', TrialsHandler),
+                   (r'/tep/observations/avalon_2/\w+/access', AccessHandler),
+                   (r'/tep/observations/avalon_2/\w+/reports', ReportsHandler),],
                    static_path=str(static_files),
                    autoreload=True)
-
-
-server = httpserver.HTTPServer(app, ssl_options={
-    "certfile": "/certs/tls.crt",
-    "keyfile": "/certs/tls.key",
-})
+server_options = {}
+if not os.getenv('SFA_DASH_LOCAL', False):
+    server_options.update({
+        'ssl_options': {
+            "certfile": "/certs/tls.crt",
+            "keyfile": "/certs/tls.key",
+        },
+    })
+    
+server = httpserver.HTTPServer(app, **server_options)
 server.listen(8080)
 tornado.ioloop.IOLoop.current().start()
