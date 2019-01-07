@@ -1,0 +1,16 @@
+{% extends "data/metadata/meta_container.html" %}
+{% import "data/metadata/meta_macro.jinja" as macro %}
+{% set data_type = 'Site' %}
+{% block metadata %}
+<ul class="data-metadata-fields col-md-6 col-xs-12">
+  {{ macro.li('Name', name) }}
+  {# {{ macro.li('Abbreviation', abbreviation) }} #}
+  {{ macro.li('Latitude', latitude) }}
+  {{ macro.li('Longitude', longitude) }}
+  {{ macro.li('Timezone', timezone) }}
+  {{ macro.li('Elevation', elevation) }}
+</ul>
+<ul class="data-metadata-fields col-md-6 col-xs-12">
+  {{ macro.li('UUID', site_id) }}
+</ul>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "dash/data.html" %}
+{# {% set sidebar = True %} #}
+{% set page_title = 'Create New Observation' %}
+{% block content %}
+{{ metadata | safe }}
+<form action="/create/site" method="post" id="some-form">
+  <div class="form-group">
+	<div class="form-element">
+	  <label>Name</label>
+  	  <input required type="text" class="form-control name-field" placeholder="Name of the Observation.">
+	</div>
+	<div class="form-element">
+	  <label>Variable</label>
+  	  <select required class="form-control">
+	    <option value="surface-temperature">Surface Temperature (C)</option>
+		<option value="surface-wind-speed">Surface Wind Speed (m/s)</option>
+		<option value="ghi">Global Horizontal Irradiance (W/m^2)</option>
+		<option value="dni">Direct Normal Irradiance (W/m^2)</option>
+		<option value="dhi">Diffuse Horizontal Irradiance (W/m^2)</option>
+		<option value="poa">Plane of Array Irradiance (W/m^2)</option>
+	    <option value="rh">Relative Humidity (%)</option>
+        <option value="ac-power">AC Power (MW)</option>
+        <option value="dc-power">DC Power (MW)</option>
+	  </select>
+	</div>
+	<div class="form-element">
+	  <label>Value Type</label>
+  	  <select required type="select" class="form-control value-type-field">
+	    <option value="interval-mean">Interval Mean</option>
+		<option value="instantaneous">Instantaneous</option>
+	  </select>
+	</div>
+    <div class="form-element">
+	  <label>Uncertainty</label>
+  	  <input type="text" class="form-control uncertainty-field" placeholder="A measure of uncertainty of observation values.">
+	</div>
+	<div class="form-element full-width">
+	  <label>Description</label>
+      <textarea cols="40" rows="5" class="form-control extra-parameters-field" placeholder="An optional text description to record information such as instrument type"></textarea>
+	</div>
+	<div class="form-element full-width">
+	  <label>Extra Parameters (Optional)</label>
+      <textarea cols="40" rows="5" class="form-control extra-parameters-field" placeholder="This field will store any ASCII text. We recommend using it to store other parameters you have collected in a format such as YAML or JSON"></textarea>
+	</div>
+  </div>
+</form>
+<button type="submit" form="some-form" value="Submit" class="btn btn-primary">Submit</button>
+{% endblock %}

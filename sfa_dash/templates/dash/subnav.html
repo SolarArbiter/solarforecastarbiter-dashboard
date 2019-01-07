@@ -1,3 +1,4 @@
+{% if subnav is defined %}
 <nav class="sub-nav">
   <ul class="sub-nav-list">
     {% for path, link_text in subnav.items() %}
@@ -9,3 +10,4 @@
     {% endfor %}
    </ul>
 </nav>
+{% endif %}

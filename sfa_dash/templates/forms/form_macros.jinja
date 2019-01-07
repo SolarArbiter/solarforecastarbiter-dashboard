@@ -1,0 +1,16 @@
+{% macro input(label, type, name, description, required) %}
+{% set extra_attr = '' %}
+
+{% if type == 'number' %}
+{% set extra_attr = extra_attr + 'step=any' %}
+{% endif %}
+
+{% if required %}
+{% set extra_attr = extra_attr + ' required' %}
+{% endif %}
+<div class="form-element">
+<label>{{ label }}</label>
+<input type="{{ type }}" class="form-control {{ name }}-field" {{ extra_attr }}  name="{{ name }}">
+<p class="form-text text-muted help-text">{{ description }}</p>
+</div>
+{% endmacro %}

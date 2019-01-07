@@ -1,0 +1,77 @@
+{% extends "dash/data.html" %}
+{% set sidebar = True %}
+{% set page_title = 'Create New Site' %}
+{% block content %}
+<form action="/create/site" method="post" id="some-form">
+  <div class="form-group">
+	<div class="form-element">
+	  <label>Name</label>
+  	  <input type="text" class="form-control name-field" value="Ashland, OR">
+	</div>
+	<div class="form-element">
+	  <label>Latitude</label>
+  	  <input type="text" class="form-control latitude-field" value="42.19">
+	</div>
+	<div class="form-element">
+	  <label>Longitude</label>
+  	  <input type="text" class="form-control longitude-field" value="-122.7">
+	</div>
+    <div class="form-element">
+	  <label>Elevation</label>
+  	  <input type="text" class="form-control elevation-field" value="595">
+	</div>
+    <div class="form-element">
+	  <label>Timezone</label>
+  	  <input type="text" class="form-control timezone-field" value="Etc/GMT+5">
+	</div>
+    <div class="form-element">
+	  <label>Network</label>
+  	  <input type="text" class="form-control network-field" value="UO SRML">
+	</div>
+	<div class="form-element">
+	  <input type="radio" name="site-type" value="power-plant">Power Plant<br>
+      <input type="radio" name="site-type" value="weather-station">Weather Stations<br>
+
+	  <div class="btn group-toggle" data-toggle="buttons">
+	    <label class="btn btn-secondary">
+	    </label>
+	    <label class="btn btn-secondary">
+	    </label>
+	  </div>
+	</div>
+	<fieldset>
+	  <legend>PV Modeling Parameters</legend>
+	    <div class="form-element">
+	      <label>AC Power</label>
+  	      <input type="text" class="form-control ac-power-field" value="">
+	    </div>
+	    <div class="form-element">
+          <label>DC Power</label>
+          <input type="text" class="form-control dc-power-field" value="">
+        </div>
+		<div class="form-element">
+	      <label>Gamma PDC</label>
+  	      <input type="text" class="form-control gamma-pdc-field" value="">
+	    </div>
+	    <div class="form-element">
+          <label>Tracking Type</label>
+          <input type="text" class="form-control tracking-type-field" value="single axis">
+        </div>
+		<div class="form-element">
+	      <label>Surface Tilt</label>
+  	      <input type="text" class="form-control surface-tilt-field" value="45">
+	    </div>
+	    <div class="form-element">
+          <label>Surface Azimuth</label>
+          <input type="text" class="form-control surface-azimuth-field" value="45">
+        </div>
+	</fieldset>
+	<div class="form-element full-width">
+	  <label>Extra Parameters</label>
+  	  <textarea cols="40" rows="5" class="form-control extra-parameters-field">{'module': 'First Solar Seried 6'}</textarea>
+	</div>
+
+  </div>
+</form>
+<button type="submit" form="some-form" value="Submit" class="btn btn-primary">Submit</button>
+{% endblock %}

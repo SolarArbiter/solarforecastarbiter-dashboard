@@ -1,0 +1,7 @@
+{% extends "data/table/data_table.html" %}
+{% block tools %}
+<input type="text" placeholder="Search" class="search">
+<a type="button" class="btn btn-outline-primary btn-sm" href="/demo/observation">Create new Observation</a>
+{% endblock %}
+{% import "data/table/observation_macro.jinja" as table_macro %}
+{% set table_type='observation' %}
