@@ -6,7 +6,7 @@ Install requirements with `pip install -r requirements.txt`
 
 Run the script with `python serve.py`
 
-Open [http://localhost:8080/tep](http://localhost:8080/tep) in a browser to view the dashboard.
+Open [http://localhost:8080/](http://localhost:8080/) in a browser to view the dashboard.
 
 
 #### Template Layout
