@@ -141,5 +141,5 @@ forecast = {
   "value_type": "mean",
 }
 observations = [ observation, observation_1, observation_2 ]
-forecasts = [forecast, forecast, forecast]
+forecasts = [forecast]
 sites = [site, site_1, site_2]
