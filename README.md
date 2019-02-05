@@ -2,7 +2,7 @@
 A simple tornado web app to demo dashboard design. There are lots of dead links and unresponsive buttons, that lead to pages/functionality that have yet to be decided on.
 
 ### Usage/ Installation
-Install requirements with `pip install -r requirements.txt`
+Install dashboard with `pip install -e .`
 
 Run the script with `python serve.py`
 
