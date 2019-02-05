@@ -12,7 +12,6 @@ def create_app():
     app.register_blueprint(data_dash_blp)
     app.register_blueprint(forms_blp)
     app.register_blueprint(demo_blp)
-    #hi
     return app
 
 if __name__ == '__main__':

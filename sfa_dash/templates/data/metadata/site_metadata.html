@@ -4,13 +4,29 @@
 {% block metadata %}
 <ul class="data-metadata-fields col-md-6 col-xs-12">
   {{ macro.li('Name', name) }}
-  {# {{ macro.li('Abbreviation', abbreviation) }} #}
-  {{ macro.li('Latitude', latitude) }}
-  {{ macro.li('Longitude', longitude) }}
+  {{ macro.li('Latitude', latitude | string + '&deg;N') }}
+  {{ macro.li('Longitude', longitude | string + '&deg;E') }}
   {{ macro.li('Timezone', timezone) }}
-  {{ macro.li('Elevation', elevation) }}
+  {{ macro.li('Elevation', elevation | string + 'm') }}
 </ul>
 <ul class="data-metadata-fields col-md-6 col-xs-12">
-  {{ macro.li('UUID', site_id) }}
+  {% if modeling_parameters %}
+    <li><b>Modeling Parameters:</b>
+      <div class="data-metadata-field-modeling-parameters pl-2">
+        <ul class="data-metadata-fields">
+        {{ macro.li('AC Power', modeling_parameters['ac_power'] | string + 'MW') }}
+        {{ macro.li('DC Power', modeling_parameters['dc_power'] | string + 'MW') }}
+        {{ macro.li('Temperatue Coefficient', modeling_parameters['temperature_coefficient'] | string +'C')}}
+        {{ macro.li('Tracking Type', modeling_parameters['tracking_type']) }}
+        {{ macro.li('Surface Tilt', modeling_parameters['surface_tilt'] | string + '&deg;') }}
+        {{ macro.li('Surface Azimuth', modeling_parameters['surface_azimuth'] | string + '&deg;') }}
+        {#
+          {% for key, value in modeling_parameters.items() %}
+            {{ macro.li(key, value) }}
+          {% endfor %} #}
+        </ul>
+      </div>
+    </li>
+  {% endif %}
 </ul>
 {% endblock %}

@@ -8,16 +8,6 @@ site = {
   "latitude": 42.19,
   "longitude": -122.7,
   "modeling_parameters": {
-    "ac_power": "",
-    "axis_azimuth": 45.0,
-    "axis_tilt": 45.0,
-    "backtrack": True,
-    "dc_power": "",
-    "gamma_pdc": "",
-    "ground_coverage_ratio": 0.5,
-    "surface_azimuth": 45.0,
-    "surface_tilt": 45.0,
-    "tracking_type": "",
   },
   "name": "Ashland OR",
   "provider": "Reference",
@@ -51,23 +41,20 @@ site_1 ={
 site_2 = {
     "elevation": 786.0,
     "extra_parameters": {
-        "network": "SURFRAD",
     },
     "latitude": 43.73403,
     "longitude": -96.62328,
     "modeling_parameters": {
-        "ac_power": "",
-        "axis_azimuth": 45.0,
-        "axis_tilt": 45.0,
+        "ac_power": "0.015",
+        "dc_power": "0.015",
         "backtrack": True,
-        "dc_power": "",
-        "gamma_pdc": "",
+        "temperature_coefficient": -.002,
         "ground_coverage_ratio": 0.5,
-        "surface_azimuth": 45.0,
+        "surface_azimuth": 180,
         "surface_tilt": 45.0,
-        "tracking_type": ""
+        "tracking_type": "Fixed"
     },
-    "name": "Sioux Falls, SD",
+    "name": "Power Plant 1",
     "provider": "Reference",
     "site_id": "8594d9a2-a23d-4f62-a410-5dddcba583a7",
     "timezone": "Etc/GMT+6"
@@ -76,40 +63,40 @@ observation = {
     "extra_parameters": {
       "instrument": "Ascension Technology Rotating Shadowband Pyranometer"
     },
-    "name": "Ashland OR, ghi",
+    "name": "GHI Instrument 1",
     "obs_id": "123e4567-e89b-12d3-a456-426655440000",
     "provider": "UO SRML",
     "site": site,
     "site_id": "123e4567-e89b-12d3-a456-426655440001",
-    "variable": "ghi",
-    "Value Type": "Interval Mean",
-    "Interval Label": "Start"
+    "variable": "GHI",
+    "value_type": "Interval Mean",
+    "interval_label": "beginning"
 }
 observation_1 = {
     "extra_parameters": {
       "instrument": "Ascension Technology Rotating Shadowband Pyranometer"
     },
-    "name": "Ashland OR, dhi",
+    "name": "DHI Instrument 1",
     "obs_id": "9cfa4aa2-7d0f-4f6f-a1c1-47f75e1d226f",
     "provider": "UO SRML",
     "site": site,
     "site_id": "123e4567-e89b-12d3-a456-426655440001",
     "variable": "dhi",
-    "Value Type": "Interval Mean",
-    "Interval Label": "Start"
+    "value_type": "Interval Mean",
+    "interval_label": "beginning"
 }
 observation_2 = {
     "extra_parameters": {
       "instrument": "Ascension Technology Rotating Shadowband Pyranometer"
     },
-    "name": "Ashland OR, dni",
+    "name": "DNI Instrument 2",
     "obs_id": "9ce9715c-bd91-47b7-989f-50bb558f1eb9",
     "provider": "UO SRML",
     "site": site,
     "site_id": "123e4567-e89b-12d3-a456-426655440001",
     "variable": "dni",
-    "Value Type": "Interval Mean",
-    "Interval Label": "Start"
+    "value_type": "Interval Mean",
+    "interval_label": "beginning"
 }
 observation_3 = {
     "extra_parameters": {
@@ -121,8 +108,8 @@ observation_3 = {
     "site": site_1,
     "site_id": "d2018f1d-82b1-422a-8ec4-4e8b3fe92a4a",
     "variable": "ghi",
-    "Value Type": "Interval Mean",
-    "Interval Label": "Start"
+    "value_type": "Interval Mean",
+    "interval_label": "beginning"
 }
 observation_4 = {
     "extra_parameters": {
@@ -134,40 +121,24 @@ observation_4 = {
     "site": site_2,
     "site_id": "8594d9a2-a23d-4f62-a410-5dddcba583a7",
     "variable": "ghi",
-    "Value Type": "Interval Mean",
-    "Interval Label": "Start"
+    "value_type": "Interval Mean",
+    "interval_label": "beginning"
 }
 
 forecast = {
   "forecast_id": "f79e4f84-e2c3-11e8-9f32-f2801f1b9fd1",
-  "name": "Ashland OR, ghi",
+  "name": "AC Power",
   "provider": "University of Arizona",
-  "site": {
-    "elevation": 595.0,
-    "extra_parameters": {
-      "net_work_api_abbreviation": "AS",
-      "network": "UO SRML",
-      "network_api_id": "94040"
-    },
-    "latitude": 42.19,
-    "longitude": -122.7,
-    "modeling_parameters": {
-      "ac_power": "",
-      "axis_azimuth": 45.0,
-      "axis_tilt": 45.0,
-      "backtrack": True, 
-      "dc_power": "",
-      "gamma_pdc": "",
-      "ground_coverage_ratio": 0.5,
-      "surface_azimuth": 45.0,
-      "surface_tilt": 45.0,
-      "tracking_type": ""
-    },
-    "name": "Ashland OR",
-    "timezone": "Etc/GMT+8"
-  },
+  "site": site_2,
   "site_id": "123e4567-e89b-12d3-a456-426655440001",
-  "variable": "ghi"
+  "variable": "AC Power",
+  "issue_time_of_day": "06:00",
+  "issue_frequency": "1 day",
+  "duration": "1 minute",
+  "intervals": "1440",
+  "interval_label": "beginning",
+  "lead_time_to_start": "1 hour",
+  "value_type": "mean",
 }
 observations = [ observation, observation_1, observation_2 ]
 forecasts = [forecast, forecast, forecast]

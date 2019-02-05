@@ -3,7 +3,7 @@
 {% set page_title = 'Create New Forecast' %}
 {% block content %}
 {{ metadata | safe }}
-<form action="/create/site" method="post" id="some-form">
+<form action="/forecasts/AC%20Power" method="get" id="some-form">
   <div class="form-group">
 	<div class="form-element">
 	  <label>Name</label>
@@ -12,26 +12,27 @@
 	<div class="form-element">
 	  <label>Variable</label>
   	  <select required name="variable" class="form-control">
-	    <option value="surface-temperature">Surface Temperature (C)</option>
-		<option value="surface-wind-speed">Surface Wind Speed (m/s)</option>
-		<option value="ghi">Global Horizontal Irradiance (W/m^2)</option>
+	    <option value="ghi">Global Horizontal Irradiance (W/m^2)</option>
 		<option value="dni">Direct Normal Irradiance (W/m^2)</option>
 		<option value="dhi">Diffuse Horizontal Irradiance (W/m^2)</option>
 		<option value="poa">Plane of Array Irradiance (W/m^2)</option>
 	    <option value="rh">Relative Humidity (%)</option>
         <option value="ac-power">AC Power (MW)</option>
         <option value="dc-power">DC Power(MW)</option>
+		<option value="surface-temperature">Surface Temperature (C)</option>
+		<option value="surface-wind-speed">Surface Wind Speed (m/s)</option>
+
 	  </select>
 	</div>
 	<div class="form-element">
 	  <span>
-	    <label>Issue Time</label><br/>
-  	    <select required name="issue-time-hours" class="form-control time-field issue-time-field issue-time-hours" title="Issue time Hours"> 
+	    <label>Issue time of day</label><br/>
+  	    <select required name="issue-time-hours" class="form-control time-field issue-time-field issue-time-hours" title="Issue time of day Hours"> 
 	    	{% for i in range(0,24) %}
 	        <option value="{{ i }}">{{ '%02d' % i }}</option>
 	      {% endfor %}
 	    </select>:
-	    <select required name="issue-time-minues" class="form-control time-field issue-time-field issue-time-minutes">
+	    <select required name="issue-time-minues" class="form-control time-field issue-time-field issue-time-minutes" title="Issue time of day minutes">
 	      {% for i in range(0,60) %}
 	        <option value="{{ i }}">{{ '%02d' % i }}</option>
 	      {% endfor %}
@@ -42,7 +43,7 @@
 	  </div>
 	</div>
     <div class="form-element">
-	  <label>Lead Time to start</label><br/>
+	  <label>Lead time to start</label><br/>
   	  <input required name="lead-time-number" type="number" step="0.01" min="0" class="form-control time-field lead-time-field">
 	  <span class="help-text">The difference between issue time and the start of the first forecast interval, e.g. 1 hour.</span>
 	  <select required name="lead-time-units" class="form-control time-field">
@@ -53,11 +54,18 @@
 	  </select>
 	</div>
 	<div class="form-element">
-	  <label>Intervals per Submission</label>
-  	  <input type="number" name="intervals-per-submission" class="form-control intervals-per-field">
+	  <label>Run length/Issue frequency</label>
+	  <input type="number" name="interval-number" step="0.01" min="0" class="form-control time-field interval-duration-field">
+	  <span class="help-text">The total length of a single issued forecast run, e.g. 1 hour. To enforce a continuous, non-overlapping sequence, this is equal to the forecast run issue frequency.</span>
+	  <select required name="interval-units" class="form-control time-field">
+	  	<option value="seconds">Seconds</option>
+        <option value="minutes">Minutes</option>
+        <option value="hours">Hours</option>
+        <option value="days">Days</option>
+	  </select>
 	</div>
 	<div class="form-element">
-	  <label>Interval Duration</label><br/>
+	  <label>Interval length </label><br/>
   	  <input type="number" name="interval-number" step="0.01" min="0" class="form-control time-field interval-duration-field">
 	  <span class="help-text">The length of time that each data point represents, e.g. 5 minutes, 1 hour.</span>
 	  <select required name="interval-units" class="form-control time-field">
@@ -68,15 +76,16 @@
 	  </select>
 	</div>
 	<div class="form-element">
-	  <label>Interval Label</label>
+	  <label>Interval label</label>
   	  <select name="interval-label" class="form-control interval-label-field">
-	    <option value="start">Start</option>
-		<option value="end">End</option>
+	    <option value="start">beginning</option>
+		<option value="ending">ending</option>
+		<option value="instant">instant</option>
 	  </select>
 	  <span class="help-text help-text-top">Indicates if a time labels the start or the end of an interval.</span>
 	</div>
 	<div class="form-element">
-	  <label>Value Type</label>
+	  <label>Value type</label>
 	  <select name="value-type" class="form-control value-type-field">
 	    <option value="mean">Mean</option>
 		<option value="min">Min</option>

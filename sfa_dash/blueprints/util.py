@@ -22,10 +22,17 @@ class DataTables(object):
             table_row['variable'] = data['variable']
             table_row['provider'] = data['provider']
             table_row['uuid'] = data[id_key]
-            table_row['link'] = url_for('data_dashboard.observation_named_data',
-                                        organization=organization,
-                                        name=data['name'],
-                                        site=site_name)
+            table_row['site'] = site_name
+            if site_name == 'Power Plant 1':
+                table_row['link'] = url_for('data_dashboard.forecast_data',
+                                            organization=organization,
+                                            name=data['name'],
+                                            site=site_name)
+            else:
+                table_row['link'] = url_for('data_dashboard.observation_named_data',
+                                            organization=organization,
+                                            name=data['name'],
+                                            site=site_name)
             table_rows.append(table_row)
         return table_rows  
 
@@ -37,6 +44,8 @@ class DataTables(object):
             table_row = {}
             table_row['name'] = data['name']
             table_row['provider'] = data['provider']
+            table_row['latitude'] = data['latitude']
+            table_row['longitude'] = data['longitude']
             table_row['uuid'] = data[id_key]
             table_row['link'] = url_for("data_dashboard.site_view",
                                         site_id=data['name'])

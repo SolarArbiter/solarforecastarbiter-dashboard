@@ -9,12 +9,12 @@
       <th scope="col">Name</th>
       <th scope="col">Variable</th>
 	  <th scope="col">Provider</th>
-      <th scope="col">UUID</th>
+      <th scope="col">Site</th>
     </tr>
   </thead>
   <tbody>
     <tr class="warning no-result">
-      <td colspan="4"><i class="fa fa-warning"></i> No result</td>
+      <td colspan="4"><i class="fa fa-warning"></i>No result</td>
     </tr>
 	{% for row in table_rows %}
 	  {{ table_macro.tr(row) }}

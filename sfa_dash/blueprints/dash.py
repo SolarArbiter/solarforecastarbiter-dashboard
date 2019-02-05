@@ -16,7 +16,7 @@ class DataDashView(BaseView):
          temp_args = {}
          temp_args['current_path'] = request.path
          temp_args['subnav'] = self.format_subnav(**kwargs)
-         temp_args['breadcrumb'] = self.make_breadcrumb_html()
+         temp_args['breadcrumb'] = self.make_breadcrumb_html(**kwargs)
          return temp_args
 
 

@@ -1,6 +1,6 @@
 {% extends "data/metadata/meta_container.html" %}
 {% import "data/metadata/meta_macro.jinja" as macro %}
-{% set data_type = 'Observation' %}
+{% set data_type = 'Forecast' %}
 {% block metadata %}
 <ul class="data-metadata-fields col-md-6 col-xs-12">
   {{ macro.li('Name', name) }}
@@ -8,8 +8,11 @@
   {{ macro.li('Site', site_link) }}
 </ul>
 <ul class="data-metadata-fields col-md-6 col-xs-12">
- {{ macro.li('Variable', variable| upper + " (W/m^2)") }}
- {{ macro.li('Value Type', value_type) }}
- {{ macro.li('Interval Label', interval_label) }}
+  {{ macro.li('Variable', variable + ' (MW)' ) }}
+  {{ macro.li('Value type', value_type) }}
+  {{ macro.li('Issue time of day', issue_time_of_day) }}
+  {{ macro.li('Run length / Issue frequency', issue_frequency) }}
+  {{ macro.li('Interval label', interval_label) }}
+  {{ macro.li('Lead time to start', lead_time_to_start) }}
 </ul>
 {% endblock %}

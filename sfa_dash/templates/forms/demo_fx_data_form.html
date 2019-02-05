@@ -1,10 +1,10 @@
 {% extends "dash/data.html" %}
 {# {% set sidebar = True %} #}
-{% set page_title = 'Upload Observation data' %}
+{% set page_title = 'Upload Forecast data' %}
 {% block content %}
 {{ metadata | safe }}
-<h3>Upload data for Observation 'GHI Instrument 1'</h3>
-<form action="/sites/Ashland%20OR/GHI%20Instrument%201" method="get" id="some-form">
+<h3>Upload data for Forecast 'AC Power'</h3>
+<form action="/forecasts/AC Power" method="get" id="some-form">
   <div class="form-group">
 	<div class="form-element">
 	  <label>My data is formatted in:</label><br>
@@ -16,9 +16,9 @@
 		<p>Observation data in CSV format should follow the formatting of the example below.</p>
 	    <pre class="example-text">
 # optional header, ignored by Solar Forecast Arbiter 
-timestamp,value,quality_flag
-2018-11-22T12:01:48Z,10.23,0 
-2018-11-22T12:07:38Z,10.67,0</pre>
+timestamp,value
+2018-11-22T12:01:48Z,10.23 
+2018-11-22T12:07:38Z,10.67</pre>
 	  </div>
 	  <div class="upload-example json collapse">
 		<p>Observation data in JSON format should follow the formatting of the example below.</p>
@@ -28,12 +28,10 @@ timestamp,value,quality_flag
         { 
            “timestamp”: “2018-11-22T12:01:48Z”, 
             “value”: 10.23, 
-            “quality_flag”: 0 
          }, 
         { 
            “timestamp”: “2018-11-22T12:07:38Z”, 
             “value”: 10.67, 
-            “quality_flag”: 0 
          }            
     ] 
 }</pre>
@@ -41,7 +39,7 @@ timestamp,value,quality_flag
 
 	</div>	
   	<div class="form-element full-width">
-	  <input type="file" name="observation-data" accept=".csv, application/json">
+	  <input type="file" name="forecast-data" accept=".csv, application/json">
 	</div>
   </div>
 </form>

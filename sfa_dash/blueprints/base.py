@@ -16,7 +16,6 @@ class BaseView(MethodView):
 
     def path_parts(self, index=None):
         path = request.path
-        # path = path[:path.find('?')] if '?' in path else path
         parts = path.split('/')
         if index is not None:
             return parts[index+1]

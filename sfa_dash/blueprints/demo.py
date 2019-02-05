@@ -15,15 +15,24 @@ class DemoViews(BaseView):
             return render_template('forms/demo_obs_form.html', **temp_args)
         if form_type=="forecast":
             return render_template('forms/demo_fx_form.html')
-        if form_type=="upload":
-            metadata = {'name': 'Ashland OR, ghi',
-                        'variable': 'GHI (W/m^2)',
+        if form_type=="obs_upload":
+            metadata = {'name': 'GHI Instrument 1',
+                        'variable': 'GHI',
                         'obs_id': '123e4567-e89b-12d3-a456-426655440000',
                         'site_id': '123e4567-e89b-12d3-a456-426655440001',
-                        'value_type': 'interval mean',
-                        'interval_label': 'end'}
-            temp_args['metadata'] = render_template('data/metadata/observation_metadata.html', **metadata)
+                        'value_type': 'Interval Mean',
+                        'interval_label': 'beginning',
+                        'site_link': '<a href="/sites/Ashland%20OR">Ashland OR</a>'}
+            temp_args['metadata'] = render_template('data/metadata/observation_metadata.html',
+                                                    **metadata)
             return render_template('forms/demo_obs_data_form.html', **temp_args)
+        if form_type == "fx_upload":
+            metadata = demo_data.forecast
+            metadata['site_link'] = '<a href="/sites/Power%20Plant%201">Power Plant 1</a>'
+            temp_args['metadata'] = render_template('data/metadata/forecast_metadata.html',
+                                                    **metadata)
+            return render_template('forms/demo_fx_data_form.html', **temp_args)
+                                    
         abort(404) 
 
 
