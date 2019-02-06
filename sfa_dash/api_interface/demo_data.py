@@ -127,8 +127,8 @@ observation_4 = {
 
 forecast = {
   "forecast_id": "f79e4f84-e2c3-11e8-9f32-f2801f1b9fd1",
-  "name": "AC Power",
-  "provider": "University of Arizona",
+  "name": "HA Power",
+  "provider": "Provider A",
   "site": site_2,
   "site_id": "123e4567-e89b-12d3-a456-426655440001",
   "variable": "AC Power",
