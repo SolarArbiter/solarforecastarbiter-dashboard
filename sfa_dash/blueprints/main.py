@@ -1,78 +1,85 @@
 import pdb
 from sfa_dash.blueprints.dash import DataDashView
-from sfa_dash.blueprints.data_assets import DataListingView
-from sfa_dash.blueprints.site import SingleSiteView
+from sfa_dash.blueprints.data_listing import DataListingView
+from sfa_dash.blueprints.sites import SingleSiteView, SitesListingView
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.util import DataTables
-from sfa_dash.api_interface.requests import api_get
+from sfa_dash.api_interface import observations, forecasts
 from sfa_dash.api_interface import demo_data
 from flask import (Flask, Blueprint, render_template,
                    request, url_for, redirect)
 from flask.views import MethodView                  
 
 
-
-class DataView(DataDashView):
+class SingleObservationView(DataDashView):
     template = 'data/asset.html'
 
     def make_breadcrumb_html(self, **kwargs):
         breadcrumb_format = '/<a href="{url}">{text}</a>'
         breadcrumb = ''
         breadcrumb += breadcrumb_format.format(
-                        url='/sites',
-                        text='Sites')
+            url=url_for('data_dashboard.sites_view'),
+            text='Sites')
         breadcrumb += breadcrumb_format.format(
-                        url='/sites/Ashland%20OR',
-	                text='Ashland OR')
+            url=url_for('data_dashboard.site_view',
+                        site_id=self.metadata['site_id']),
+	    text=self.metadata['site']['name'])
         breadcrumb += breadcrumb_format.format(
-            url='/observations?site=Ashland%20OR',
+            url=url_for('data_dashboard.observations',
+                        site_id=self.metadata['site_id']),
             text='Observations')
         breadcrumb += breadcrumb_format.format(
-            url='/observations/123e4567-e89b-12d3-a456-426655440000',
-            text=kwargs['name'])
+            url=url_for('data_dashboard.observation_data',
+                        obs_id=self.metadata['obs_id']),
+            text=self.metadata['name'])
         return breadcrumb
 
 
-    def get(self, **kwargs):
+    def get(self, obs_id, **kwargs):
+        self.metadata = observations.get_metadata(obs_id)
         temp_args = self.template_args(**kwargs)
-        metadata = demo_data.observation #api_get('/observations/station/metadata')
-        metadata['site_link'] = f'<a href="/sites/{metadata["site"]["name"]}">{metadata["site"]["name"]}</a>'
-        temp_args['metadata'] = render_template('data/metadata/observation_metadata.html', **metadata)
+        site_link = url_for('data_dashboard.site_view',
+                            site_id=self.metadata['site_id'])
+        self.metadata['site_link'] = f'<a href="{site_link}">{self.metadata["site"]["name"]}</a>'
+        temp_args['metadata'] = render_template('data/metadata/observation_metadata.html',
+                                                **self.metadata)
         temp_args['upload_link'] = '/demo/obs_upload'
-        # TODO: get data from api, generate bokeh plots
         return render_template(self.template, **temp_args)
 
 
-class TempDataView(DataDashView):
+class SingleForecastView(DataDashView):
     template = 'data/asset.html'
 
     def make_breadcrumb_html(self, **kwargs):
         breadcrumb_format = '/<a href="{url}">{text}</a>'
         breadcrumb = ''
         breadcrumb += breadcrumb_format.format(
-                        url='/sites',
-                        text='Sites')
+            url=url_for('data_dashboard.sites_view'),
+            text='Sites')
         breadcrumb += breadcrumb_format.format(
-                        url='/sites/Power%20Plant%201',
-	                text='Power Plant 1')
+            url=url_for('data_dashboard.site_view',
+                        site_id=self.metadata['site_id']),
+	    text=self.metadata['site']['name'])
         breadcrumb += breadcrumb_format.format(
-            url='/forecasts?site=Power%20Plant%201',
+            url=url_for('data_dashboard.forecasts',
+                        site_id=self.metadata['site_id']),
             text='Forecasts')
         breadcrumb += breadcrumb_format.format(
-            url=f'/forecasts/{kwargs["name"]}',
-            text=kwargs['name'])
+            url=url_for('data_dashboard.forecast_data',
+                        forecast_id=self.metadata['forecast_id']),
+            text=self.metadata['name'])
         return breadcrumb
 
 
-    def get(self, **kwargs):
+    def get(self, forecast_id, **kwargs):
+        self.metadata = forecasts.get_metadata(forecast_id)
         temp_args = self.template_args(**kwargs)
-        metadata = demo_data.forecast
-        metadata['site_link'] = f'<a href="/sites/{metadata["site"]["name"]}">{metadata["site"]["name"]}</a>'
-        temp_args['metadata'] = render_template('data/metadata/forecast_metadata.html', **metadata)
+        site_link = url_for('data_dashboard.site_view',
+                            site_id=self.metadata['site_id'])
+        self.metadata['site_link'] = f'<a href="{site_link}">{self.metadata["site"]["name"]}</a>'
+        temp_args['metadata'] = render_template('data/metadata/forecast_metadata.html', **self.metadata)
         temp_args['upload_link'] = '/demo/fx_upload'
-        # TODO: get data from api, generate bokeh plots
         return render_template(self.template, **temp_args)
-
 
 
 class AccessView(DataDashView):
@@ -87,47 +94,20 @@ class TrialsView(DataDashView):
     template = 'data/trials.html'
 
 
-class OrgView(BaseView):
-    template = 'org/obs.html'
-    subnav_format = {
-        '{observations_url}': 'Observation Data',
-        '{forecasts_url}': 'Forecast Data',
-        '{trials_url}': 'Trials',
-    }
-    
-    def template_args(self, organization, **kwargs):
-        subnav_kwargs = {
-            'observations_url': url_for('data_dashboard.observations', organization=organization),
-            ## TODO: Set these to trials & forecasts
-            'forecasts_url': url_for('data_dashboard.forecasts', organization=organization),
-            'trials_url': url_for('data_dashboard.observations', organization=organization),
-        }
-        return {'breadcrumb': self.make_breadcrumb_html(),
-                'current_path': request.path,
-                'subnav': self.format_subnav(**subnav_kwargs)}
-
-
-    def get(self, **kwargs):
-        temp_args = self.template_args(**kwargs)
-        temp_args['data_table'] = DataTables.get_observation_table(**kwargs)
-        return render_template(self.template, **temp_args) 
-
 class ToSites(MethodView):
     def get(self):
         return redirect('/sites', 302)
 
-#data_dash_blp.add_url_rule('/<organization>', view_func=OrgView.as_view('organization_view'))
 data_dash_blp = Blueprint('data_dashboard', 'data_dashboard')
-data_dash_blp.add_url_rule('/sites/', view_func=DataListingView.as_view('sites_view', data_type='sites'))
+data_dash_blp.add_url_rule('/sites/', view_func=SitesListingView.as_view('sites_view'))
 data_dash_blp.add_url_rule('/sites/<site_id>/', view_func=SingleSiteView.as_view('site_view'))
-data_dash_blp.add_url_rule('/sites/<site>/<name>', view_func=DataView.as_view('observation_named_data'))
-data_dash_blp.add_url_rule('/sites/<site>/<name>/access', view_func=AccessView.as_view('observation_named_access'))
-data_dash_blp.add_url_rule('/sites/<site>/<name>/reports', view_func=ReportsView.as_view('observation_named_reports'))
-data_dash_blp.add_url_rule('/sites/<site>/<name>/trials', view_func=TrialsView.as_view('observation_named_trials'))
-data_dash_blp.add_url_rule('/observations/', view_func=DataListingView.as_view('observations', data_type='observations'))
-data_dash_blp.add_url_rule('/forecasts/', view_func=DataListingView.as_view('forecasts', data_type='forecasts'))
-data_dash_blp.add_url_rule('/forecasts/<name>', view_func=TempDataView.as_view('forecast_data'))
+data_dash_blp.add_url_rule('/sites/<site_id>/<name>/access', view_func=AccessView.as_view('observation_named_access'))
+data_dash_blp.add_url_rule('/sites/<site_id>/<name>/reports', view_func=ReportsView.as_view('observation_named_reports'))
+data_dash_blp.add_url_rule('/sites/<site_id>/<name>/trials', view_func=TrialsView.as_view('observation_named_trials'))
+data_dash_blp.add_url_rule('/observations/', view_func=DataListingView.as_view('observations', data_type='observation'))
+data_dash_blp.add_url_rule('/observations/<obs_id>', view_func=SingleObservationView.as_view('observation_data'))
+data_dash_blp.add_url_rule('/forecasts/', view_func=DataListingView.as_view('forecasts', data_type='forecast'))
+data_dash_blp.add_url_rule('/forecasts/<forecast_id>', view_func=SingleForecastView.as_view('forecast_data'))
 
 #Temporary redirect to sites page
 data_dash_blp.add_url_rule('/', view_func=ToSites.as_view('root_redirect'))
-
