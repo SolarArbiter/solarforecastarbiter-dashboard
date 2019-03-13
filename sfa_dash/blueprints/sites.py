@@ -21,12 +21,6 @@ class SitesListingView(SiteDashView):
         """Create a dictionary containing the required arguments for the template
         """
         template_args = {}
-        subnav_kwargs = { 
-            'observations_url': url_for('data_dashboard.observations', **kwargs),
-            'forecasts_url': url_for('data_dashboard.forecasts', **kwargs),
-            'trials_url': url_for('data_dashboard.observations', **kwargs),
-        }
-        template_args['subnav'] = self.format_subnav(**subnav_kwargs)
         template_args['data_table'] = DataTables.get_site_table(**kwargs)
         template_args['current_path'] = request.path
         template_args['breadcrumb'] = self.breadcrumb_html(**kwargs)

@@ -22,8 +22,8 @@ class DataDashView(BaseView):
 class SiteDashView(BaseView):
     template = 'data/site.html'
     subnav_format = {
-        '{forecasts_url}': 'Forecasts',
         '{observations_url}': 'Observations',
+        '{forecasts_url}': 'Forecasts',
     }
     def template_args(self, **kwargs):
          """

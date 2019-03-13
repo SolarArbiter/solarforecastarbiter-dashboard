@@ -13,5 +13,5 @@ def get_metadata(site_id):
 
 def post_metadata(site_dict):
     r = post_request('/sites/', site_dict, json=True)
-    return r.json()
+    return r
 
