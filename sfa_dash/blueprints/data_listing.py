@@ -29,12 +29,15 @@ class DataListingView(BaseView):
         breadcrumb_format = '/<a href="{url}">{text}</a>'
         breadcrumb = ''
         if site_id is not None:
-            site_metadata = sites.get_metadata(site_id)
+            site_metadata_request = sites.get_metadata(site_id)
+            if site_metadata_request.status_code != 200:
+                abort(404)
+            site_metadata = site_metadata_request.json()
             breadcrumb += breadcrumb_format.format(
                             url=url_for('data_dashboard.sites_view'),
                             text='Sites')
             breadcrumb += breadcrumb_format.format(
-                            url=url_for('data_dashboard.site_view', site_id=site_id),
+                            url=url_for('data_dashboard.site_view', uuid=site_id),
                             text=site_metadata['name'])
         breadcrumb += breadcrumb_format.format(
             url=url_for(f'data_dashboard.{self.data_type}s'),

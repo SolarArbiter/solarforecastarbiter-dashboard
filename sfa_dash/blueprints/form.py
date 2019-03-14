@@ -8,7 +8,7 @@ import requests
 
 
 class MetadataForm(BaseView):
-    """
+    """Base form view.
     """
     def __init__(self, data_type):
         self.data_type = data_type
@@ -29,6 +29,10 @@ class MetadataForm(BaseView):
             self.formatter = self.site_formatter
         
     def flatten_dict(self, to_flatten):
+        """Flattens nested dictionaries, removing keys of the nested elements.
+        Useful for flattening API responses for prefilling forms on the
+        dashboard.
+        """
         flattened = {}
         for key, value in to_flatten.items():
             if isinstance(value, dict):
@@ -79,7 +83,15 @@ class MetadataForm(BaseView):
         dictionary
             Form data formatted to the API spec.
         """
-        return observation_dict
+        observation_metadata = {}
+        direct_keys = ['name', 'variable', 'value_type', 'uncertainty', 'extra_parameters',
+                       'interval_label', 'site_id']
+        observation_metadata = { key: observation_dict[key]
+                                 for key in direct_keys
+                                 if observation_dict.get(key, "") != ""} 
+        #interval_length = f'{observaton_dict["interval_number"]} {observation_dict["interval_units"]}'
+        #observation_dict['interval_length'] = interval_length
+        return observation_metadata
 
 
     def forecast_formatter(self, forecast_dict):
@@ -98,16 +110,21 @@ class MetadataForm(BaseView):
 class CreateForm(MetadataForm):
     def __init__(self, data_type):
         super().__init__(data_type)
+    
+    def get_site_metadata(self, site_id):
+        site_metadata_request = sites.get_metadata(site_id)
+        if site_metadata_request.status_code != 200:
+            abort(404)
+        site_metadata = site_metadata_request.json()
+        return render_template('data/metadata/site_metadata.html',
+                                   **site_metadata)
 
     def get(self):
         template_arguments = {}
         site_id = request.args.get('site_id')
         if site_id is not None:
-            site_metadata = sites.get_metadata(site_id)
-            if not site_metadata:
-                abort(404)
-            template_arguments['metadata'] = render_template('data/metadata/site_metadata.html',
-                                                             **site_metadata)
+            template_arguments['site_id'] = site_id
+            template_arguments['metadata'] = self.get_site_metadata(site_id)
         return render_template(self.template, **template_arguments)
 
     def post(self):
@@ -115,9 +132,9 @@ class CreateForm(MetadataForm):
         formatted_form = self.formatter(form_data)
         response = self.api_handle.post_metadata(formatted_form)
         if response.status_code == 201:
-            site_id = response.text
-            return redirect(url_for('data_dashboard.site_view',
-                                    site_id=site_id))
+            uuid = response.text
+            return redirect(url_for(f'data_dashboard.{self.data_type}_view',
+                                    uuid=uuid))
         elif response.status_code == 400:
             errors = response.json()['errors']
             errors = self.flatten_dict(errors)
@@ -128,7 +145,7 @@ class CreateForm(MetadataForm):
             return render_template(self.template, form_data=form_data, errors=errors)
         else:
             errors = { 'Error': 'Something went wrong, please contact a site administrator.'}
-            return render_template(self.template, errors=errors)
+            return render_template(self.template, form_data=form_data, errors=errors)
 
 class EditForm(MetadataForm):
     def __init__(self, data_type):

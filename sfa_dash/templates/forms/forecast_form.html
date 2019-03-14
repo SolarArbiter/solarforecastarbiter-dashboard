@@ -7,7 +7,7 @@
 {% if form_data is not defined %}
 {% set form_data = {} %}
 {% endif %}
-<form action="/forecasts/create" method="get" id="some-form">
+<form action="/forecasts/create" method="get" id="forecast-form">
   <div class="form-group">
 	<div class="form-element">
       {{ form.input('Name', 'text', 'name', 'Name for the Forecast',
@@ -103,5 +103,5 @@
 	</div>
   </div>
 </form>
-<button type="submit" form="some-form" value="Submit" class="btn btn-primary">Submit</button>
+<button type="submit" form="forecast-form" value="Submit" class="btn btn-primary">Submit</button>
 {% endblock %}

@@ -23,11 +23,11 @@ class DataTables(object):
             table_row['uuid'] = data[id_key]
             table_row['site'] = site_name
             if id_key == 'forecast_id':
-                table_row['link'] = url_for('data_dashboard.forecast_data',
-                                            forecast_id=data[id_key])
+                table_row['link'] = url_for('data_dashboard.forecast_view',
+                                            uuid=data[id_key])
             else:
-                table_row['link'] = url_for('data_dashboard.observation_data',
-                                            obs_id=data[id_key])
+                table_row['link'] = url_for('data_dashboard.observation_view',
+                                            uuid=data[id_key])
             table_rows.append(table_row)
         return table_rows
 
@@ -42,7 +42,7 @@ class DataTables(object):
             table_row['longitude'] = data['longitude']
             table_row['uuid'] = data[id_key]
             table_row['link'] = url_for("data_dashboard.site_view",
-                                        site_id=data['site_id'])
+                                        uuid=data['site_id'])
             table_rows.append(table_row)
         return table_rows
 
@@ -52,7 +52,7 @@ class DataTables(object):
         TODO: fix parameters.
         """
         site_id = kwargs.get('site_id')
-        obs_data = observations.list_metadata(site_id=site_id)
+        obs_data = observations.list_metadata(site_id=site_id).json()
         rows = cls.create_table_elements(obs_data, 'obs_id', **kwargs)
         rendered_table = render_template(cls.observation_template,
                                          table_rows=rows,
@@ -64,7 +64,7 @@ class DataTables(object):
         """
         """
         site_id = kwargs.get('site_id')
-        forecast_data = forecasts.list_metadata(site_id=site_id)
+        forecast_data = forecasts.list_metadata(site_id=site_id).json()
         rows = cls.create_table_elements(forecast_data,
                                          'forecast_id',
                                          **kwargs)
@@ -77,7 +77,7 @@ class DataTables(object):
     def get_site_table(cls, **kwargs):
         """
         """
-        site_data = sites.list_metadata()
+        site_data = sites.list_metadata().json()
         rows = cls.create_site_table_elements(site_data, 'site_id', **kwargs)
         rendered_table = render_template(cls.site_template, table_rows=rows)
         return rendered_table

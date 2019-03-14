@@ -2,12 +2,12 @@ from sfa_dash.api_interface import get_request, post_request
 
 def get_metadata(forecast_id):
     r = get_request(f'/forecasts/{forecast_id}/metadata')
-    return r.json()
+    return r
 
 
 def get_values(forecast_id):
     r = get_request(f'/forecasts/{forecast_id}/values')
-    return r.json()
+    return r
 
 
 def list_metadata(site_id=None):
@@ -15,8 +15,9 @@ def list_metadata(site_id=None):
         r = get_request(f'/sites/{site_id}/forecasts')
     else:
         r = get_request('/forecasts/')
-    return r.json()
+    return r
+
 
 def post_metadata(forecast_dict):
-    r = post_request('/forecasts/')
-    return r.json()
+    r = post_request('/forecasts/', forecast_dict, json=True)
+    return r

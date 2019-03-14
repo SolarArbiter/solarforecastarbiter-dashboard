@@ -43,11 +43,14 @@ class SingleSiteView(SiteDashView):
                 text="Sites")
         bc += bc_format.format(
                 url=url_for('data_dashboard.site_view',
-                            site_id=self.metadata['site_id']),
+                            uuid=self.metadata['site_id']),
                 text=self.metadata['name'])
         return bc
 
 
-    def get(self, site_id, **kwargs):
-        self.metadata = sites.get_metadata(site_id)
+    def get(self, uuid, **kwargs):
+        metadata_request = sites.get_metadata(uuid)
+        if metadata_request.status_code != 200:
+            abort(404)
+        self.metadata = metadata_request.json()
         return render_template(self.template, **self.template_args(**kwargs))

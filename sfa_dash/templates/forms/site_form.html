@@ -6,7 +6,7 @@
 {% if form_data is not defined %}
 {% set form_data = {} %}
 {% endif %}
-<form action="/sites/create" enctype='application/json' method="post" id="some-form">
+<form action="/sites/create" enctype='application/json' method="post" id="site-form">
   <div class="form-group">
     <div class="form-element full-width">
     {{ form.input('Name', 'text', 'name', 'Name for the Site.', required=True, form_data=form_data) }}
@@ -106,5 +106,5 @@
 	</div>
   </div>
 </form>
-<button type="submit" form="some-form" value="Submit" class="btn btn-primary">Submit</button>
+<button type="submit" form="site-form" value="Submit" class="btn btn-primary">Submit</button>
 {% endblock %}

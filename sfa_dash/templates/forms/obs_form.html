@@ -7,8 +7,9 @@
 {% if form_data is not defined %}
 {% set form_data = {} %}
 {% endif %}
-<form action="/observations/create" method="get" id="some-form">
+<form action="/observations/create" method="post" id="observation-form">
   <div class="form-group">
+    <input type="hidden" name="site_id" value="{{ site_id }}">
 	<div class="form-element">
       {{ form.input('Name', 'text', 'name', 'Name of the Observation.', form_data=form_data) }}
 	</div>
@@ -27,7 +28,7 @@
 	</div>
 	<div class="form-element">
       {{ form.select('Value Type', 'value_type',
-                      {"interval-mean": "Interval Mean",
+                      {"interval_mean": "Interval Mean",
                        "instantaneous": "Instantaneous"},
                        form_data=form_data) }}
 	</div>
@@ -38,9 +39,9 @@
 	</div>
     <div class="form-element">
       <label>Interval length </label><br/>
-      <input type="number" name="interval-number" step="0.01" min="0" class="form-control time-field interval-duration-field">
+      <input type="number" name="interval_number" step="0.01" min="0" class="form-control time-field interval-duration-field">
       <span class="help-text">The length of time that each data point represents, e.g. 5 minutes, 1 hour.</span>
-      <select required name="interval-units" class="form-control time-field">
+      <select required name="interval_units" class="form-control time-field">
         <option value="seconds">Seconds</option>
         <option value="minutes">Minutes</option>
         <option value="hours">Hours</option>
@@ -53,17 +54,12 @@
 					  'ending': 'Ending',
 					  'instant': 'Instant'},
 					  'Indicates if a time labels the start or the end of an interval.') }}
-    <span class="help-text help-text-top"></span>
     </div>
-	<div class="form-element full-width">
-	  <label>Description</label>
-      <textarea cols="40" rows="5" class="form-control extra-parameters-field" placeholder="An optional text description to record information such as instrument type"></textarea>
-	</div>
-	<div class="form-element full-width">
+    <div class="form-element full-width">
 	  <label>Extra Parameters (Optional)</label>
       <textarea cols="40" rows="5" class="form-control extra-parameters-field" placeholder="This field will store any ASCII text. We recommend using it to store other parameters you have collected in a format such as YAML or JSON"></textarea>
 	</div>
   </div>
 </form>
-<button type="submit" form="some-form" value="Submit" class="btn btn-primary">Submit</button>
+<button type="submit" form="observation-form" value="Submit" class="btn btn-primary">Submit</button>
 {% endblock %}

@@ -14,14 +14,14 @@
 {% if help_text is not none %}<span class="form-text text-muted help-text">{{ help_text }}</span>{% endif %}
 {% endmacro %}
 
-{% macro select(label, name, options, help_text, required=False, form_data=None) %}
+{% macro select(label, name, options, help_text=None, required=False, form_data=None) %}
 <label>{{ label }}</label>
 <select class="form-control {{ name }}-field" name="{{ name }}"{% if required %} required {% endif %}>
   {% for option, option_label in options.items() %}
   <option value="{{ option }}" {% if (form_data is not none) and (option == form_data.get(name))  %} selected="selected"{% endif %}>{{ option_label }}</option>
   {% endfor %}
 </select>
-{% if help_text is not none %}<span class="form-text text-muted help-text-top">{{ help_text }}</span>{% endif %}
+{% if help_text is not none %}<span class="help-text text-muted help-text-top">{{ help_text }}</span>{% endif %}
 {% endmacro %}
 
 {% macro radio(label, name, options, required=False) %}
