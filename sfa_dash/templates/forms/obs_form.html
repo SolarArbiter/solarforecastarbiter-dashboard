@@ -1,39 +1,60 @@
 {% extends "dash/data.html" %}
-{# {% set sidebar = True %} #}
+{% import "forms/form_macros.jinja" as form %}
 {% set page_title = 'Create New Observation' %}
 {% block content %}
 {{ metadata | safe }}
-<form action="/sites/Ashland%20OR/GHI%20Instrument%201" method="get" id="some-form">
+{% include "forms/sections/notifications.html" %}
+{% if form_data is not defined %}
+{% set form_data = {} %}
+{% endif %}
+<form action="/observations/create" method="get" id="some-form">
   <div class="form-group">
 	<div class="form-element">
-	  <label>Name</label>
-  	  <input required type="text" class="form-control name-field" placeholder="Name of the Observation.">
+      {{ form.input('Name', 'text', 'name', 'Name of the Observation.', form_data=form_data) }}
 	</div>
 	<div class="form-element">
-	  <label>Variable</label>
-  	  <select required class="form-control">
-		<option value="ghi">Global Horizontal Irradiance (W/m^2)</option>
-		<option value="dni">Direct Normal Irradiance (W/m^2)</option>
-		<option value="dhi">Diffuse Horizontal Irradiance (W/m^2)</option>
-		<option value="poa">Plane of Array Irradiance (W/m^2)</option>
-		<option value="ac-power">AC Power (MW)</option>
-        <option value="dc-power">DC Power (MW)</option>
-	    <option value="surface-temperature">Surface Temperature (C)</option>
-		<option value="surface-wind-speed">Surface Wind Speed (m/s)</option>
-		<option value="rh">Relative Humidity (%)</option>
-	  </select>
+      {{ form.select('Variable', 'variable',
+                     {"ghi":"Global Horizontal Irradiance (W/m^2)",
+                      "dni":"Direct Normal Irradiance (W/m^2)",
+                      "dhi":"Diffuse Horizontal Irradiance (W/m^2)",
+                      "poa":"Plane of Array Irradiance (W/m^2)",
+                      "rh":"Relative Humidity (%)",
+                      "ac-power":"AC Power (MW)",
+                      "dc-power":"DC Power(MW)",
+                      "surface-temperature":"Surface Temperature (C)",
+                      "surface-wind-speed":"Surface Wind Speed (m/s)"},
+                      form_data=form_data) }}
 	</div>
 	<div class="form-element">
-	  <label>Value Type</label>
-  	  <select required type="select" class="form-control value-type-field">
-	    <option value="interval-mean">Interval Mean</option>
-		<option value="instantaneous">Instantaneous</option>
-	  </select>
+      {{ form.select('Value Type', 'value_type',
+                      {"interval-mean": "Interval Mean",
+                       "instantaneous": "Instantaneous"},
+                       form_data=form_data) }}
 	</div>
     <div class="form-element">
-	  <label>Uncertainty</label>
-  	  <input type="text" class="form-control uncertainty-field" placeholder="A measure of uncertainty of observation values.">
+      {{ form.input('Uncertainty', 'number', 'uncertainty',
+                    'A measure of uncertainty of Observation values.',
+                    form_data=form_data) }}
 	</div>
+    <div class="form-element">
+      <label>Interval length </label><br/>
+      <input type="number" name="interval-number" step="0.01" min="0" class="form-control time-field interval-duration-field">
+      <span class="help-text">The length of time that each data point represents, e.g. 5 minutes, 1 hour.</span>
+      <select required name="interval-units" class="form-control time-field">
+        <option value="seconds">Seconds</option>
+        <option value="minutes">Minutes</option>
+        <option value="hours">Hours</option>
+        <option value="days">Days</option>
+      </select>
+    </div>
+    <div class="form-element">
+      {{ form.select('Interval Label', 'interval_label',
+					 {'beginning': 'Beginning',
+					  'ending': 'Ending',
+					  'instant': 'Instant'},
+					  'Indicates if a time labels the start or the end of an interval.') }}
+    <span class="help-text help-text-top"></span>
+    </div>
 	<div class="form-element full-width">
 	  <label>Description</label>
       <textarea cols="40" rows="5" class="form-control extra-parameters-field" placeholder="An optional text description to record information such as instrument type"></textarea>

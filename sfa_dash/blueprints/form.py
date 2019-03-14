@@ -1,5 +1,5 @@
 import pdb
-from flask import Blueprint, jsonify, render_template, request, abort, redirect
+from flask import Blueprint, jsonify, render_template, request, abort, redirect, url_for
 from flask.views import MethodView
 from sfa_dash.api_interface import sites, observations, forecasts
 from sfa_dash.blueprints.base import BaseView
@@ -16,20 +16,75 @@ class MetadataForm(BaseView):
             self.template = 'forms/forecast_form.html'
             self.id_key = 'forecast_id'
             self.api_handle = forecasts
+            self.formatter = self.forecast_formatter
         if data_type == 'observation':
             self.template = 'forms/obs_form.html'
             self.id_key = 'obs_id'
             self.api_handle = observations
+            self.formatter = self.observation_formatter
         if data_type == 'site':
             self.template = 'forms/site_form.html'
             self.id_key = 'site_id'
             self.api_handle = sites
-        # TODO :remove this
-        if data_type == 'test':
-            self.template = 'forms/test_site_form.html'
-            self.id_key = 'site_id'
-            self.api_handle = sites
+            self.formatter = self.site_formatter
+        
+    def flatten_dict(self, to_flatten):
+        flattened = {}
+        for key, value in to_flatten.items():
+            if isinstance(value, dict):
+                flattened.update(self.flatten_dict(value))
+            else:
+                flattened[key] = value
+        return flattened
 
+
+    def site_formatter(self, site_dict):
+        """Formats the result of a site webform into an API payload.
+
+        Parameters
+        ----------
+        site_dict:  dict
+            The posted form data parsed into a dict.
+        Returns
+        -------
+        dictionary
+            Form data formatted to the API spec.
+        """
+        modeling_keys = ['ac_capacity','dc_capacity',
+                         'temperature_coefficient', 'axis_azimuth',
+                         'tracking_type', 'backtrack',
+                         'axis_tilt', 'ground_coverage_ratio',
+                         'surface_tilt', 'surface_azimuth']
+        top_level_keys = ['name', 'elevation', 'latitude',
+                          'longitude', 'timezone', 'extra_parameters']
+        site_metadata = { key: site_dict[key]
+                          for key in top_level_keys
+                          if site_dict.get(key, "") != ""} 
+        modeling_params = { key: site_dict[key]
+                            for key in modeling_keys
+                            if site_dict.get(key, "") != ""}
+        site_metadata['modeling_parameters'] = modeling_params
+        return site_metadata
+
+
+    def observation_formatter(self, observation_dict):
+        """Formats the result of a observation webform into an API payload.
+
+        Parameters
+        ----------
+        site_dict:  dict
+            The posted form data parsed into a dict.
+        Returns
+        -------
+        dictionary
+            Form data formatted to the API spec.
+        """
+        return observation_dict
+
+
+    def forecast_formatter(self, forecast_dict):
+        return forecast_dict
+            
     def handle_api_error(self):
         pass
 
@@ -56,19 +111,21 @@ class CreateForm(MetadataForm):
         return render_template(self.template, **template_arguments)
 
     def post(self):
-        # TODO: some validation
-        # TODO: add template args for types other than site.
         form_data = request.form
-        response = self.api_handle.post_metadata(form_data)
+        formatted_form = self.formatter(form_data)
+        response = self.api_handle.post_metadata(formatted_form)
         if response.status_code == 201:
             site_id = response.text
-            return redirect(url_for('data_dashboard.site_view'), site_id=site_id)
+            return redirect(url_for('data_dashboard.site_view',
+                                    site_id=site_id))
         elif response.status_code == 400:
             errors = response.json()['errors']
-            return render_template(self.template, metadata=form_data, errors=errors)
+            errors = self.flatten_dict(errors)
+            return render_template(self.template, form_data=form_data,
+                                   errors=errors)
         elif response.status_code == 401:
             errors = { 'Unauthorized': f'You do not have permissions to create resources of type {self.data_type}'}
-            return render_template(self.template, metadata=form_data, errors=errors)
+            return render_template(self.template, form_data=form_data, errors=errors)
         else:
             errors = { 'Error': 'Something went wrong, please contact a site administrator.'}
             return render_template(self.template, errors=errors)
@@ -82,10 +139,10 @@ class EditForm(MetadataForm):
         metadata = self.api_handle.get_metadata(uuid)
         return render_template(self.template, **metadata)
 
-forms_blp = Blueprint('forms', 'forms')
-#forms_blp.add_url_rule('/sites/create', view_func=CreateForm.as_view('create_site', data_type='site'))
-forms_blp.add_url_rule('/sites/create', view_func=CreateForm.as_view('create_site', data_type='test'))
 
+
+forms_blp = Blueprint('forms', 'forms')
+forms_blp.add_url_rule('/sites/create', view_func=CreateForm.as_view('create_site', data_type='site'))
 forms_blp.add_url_rule('/observations/create',
                        view_func=CreateForm.as_view('create_site_observation', data_type='observation'))
 forms_blp.add_url_rule('/forecasts/create',

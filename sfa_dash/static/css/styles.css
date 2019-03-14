@@ -207,4 +207,12 @@ span.help-text.help-text-top::before{
 input[class$="-field"]:focus + span.help-text,select[class$="-field"]:focus + span.help-text{
   display: block;
 }
-
+ul.error-list{
+  list-style: none;
+}
+li.alert{
+  margin-bottom: .5rem;
+}
+li.alert p{
+  margin-bottom: 0;
+}

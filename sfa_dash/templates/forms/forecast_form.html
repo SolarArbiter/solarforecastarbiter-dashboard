@@ -1,28 +1,30 @@
 {% extends "dash/data.html" %}
-{# {% set sidebar = True %} #}
+{% import "forms/form_macros.jinja" as form %}
 {% set page_title = 'Create New Forecast' %}
 {% block content %}
 {{ metadata | safe }}
-<form action="/forecasts/AC%20Power" method="get" id="some-form">
+{% include "forms/sections/notifications.html" %}
+{% if form_data is not defined %}
+{% set form_data = {} %}
+{% endif %}
+<form action="/forecasts/create" method="get" id="some-form">
   <div class="form-group">
 	<div class="form-element">
-	  <label>Name</label>
-  	  <input required name="name" type="text" class="form-control name-field" placeholder="Name for the Forecast.">
+      {{ form.input('Name', 'text', 'name', 'Name for the Forecast',
+                    required=True, form_data=form_data) }}
 	</div>
 	<div class="form-element">
-	  <label>Variable</label>
-  	  <select required name="variable" class="form-control">
-	    <option value="ghi">Global Horizontal Irradiance (W/m^2)</option>
-		<option value="dni">Direct Normal Irradiance (W/m^2)</option>
-		<option value="dhi">Diffuse Horizontal Irradiance (W/m^2)</option>
-		<option value="poa">Plane of Array Irradiance (W/m^2)</option>
-	    <option value="rh">Relative Humidity (%)</option>
-        <option value="ac-power">AC Power (MW)</option>
-        <option value="dc-power">DC Power(MW)</option>
-		<option value="surface-temperature">Surface Temperature (C)</option>
-		<option value="surface-wind-speed">Surface Wind Speed (m/s)</option>
-
-	  </select>
+      {{ form.select('Variable', 'variable',
+                     {"ghi":"Global Horizontal Irradiance (W/m^2)",
+		              "dni":"Direct Normal Irradiance (W/m^2)",
+		              "dhi":"Diffuse Horizontal Irradiance (W/m^2)",
+		              "poa":"Plane of Array Irradiance (W/m^2)",
+	                  "rh":"Relative Humidity (%)",
+                      "ac-power":"AC Power (MW)",
+                      "dc-power":"DC Power(MW)",
+		              "surface-temperature":"Surface Temperature (C)",
+		              "surface-wind-speed":"Surface Wind Speed (m/s)"},
+                      form_data=form_data) }}
 	</div>
 	<div class="form-element">
 	  <span>
@@ -32,7 +34,7 @@
 	        <option value="{{ i }}">{{ '%02d' % i }}</option>
 	      {% endfor %}
 	    </select>:
-	    <select required name="issue-time-minues" class="form-control time-field issue-time-field issue-time-minutes" title="Issue time of day minutes">
+	    <select required name="issue-time-minutes" class="form-control time-field issue-time-field issue-time-minutes" title="Issue time of day minutes">
 	      {% for i in range(0,60) %}
 	        <option value="{{ i }}">{{ '%02d' % i }}</option>
 	      {% endfor %}
