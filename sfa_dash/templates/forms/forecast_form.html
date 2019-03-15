@@ -7,8 +7,9 @@
 {% if form_data is not defined %}
 {% set form_data = {} %}
 {% endif %}
-<form action="/forecasts/create" method="get" id="forecast-form">
+<form action="{{ url_for('forms.create_site_forecast', site_id=site_metadata['site_id']) }}" method="post" enctype='application/json' id="forecast-form">
   <div class="form-group">
+    <input type="hidden" name="site_id" value="{{ site_metadata['site_id'] }}">
 	<div class="form-element">
       {{ form.input('Name', 'text', 'name', 'Name for the Forecast',
                     required=True, form_data=form_data) }}
@@ -26,77 +27,39 @@
 		              "surface-wind-speed":"Surface Wind Speed (m/s)"},
                       form_data=form_data) }}
 	</div>
+    <div class="form-element">
+      {{ form.timedelta('Issue time of day', 'issue_time',
+                        'The time of day that a forecast run is issued specified in the timezone of the site in HH:MM format, e.g. 00:30.For forecast runs issued multiple times within one day (e.g. hourly), this specifies the first issue time of day. Additional issue times are uniquely determined by the first issue time and the run length & issue frequency attribute.') }}{{ timezone }}
+    </div>
+    <div class="form-element">
+        {{ form.timedelta('Lead time to start', 'lead_time',
+                          'The difference between the issue time and the start of the first forecast interval in HH:MM format, e.g. 01:00 for 1 hour.')}}
+	</div>
 	<div class="form-element">
-	  <span>
-	    <label>Issue time of day</label><br/>
-  	    <select required name="issue-time-hours" class="form-control time-field issue-time-field issue-time-hours" title="Issue time of day Hours"> 
-	    	{% for i in range(0,24) %}
-	        <option value="{{ i }}">{{ '%02d' % i }}</option>
-	      {% endfor %}
-	    </select>:
-	    <select required name="issue-time-minutes" class="form-control time-field issue-time-field issue-time-minutes" title="Issue time of day minutes">
-	      {% for i in range(0,60) %}
-	        <option value="{{ i }}">{{ '%02d' % i }}</option>
-	      {% endfor %}
-	    </select>
-		{{ timezone }}
-	  </span>
-	  <div>
-	  </div>
+      {{ form.timedelta('Run length/Issue frequency', 'run_length',
+                        'The total length of a single issued forecast run in HH:MM format, e.g. 01:00 for 1 hour. To enforce a continuous, non-overlapping sequence, this is equal to the forecast run issue frequency.') }}
+	</div>
+	<div class="form-element">
+      {{ form.timedelta('Interval length', 'interval_length',
+                        'The length of time that each data point represents inHH:MM format, e.g. 00:05 for 5 minutes.') }}
 	</div>
     <div class="form-element">
-	  <label>Lead time to start</label><br/>
-  	  <input required name="lead-time-number" type="number" step="0.01" min="0" class="form-control time-field lead-time-field">
-	  <span class="help-text">The difference between issue time and the start of the first forecast interval, e.g. 1 hour.</span>
-	  <select required name="lead-time-units" class="form-control time-field">
-	  	<option>Seconds</option>
-        <option>Minutes</option>
-        <option>Hours</option>
-        <option>Days</option>
-	  </select>
-	</div>
-	<div class="form-element">
-	  <label>Run length/Issue frequency</label>
-	  <input type="number" name="interval-number" step="0.01" min="0" class="form-control time-field interval-duration-field">
-	  <span class="help-text">The total length of a single issued forecast run, e.g. 1 hour. To enforce a continuous, non-overlapping sequence, this is equal to the forecast run issue frequency.</span>
-	  <select required name="interval-units" class="form-control time-field">
-	  	<option value="seconds">Seconds</option>
-        <option value="minutes">Minutes</option>
-        <option value="hours">Hours</option>
-        <option value="days">Days</option>
-	  </select>
-	</div>
-	<div class="form-element">
-	  <label>Interval length </label><br/>
-  	  <input type="number" name="interval-number" step="0.01" min="0" class="form-control time-field interval-duration-field">
-	  <span class="help-text">The length of time that each data point represents, e.g. 5 minutes, 1 hour.</span>
-	  <select required name="interval-units" class="form-control time-field">
-	  	<option value="seconds">Seconds</option>
-        <option value="minutes">Minutes</option>
-        <option value="hours">Hours</option>
-        <option value="days">Days</option>
-	  </select>
-	</div>
-	<div class="form-element">
-	  <label>Interval label</label>
-  	  <select name="interval-label" class="form-control interval-label-field">
-	    <option value="start">beginning</option>
-		<option value="ending">ending</option>
-		<option value="instant">instant</option>
-	  </select>
-	  <span class="help-text help-text-top">Indicates if a time labels the start or the end of an interval.</span>
-	</div>
-	<div class="form-element">
-	  <label>Value type</label>
-	  <select name="value-type" class="form-control value-type-field">
-	    <option value="mean">Mean</option>
-		<option value="min">Min</option>
-		<option value="max">Max</option>
-		<option value="median">Median</option>
-		<option value="percentile">Percentile</option>
-		<option value="instantaneous">Instantaneous</option>
-	  </select>
-	</div>
+      {{ form.select('Interval Label', 'interval_label',
+                     {'beginning': 'Beginning',
+                      'ending': 'Ending',
+                      'instant': 'Instant'},
+                      'Indicates if a time labels the start or the end of an interval.') }}
+    </div>
+    <div class="form-element">
+      {{ form.select('Value Type', 'value_type',
+                      {"interval_mean": "Mean",
+					   "interval_min": "Min",
+                       "interval_max": "Max",
+                       "interval_median": "Median",
+                       "percentile": "Percentile",
+                       "instantaneous": "Instantaneous"},
+                       form_data=form_data) }}
+    </div>
 	<div class="form-element full-width">
 	  <label>Extra Parameters</label>
       <textarea cols="40" rows="5" class="form-control extra-parameters-field" placeholder="This field will store any ASCII text. We recommend using it to store other parameters you have collected in a format such as YAML or JSON."></textarea>

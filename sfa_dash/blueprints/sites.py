@@ -1,9 +1,7 @@
-from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.util import DataTables
 from sfa_dash.blueprints.dash import SiteDashView
-from sfa_dash.blueprints.data_listing import DataListingView
-from sfa_dash.api_interface import demo_data, sites
-from flask import Flask, Blueprint, render_template, url_for, request
+from sfa_dash.api_interface import sites
+from flask import render_template, url_for, request, abort
 
 
 class SitesListingView(SiteDashView):
@@ -16,7 +14,6 @@ class SitesListingView(SiteDashView):
             text='Sites')
         return breadcrumb
 
-
     def get_template_args(self, **kwargs):
         """Create a dictionary containing the required arguments for the template
         """
@@ -26,16 +23,15 @@ class SitesListingView(SiteDashView):
         template_args['breadcrumb'] = self.breadcrumb_html(**kwargs)
         return template_args
 
-
     def get(self, **kwargs):
-        return render_template(self.template, **self.get_template_args(**kwargs))
+        return render_template(self.template,
+                               **self.get_template_args(**kwargs))
 
 
 class SingleSiteView(SiteDashView):
     template = 'data/site.html'
 
-
-    def make_breadcrumb_html(self, **kwargs):
+    def breadcrumb_html(self, **kwargs):
         bc_format = '/<a href="{url}">{text}</a>'
         bc = ''
         bc += bc_format.format(
@@ -46,7 +42,6 @@ class SingleSiteView(SiteDashView):
                             uuid=self.metadata['site_id']),
                 text=self.metadata['name'])
         return bc
-
 
     def get(self, uuid, **kwargs):
         metadata_request = sites.get_metadata(uuid)

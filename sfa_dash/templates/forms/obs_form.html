@@ -7,9 +7,9 @@
 {% if form_data is not defined %}
 {% set form_data = {} %}
 {% endif %}
-<form action="/observations/create" method="post" id="observation-form">
+<form action="{{ url_for('forms.create_site_observation', site_id=site_metadata['site_id']) }}" method="post" id="observation-form", enctype='application/json'>
   <div class="form-group">
-    <input type="hidden" name="site_id" value="{{ site_id }}">
+    <input type="hidden" name="site_id" value="{{ site_metadata['site_id'] }}">
 	<div class="form-element">
       {{ form.input('Name', 'text', 'name', 'Name of the Observation.', form_data=form_data) }}
 	</div>
@@ -38,15 +38,8 @@
                     form_data=form_data) }}
 	</div>
     <div class="form-element">
-      <label>Interval length </label><br/>
-      <input type="number" name="interval_number" step="0.01" min="0" class="form-control time-field interval-duration-field">
-      <span class="help-text">The length of time that each data point represents, e.g. 5 minutes, 1 hour.</span>
-      <select required name="interval_units" class="form-control time-field">
-        <option value="seconds">Seconds</option>
-        <option value="minutes">Minutes</option>
-        <option value="hours">Hours</option>
-        <option value="days">Days</option>
-      </select>
+      {{ form.timedelta('Interval length', 'interval_length',
+                        'The length of time that each data point represents inHH:MM format, e.g. 00:05 for 5 minutes.') }}
     </div>
     <div class="form-element">
       {{ form.select('Interval Label', 'interval_label',

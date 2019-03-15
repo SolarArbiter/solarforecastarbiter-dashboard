@@ -14,8 +14,8 @@
     <li><b>Modeling Parameters:</b>
       <div class="data-metadata-field-modeling-parameters pl-2">
         <ul class="data-metadata-fields">
-        {{ macro.li('AC Power', modeling_parameters['ac_power'] | string + ' MW') }}
-        {{ macro.li('DC Power', modeling_parameters['dc_power'] | string + ' MW') }}
+        {{ macro.li('AC Capacity', modeling_parameters['ac_capacity'] | string + ' MW') }}
+        {{ macro.li('DC Capacity', modeling_parameters['dc_capacity'] | string + ' MW') }}
         {{ macro.li('Temperatue Coefficient', modeling_parameters['temperature_coefficient'] | string +' 1/C')}}
         {{ macro.li('Tracking Type', modeling_parameters['tracking_type']) }}
         {{ macro.li('Surface Tilt', modeling_parameters['surface_tilt'] | string + '&deg;') }}

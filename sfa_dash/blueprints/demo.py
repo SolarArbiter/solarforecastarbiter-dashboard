@@ -7,17 +7,6 @@ demo_blp = Blueprint('demo', 'demo', url_prefix='/demo')
 class DemoViews(BaseView):
     def get(self, form_type):
         temp_args = {}
-        if form_type=="site":
-            return render_template('forms/demo_site_form.html')
-        if form_type=="observation":
-            metadata = demo_data.site
-            temp_args['metadata'] = render_template('data/metadata/site_metadata.html', **metadata)
-            return render_template('forms/demo_obs_form.html', **temp_args)
-        if form_type=="forecast":
-            metadata = demo_data.site_2
-            temp_args['timezone'] = metadata['timezone']
-            temp_args['metadata'] = render_template('data/metadata/site_metadata.html', **metadata)
-            return render_template('forms/demo_fx_form.html', **temp_args)
         if form_type=="obs_upload":
             metadata = {'name': 'GHI Instrument 1',
                         'variable': 'GHI',

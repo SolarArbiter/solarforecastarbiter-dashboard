@@ -14,11 +14,11 @@
 {% if help_text is not none %}<span class="form-text text-muted help-text">{{ help_text }}</span>{% endif %}
 {% endmacro %}
 
-{% macro select(label, name, options, help_text=None, required=False, form_data=None) %}
+{% macro select(label, name, options, help_text=None, required=False, form_data={}) %}
 <label>{{ label }}</label>
 <select class="form-control {{ name }}-field" name="{{ name }}"{% if required %} required {% endif %}>
   {% for option, option_label in options.items() %}
-  <option value="{{ option }}" {% if (form_data is not none) and (option == form_data.get(name))  %} selected="selected"{% endif %}>{{ option_label }}</option>
+  <option value="{{ option }}" {% if option == form_data.get(name)  %} selected="selected"{% endif %}>{{ option_label }}</option>
   {% endfor %}
 </select>
 {% if help_text is not none %}<span class="help-text text-muted help-text-top">{{ help_text }}</span>{% endif %}
@@ -29,4 +29,20 @@
 {% for option, option_label in options.items() %}
 <input name="{{ name }}" type="radio" value="{{ option }}">{{ option_label }}</label>
 {% endfor %}
+{% endmacro %}
+
+{% macro timedelta(label, name, help_text=None, required=False, form_data={}) %}
+<label>{{ label }}</label><br/>
+<select {% if required %}required{% endif %} name="{{ name }}_hours" class="form-control time-field {{ name }}_hours-field">
+  {% for i in range(0,24) %}
+  <option value="{{ i }}">{{ '%02d' % i }}</option>
+  {% endfor %}
+</select>
+:
+<select {% if required %}required{% endif %} name="{{ name }}_minutes" class="form-control time-field {{ name }}_minutes-field">
+  {% for i in range(0,60) %}
+  <option value="{{ i }}">{{ '%02d' % i }}</option>
+  {% endfor %}
+</select>
+{% if help_text is not none %}<span class="help-text text-muted  time-field-help help-text-top">{{ help_text }}</span>{% endif %}
 {% endmacro %}
