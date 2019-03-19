@@ -1,15 +1,20 @@
 # Solar Forecast Arbiter Dashboard
-A simple tornado web app to demo dashboard design. There are lots of dead links and unresponsive buttons, that lead to pages/functionality that have yet to be decided on.
+The front end [Flask](http://flask.pocoo.org/) application for the Solar Forecast Arbiter.
 
 ### Usage/ Installation
-Install dashboard with `pip install -e .`
 
-Run the script with `python serve.py`
+Currently the dashboard is hardcoded to utilize a local development api instance. These instructions will guide you through running it locally.
 
-Open [http://localhost:8080/](http://localhost:8080/) in a browser to view the dashboard.
+- Install the [Solar Forecast Arbiter API](https://github.com/SolarArbiter/solarforecastarbiter-api) and run it with the `SFA_API_STATIC_DATA=true` option.
+
+- Install dashboard with `pip install -e .`
+
+- Run the script with `python sfa_dash/serve.py`
+
+- Open [http://localhost:8080/](http://localhost:8080/) in a browser to view the dashboard.
 
 
-#### Template Layout
+### Template Layout
 
 base.html
 
