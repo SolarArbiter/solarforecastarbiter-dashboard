@@ -18,5 +18,9 @@ def list_metadata(site_id=None):
     return r
 
 def post_metadata(obs_dict):
-    r = post_request('/observations/', obs_dict, json=True)
+    r = post_request('/observations/', obs_dict)
+    return r
+
+def post_values(uuid, values, json=True):
+    r = post_request(f'/observations/{uuid}/values', values, json)
     return r

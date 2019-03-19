@@ -19,5 +19,9 @@ def list_metadata(site_id=None):
 
 
 def post_metadata(forecast_dict):
-    r = post_request('/forecasts/', forecast_dict, json=True)
+    r = post_request('/forecasts/', forecast_dict)
+    return r
+
+def post_values(uuid, values, json=True):
+    r = post_request(f'/forecasts/{uuid}/values', values, json)
     return r

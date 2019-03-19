@@ -3,7 +3,7 @@
 {% set page_title = 'Create New Observation' %}
 {% block content %}
 {{ metadata | safe }}
-{% include "forms/sections/notifications.html" %}
+{% include "sections/notifications.html" %}
 {% if form_data is not defined %}
 {% set form_data = {} %}
 {% endif %}

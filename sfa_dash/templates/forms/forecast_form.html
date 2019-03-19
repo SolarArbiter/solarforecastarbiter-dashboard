@@ -3,7 +3,7 @@
 {% set page_title = 'Create New Forecast' %}
 {% block content %}
 {{ metadata | safe }}
-{% include "forms/sections/notifications.html" %}
+{% include "sections/notifications.html" %}
 {% if form_data is not defined %}
 {% set form_data = {} %}
 {% endif %}
@@ -28,20 +28,20 @@
                       form_data=form_data) }}
 	</div>
     <div class="form-element">
-      {{ form.timedelta('Issue time of day', 'issue_time',
-                        'The time of day that a forecast run is issued specified in the timezone of the site in HH:MM format, e.g. 00:30.For forecast runs issued multiple times within one day (e.g. hourly), this specifies the first issue time of day. Additional issue times are uniquely determined by the first issue time and the run length & issue frequency attribute.') }}{{ timezone }}
+      {{ form.time_of_day('Issue time of day', 'issue_time',
+                        'The time of day that a forecast run is issued specified in the timezone of the site in HH:MM format, e.g. 00:30.For forecast runs issued multiple times within one day (e.g. hourly), this specifies the first issue time of day. Additional issue times are uniquely determined by the first issue time and the run length & issue frequency attribute.') }}{{ site_metadata['timezone'] }}
     </div>
     <div class="form-element">
         {{ form.timedelta('Lead time to start', 'lead_time',
-                          'The difference between the issue time and the start of the first forecast interval in HH:MM format, e.g. 01:00 for 1 hour.')}}
+                          'The difference between the issue time and the start of the first forecast interval. Values must be integers.')}}
 	</div>
 	<div class="form-element">
       {{ form.timedelta('Run length/Issue frequency', 'run_length',
-                        'The total length of a single issued forecast run in HH:MM format, e.g. 01:00 for 1 hour. To enforce a continuous, non-overlapping sequence, this is equal to the forecast run issue frequency.') }}
+                        'The total length of a single issued forecast run. To enforce a continuous, non-overlapping sequence, this is equal to the forecast run issue frequency. Values must be integers.') }}
 	</div>
 	<div class="form-element">
       {{ form.timedelta('Interval length', 'interval_length',
-                        'The length of time that each data point represents inHH:MM format, e.g. 00:05 for 5 minutes.') }}
+                        'The length of time that each data point represents. Values must be integers.') }}
 	</div>
     <div class="form-element">
       {{ form.select('Interval Label', 'interval_label',

@@ -32,6 +32,17 @@
 {% endmacro %}
 
 {% macro timedelta(label, name, help_text=None, required=False, form_data={}) %}
+  <label>{{ label }}</label><br/>
+  <input type="number" name="{{ name }}_number" step="1" min="0" {% if name+'_number' in form_data %}value="{{ form_data[name+'_number'] }}"{% endif %} class="form-control time-field {{name }}-field">
+  <select required name="{{ name }}_units" class="form-control time-field">
+    <option value="minutes">Minutes</option>
+    <option value="hours">Hours</option>
+    <option value="days">Days</option>
+  </select>
+{% if help_text is not none %}<span class="help-text text-muted  time-field-help help-text-top">{{ help_text }}</span>{% endif %}
+{% endmacro %}
+
+{% macro time_of_day(label, name, help_text=None, required=False, form_data={}) %}
 <label>{{ label }}</label><br/>
 <select {% if required %}required{% endif %} name="{{ name }}_hours" class="form-control time-field {{ name }}_hours-field">
   {% for i in range(0,24) %}

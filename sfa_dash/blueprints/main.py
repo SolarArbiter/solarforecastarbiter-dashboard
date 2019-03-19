@@ -36,14 +36,11 @@ class SingleObservationView(DataDashView):
             abort(404)
         self.metadata = metadata_request.json()
         temp_args = self.template_args(**kwargs)
-        site_link = url_for('data_dashboard.site_view',
-                            uuid=self.metadata['site_id'])
-        site_name = self.metadata['site']['name']
-        self.metadata['site_link'] = f'<a href="{site_link}">{site_name}</a>'
+        self.metadata['site_link'] =  self.generate_site_link(self.metadata)
         temp_args['metadata'] = render_template(
             'data/metadata/observation_metadata.html',
             **self.metadata)
-        temp_args['upload_link'] = '/demo/obs_upload'
+        temp_args['upload_link'] = url_for('forms.upload_observation_data', uuid=uuid)
         return render_template(self.template, **temp_args)
 
 
@@ -76,14 +73,11 @@ class SingleForecastView(DataDashView):
             abort(404)
         self.metadata = metadata_request.json()
         temp_args = self.template_args(**kwargs)
-        site_link = url_for('data_dashboard.site_view',
-                            uuid=self.metadata['site_id'])
-        site_name = self.metadata['site']['name']
-        self.metadata['site_link'] = f'<a href="{site_link}">{site_name}</a>'
+        self.metadata['site_link'] = self.generate_site_link(self.metadata)
         temp_args['metadata'] = render_template(
             'data/metadata/forecast_metadata.html',
             **self.metadata)
-        temp_args['upload_link'] = '/demo/fx_upload'
+        temp_args['upload_link'] = url_for('forms.upload_forecast_data', uuid=uuid)
         return render_template(self.template, **temp_args)
 
 

@@ -29,5 +29,3 @@ class DemoViews(BaseView):
 
 
 demo_blp.add_url_rule('/<form_type>/', view_func=DemoViews.as_view('site_form'))
-
-

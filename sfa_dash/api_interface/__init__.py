@@ -20,7 +20,7 @@ def get_request(path):
     return requests.get(f'{app.config["SFA_API_URL"]}{path}')
 
 
-def post_request(path, payload, json=False):
+def post_request(path, payload, json=True):
     """Post payload to a path at the SFA api.
 
     Parameters

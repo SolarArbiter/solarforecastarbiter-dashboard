@@ -8,7 +8,6 @@ def create_app():
     from blueprints.main import data_dash_blp
     from blueprints.form import forms_blp
     from blueprints.demo import demo_blp
-    # TODO: remove the schema blp when it's added to the api
     app.register_blueprint(data_dash_blp)
     app.register_blueprint(forms_blp)
     app.register_blueprint(demo_blp)
