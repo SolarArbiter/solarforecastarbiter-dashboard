@@ -67,14 +67,36 @@ class MetadataForm(BaseView):
         return f'{hours:02d}:{minutes:02d}'
 
     def parse_timedelta(self, data_dict, key_root):
+        """Parse values from a timedelta form element, and return the value in
+        minutes
+
+        Parameters
+        ----------
+        data_dict: dict
+            Dictionary of posted form data
+
+        key_root: string
+            The shared part of the name attribute of the inputs to parse.
+            e.g. 'lead_time' will parse and concatenate 'issue_time_number'
+            and 'issue_time_units'
+
+        Returns
+        -------
+        int
+            The number of minutes in the Timedelta or 'NaT' if invalid units
+            are provided.
+
+        """
         value = int(data_dict[f'{key_root}_number'])
         units = data_dict[f'{key_root}_units']
         if units == 'minutes':
             return value
-        if units == 'hours':
+        elif units == 'hours':
             return value * 60
+        elif units == 'days':
+            return value * 1440
         else:
-            return value * 3600
+            return 'NaT'
 
     def site_formatter(self, site_dict):
         """Formats the result of a site webform into an API payload.
@@ -89,6 +111,7 @@ class MetadataForm(BaseView):
             Form data formatted to the API spec.
         """
         modeling_keys = ['ac_capacity', 'dc_capacity',
+                         'ac_losses', 'dc_losses',
                          'temperature_coefficient', 'axis_azimuth',
                          'tracking_type', 'backtrack',
                          'axis_tilt', 'ground_coverage_ratio',
