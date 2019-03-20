@@ -5,6 +5,7 @@ The front end [Flask](http://flask.pocoo.org/) application for the Solar Forecas
 
 Currently the dashboard is hardcoded to utilize a local development api instance. These instructions will guide you through running it locally.
 
+
 - Install the [Solar Forecast Arbiter API](https://github.com/SolarArbiter/solarforecastarbiter-api) and run it with the `SFA_API_STATIC_DATA=true` option and `port` set to 5000.
 
 - Install dashboard with `pip install -e .`
@@ -12,6 +13,7 @@ Currently the dashboard is hardcoded to utilize a local development api instance
 - Run the script with `python sfa_dash/serve.py`
 
 - Open [http://localhost:8080/](http://localhost:8080/) in a browser to view the dashboard.
+
 
 
 ### Template Layout
