@@ -77,8 +77,8 @@ class MetadataForm(BaseView):
 
         key_root: string
             The shared part of the name attribute of the inputs to parse.
-            e.g. 'lead_time' will parse and concatenate 'issue_time_number'
-            and 'issue_time_units'
+            e.g. 'lead_time' will parse and concatenate 'lead_time_number'
+            and 'lead_time_units'
 
         Returns
         -------
