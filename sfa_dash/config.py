@@ -1,5 +1,5 @@
 class LocalConfig(object):
-    SFA_API_URL = 'http://localhost:8080'
+    SFA_API_URL = 'http://localhost:5000'
     TEMPLATES_AUTO_RELOAD = True
 
 class DevConfig(object):

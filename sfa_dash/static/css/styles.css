@@ -176,6 +176,7 @@ pre.example-text{
 }
 span.help-text{
   display: none;
+  width: 100%;
   padding: .5em;
   border: 2px solid #6c757d;
   border-radius: 8px;
@@ -195,8 +196,11 @@ span.help-text::before {
   border-style: solid;
   border-color: transparent transparent #6c757d transparent;
 }
+span.help-text.time-field-help::before {
+  left: 20%;
+}
 span.help-text.help-text-top{
-  top: -2em;
+  bottom: 3.5em;
 }
 span.help-text.help-text-top::before{
   border-color: #6c757d transparent transparent transparent;
@@ -204,7 +208,15 @@ span.help-text.help-text-top::before{
   bottom: -13px;
 }
 
-input[class$="-field"]:focus + span.help-text,select[class$="-field"]:focus + span.help-text{
+input[class$="-field"]:focus ~ span.help-text,select[class$="-field"]:focus ~ span.help-text{
   display: block;
 }
-
+ul.error-list{
+  list-style: none;
+}
+li.alert{
+  margin-bottom: .5rem;
+}
+li.alert p{
+  margin-bottom: 0;
+}
