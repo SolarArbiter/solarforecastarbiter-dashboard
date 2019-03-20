@@ -280,6 +280,17 @@ class UploadForm(BaseView):
                                     uuid=uuid))
 
 
+class DownloadForm(BaseView):
+    def __init__(self, data_type):
+        if data_type == 'observation':
+            self.template = 'forms/obs_data_download_form.html'
+        if data_type == 'forecast':
+            self.template = 'forms/fx_data_download_form.html'
+
+    def get(self, uuid):
+        return render_template(self.template)
+
+
 forms_blp = Blueprint('forms', 'forms')
 forms_blp.add_url_rule('/sites/create',
                        view_func=CreateForm.as_view('create_site',
@@ -296,3 +307,9 @@ forms_blp.add_url_rule('/observations/<uuid>/upload',
 forms_blp.add_url_rule('/forecasts/<uuid>/upload',
                        view_func=UploadForm.as_view('upload_forecast_data',
                                                     data_type='forecast'))
+forms_blp.add_url_rule('/observations/<uuid>/download',
+                       view_func=DownloadForm.as_view('download_observation_data',
+                                                      data_type='observation'))
+forms_blp.add_url_rule('/forecasts/<uuid>/download',
+                       view_func=DownloadForm.as_view('download_forecast_data',
+                                                      data_type='forecast'))
