@@ -36,11 +36,13 @@ class SingleObservationView(DataDashView):
             abort(404)
         self.metadata = metadata_request.json()
         temp_args = self.template_args(**kwargs)
-        self.metadata['site_link'] =  self.generate_site_link(self.metadata)
+        self.metadata['site_link'] = self.generate_site_link(self.metadata)
         temp_args['metadata'] = render_template(
             'data/metadata/observation_metadata.html',
             **self.metadata)
-        temp_args['upload_link'] = url_for('forms.upload_observation_data', uuid=uuid)
+        temp_args['upload_link'] = url_for(
+            'forms.upload_observation_data',
+            uuid=uuid)
         return render_template(self.template, **temp_args)
 
 
@@ -77,7 +79,9 @@ class SingleForecastView(DataDashView):
         temp_args['metadata'] = render_template(
             'data/metadata/forecast_metadata.html',
             **self.metadata)
-        temp_args['upload_link'] = url_for('forms.upload_forecast_data', uuid=uuid)
+        temp_args['upload_link'] = url_for(
+            'forms.upload_forecast_data',
+            uuid=uuid)
         return render_template(self.template, **temp_args)
 
 
@@ -94,8 +98,11 @@ class TrialsView(DataDashView):
 
 
 class ToSites(MethodView):
+    """Temporary redirect to sites until landing/homepage is
+    designed.
+    """
     def get(self):
-        return redirect('/sites', 302)
+        return redirect(url_for('data_dashboard.sites_view'), 302)
 
 
 data_dash_blp = Blueprint('data_dashboard', 'data_dashboard')

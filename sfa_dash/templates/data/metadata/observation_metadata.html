@@ -10,6 +10,6 @@
  {{ macro.li('Variable', variable| upper + " (W/m^2)") }}
  {{ macro.li('Value Type', value_type) }}
  {{ macro.li('Interval Label', interval_label) }}
- {{ macro.li('Interval Length', interval_length | string) }}
+ {{ macro.li('Interval Length', interval_length | string, 'minutes') }}
 </ul>
 {% endblock %}

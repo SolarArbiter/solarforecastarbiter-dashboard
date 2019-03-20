@@ -1,3 +1,4 @@
+import pdb
 import json
 
 from flask import Blueprint, render_template, request, abort, redirect, url_for
@@ -72,9 +73,9 @@ class MetadataForm(BaseView):
         if units == 'minutes':
             return value
         if units == 'hours':
-            return value / 60
+            return value * 60
         else:
-            return value / 3600
+            return value * 3600
 
     def site_formatter(self, site_dict):
         """Formats the result of a site webform into an API payload.
@@ -125,6 +126,7 @@ class MetadataForm(BaseView):
         observation_metadata['interval_length'] = self.parse_timedelta(
                 observation_dict,
                 'interval_length')
+        pdb.set_trace()
         return observation_metadata
 
     def forecast_formatter(self, forecast_dict):
