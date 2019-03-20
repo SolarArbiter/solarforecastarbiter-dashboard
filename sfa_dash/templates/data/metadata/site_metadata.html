@@ -16,6 +16,8 @@
         <ul class="data-metadata-fields">
         {{ macro.li('AC Capacity', modeling_parameters['ac_capacity'] | string, 'MW') }}
         {{ macro.li('DC Capacity', modeling_parameters['dc_capacity'] | string, 'MW') }}
+        {{ macro.li('AC Loss Factor', modeling_parameters['ac_loss_factor'] | string, '&percnt;') }}
+        {{ macro.li('DC Loss Factor', modeling_parameters['dc_loss_factor'] | string, '&percnt;') }}
         {{ macro.li('Temperatue Coefficient', modeling_parameters['temperature_coefficient'] | string, '1/C')}}
         {{ macro.li('Tracking Type', modeling_parameters['tracking_type']) }}
         {{ macro.li('Surface Tilt', modeling_parameters['surface_tilt'] | string, '&deg;') }}

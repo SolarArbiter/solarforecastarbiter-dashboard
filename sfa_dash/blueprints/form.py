@@ -111,7 +111,7 @@ class MetadataForm(BaseView):
             Form data formatted to the API spec.
         """
         modeling_keys = ['ac_capacity', 'dc_capacity',
-                         'ac_losses', 'dc_losses',
+                         'ac_loss_factor', 'dc_loss_factor',
                          'temperature_coefficient', 'axis_azimuth',
                          'tracking_type', 'backtrack',
                          'axis_tilt', 'ground_coverage_ratio',

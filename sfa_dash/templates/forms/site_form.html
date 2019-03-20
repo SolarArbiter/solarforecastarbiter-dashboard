@@ -50,6 +50,16 @@
                       'Nameplate DC power rating in megawatts.',
                       form_data=form_data) }}
         </div>
+        <div class="form-element">
+        {{ form.input('AC Loss Factor', 'number', 'ac_loss_factor',
+                      'Loss factor applied to AC current in &percnt;.',
+                      form_data=form_data)}}
+        </div>
+        <div class="form-element">
+        {{ form.input('DC Loss Factor', 'number', 'dc_loss_factor',
+                      'Loss factor applied to DC current in &percnt;.',
+                      form_data=form_data)}}
+        </div>
 	  	<div class="form-element">
         {{ form.input('Temperature Coefficient', 'number', 'temperature_coefficient',
                       'Temperature coefficient of DC power in units of 1/C.',
