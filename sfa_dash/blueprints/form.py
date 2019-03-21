@@ -1,7 +1,7 @@
-from datetime import datetime
 import json
 
-from flask import Blueprint, render_template, request, abort, redirect, url_for, make_response
+from flask import (Blueprint, render_template, request,
+                   abort, redirect, url_for, make_response)
 import pandas as pd
 from sfa_dash.api_interface import sites, observations, forecasts
 from sfa_dash.blueprints.base import BaseView
@@ -334,7 +334,9 @@ class DownloadForm(BaseView):
     def post(self, uuid):
         form_data = request.form
         headers, params = self.format_params(form_data)
-        data_request = self.api_handle.get_values(uuid, headers=headers ,params=params)
+        data_request = self.api_handle.get_values(uuid,
+                                                  headers=headers,
+                                                  params=params)
         if data_request.status_code != 200:
             abort(404)
         if form_data['format'] == 'application/json':
@@ -369,8 +371,9 @@ forms_blp.add_url_rule('/forecasts/<uuid>/upload',
                        view_func=UploadForm.as_view('upload_forecast_data',
                                                     data_type='forecast'))
 forms_blp.add_url_rule('/observations/<uuid>/download',
-                       view_func=DownloadForm.as_view('download_observation_data',
-                                                      data_type='observation'))
+                       view_func=DownloadForm.as_view(
+                           'download_observation_data',
+                           data_type='observation'))
 forms_blp.add_url_rule('/forecasts/<uuid>/download',
                        view_func=DownloadForm.as_view('download_forecast_data',
                                                       data_type='forecast'))
