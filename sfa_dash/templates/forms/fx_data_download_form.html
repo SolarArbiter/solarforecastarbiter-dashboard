@@ -4,8 +4,8 @@
 {% block content %}
 {{ metadata | safe }}
 <h3>Download data for Forecast 'DA Power'</h3>
-<p><b>Available Date Range:</b> <i>2016-01-01T12:00Z</i> to <i>2019-01-01T12:00Z</i></p>
-<form action="/create/site" method="post" id="some-form">
+{#<p><b>Available Date Range:</b> <i>2016-01-01T12:00Z</i> to <i>2019-01-01T12:00Z</i></p>#}
+<form action="{{ url_for('forms.download_forecast_data', uuid=uuid) }}" method="post" id="forecast-download">
   <div class="form-group">
 	<div class="form-element">
 	  <label for="start">Start time:</label>
@@ -23,8 +23,8 @@
 	</div>
 	<div class="form-element full-width">
 	  <label for="format">Format</label><br/>
-	  <input type="radio" data-toggle="collapse" data-target=".download-example" name="format" value="csv" checked>CSV</input>
-	  <input type="radio" data-toggle="collapse" data-target=".download-example" name="format" value="json">JSON</input>
+	  <input type="radio" data-toggle="collapse" data-target=".download-example" name="format" value="text/csv" checked>CSV</input>
+	  <input type="radio" data-toggle="collapse" data-target=".download-example" name="format" value="application/json">JSON</input>
 	</div>
 	<div class="form-element full-width">
 	  <div class="download-example csv show">
@@ -65,6 +65,6 @@ timestamp,value
   </div>
 </form>
 <div class="form-element">
-  <button type="submit" form="some-form" value="Submit" class="btn btn-primary">Download</button>
+  <button type="submit" form="forecast-download" value="Submit" class="btn btn-primary">Download</button>
 </div>
 {% endblock %}

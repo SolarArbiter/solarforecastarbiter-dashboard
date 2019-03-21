@@ -1,8 +1,8 @@
 """Helper functions for all Solar Forecast Arbiter /sites/* endpoints.
 """
 from flask import current_app as app
-import json
 import requests
+
 
 def get_request(path, **kwargs):
     """Make a get request to a path at SFA api.
@@ -33,7 +33,7 @@ def post_request(path, payload, json=True):
         A flag for setting the content type of the request, if
         True, posts json to the api, otherwise sends the payload
         as text/csv.
-        
+
     Returns
     -------
     requests.Response
