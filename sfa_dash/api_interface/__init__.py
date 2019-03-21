@@ -1,11 +1,10 @@
 """Helper functions for all Solar Forecast Arbiter /sites/* endpoints.
 """
-import pdb
 from flask import current_app as app
 import json
 import requests
 
-def get_request(path, headers=None, **kwargs):
+def get_request(path, **kwargs):
     """Make a get request to a path at SFA api.
 
     Parameters
