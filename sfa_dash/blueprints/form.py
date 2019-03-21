@@ -1,6 +1,8 @@
+from datetime import datetime
 import json
 
-from flask import Blueprint, render_template, request, abort, redirect, url_for
+from flask import Blueprint, render_template, request, abort, redirect, url_for, make_response
+import pandas as pd
 from sfa_dash.api_interface import sites, observations, forecasts
 from sfa_dash.blueprints.base import BaseView
 
@@ -282,13 +284,72 @@ class UploadForm(BaseView):
 
 class DownloadForm(BaseView):
     def __init__(self, data_type):
+        self.data_type = data_type
         if data_type == 'observation':
             self.template = 'forms/obs_data_download_form.html'
+            self.metadata_template = 'data/metadata/observation_metadata.html'
+            self.api_handle = observations
         if data_type == 'forecast':
             self.template = 'forms/fx_data_download_form.html'
+            self.metadata_template = 'data/metadata/forecast_metadata.html'
+            self.api_handle = forecasts
+
+    def format_params(self, form_data):
+        """Parses start and end time and the format from the posted form
+        and returns headers and query parameters for requesting the data.
+
+        Parameters
+        ----------
+        form_data: dict
+            Dictionary of posted form values.
+
+        Returns
+        -------
+        headers: dict
+            The accept headers set to 'text/csv' or 'application/json'
+            based on the selected format.
+        params: dict
+            Query parameters start and end, both formatted in iso8601 and
+            localized to the provided timezone.
+        """
+        timezone = form_data['timezone']
+        start_time = pd.Timestamp(form_data['period-start'], tz=timezone)
+        end_time = pd.Timestamp(form_data['period-end'], tz=timezone)
+        params = {
+            'start': start_time.isoformat(),
+            'end': end_time.isoformat(),
+        }
+        headers = {'Accept': form_data['format']}
+        return headers, params
 
     def get(self, uuid):
-        return render_template(self.template)
+        metadata_request = self.api_handle.get_metadata(uuid)
+        if metadata_request.status_code != 200:
+            abort(404)
+        metadata_dict = metadata_request.json()
+        metadata_dict['site_link'] = self.generate_site_link(metadata_dict)
+        metadata = render_template(self.metadata_template, **metadata_dict)
+        return render_template(self.template, metadata=metadata, uuid=uuid)
+
+    def post(self, uuid):
+        form_data = request.form
+        headers, params = self.format_params(form_data)
+        data_request = self.api_handle.get_values(uuid, headers=headers ,params=params)
+        if data_request.status_code != 200:
+            abort(404)
+        if form_data['format'] == 'application/json':
+            data = data_request.json()
+            response = make_response(json.dumps(data))
+            response.headers.set('Content-Type', 'application/json')
+            response.headers.set(
+                'Content-Disposition', 'attachment', filename='data.json')
+        if form_data['format'] == 'text/csv':
+            csv_data = data_request.text
+            response = make_response(csv_data)
+            response.headers.set('Content-Type', 'text/csv')
+            response.headers.set(
+                'Content-Disposition', 'attachment', filename='data.csv')
+        return response
 
 
 forms_blp = Blueprint('forms', 'forms')

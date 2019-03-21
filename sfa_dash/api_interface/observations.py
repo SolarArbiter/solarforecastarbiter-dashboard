@@ -5,8 +5,8 @@ def get_metadata(obs_id):
     return r
 
 
-def get_values(obs_id):
-    r = get_request(f'/observations/{obs_id}/values')
+def get_values(obs_id, **kwargs):
+    r = get_request(f'/observations/{obs_id}/values', **kwargs)
     return r
 
 
