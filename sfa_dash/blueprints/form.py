@@ -18,17 +18,19 @@ class MetadataForm(BaseView):
             self.api_handle = forecasts
             self.formatter = self.forecast_formatter
             self.metadata_template = 'data/metadata/site_metadata.html'
-        if data_type == 'observation':
-            self.template = 'forms/obs_form.html'
+        elif data_type == 'observation':
+            self.template = 'forms/observation_form.html'
             self.id_key = 'obs_id'
             self.api_handle = observations
             self.formatter = self.observation_formatter
             self.metadata_template = 'data/metadata/site_metadata.html'
-        if data_type == 'site':
+        elif data_type == 'site':
             self.template = 'forms/site_form.html'
             self.id_key = 'site_id'
             self.api_handle = sites
             self.formatter = self.site_formatter
+        else:
+            raise ValueError(f'No metadata form defined for {data_type}')
 
     def flatten_dict(self, to_flatten):
         """Flattens nested dictionaries, removing keys of the nested elements.
@@ -237,11 +239,11 @@ class UploadForm(BaseView):
     def __init__(self, data_type):
         self.data_type = data_type
         if data_type == 'observation':
-            self.template = 'forms/obs_data_form.html'
+            self.template = 'forms/observation_upload_form.html'
             self.metadata_template = 'data/metadata/observation_metadata.html'
             self.api_handle = observations
         if data_type == 'forecast':
-            self.template = 'forms/forecast_data_form.html'
+            self.template = 'forms/forecast_upload_form.html'
             self.metadata_template = 'data/metadata/forecast_metadata.html'
             self.api_handle = forecasts
 
@@ -286,17 +288,19 @@ class DownloadForm(BaseView):
     def __init__(self, data_type):
         self.data_type = data_type
         if data_type == 'observation':
-            self.template = 'forms/obs_data_download_form.html'
+            self.template = 'forms/observation_download_form.html'
             self.metadata_template = 'data/metadata/observation_metadata.html'
             self.api_handle = observations
-        if data_type == 'forecast':
-            self.template = 'forms/fx_data_download_form.html'
+        elif data_type == 'forecast':
+            self.template = 'forms/forecast_download_form.html'
             self.metadata_template = 'data/metadata/forecast_metadata.html'
             self.api_handle = forecasts
+        else:
+            raise ValueError(f'No Download form configured for {data_type}.')
 
     def format_params(self, form_data):
-        """Parses start and end time and the format from the posted form
-        and returns headers and query parameters for requesting the data.
+        """Parses start and end time and the format from the posted form.
+        Returns headers and query parameters for requesting the data.
 
         Parameters
         ----------
@@ -339,18 +343,20 @@ class DownloadForm(BaseView):
                                                   params=params)
         if data_request.status_code != 200:
             abort(404)
-        if form_data['format'] == 'application/json':
+        elif form_data['format'] == 'application/json':
             data = data_request.json()
             response = make_response(json.dumps(data))
             response.headers.set('Content-Type', 'application/json')
             response.headers.set(
                 'Content-Disposition', 'attachment', filename='data.json')
-        if form_data['format'] == 'text/csv':
+        elif form_data['format'] == 'text/csv':
             csv_data = data_request.text
             response = make_response(csv_data)
             response.headers.set('Content-Type', 'text/csv')
             response.headers.set(
                 'Content-Disposition', 'attachment', filename='data.csv')
+        else:
+            raise ValueError('Invalid Format.')
         return response
 
 

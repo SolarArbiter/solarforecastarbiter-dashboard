@@ -33,9 +33,9 @@
 # name: DA Power
 # forecast_id: f79e4f84-e2c3-11e8-9f32-f2801f1b9fd1
 timestamp,value
-2018-11-22T12:01:00Z,10.23
-2018-11-22T12:02:00Z,10.67
-2018-11-22T12:03:00Z,10.67
+2018-11-22T18:01:00Z,10.23
+2018-11-22T18:02:00Z,10.67
+2018-11-22T18:03:00Z,10.67
 	  </pre>
 
 	  </div>
@@ -44,19 +44,23 @@ timestamp,value
 	  <div class="download-example json collapse">
 	    <p>JSON downloads will have the following format.</p>
 		<pre class="example-text">{
-    “id”: “f79e4f84-e2c3-11e8-9f32-f2801f1b9fd1',
+    “forecast_id”: “f79e4f84-e2c3-11e8-9f32-f2801f1b9fd1',
 	"_links": {
 		"metadata": "https://api.solarforecastarbiter.org/forecasts/f79e4f84-e2c3-11e8-9f32-f2801f1b9fd1/metadata",
 	},
     “values”: [
         { 
-           “timestamp”: “2018-11-22T12:01:48Z”,
+           “timestamp”: “2018-11-22T18:01:001Z”,
             “value”: 10.23,
          }, 
         { 
-           “timestamp”: “2018-11-22T12:07:38Z”,
+           “timestamp”: “2018-11-22T18:02:00Z”,
             “value”: 10.67,
-         }     
+         },
+        {
+           “timestamp”: “2018-11-22T18:03:00Z”,
+            “value”: 10.67,
+         }
     ] 
 }</pre>
 	  </div>
