@@ -87,9 +87,7 @@ class MetadataForm(BaseView):
         Returns
         -------
         int
-            The number of minutes in the Timedelta or 'NaT' if invalid units
-            are provided.
-
+            The number of minutes in the Timedelta.
         """
         value = int(data_dict[f'{key_root}_number'])
         units = data_dict[f'{key_root}_units']
@@ -100,7 +98,7 @@ class MetadataForm(BaseView):
         elif units == 'days':
             return value * 1440
         else:
-            return 'NaT'
+            raise ValueError('Invalid selection in time units field.')
 
     def site_formatter(self, site_dict):
         """Formats the result of a site webform into an API payload.
@@ -242,10 +240,12 @@ class UploadForm(BaseView):
             self.template = 'forms/observation_upload_form.html'
             self.metadata_template = 'data/metadata/observation_metadata.html'
             self.api_handle = observations
-        if data_type == 'forecast':
+        elif data_type == 'forecast':
             self.template = 'forms/forecast_upload_form.html'
             self.metadata_template = 'data/metadata/forecast_metadata.html'
             self.api_handle = forecasts
+        else:
+            raise ValueError(f'No upload form defined for {data_type}')
 
     def render_metadata_section(self, metadata):
         return render_template(self.metadata_template, **metadata)
