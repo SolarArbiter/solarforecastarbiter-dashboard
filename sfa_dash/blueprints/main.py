@@ -79,6 +79,9 @@ class SingleForecastView(DataDashView):
         if metadata_request.status_code != 200:
             abort(404)
         self.metadata = metadata_request.json()
+        self.metadata['site'] = self.get_site_metadata(
+            self.metadata['site_id'])
+
         temp_args = self.template_args(**kwargs)
         self.metadata['site_link'] = self.generate_site_link(self.metadata)
         temp_args['metadata'] = render_template(
@@ -128,8 +131,11 @@ data_dash_blp.add_url_rule(
     '/observations/<uuid>',
     view_func=SingleObservationView.as_view('observation_view'))
 data_dash_blp.add_url_rule(
-    '/forecasts/',
+    '/forecasts/single/',
     view_func=DataListingView.as_view('forecasts', data_type='forecast'))
 data_dash_blp.add_url_rule(
-    '/forecasts/<uuid>',
+    '/forecasts/cdf/',
+    view_func=DataListingView.as_view('cdf_forecasts', data_type='cdf_forecast'))
+data_dash_blp.add_url_rule(
+    '/forecasts/single/<uuid>',
     view_func=SingleForecastView.as_view('forecast_view'))
