@@ -13,7 +13,7 @@ def get_values(forecast_id, **kwargs):
 
 def list_metadata(site_id=None):
     if site_id is not None:
-        r = get_request(f'/sites/{site_id}/forecasts')
+        r = get_request(f'/sites/{site_id}/forecasts/single')
     else:
         r = get_request('/forecasts/single/')
     return r

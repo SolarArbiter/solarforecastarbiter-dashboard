@@ -22,7 +22,7 @@ class DataListingView(BaseView):
         elif data_type == 'observation':
             self.table_function = DataTables.get_observation_table
         elif data_type =='cdf_forecast':
-            self.table_function = DataTables.get_forecast_table
+            self.table_function = DataTables.get_cdf_forecast_table
         else:
             raise Exception
         self.data_type = data_type

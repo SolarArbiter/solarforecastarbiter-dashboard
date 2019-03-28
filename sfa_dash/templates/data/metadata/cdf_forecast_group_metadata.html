@@ -1,6 +1,6 @@
 {% extends "data/metadata/meta_container.html" %}
 {% import "data/metadata/meta_macro.jinja" as macro %}
-{% set data_type = 'Probabilistic Forecast Value' %}
+{% set data_type = 'Probabilistic Forecast' %}
 {% block metadata %}
 <ul class="data-metadata-fields col-md-6 col-xs-12">
   {{ macro.li('Name', name) }}
@@ -15,7 +15,5 @@
   {{ macro.li('Run length / Issue frequency', run_length | string, 'minutes' ) }}
   {{ macro.li('Lead time to start', lead_time_to_start | string, 'minutes') }}
   {{ macro.li('Axis', axis) }}
-  {# constant_value will need units dependent on axis, and variable #}
-  {{ macro.li('Constant Value', constant_value |string ) }}
 </ul>
 {% endblock %}

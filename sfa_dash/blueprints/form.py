@@ -27,7 +27,7 @@ class MetadataForm(BaseView):
             self.metadata_template = 'data/metadata/site_metadata.html'
         elif data_type == 'observation':
             self.template = 'forms/observation_form.html'
-            self.id_key = 'obs_id'
+            self.id_key = 'observation_id'
             self.api_handle = observations
             self.formatter = self.observation_formatter
             self.metadata_template = 'data/metadata/site_metadata.html'
@@ -233,8 +233,8 @@ class CreateForm(MetadataForm):
                                        'permissions to create resources '
                                        f'of type {self.data_type}'}
         else:
-            template_args['errors'] = {'Error': 'Something went wrong, please '
-                                       'contact a site administrator.'}
+            template_args['errors'] = {'Error': ['Something went wrong, please '
+                                       'contact a site administrator.']}
 
         return render_template(self.template, form_data=form_data,
                                **template_args)
