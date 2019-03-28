@@ -1,6 +1,6 @@
 """ Utility classes/functions. Mostly for handling api data.
 """
-from sfa_dash.api_interface import (sites, forecasts, observations, cdf_forecasts,
+from sfa_dash.api_interface import (sites, forecasts, observations,
                                     cdf_forecast_groups)
 from flask import render_template, url_for
 
@@ -103,9 +103,10 @@ class DataTables(object):
         """
         """
         site_id = kwargs.get('site_id')
-        cdf_forecast_data = cdf_forecast_groups.list_metadata(site_id=site_id).json()
+        cdf_forecast_data = cdf_forecast_groups.list_metadata(
+            site_id=site_id).json()
         rows = cls.create_cdf_forecast_elements(cdf_forecast_data,
-                                         **kwargs)
+                                                **kwargs)
         rendered_table = render_template(cls.cdf_forecast_template,
                                          table_rows=rows,
                                          **kwargs)
@@ -119,5 +120,3 @@ class DataTables(object):
         rows = cls.create_site_table_elements(site_data, 'site_id', **kwargs)
         rendered_table = render_template(cls.site_template, table_rows=rows)
         return rendered_table
-
-

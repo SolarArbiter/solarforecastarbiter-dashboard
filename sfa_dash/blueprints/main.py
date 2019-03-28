@@ -101,7 +101,6 @@ class SingleCDFForecastView(DataDashView):
         return render_template(self.template, **temp_args)
 
 
-
 class SingleForecastView(DataDashView):
     template = 'data/asset.html'
 
@@ -132,7 +131,6 @@ class SingleForecastView(DataDashView):
         self.metadata = metadata_request.json()
         self.metadata['site'] = self.get_site_metadata(
             self.metadata['site_id'])
-
         temp_args = self.template_args(**kwargs)
         self.metadata['site_link'] = self.generate_site_link(self.metadata)
         temp_args['metadata'] = render_template(
@@ -192,7 +190,6 @@ class SingleCDFForecastGroupView(DataDashView):
         return render_template(self.template, **temp_args)
 
 
-
 class AccessView(DataDashView):
     template = 'data/access.html'
 
@@ -232,7 +229,8 @@ data_dash_blp.add_url_rule(
     view_func=DataListingView.as_view('forecasts', data_type='forecast'))
 data_dash_blp.add_url_rule(
     '/forecasts/cdf/',
-    view_func=DataListingView.as_view('cdf_forecasts', data_type='cdf_forecast'))
+    view_func=DataListingView.as_view('cdf_forecasts',
+                                      data_type='cdf_forecast'))
 data_dash_blp.add_url_rule(
     '/forecasts/single/<uuid>',
     view_func=SingleForecastView.as_view('forecast_view'))

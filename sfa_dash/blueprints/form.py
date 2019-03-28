@@ -149,8 +149,9 @@ class MetadataForm(BaseView):
             Form data formatted to the API spec.
         """
         observation_metadata = {}
-        direct_keys = ['name', 'variable', 'interval_value_type', 'uncertainty',
-                       'extra_parameters', 'interval_label', 'site_id']
+        direct_keys = ['name', 'variable', 'interval_value_type',
+                       'uncertainty', 'extra_parameters', 'interval_label',
+                       'site_id']
         observation_metadata = {key: observation_dict[key]
                                 for key in direct_keys
                                 if observation_dict.get(key, "") != ""}
@@ -161,8 +162,9 @@ class MetadataForm(BaseView):
 
     def forecast_formatter(self, forecast_dict):
         forecast_metadata = {}
-        direct_keys = ['name', 'variable', 'interval_value_type', 'extra_parameters',
-                       'interval_length', 'interval_label', 'site_id']
+        direct_keys = ['name', 'variable', 'interval_value_type',
+                       'extra_parameters', 'interval_length',
+                       'interval_label', 'site_id']
         forecast_metadata = {key: forecast_dict[key]
                              for key in direct_keys
                              if forecast_dict.get(key, '') != ''}
@@ -233,7 +235,7 @@ class CreateForm(MetadataForm):
                                        'permissions to create resources '
                                        f'of type {self.data_type}'}
         else:
-            template_args['errors'] = {'Error': ['Something went wrong, please '
+            template_args['errors'] = {'Error': ['Something went wrong, '
                                        'contact a site administrator.']}
 
         return render_template(self.template, form_data=form_data,
