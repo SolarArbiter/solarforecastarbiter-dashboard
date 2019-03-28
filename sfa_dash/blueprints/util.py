@@ -66,7 +66,7 @@ class DataTables(object):
             table_row['variable'] = data['variable']
             table_row['provider'] = data.get('provider', 'Test User')
             table_row['site'] = site_link
-            table_row['link'] = url_for('data_dashboard.cdf_forecast',
+            table_row['link'] = url_for('data_dashboard.cdf_forecast_view',
                                         uuid=data['forecast_id'])
             table_rows.append(table_row)
         return table_rows

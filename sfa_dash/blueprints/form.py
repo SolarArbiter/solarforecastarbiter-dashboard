@@ -4,7 +4,7 @@ from flask import (Blueprint, render_template, request,
                    abort, redirect, url_for, make_response)
 import pandas as pd
 from sfa_dash.api_interface import (sites, observations, forecasts,
-                                    cdf_forecasts)
+                                    cdf_forecast_groups)
 from sfa_dash.blueprints.base import BaseView
 
 
@@ -22,8 +22,8 @@ class MetadataForm(BaseView):
         elif data_type == 'cdf_forecast':
             self.template = 'forms/cdf_forecast_form.html'
             self.id_key = 'forecast_id'
-            self.api_handle = cdf_forecasts
-            self.formatter = self.forecast_formatter
+            self.api_handle = cdf_forecast_groups
+            self.formatter = self.cdf_forecast_formatter
             self.metadata_template = 'data/metadata/site_metadata.html'
         elif data_type == 'observation':
             self.template = 'forms/observation_form.html'
@@ -181,6 +181,13 @@ class MetadataForm(BaseView):
                 forecast_dict,
                 'interval_length')
         return forecast_metadata
+
+    def cdf_forecast_formatter(self, forecast_dict):
+        cdf_forecast_metadata = self.forecast_formatter(forecast_dict)
+        constant_values = forecast_dict['constant_values'].split(',')
+        cdf_forecast_metadata['constant_values'] = constant_values
+        cdf_forecast_metadata['axis'] = forecast_dict['axis']
+        return cdf_forecast_metadata
 
     def get(self):
         raise NotImplementedError

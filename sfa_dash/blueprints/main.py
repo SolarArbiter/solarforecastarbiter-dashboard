@@ -70,11 +70,11 @@ class SingleCDFForecastView(DataDashView):
                         uuid=self.metadata['site_id']),
             text='CDF Forecasts')
         breadcrumb += breadcrumb_format.format(
-            url=url_for('data_dashboard.cdf_forecast',
+            url=url_for('data_dashboard.cdf_forecast_view',
                         uuid=self.metadata['parent']),
             text=self.metadata['name'])
         breadcrumb += breadcrumb_format.format(
-            url=url_for('data_dashboard.cdf_forecast_single',
+            url=url_for('data_dashboard.cdf_forecast_single_view',
                         uuid=self.metadata['forecast_id']),
             text=self.metadata['constant_value'])
 
@@ -163,7 +163,7 @@ class SingleCDFForecastGroupView(DataDashView):
                         site_id=self.metadata['site_id']),
             text='CDF Forecasts')
         breadcrumb += breadcrumb_format.format(
-            url=url_for('data_dashboard.cdf_forecast',
+            url=url_for('data_dashboard.cdf_forecast_view',
                         uuid=self.metadata['forecast_id']),
             text=self.metadata['name'])
         return breadcrumb
@@ -236,7 +236,7 @@ data_dash_blp.add_url_rule(
     view_func=SingleForecastView.as_view('forecast_view'))
 data_dash_blp.add_url_rule(
     '/forecasts/cdf/<uuid>',
-    view_func=SingleCDFForecastGroupView.as_view('cdf_forecast'))
+    view_func=SingleCDFForecastGroupView.as_view('cdf_forecast_view'))
 data_dash_blp.add_url_rule(
     '/forecasts/cdf/single/<uuid>',
-    view_func=SingleCDFForecastView.as_view('cdf_forecast_single'))
+    view_func=SingleCDFForecastView.as_view('cdf_forecast_single_view'))
