@@ -16,7 +16,7 @@ auth0 = LocalProxy(partial(_lookup_app_object, 'auth0_oauth'))
 
 def logout():
     session.clear()
-    params = {'returnTo': url_for('data_dashboard.root_redirect',
+    params = {'returnTo': url_for('index',
                                   _external=True),
               'client_id': current_app.config['AUTH0_OAUTH_CLIENT_ID']}
     return redirect(
@@ -53,6 +53,6 @@ def make_auth0_blueprint(
     def callback_handling():
         userinfo = auth0.get(f'{base_url}/userinfo').json()
         session['userinfo'] = userinfo
-        return redirect(url_for('data_dashboard.root_redirect'))
+        return redirect(url_for('index'))
 
     return auth0_bp

@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, render_template
 
 
 from sfa_dash.blueprints.auth0 import make_auth0_blueprint, auth0, logout
@@ -22,6 +22,13 @@ def create_app(config=None):
             # by request_oauthlib and oauthlib
             # and the api validates expiration
             return redirect(url_for('auth0.login'))
+
+    @app.route('/')
+    def index():
+        # move index to app so all blueprints are secured
+        # should probably test if auth0.authorized and show one
+        # page, show a different page w/ login link otherwise
+        return render_template('index.html')
 
     from sfa_dash.blueprints.main import data_dash_blp
     from sfa_dash.blueprints.form import forms_blp
