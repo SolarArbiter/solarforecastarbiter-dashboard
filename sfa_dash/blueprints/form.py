@@ -319,6 +319,10 @@ class DownloadForm(BaseView):
             self.template = 'forms/forecast_download_form.html'
             self.metadata_template = 'data/metadata/forecast_metadata.html'
             self.api_handle = forecasts
+        elif data_type == 'cdf_forecast':
+            self.template = 'forms/forecast_download_form.html'
+            self.metadata_template = 'data/metadata/cdf_forecast_metadata.html'
+            self.api_handle = cdf_forecasts
         else:
             raise ValueError(f'No Download form configured for {data_type}.')
 
@@ -410,3 +414,6 @@ forms_blp.add_url_rule('/observations/<uuid>/download',
 forms_blp.add_url_rule('/forecasts/single/<uuid>/download',
                        view_func=DownloadForm.as_view('download_forecast_data',
                                                       data_type='forecast'))
+forms_blp.add_url_rule('/forecasts/cdf/<uuid>/download',
+                       view_func=DownloadForm.as_view('download_cdf_forecast_data',
+                                                      data_type='cdf_forecast'))
