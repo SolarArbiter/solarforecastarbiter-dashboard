@@ -11,7 +11,7 @@ from flask_dance.consumer import OAuth2ConsumerBlueprint
 from six.moves.urllib.parse import urlencode
 
 
-auth0 = LocalProxy(partial(_lookup_app_object, 'auth0_oauth'))
+oauth_request_session = LocalProxy(partial(_lookup_app_object, 'auth0_oauth'))
 
 
 def logout():
@@ -56,7 +56,7 @@ def make_auth0_blueprint(
         # can probably just decode the id_token
         # might also want to make a current_user proxy with the
         # sub or email
-        userinfo = auth0.get(f'{base_url}/userinfo').json()
+        userinfo = oauth_request_session.get(f'{base_url}/userinfo').json()
         session['userinfo'] = userinfo
         return redirect(url_for('index'))
 

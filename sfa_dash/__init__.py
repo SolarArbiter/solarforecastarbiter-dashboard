@@ -1,7 +1,8 @@
 from flask import Flask, redirect, url_for, render_template
 
 
-from sfa_dash.blueprints.auth0 import make_auth0_blueprint, auth0, logout
+from sfa_dash.blueprints.auth0 import (make_auth0_blueprint, logout,
+                                       oauth_request_session)
 
 
 def create_app(config=None):
@@ -16,7 +17,7 @@ def create_app(config=None):
     app.route('/logout')(logout)
 
     def protect_endpoint():
-        if not auth0.authorized:
+        if not oauth_request_session.authorized:
             # means we have a token, not necessarily that it
             # hasn't expired, but refreshing is handled
             # by request_oauthlib and oauthlib
@@ -26,7 +27,7 @@ def create_app(config=None):
     @app.route('/')
     def index():
         # move index to app so all blueprints are secured
-        # should probably test if auth0.authorized and show one
+        # should probably test if authorized and show one
         # page, show a different page w/ login link otherwise
         return render_template('index.html')
 

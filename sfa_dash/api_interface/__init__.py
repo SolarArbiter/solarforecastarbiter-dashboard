@@ -3,7 +3,7 @@
 from flask import current_app as app
 
 
-from sfa_dash import auth0
+from sfa_dash import oauth_request_session
 
 
 def get_request(path, **kwargs):
@@ -19,13 +19,9 @@ def get_request(path, **kwargs):
     requests.Response
         The api response.
     """
-    try:
-        session = auth0  # already has token ready to use for api
-    except Exception:
-        # make a requests session?
-        # redirect to login?
-        raise
-    return session.get(f'{app.config["SFA_API_URL"]}{path}', **kwargs)
+    # may need to handle errors if oauth_request_session does not exist somehow
+    return oauth_request_session.get(
+            f'{app.config["SFA_API_URL"]}{path}', **kwargs)
 
 
 def post_request(path, payload, json=True):
@@ -47,10 +43,10 @@ def post_request(path, payload, json=True):
     requests.Response
         The api response.
     """
-    session = auth0
     if json:
-        return session.post(f'{app.config["SFA_API_URL"]}{path}',
-                            json=payload)
-    return session.post(f'{app.config["SFA_API_URL"]}{path}',
-                        headers={'Content-type': 'text/csv'},
-                        data=payload)
+        kwargs = {'json': payload}
+    else:
+        kwargs = {'headers': {'Content-type': 'text/csv'},
+                  'data': payload}
+    return oauth_request_session.post(
+        f'{app.config["SFA_API_URL"]}{path}', **kwargs)
