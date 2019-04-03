@@ -25,27 +25,20 @@ def logout():
 
 
 def make_auth0_blueprint(
-        base_url, client_id=None, client_secret=None,
-        scope=None, redirect_url=None,
-        redirect_to=None, login_url=None,
-        session_class=None,
+        base_url,
+        scope=None,
         storage=None):
     scope = scope or ['openid', 'email', 'profile', 'offline_access']
     auth0_bp = OAuth2ConsumerBlueprint(
         'auth0', __name__,
-        client_id=client_id,
-        client_secret=client_secret,
         base_url=base_url,
         token_url=f'{base_url}/oauth/token',
         auto_refresh_url=f'{base_url}/oauth/token',
         authorization_url=f'{base_url}/authorize',
         authorization_url_params={
             'audience': 'https://api.solarforecastarbiter.org'},
-        redirect_url=redirect_url,
-        redirect_to=redirect_to,
+        redirect_to='.callback_handling',
         scope=scope,
-        login_url=login_url,
-        session_class=session_class,
         storage=storage,
         )
     auth0_bp.from_config['client_id'] = 'AUTH0_OAUTH_CLIENT_ID'
@@ -55,5 +48,11 @@ def make_auth0_blueprint(
     def set_applocal_session():
         ctx = stack.top
         ctx.auth0_oauth = auth0_bp.session
+
+    @auth0_bp.route('/callback')
+    def callback_handling():
+        userinfo = auth0.get(f'{base_url}/userinfo').json()
+        session['userinfo'] = userinfo
+        return redirect(url_for('data_dashboard.root_redirect'))
 
     return auth0_bp
