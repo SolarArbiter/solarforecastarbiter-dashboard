@@ -37,6 +37,7 @@ def make_auth0_blueprint(
         client_secret=client_secret,
         base_url=base_url,
         token_url=f'{base_url}/oauth/token',
+        auto_refresh_url=f'{base_url}/oauth/token',
         authorization_url=f'{base_url}/authorize',
         authorization_url_params={
             'audience': 'https://api.solarforecastarbiter.org'},
