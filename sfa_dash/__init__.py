@@ -18,8 +18,9 @@ def create_app(config=None):
     def protect_endpoint():
         if not auth0.authorized:
             # means we have a token, not necessarily that it
-            # hasn't expired, but the oauth session should
-            # refresh if needed
+            # hasn't expired, but refreshing is handled
+            # by request_oauthlib and oauthlib
+            # and the api validates expiration
             return redirect(url_for('auth0.login'))
 
     from sfa_dash.blueprints.main import data_dash_blp
