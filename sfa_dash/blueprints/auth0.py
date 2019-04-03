@@ -28,7 +28,9 @@ def make_auth0_blueprint(
         base_url,
         scope=None,
         storage=None):
-    scope = scope or ['openid', 'email', 'profile', 'offline_access']
+    scope = scope or ['openid', 'email', 'profile']
+    # add 'offline_access' to the scope once secure storage is implemented
+    # so the refresh token can be stored and used
     auth0_bp = OAuth2ConsumerBlueprint(
         'auth0', __name__,
         base_url=base_url,
@@ -51,6 +53,9 @@ def make_auth0_blueprint(
 
     @auth0_bp.route('/callback')
     def callback_handling():
+        # can probably just decode the id_token
+        # might also want to make a current_user proxy with the
+        # sub or email
         userinfo = auth0.get(f'{base_url}/userinfo').json()
         session['userinfo'] = userinfo
         return redirect(url_for('index'))
