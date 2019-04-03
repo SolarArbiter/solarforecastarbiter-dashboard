@@ -5,8 +5,23 @@ try:
     from flask import _app_ctx_stack as stack
 except ImportError:
     from flask import _request_ctx_stack as stack
+from flask import url_for, redirect, current_app, session
 from flask.globals import LocalProxy, _lookup_app_object
 from flask_dance.consumer import OAuth2ConsumerBlueprint
+from six.moves.urllib.parse import urlencode
+
+
+auth0 = LocalProxy(partial(_lookup_app_object, 'auth0_oauth'))
+
+
+def logout():
+    session.clear()
+    params = {'returnTo': url_for('data_dashboard.root_redirect',
+                                  _external=True),
+              'client_id': current_app.config['AUTH0_OAUTH_CLIENT_ID']}
+    return redirect(
+        current_app.config['AUTH0_OAUTH_BASE_URL'] + '/v2/logout?'
+        + urlencode(params))
 
 
 def make_auth0_blueprint(
@@ -41,6 +56,3 @@ def make_auth0_blueprint(
         ctx.auth0_oauth = auth0_bp.session
 
     return auth0_bp
-
-
-auth0 = LocalProxy(partial(_lookup_app_object, 'auth0_oauth'))

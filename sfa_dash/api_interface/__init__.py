@@ -1,7 +1,9 @@
 """Helper functions for all Solar Forecast Arbiter /sites/* endpoints.
 """
 from flask import current_app as app
-import requests
+
+
+from sfa_dash import auth0
 
 
 def get_request(path, **kwargs):
@@ -17,7 +19,13 @@ def get_request(path, **kwargs):
     requests.Response
         The api response.
     """
-    return requests.get(f'{app.config["SFA_API_URL"]}{path}', **kwargs)
+    try:
+        session = auth0  # already has token ready to use for api
+    except Exception:
+        # make a requests session?
+        # redirect to login?
+        raise
+    return session.get(f'{app.config["SFA_API_URL"]}{path}', **kwargs)
 
 
 def post_request(path, payload, json=True):
@@ -39,9 +47,10 @@ def post_request(path, payload, json=True):
     requests.Response
         The api response.
     """
+    session = auth0
     if json:
-        return requests.post(f'{app.config["SFA_API_URL"]}{path}',
-                             json=payload)
-    return requests.post(f'{app.config["SFA_API_URL"]}{path}',
-                         headers={'Content-type': 'text/csv'},
-                         data=payload)
+        return session.post(f'{app.config["SFA_API_URL"]}{path}',
+                            json=payload)
+    return session.post(f'{app.config["SFA_API_URL"]}{path}',
+                        headers={'Content-type': 'text/csv'},
+                        data=payload)

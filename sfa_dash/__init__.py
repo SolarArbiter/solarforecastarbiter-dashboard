@@ -1,14 +1,33 @@
-from flask import Flask
+from flask import Flask, redirect, url_for
 
 
-def create_app():
+from sfa_dash.blueprints.auth0 import make_auth0_blueprint, auth0, logout
+
+
+def create_app(config=None):
     app = Flask(__name__)
-    app.secret_key = b'_24nsdagnnt2#%53moz'
-    app.config.from_object('sfa_dash.config.LocalConfig')
-    from blueprints.main import data_dash_blp
-    from blueprints.form import forms_blp
-    app.register_blueprint(data_dash_blp)
-    app.register_blueprint(forms_blp)
+    config = config or 'sfa_dash.config.DevConfig'
+    app.config.from_object(config)
+    app.secret_key = app.config['SECRET_KEY']
+
+    auth0_bp = make_auth0_blueprint(
+        base_url=app.config['AUTH0_OAUTH_BASE_URL'])
+    app.register_blueprint(auth0_bp, url_prefix='/login')
+    app.route('/logout')(logout)
+
+    def protect_endpoint():
+        if not auth0.authorized:
+            # means we have a token, not necessarily that it
+            # hasn't expired, but the oauth session should
+            # refresh if needed
+            return redirect(url_for('auth0.login'))
+
+    from sfa_dash.blueprints.main import data_dash_blp
+    from sfa_dash.blueprints.form import forms_blp
+
+    for blp in (data_dash_blp, forms_blp):
+        blp.before_request(protect_endpoint)
+        app.register_blueprint(blp)
     return app
 
 
