@@ -1,4 +1,3 @@
-import pdb
 import json
 
 from flask import (Blueprint, render_template, request,
@@ -289,7 +288,6 @@ class UploadForm(BaseView):
         return render_template(self.template, uuid=uuid, metadata=metadata)
 
     def post(self, uuid):
-        pdb.set_trace()
         if request.mimetype != 'multipart/form-data':
             abort(415)
         if f'{self.data_type}-data' not in request.files:
@@ -424,5 +422,6 @@ forms_blp.add_url_rule('/forecasts/single/<uuid>/download',
                        view_func=DownloadForm.as_view('download_forecast_data',
                                                       data_type='forecast'))
 forms_blp.add_url_rule('/forecasts/cdf/<uuid>/download',
-                       view_func=DownloadForm.as_view('download_cdf_forecast_data',
-                                                      data_type='cdf_forecast'))
+                       view_func=DownloadForm.as_view(
+                           'download_cdf_forecast_data',
+                           data_type='cdf_forecast'))
