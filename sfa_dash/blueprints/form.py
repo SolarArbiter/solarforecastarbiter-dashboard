@@ -164,8 +164,8 @@ class MetadataForm(BaseView):
                                 for key in direct_keys
                                 if observation_dict.get(key, "") != ""}
         observation_metadata['interval_length'] = self.parse_timedelta(
-                observation_dict,
-                'interval_length')
+            observation_dict,
+            'interval_length')
         return observation_metadata
 
     def forecast_formatter(self, forecast_dict):
@@ -177,17 +177,17 @@ class MetadataForm(BaseView):
                              for key in direct_keys
                              if forecast_dict.get(key, '') != ''}
         forecast_metadata['issue_time_of_day'] = self.parse_hhmm_field(
-                forecast_dict,
-                'issue_time')
+            forecast_dict,
+            'issue_time')
         forecast_metadata['lead_time_to_start'] = self.parse_timedelta(
-                forecast_dict,
-                'lead_time')
+            forecast_dict,
+            'lead_time')
         forecast_metadata['run_length'] = self.parse_timedelta(
-                forecast_dict,
-                'run_length')
+            forecast_dict,
+            'run_length')
         forecast_metadata['interval_length'] = self.parse_timedelta(
-                forecast_dict,
-                'interval_length')
+            forecast_dict,
+            'interval_length')
         return forecast_metadata
 
     def cdf_forecast_formatter(self, forecast_dict):
