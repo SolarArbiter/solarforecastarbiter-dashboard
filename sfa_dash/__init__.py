@@ -6,6 +6,7 @@ from sfa_dash.blueprints.auth0 import (make_auth0_blueprint, logout,
                                        oauth_request_session)
 from sfa_dash.filters import register_jinja_filters
 from sfa_dash.template_globals import template_variables
+from sfa_dash.error_handlers import register_error_handlers
 
 
 def create_app(config=None):
