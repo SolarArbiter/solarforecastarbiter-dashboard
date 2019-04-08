@@ -3,6 +3,7 @@ from flask import Flask, redirect, url_for, render_template
 
 from sfa_dash.blueprints.auth0 import (make_auth0_blueprint, logout,
                                        oauth_request_session)
+from sfa_dash.filters import register_jinja_filters
 
 
 def create_app(config=None):
@@ -10,6 +11,7 @@ def create_app(config=None):
     config = config or 'sfa_dash.config.DevConfig'
     app.config.from_object(config)
     app.secret_key = app.config['SECRET_KEY']
+    register_jinja_filters(app)
 
     auth0_bp = make_auth0_blueprint(
         base_url=app.config['AUTH0_OAUTH_BASE_URL'])
