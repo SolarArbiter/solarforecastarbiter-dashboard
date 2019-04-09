@@ -15,14 +15,14 @@ def test_flatten_dict(meta_form):
         'b': {'z': 5,
               'y': 4,
               'x': 3},
-        'c': [1,2,3,4]
+        'c': [1, 2, 3, 4]
     }
     expected_out = {
         'a': 1,
         'z': 5,
         'y': 4,
         'x': 3,
-        'c': [1,2,3,4],
+        'c': [1, 2, 3, 4],
     }
     out = meta_form.flatten_dict(original_dict)
     assert out == expected_out
@@ -34,12 +34,15 @@ def test_flatten_dict(meta_form):
 ])
 def test_parse_hhmm_field(data, root, expected, meta_form):
     assert meta_form.parse_hhmm_field(data, root) == expected
-    
+
 
 @pytest.mark.parametrize('data,root,expected', [
-    ({'lead_time_number': 360, 'lead_time_units': 'minutes'}, 'lead_time', 360),
-    ({'lead_time_number': 3, 'lead_time_units': 'hours'}, 'lead_time', 180),
-    ({'lead_time_number': 2, 'lead_time_units': 'days'}, 'lead_time', 2880),
+    ({'lead_time_number': 360,
+      'lead_time_units': 'minutes'}, 'lead_time', 360),
+    ({'lead_time_number': 3,
+      'lead_time_units': 'hours'}, 'lead_time', 180),
+    ({'lead_time_number': 2,
+      'lead_time_units': 'days'}, 'lead_time', 2880),
 ])
 def test_parse_timedelta(data, root, expected, meta_form):
     assert meta_form.parse_timedelta(data, root) == expected
