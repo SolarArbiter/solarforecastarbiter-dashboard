@@ -21,6 +21,7 @@ def auth_token():
         token = token_req.json()['access_token']
         return token
 
+
 @pytest.fixture()
 def app():
     return create_app('sfa_dash.config.TestConfig')

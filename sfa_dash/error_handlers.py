@@ -1,4 +1,4 @@
-from flask import jsonify, redirect, url_for
+from flask import redirect, url_for
 
 
 from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError

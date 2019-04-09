@@ -16,6 +16,7 @@ def create_app(config=None):
     app.secret_key = app.config['SECRET_KEY']
     SeaSurf(app)
     register_jinja_filters(app)
+    register_error_handlers(app)
 
     auth0_bp = make_auth0_blueprint(
         base_url=app.config['AUTH0_OAUTH_BASE_URL'])
