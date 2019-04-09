@@ -4,10 +4,9 @@ variable_mapping = {
     'dhi': ('DHI', '(W/m^2)'),
     'temp_air': ('Air Temperature', '(&deg;C)'),
     'wind_speed': ('Wind Speed', '(m/s)'),
-    'poa_global': ('Plane of Array', '(W/m^2)'),
+    'poa_global': ('Plane of Array Irradiance', '(W/m^2)'),
     'ac_power': ('AC Power', '(MW)'),
     'dc_power': ('DC Power', '(MW)'),
-    'cdf_value': ('CDF Value', ''),
 }
 
 
