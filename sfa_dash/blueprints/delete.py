@@ -1,4 +1,4 @@
-from flask import url_for, render_template, abort, redirect
+from flask import url_for, request, render_template, abort, redirect
 
 from sfa_dash.api_interface import (sites, observations, forecasts,
                                     cdf_forecast_groups)
@@ -32,10 +32,14 @@ class DeleteConfirmation(DataDashView):
             'uuid': self.metadata['uuid'],
             'data_type': self.data_type,
         }
+        if 'errors' in kwargs:
+            temp_args.update({'errors': kwargs['errors']})
         return temp_args
 
-    def get(self, uuid):
-        """Presents a delete confirmation to the user"""
+    def get(self, uuid, **kwargs):
+        """Presents a deletion confirmation form that makes a post
+        request to this endpoint on submission
+        """
         metadata_request = self.api_handle.get_metadata(uuid)
         if metadata_request.status_code != 200:
             abort(404)
@@ -45,10 +49,24 @@ class DeleteConfirmation(DataDashView):
             self.metadata['site_id'])
         return render_template(
             self.template,
-            **self.template_args(**self.metadata))
+            **self.template_args(**kwargs))
 
     def post(self, uuid):
+        """Carries out the delete request to the API"""
+        confirmation_url = url_for(f'data_dashboard.delete_{self.data_type}',
+                                   _external=True,
+                                   uuid=uuid)
+        if request.headers['Referer'] != confirmation_url:
+            # If the user was directed from anywhere other than
+            # the confirmation page, redirect to confirm.
+            return redirect(confirmation_url)
         delete_request = self.api_handle.delete(uuid)
-        if delete_request.status_code != 204:
+        if delete_request.status_code == 400:
+            # Redirect and display errors if the delete request
+            # failed
+            response_json = delete_request.json()
+            errors = response_json['errors']
+            return self.get(uuid, errors=errors)
+        elif delete_request.status_code == 404:
             abort(404)
         return redirect(url_for(f'data_dashboard.{self.data_type}s'))
