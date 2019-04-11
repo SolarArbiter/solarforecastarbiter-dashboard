@@ -248,10 +248,13 @@ data_dash_blp.add_url_rule(
     view_func=DeleteConfirmation.as_view('delete_site', data_type='site'))
 data_dash_blp.add_url_rule(
     '/observations/<uuid>/delete',
-    view_func=DeleteConfirmation.as_view('delete_observation', data_type='observation'))
+    view_func=DeleteConfirmation.as_view(
+        'delete_observation', data_type='observation'))
 data_dash_blp.add_url_rule(
     '/forecasts/single/<uuid>/delete',
-    view_func=DeleteConfirmation.as_view('delete_forecast', data_type='forecast'))
+    view_func=DeleteConfirmation.as_view(
+        'delete_forecast', data_type='forecast'))
 data_dash_blp.add_url_rule(
     '/forecasts/cdf/<uuid>/delete',
-    view_func=DeleteConfirmation.as_view('delete_cdf_forecast_group', data_type='cdf_forecast_group'))
+    view_func=DeleteConfirmation.as_view(
+        'delete_cdf_forecast_group', data_type='cdf_forecast_group'))

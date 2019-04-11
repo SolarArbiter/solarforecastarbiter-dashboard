@@ -17,6 +17,7 @@ def post_metadata(site_dict):
     r = post_request('/sites/', site_dict, json=True)
     return r
 
+
 def delete(site_id):
     req = delete_request(f'/sites/{site_id}')
     return req
