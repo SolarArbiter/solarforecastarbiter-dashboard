@@ -233,5 +233,5 @@ a.help-button{
 }
 .input-wrapper{
     width: calc(100% - 29px);
-    display: inline-block;
+    display: inline-flex;
 }
