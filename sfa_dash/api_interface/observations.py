@@ -29,5 +29,5 @@ def post_values(uuid, values, json=True):
     return req
 
 def delete(observation_id):
-    req = delete_request(f'/observation/{uuid}')
+    req = delete_request(f'/observations/{observation_id}')
     return req
