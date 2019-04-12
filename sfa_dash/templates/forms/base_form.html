@@ -1,15 +1,14 @@
 {% extends "dash/data.html" %}
-{% import "forms/form_macros.jinja" as form %}
 {% block content %}
 {{ metadata | safe }}
 {% include "sections/notifications.html" %}
-{% if form_data is not defined %}
-{% set form_data = {} %}
-{% endif %}
-<form action="{{ url_for('forms.create_cdf_forecast', site_id=site_metadata['site_id']) }}" method="post" enctype='application/json' id="cdf-forecast-form">
-{% block fields %}
-{% endblock %}
+<form action="{{ url_for('forms.create_' + data_type, site_id=site_metadata['site_id']) }}" method="post" enctype='application/json' id="{{ data_type }}-form">
+  <div class="form-group">
+    {% block fields %}
+    {% endblock %}
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  </div>
 </form>
-<button type="submit" form="cdf-forecast-form" value="Submit" class="btn btn-primary">Submit</button>
+<button type="submit" form="{{ data_type }}-form" value="Submit" class="btn btn-primary">Submit</button>
 {% endblock %}
 
