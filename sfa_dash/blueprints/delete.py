@@ -47,6 +47,7 @@ class DeleteConfirmation(DataDashView):
         self.metadata['uuid'] = uuid
         self.metadata['site'] = self.get_site_metadata(
             self.metadata['site_id'])
+        self.metadata['site_link'] = self.generate_site_link(self.metadata)
         return render_template(
             self.template,
             **self.template_args(**kwargs))
