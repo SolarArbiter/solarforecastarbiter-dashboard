@@ -1,7 +1,7 @@
-{% extends "forms/base_form.html" %}
+{% extends "forms/base/creation_form.html" %}
 {% import "forms/form_macros.jinja" as form %}
 {% set page_title = 'Create New Observation' %}
-{% set data_type = 'observation' %}
+{% set data_type, form_enc  = 'observation', 'application/json' %}
 {% if form_data is not defined %}
 {% set form_data = {} %}
 {% endif %}

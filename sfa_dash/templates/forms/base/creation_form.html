@@ -1,12 +1,14 @@
+{% import "forms/form_macros.jinja" as form %}
 {% extends "dash/data.html" %}
 {% block content %}
 {{ metadata | safe }}
 {% include "sections/notifications.html" %}
-<form action="{{ url_for('forms.create_' + data_type, site_id=site_metadata['site_id']) }}" method="post" enctype='application/json' id="{{ data_type }}-form">
+{% if form_title %}<h3>{{ form_title }}</h3> {% endif %}
+<form action="{{ url_for('forms.create_' + data_type, site_id=site_metadata['site_id']) }}" method="post" enctype='{{ form_enc }}' id="{{ data_type }}-form">
   <div class="form-group">
     {% block fields %}
     {% endblock %}
-    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    {{ form.token() }}
   </div>
 </form>
 <button type="submit" form="{{ data_type }}-form" value="Submit" class="btn btn-primary">Submit</button>
