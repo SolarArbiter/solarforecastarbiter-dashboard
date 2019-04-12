@@ -61,7 +61,9 @@ class DeleteConfirmation(DataDashView):
             # the confirmation page, redirect to confirm.
             return redirect(confirmation_url)
         delete_request = self.api_handle.delete(uuid)
-        if delete_request.status_code == 400:
+        if delete_request.status_code == 204:
+            return redirect(url_for(f'data_dashboard.{self.data_type}s'))
+        elif delete_request.status_code == 400:
             # Redirect and display errors if the delete request
             # failed
             response_json = delete_request.json()
@@ -69,4 +71,6 @@ class DeleteConfirmation(DataDashView):
             return self.get(uuid, errors=errors)
         elif delete_request.status_code == 404:
             abort(404)
-        return redirect(url_for(f'data_dashboard.{self.data_type}s'))
+        else:
+            errors = {"error": ["Could not complete the requested action."]}
+            return self.get(uuid, errors=errors)
