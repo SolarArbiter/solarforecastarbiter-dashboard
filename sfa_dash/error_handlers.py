@@ -8,6 +8,8 @@ def no_refresh_token(error):
     return redirect(url_for('auth0.login'))
 
 
-def register_error_handlers(app):
-    # This may be a temporary solution to tokens that do not auto-refresh
+def register_handlers(app):
+    """Registers Errors handlers to catch exceptions raised that would otherwise
+    propogate and crash the application.
+    """
     app.register_error_handler(InvalidClientIdError, no_refresh_token)

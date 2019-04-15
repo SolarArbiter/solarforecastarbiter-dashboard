@@ -6,7 +6,7 @@ from sfa_dash.blueprints.auth0 import (make_auth0_blueprint, logout,
                                        oauth_request_session)
 from sfa_dash.filters import register_jinja_filters
 from sfa_dash.template_globals import template_variables
-from sfa_dash.error_handlers import register_error_handlers
+from sfa_dash import error_handlers
 
 
 def create_app(config=None):
@@ -16,8 +16,8 @@ def create_app(config=None):
     app.secret_key = app.config['SECRET_KEY']
     SeaSurf(app)
     register_jinja_filters(app)
-    register_error_handlers(app)
-    
+    error_handlers.register_handlers(app)
+
     session_storage = SessionStorage()
     auth0_bp = make_auth0_blueprint(
         base_url=app.config['AUTH0_OAUTH_BASE_URL'],
