@@ -13,8 +13,9 @@ setup(
         'requests',
         'pandas',
         'flask-dance',
+        'sqlalchemy',
         'flask-sqlalchemy',
         'flask-seasurf'
-        'python-jose',
-        'sqlalchemy-utils'],
+        'python-jose'
+        ]
 )
