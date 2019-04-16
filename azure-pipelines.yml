@@ -9,37 +9,36 @@ variables:
 trigger:
 - master
 
-pool:
-  vmImage: 'Ubuntu-16.04'
-strategy:
-  matrix:
-    Python27:
-      python.version: '2.7'
-    Python35:
-      python.version: '3.5'
-    Python36:
-      python.version: '3.6'
-    Python37:
-      python.version: '3.7'
+jobs:
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
-
-- script: |
-    python -m pip install --upgrade pip
-    pip install -r requirements.txt
-  displayName: 'Install dependencies'
-
-- script: |
-    pip install pytest pytest-azurepipelines
-    pytest
-  displayName: 'pytest'
-
-- script: |
-    echo $MY_SECRET 
-  env:
-    MY_SECRET: $(test_secret)
-  displayName: 'Print Test Secret'
+- job: 'Test'
+  pool:
+    vmImage: 'Ubuntu-16.04'
+  strategy:
+    matrix:
+      Python37:
+        python.version: '3.7'
+  
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+    displayName: 'Use Python $(python.version)'
+  
+  - script: |
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+    displayName: 'Install dependencies'
+  
+  - script: |
+      echo 'Printing...';echo $MY_SECRET; echo $NOT_SECRET
+    env:
+      MY_SECRET: $(test_secret)
+      NOT_SECRET: 'not a secret'
+    displayName: 'Print Test Secret'
+    #  - script: |
+    #      pip install pytest pytest-azurepipelines
+    #      pytest
+    #    displayName: 'pytest'
+  
+  
