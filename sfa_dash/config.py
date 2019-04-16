@@ -10,10 +10,12 @@ class BaseConfig(object):
     AUTH0_OAUTH_BASE_URL = 'https://solarforecastarbiter.auth0.com'
     AUTH0_OAUTH_JWT_KEY = requests.get(
         AUTH0_OAUTH_BASE_URL + '/.well-known/jwks.json').json()
+    # require login every day
     PERMANENT_SESSION_LIFETIME = dt.timedelta(days=1)
-    SESSION_REFRESH_EACH_REQUEST = True
+    SESSION_REFRESH_EACH_REQUEST = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/test.db'
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI',
+                                        'sqlite:////tmp/test.db')
 
 
 class LocalConfig(BaseConfig):
@@ -29,4 +31,3 @@ class DevConfig(BaseConfig):
     SFA_API_URL = 'https://dev-api.solarforecastarbiter.org'
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SQLALCHEMY_DATABASE_URI = os.getenv('SESSION_DATABASE_URI', '')
