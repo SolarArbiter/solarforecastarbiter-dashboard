@@ -14,7 +14,7 @@ class LocalConfig(BaseConfig):
 
 
 class TestConfig(BaseConfig):
-    SFA_API_URL = 'http://localhost:5000'
+    SFA_API_URL = os.getenv('SFA_API_URL','http://localhost:5000')
 
 
 class DevConfig(BaseConfig):

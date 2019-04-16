@@ -31,14 +31,12 @@ jobs:
     displayName: 'Install dependencies'
   
   - script: |
-      echo 'Printing...';echo $MY_SECRET; echo $NOT_SECRET
+      pip install pytest pytest-azurepipelines
+      pytest
     env:
-      MY_SECRET: $(test_secret)
-      NOT_SECRET: 'not a secret'
-    displayName: 'Print Test Secret'
-    #  - script: |
-    #      pip install pytest pytest-azurepipelines
-    #      pytest
-    #    displayName: 'pytest'
+      AUTH0_CLIENT_SECRET: $(auth0_client_secret)
+      AUTH0_CLIENT_ID: 'PrE39AdtGMPI4gK2hRvWZ2aDRarfpg7A'
+      SFA_API_URL: 'https://dev-api.solarforecastarbiter.org'
+    displayName: 'pytest'
   
   
