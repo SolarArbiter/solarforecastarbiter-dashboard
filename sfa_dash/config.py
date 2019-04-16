@@ -12,12 +12,13 @@ class BaseConfig(object):
         AUTH0_OAUTH_BASE_URL + '/.well-known/jwks.json').json()
     PERMANENT_SESSION_LIFETIME = dt.timedelta(days=1)
     SESSION_REFRESH_EACH_REQUEST = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/test.db'
 
 
 class LocalConfig(BaseConfig):
     SFA_API_URL = 'http://localhost:5000'
     TEMPLATES_AUTO_RELOAD = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/test.db'
 
 
 class TestConfig(BaseConfig):
@@ -28,3 +29,4 @@ class DevConfig(BaseConfig):
     SFA_API_URL = 'https://dev-api.solarforecastarbiter.org'
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SQLALCHEMY_DATABASE_URI = os.getenv('SESSION_DATABASE_URI', '')
