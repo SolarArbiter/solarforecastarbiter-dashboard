@@ -7,4 +7,5 @@ gunicorn
 gevent
 sqlalchemy
 flask-sqlalchemy
+sqlalchemy_utils
 python-jose
