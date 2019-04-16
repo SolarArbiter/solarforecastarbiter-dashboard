@@ -19,7 +19,6 @@ Currently the dashboard is hardcoded to utilize a local development api instance
 - Open [http://localhost:8080/](http://localhost:8080/) in a browser to view the dashboard.
 
 
-
 ### Template Layout
 
 base.html
@@ -53,3 +52,7 @@ data/
 org/
 
  - Templates extending the `dash/org.html` dashboard.
+
+sections/
+
+ - Templates to be included in others. I.E. a notifications section.
