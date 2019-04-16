@@ -14,17 +14,8 @@ from six.moves.urllib.parse import urlencode
 oauth_request_session = LocalProxy(partial(_lookup_app_object, 'auth0_oauth'))
 
 
-def logout():
-    session.clear()
-    params = {'returnTo': url_for('index',
-                                  _external=True),
-              'client_id': current_app.config['AUTH0_OAUTH_CLIENT_ID']}
-    return redirect(
-        current_app.config['AUTH0_OAUTH_BASE_URL'] + '/v2/logout?'
-        + urlencode(params))
-
-
 def make_auth0_blueprint(
+        app,
         base_url,
         scope=None,
         storage=None):
@@ -49,7 +40,7 @@ def make_auth0_blueprint(
     @auth0_bp.before_app_request
     def set_applocal_session():
         ctx = stack.top
-        ctx.auth0_oauth = auth0_bp.session
+        ctx.auth0_oauth = auth0_bp.session  # this is a requests Session
 
     @auth0_bp.route('/callback')
     def callback_handling():
@@ -57,7 +48,20 @@ def make_auth0_blueprint(
         # might also want to make a current_user proxy with the
         # sub or email
         userinfo = oauth_request_session.get(f'{base_url}/userinfo').json()
+        # set the userinfo in the flask session (i.e. cookie)
         session['userinfo'] = userinfo
         return redirect(session.get('redirect_path', url_for('index')))
 
-    return auth0_bp
+    @app.route('/logout')
+    def logout():
+        del auth0_bp.token  # delete token
+        session.clear()  # clear cookie
+        params = {'returnTo': url_for('index',
+                                      _external=True),
+                  'client_id': current_app.config['AUTH0_OAUTH_CLIENT_ID']}
+        return redirect(
+            current_app.config['AUTH0_OAUTH_BASE_URL'] + '/v2/logout?'
+            + urlencode(params))
+
+    app.register_blueprint(auth0_bp, url_prefix='/login')
+    return app

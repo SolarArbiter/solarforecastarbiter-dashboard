@@ -2,7 +2,7 @@ from flask import Flask, redirect, url_for, render_template, session, request
 from flask_seasurf import SeaSurf
 from flask_dance.consumer.storage.session import SessionStorage
 
-from sfa_dash.blueprints.auth0 import (make_auth0_blueprint, logout,
+from sfa_dash.blueprints.auth0 import (make_auth0_blueprint,
                                        oauth_request_session)
 from sfa_dash.filters import register_jinja_filters
 from sfa_dash.template_globals import template_variables
@@ -19,11 +19,10 @@ def create_app(config=None):
     error_handlers.register_handlers(app)
 
     session_storage = SessionStorage()
-    auth0_bp = make_auth0_blueprint(
+    make_auth0_blueprint(
+        app,
         base_url=app.config['AUTH0_OAUTH_BASE_URL'],
         storage=session_storage)
-    app.register_blueprint(auth0_bp, url_prefix='/login')
-    app.route('/logout')(logout)
 
     def protect_endpoint():
         if not oauth_request_session.authorized:
