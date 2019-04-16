@@ -1,9 +1,13 @@
+[![Build Status](https://dev.azure.com/solararbiter/solarforecastarbiter/_apis/build/status/SolarArbiter.solarforecastarbiter_dashboard?branchName=master)](https://dev.azure.com/solararbiter/solarforecastarbiter/_build/latest?definitionId=3&branchName=master)
+
 # Solar Forecast Arbiter Dashboard
 The front end [Flask](http://flask.pocoo.org/) application for the Solar Forecast Arbiter.
 
 ### Usage/ Installation
 
-Currently the dashboard is hardcoded to utilize a local development api instance. These instructions will guide you through running it locally.
+Currently the dashboard is hardcoded to utilize a local development api instance. These instructions will guide you through running it locally. 
+
+**You will need to set the environment variables `AUTH0_CLIENT_SECRET` and `AUTH0_CLIENT_ID` for authentication to operate correctly.**
 
 
 - Install the [Solar Forecast Arbiter API](https://github.com/SolarArbiter/solarforecastarbiter-api) and run it with the `SFA_API_STATIC_DATA=true` option and `port` set to 5000.

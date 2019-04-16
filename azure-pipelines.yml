@@ -39,5 +39,3 @@ jobs:
       AUTH0_CLIENT_ID: 'PrE39AdtGMPI4gK2hRvWZ2aDRarfpg7A'
       SFA_API_URL: 'https://dev-api.solarforecastarbiter.org'
     displayName: 'pytest'
-  
-  
