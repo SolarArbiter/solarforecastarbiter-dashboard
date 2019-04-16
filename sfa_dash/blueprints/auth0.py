@@ -56,6 +56,9 @@ def make_auth0_blueprint(
                 jwt.JWTClaimsError,
                 AttributeError):
             return Response('OAuth login failed', 401)
+        # set session as permanent and expire after
+        # not used for config[PERMANENT_SESSION_LIFETIME]
+        session.permanent = True
         session['user'] = idtoken['sub'].split('|')[1]
         session['userinfo'] = {'name': idtoken['name']}
 

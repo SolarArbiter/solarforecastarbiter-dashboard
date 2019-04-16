@@ -1,3 +1,4 @@
+import datetime as dt
 import os
 import requests
 
@@ -9,6 +10,8 @@ class BaseConfig(object):
     AUTH0_OAUTH_BASE_URL = 'https://solarforecastarbiter.auth0.com'
     AUTH0_OAUTH_JWT_KEY = requests.get(
         AUTH0_OAUTH_BASE_URL + '/.well-known/jwks.json').json()
+    PERMANENT_SESSION_LIFETIME = dt.timedelta(days=1)
+    SESSION_REFRESH_EACH_REQUEST = True
 
 
 class LocalConfig(BaseConfig):
