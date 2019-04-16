@@ -1,9 +1,10 @@
 from flask import Flask, redirect, url_for, render_template, session, request
 from flask_seasurf import SeaSurf
-from flask_dance.consumer.storage.session import SessionStorage
+
 
 from sfa_dash.blueprints.auth0 import (make_auth0_blueprint,
                                        oauth_request_session)
+from sfa_dash.database import db, session_storage
 from sfa_dash.filters import register_jinja_filters
 from sfa_dash.template_globals import template_variables
 from sfa_dash import error_handlers
@@ -18,20 +19,26 @@ def create_app(config=None):
     register_jinja_filters(app)
     error_handlers.register_handlers(app)
 
-    session_storage = SessionStorage()
+    db.init_app(app)
+    db.create_all(app=app)
     make_auth0_blueprint(
         app,
         base_url=app.config['AUTH0_OAUTH_BASE_URL'],
         storage=session_storage)
 
     def protect_endpoint():
-        if not oauth_request_session.authorized:
-            # means we have a token, not necessarily that it
-            # hasn't expired, but refreshing is handled
-            # by request_oauthlib and oauthlib
-            # and the api validates expiration
-            session['redirect_path'] = request.path
-            return redirect(url_for('auth0.login'))
+        try:
+            authorized = oauth_request_session.authorized
+        except ValueError:
+            return redirect(url_for('index'))
+        else:
+            if not authorized:
+                # means we have a token, not necessarily that it
+                # hasn't expired, but refreshing is handled
+                # by request_oauthlib and oauthlib
+                # and the api validates expiration
+                session['redirect_path'] = request.path
+                return redirect(url_for('auth0.login'))
 
     @app.route('/')
     def index():
