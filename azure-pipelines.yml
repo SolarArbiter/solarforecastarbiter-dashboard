@@ -31,7 +31,8 @@ jobs:
     displayName: 'Install dependencies'
   
   - script: |
-      pip install pytest pytest-azurepipelines
+      pip install pytest-azurepipelines
+      pip install -r requirements-test.txt
       pytest
     env:
       AUTH0_CLIENT_SECRET: $(auth0_client_secret)
