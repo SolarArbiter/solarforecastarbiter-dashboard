@@ -5,6 +5,7 @@ The front end [Flask](http://flask.pocoo.org/) application for the Solar Forecas
 
 Currently the dashboard is hardcoded to utilize a local development api instance. These instructions will guide you through running it locally.
 
+**You will need to set the environment variables `AUTH0_CLIENT_SECRET` and `AUTH0_CLIENT_ID` for authentication to operate correctly.**
 
 - Install the [Solar Forecast Arbiter API](https://github.com/SolarArbiter/solarforecastarbiter-api) and run it with the `SFA_API_STATIC_DATA=true` option and `port` set to 5000.
 
@@ -22,7 +23,7 @@ base.html
  - Basic html structure, includes navbar, footer and head. Will conditionally include sidebar if `sidebar` variable is defined.
 
 navbar.html
-	
+
  - Includes header for logo/site name and main navigation.
 
 head.html
@@ -39,9 +40,9 @@ footer.html
 
 dash/
 
- - Dash includes secondary nav content and anything else that may be section-wide. 
+ - Dash includes secondary nav content and anything else that may be section-wide.
 
-data/  
+data/
 
  - Templates extending the `dash/data.html` dashboard.
 
