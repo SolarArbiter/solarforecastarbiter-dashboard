@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/solararbiter/solarforecastarbiter/_apis/build/status/SolarArbiter.solarforecastarbiter_dashboard?branchName=master)](https://dev.azure.com/solararbiter/solarforecastarbiter/_build/latest?definitionId=3&branchName=master)
+
 # Solar Forecast Arbiter Dashboard
 The front end [Flask](http://flask.pocoo.org/) application for the Solar Forecast Arbiter.
 
