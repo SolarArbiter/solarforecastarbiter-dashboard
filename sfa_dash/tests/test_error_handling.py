@@ -1,12 +1,19 @@
-def test_token_refresh_error(app):
-    with app.test_client() as webapp:
-        req = webapp.get('/observations/', follow_redirects=False)
-    assert req.status_code == 302
-    assert req.headers['Location'] == 'http://localhost/login/auth0'
+import pytest
+from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError
 
 
-def test_token_refresh_error_handler_called(app, mocker):
-    handler = mocker.patch('sfa_dash.error_handlers.no_refresh_token')
+@pytest.fixture()
+def no_refresh_token(mocker):
+    ref = mocker.patch(
+        'requests_oauthlib.oauth2_session.OAuth2Session.refresh_token')
+    return ref
+
+
+def test_token_refresh_invalid_clientid_error(app, mocker, no_refresh_token):
+    """Test redirect to login when refreshing an expired token fails with
+    InvalidClientIdError"""
+    no_refresh_token.side_effect = InvalidClientIdError
+    handler = mocker.patch('sfa_dash.error_handlers.bad_refresh_token')
     with app.test_client() as webapp:
         get = webapp.get('/observations/', base_url='http://localhost',
                          follow_redirects=False)
