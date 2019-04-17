@@ -2,7 +2,7 @@ from sfa_dash.blueprints.dash import DataDashView
 from sfa_dash.blueprints.data_listing import DataListingView
 from sfa_dash.blueprints.sites import SingleSiteView, SitesListingView
 from sfa_dash.blueprints.delete import DeleteConfirmation
-from sfa_dash.plotting import generate_figure
+from sfa_dash.plotting import timeseries
 from sfa_dash.api_interface import (observations, forecasts,
                                     cdf_forecasts, cdf_forecast_groups)
 from flask import (Blueprint, render_template,
@@ -42,9 +42,16 @@ class SingleObservationView(DataDashView):
         temp_args = self.template_args(**kwargs)
         values_request = observations.get_values(uuid)
         if values_request.status_code == 200:
-            bokeh_script, plot = generate_figure(self.metadata,
-                                                 values_request.json())
-            temp_args.update({'plot': plot, 'bokeh_script': bokeh_script})
+            try:
+                bokeh_script, plot = timeseries.generate_figure(
+                    self.metadata,
+                    values_request.json())
+            except ValueError:
+                # No data available for this observation
+                pass
+            else:
+                temp_args.update({'plot': plot,
+                                  'bokeh_script': bokeh_script})
         self.metadata['site_link'] = self.generate_site_link(self.metadata)
         temp_args['metadata'] = render_template(
             'data/metadata/observation_metadata.html',
