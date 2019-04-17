@@ -12,8 +12,7 @@ def bad_oauth_token(error):
     # https://github.com/oauthlib/oauthlib/blob/v3.0.1/oauthlib/oauth2/rfc6749/errors.py  # NOQA
     # for a list of errors that we may need to handle individually
     # for now, log the error
-    logging.warning('OAuth2 error redirected to login\n%s',
-                    str(error))
+    logging.exception('OAuth2 error redirected to login')
     return redirect(url_for('auth0.login'))
 
 
