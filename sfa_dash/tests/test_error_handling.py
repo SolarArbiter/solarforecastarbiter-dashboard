@@ -13,7 +13,7 @@ def test_token_refresh_invalid_clientid_error(app, mocker, no_refresh_token):
     """Test redirect to login when refreshing an expired token fails with
     InvalidClientIdError"""
     no_refresh_token.side_effect = InvalidClientIdError
-    handler = mocker.patch('sfa_dash.error_handlers.bad_refresh_token')
+    handler = mocker.patch('sfa_dash.error_handlers.bad_oauth_token')
     with app.test_client() as webapp:
         get = webapp.get('/observations/', base_url='http://localhost',
                          follow_redirects=False)
