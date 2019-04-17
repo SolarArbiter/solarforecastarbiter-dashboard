@@ -10,3 +10,4 @@ flask-sqlalchemy
 sqlalchemy_utils
 python-jose
 blinker
+cryptography

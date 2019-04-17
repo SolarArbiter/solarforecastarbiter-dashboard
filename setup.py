@@ -17,6 +17,7 @@ setup(
         'flask-sqlalchemy',
         'flask-seasurf'
         'python-jose',
+        'cryptography',
         'blinker'
         ]
 )
