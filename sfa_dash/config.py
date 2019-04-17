@@ -25,6 +25,7 @@ class LocalConfig(BaseConfig):
 
 class TestConfig(BaseConfig):
     SFA_API_URL = 'http://localhost:5000'
+    SQLALCHEMY_DATABASE_URI = ''
 
 
 class DevConfig(BaseConfig):

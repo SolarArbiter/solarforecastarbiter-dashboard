@@ -45,7 +45,8 @@ def mocked_storage(mocker, expired_token):
 
         def delete(self, *args):
             pass
-    storage = mocker.patch('sfa_dash.SessionStorage', new=fake_storage)
+    storage = mocker.patch('sfa_dash.session_storage',
+                           new=fake_storage)
     return storage
 
 

@@ -19,8 +19,10 @@ def create_app(config=None):
     register_jinja_filters(app)
     error_handlers.register_handlers(app)
 
-    db.init_app(app)
-    db.create_all(app=app)
+    if app.config['SQLALCHEMY_DATABASE_URI']:
+        db.init_app(app)
+        db.create_all(app=app)
+
     make_auth0_blueprint(
         app,
         base_url=app.config['AUTH0_OAUTH_BASE_URL'],
