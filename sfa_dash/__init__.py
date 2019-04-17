@@ -32,15 +32,16 @@ def create_app(config=None):
         try:
             authorized = oauth_request_session.authorized
         except ValueError:
-            return redirect(url_for('index'))
-        else:
-            if not authorized:
-                # means we have a token, not necessarily that it
-                # hasn't expired, but refreshing is handled
-                # by request_oauthlib and oauthlib
-                # and the api validates expiration
-                session['redirect_path'] = request.path
-                return redirect(url_for('auth0.login'))
+            # no token set for user/no user set
+            authorized = False
+
+        # authorized == True means we have a token, not necessarily that it
+        # hasn't expired, but refreshing is handled
+        # by request_oauthlib and oauthlib
+        # and the api validates expiration
+        if not authorized:
+            session['redirect_path'] = request.path
+            return redirect(url_for('auth0.login'))
 
     @app.route('/')
     def index():
