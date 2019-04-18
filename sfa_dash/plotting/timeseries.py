@@ -100,7 +100,7 @@ def generate_figure(metadata, json_value_response):
     # If there is more than 3 days of data, limit the default x_range
     # to display only the most recent 3 day. Users will be able to scroll
     # to see past data.
-    x_range_start = df.index[df.index.get_loc(period_end - pd.Timedelta('3d'), 
+    x_range_start = df.index[df.index.get_loc(period_end - pd.Timedelta('3d'),
                                               method='bfill')]
     cds = ColumnDataSource(df)
     figure_title = build_figure_title(metadata, period_start, period_end)
