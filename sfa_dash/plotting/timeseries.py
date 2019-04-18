@@ -103,8 +103,9 @@ def generate_figure(metadata, json_value_response):
     # to scroll to see past data.
     interval_length = metadata['interval_length']
     intervals_per_day = int(1440 / interval_length)
-    if df.index.size > intervals_per_day:
-        x_range_start = df.index[-intervals_per_day]
+    three_days = 3 * intervals_per_day
+    if df.index.size > three_days:
+        x_range_start = df.index[-three_days]
     else:
         x_range_start = df.index[0]
     cds = ColumnDataSource(df)
