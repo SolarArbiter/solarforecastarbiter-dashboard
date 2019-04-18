@@ -47,8 +47,11 @@ class SingleObservationView(DataDashView):
                     self.metadata,
                     values_request.json())
             except ValueError:
-                # No data available for this observation
-                pass
+                temp_args.update(
+                    {'messages':
+                        {'Data': ["No data available for this Observation."]}
+                     }
+                )
             else:
                 temp_args.update({'plot': plot,
                                   'bokeh_script': bokeh_script})
@@ -110,8 +113,11 @@ class SingleCDFForecastView(DataDashView):
                     self.metadata,
                     values_request.json())
             except ValueError:
-                # No data available for this observation
-                pass
+                temp_args.update(
+                    {'messages':
+                        {'Data': ["No data available for this Forecast."]}
+                     }
+                )
             else:
                 temp_args.update({'plot': plot,
                                   'bokeh_script': bokeh_script})
@@ -166,8 +172,11 @@ class SingleForecastView(DataDashView):
                     self.metadata,
                     values_request.json())
             except ValueError:
-                # No data available for this observation
-                pass
+                temp_args.update(
+                    {'messages':
+                        {'Data': ["No data available for this Forecast."]}
+                     }
+                )
             else:
                 temp_args.update({'plot': plot,
                                   'bokeh_script': bokeh_script})
