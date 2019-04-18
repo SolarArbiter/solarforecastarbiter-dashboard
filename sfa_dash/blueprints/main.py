@@ -1,4 +1,3 @@
-from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.dash import DataDashView
 from sfa_dash.blueprints.data_listing import DataListingView
 from sfa_dash.blueprints.sites import SingleSiteView, SitesListingView

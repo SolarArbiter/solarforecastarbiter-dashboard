@@ -50,7 +50,6 @@ def create_app(config=None):
         # page, show a different page w/ login link otherwise
         return render_template('index.html')
 
-
     @app.route('/documentation/')
     def documentation():
         return render_template('documentation.html')
