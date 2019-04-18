@@ -29,8 +29,8 @@ def build_df(json):
     return df
 
 
-def build_x_axis_label(metadata):
-    """Builds an x axis label from a metadata object.
+def build_y_axis_label(metadata):
+    """Builds a y axis label from a metadata object.
 
     Parameters
     ----------
@@ -45,7 +45,7 @@ def build_x_axis_label(metadata):
     variable = metadata['variable']
     var_name = api_to_dash_varname(variable)
     units = api_varname_to_units(variable)
-    label = f'{var_name}{units}'
+    label = f'{var_name} {units}'
     return label
 
 
@@ -69,11 +69,10 @@ def build_figure_title(metadata, start, end):
     string
         The appropriate figure title.
     """
-    site_name = metadata['site']['name']
+    object_name = metadata['name']
     start_string = start.strftime('%Y-%m-%d %H:%M')
     end_string = end.strftime('%Y-%m-%d %H:%M')
-    figure_title = (f'{site_name} {build_x_axis_label(metadata)}'
-                    f' {start_string} to {end_string} UTC')
+    figure_title = (f'{object_name} {start_string} to {end_string} UTC')
     return figure_title
 
 
@@ -98,22 +97,17 @@ def generate_figure(metadata, json_value_response):
     df = build_df(json_value_response)
     period_start = df.index[0]
     period_end = df.index[-1]
-    # If there is more than a day of data, limit the default x_range
-    # to display only the most recent day of data. Users will be able
-    # to scroll to see past data.
-    interval_length = metadata['interval_length']
-    intervals_per_day = int(1440 / interval_length)
-    three_days = 3 * intervals_per_day
-    if df.index.size > three_days:
-        x_range_start = df.index[-three_days]
-    else:
-        x_range_start = df.index[0]
+    # If there is more than 3 days of data, limit the default x_range
+    # to display only the most recent 3 day. Users will be able to scroll
+    # to see past data.
+    x_range_start = df.index[df.index.get_loc(period_end - pd.Timedelta('3d'), 
+                                              method='bfill')]
     cds = ColumnDataSource(df)
     figure_title = build_figure_title(metadata, period_start, period_end)
     fig = figure(title=figure_title, sizing_mode='scale_width', plot_width=900,
                  plot_height=300, x_range=(x_range_start, period_end),
                  x_axis_type='datetime', tools='pan,wheel_zoom,reset')
     fig.line(x='timestamp', y='value', source=cds)
-    fig.yaxis.axis_label = build_x_axis_label(metadata)
+    fig.yaxis.axis_label = build_y_axis_label(metadata)
     fig.xaxis.axis_label = 'Time'
     return components(fig)
