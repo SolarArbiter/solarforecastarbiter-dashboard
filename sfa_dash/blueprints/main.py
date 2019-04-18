@@ -103,6 +103,18 @@ class SingleCDFForecastView(DataDashView):
         self.metadata['site'] = self.get_site_metadata(
             self.metadata['site_id'])
         temp_args = self.template_args(**kwargs)
+        values_request = cdf_forecasts.get_values(uuid)
+        if values_request.status_code == 200:
+            try:
+                bokeh_script, plot = timeseries.generate_figure(
+                    self.metadata,
+                    values_request.json())
+            except ValueError:
+                # No data available for this observation
+                pass
+            else:
+                temp_args.update({'plot': plot,
+                                  'bokeh_script': bokeh_script})
         self.metadata['site_link'] = self.generate_site_link(self.metadata)
         temp_args['metadata'] = render_template(
             'data/metadata/cdf_forecast_metadata.html',
@@ -147,6 +159,18 @@ class SingleForecastView(DataDashView):
         self.metadata['site'] = self.get_site_metadata(
             self.metadata['site_id'])
         temp_args = self.template_args(**kwargs)
+        values_request = forecasts.get_values(uuid)
+        if values_request.status_code == 200:
+            try:
+                bokeh_script, plot = timeseries.generate_figure(
+                    self.metadata,
+                    values_request.json())
+            except ValueError:
+                # No data available for this observation
+                pass
+            else:
+                temp_args.update({'plot': plot,
+                                  'bokeh_script': bokeh_script})
         self.metadata['site_link'] = self.generate_site_link(self.metadata)
         temp_args['metadata'] = render_template(
             'data/metadata/forecast_metadata.html',
