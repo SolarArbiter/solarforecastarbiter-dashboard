@@ -1,3 +1,4 @@
+from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.dash import DataDashView
 from sfa_dash.blueprints.data_listing import DataListingView
 from sfa_dash.blueprints.sites import SingleSiteView, SitesListingView
@@ -204,7 +205,21 @@ class TrialsView(DataDashView):
     template = 'data/trials.html'
 
 
+class ChangelogView(BaseView):
+    template = 'data/changelog.html'
+
+
+class DocView(BaseView):
+    template = 'data/documentation.html'
+
+
 data_dash_blp = Blueprint('data_dashboard', 'data_dashboard')
+data_dash_blp.add_url_rule(
+    '/documentation/',
+    view_func=DocView.as_view('documentation'))
+data_dash_blp.add_url_rule(
+    '/changelog/',
+    view_func=ChangelogView.as_view('changelog'))
 data_dash_blp.add_url_rule(
     '/sites/',
     view_func=SitesListingView.as_view('sites'))
