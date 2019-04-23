@@ -76,11 +76,10 @@ class DataListingView(BaseView):
         """
         """
         # Check for a uuid parameter indicating we should filter by site.
-        # otherwise, set the create key to pass to the site listing page
+        # otherwise, set the create key to pass as a query parameter to
+        # the site listing page.
         uuid = request.args.get('uuid')
         if uuid is not None:
             kwargs.update({'site_id': uuid})
-        else:
-            kwargs.update({'create': self.data_type})
         return render_template(self.template,
                                **self.get_template_args(**kwargs))
