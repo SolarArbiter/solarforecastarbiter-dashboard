@@ -257,3 +257,7 @@ a.help-button{
     font-weight: bold;
     padding: .75rem;
 }
+.scrollbox{
+    height: 400px;
+    overflow: scroll;
+}

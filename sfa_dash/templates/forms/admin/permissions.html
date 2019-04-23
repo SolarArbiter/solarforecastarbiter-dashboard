@@ -1,0 +1,8 @@
+{% extends "dash/data.html" %}
+{% set page_title = 'Permissions' %}
+{% block content %}
+<a href="{{ url_for('admin.observation_permission') }}">Observations</a>
+<a href='{{ url_for("admin.forecast_permission") }}'>Forecasts</a>
+<a href='{{ url_for("admin.site_permission") }}'>Sites</a>
+<a href='{{ url_for("admin.cdf_forecast_group_permission") }}'>Probabilistic Forecast Groups</a>
+{% endblock %}
