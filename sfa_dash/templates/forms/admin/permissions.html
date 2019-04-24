@@ -1,8 +1,12 @@
 {% extends "dash/data.html" %}
 {% set page_title = 'Permissions' %}
 {% block content %}
-<a href="{{ url_for('admin.observation_permission') }}">Observations</a>
-<a href='{{ url_for("admin.forecast_permission") }}'>Forecasts</a>
-<a href='{{ url_for("admin.site_permission") }}'>Sites</a>
-<a href='{{ url_for("admin.cdf_forecast_group_permission") }}'>Probabilistic Forecast Groups</a>
+<div class="data-metadata border mt-2">
+  <h3>Create a new permission</h3>
+  Select a data type:
+  <a class="btn-sm btn-primary" href="{{ url_for("admin.observation_permission") }}">Observation</a>
+  <a class="btn-sm btn-primary" href='{{ url_for("admin.forecast_permission") }}'>Forecasts</a>
+  <a class="btn-sm btn-primary" href='{{ url_for("admin.site_permission") }}'>Sites</a>
+  <a class="btn-sm btn-primary" href='{{ url_for("admin.cdf_forecast_group_permission") }}'>Probabilistic Forecast Groups</a>
+</div>
 {% endblock %}

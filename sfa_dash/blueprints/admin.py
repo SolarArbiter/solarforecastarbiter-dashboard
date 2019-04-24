@@ -8,7 +8,46 @@ from sfa_dash.api_interface import (sites, observations, forecasts,
 from sfa_dash.blueprints.base import BaseView
 
 
-class PermissionsCreation(BaseView):
+class AdminView(BaseView):
+    subnav_format = {
+        '{users_url}': 'Users',
+        '{roles_url}': 'Roles',
+        '{permissions_url}': 'Permissions',
+    }
+
+
+    def template_args(self):
+        subnav_kwargs = {
+            'users_url': url_for('admin.users'),
+            'roles_url':url_for('admin.roles'),
+            'permissions_url':url_for('admin.permissions'),
+        }
+        return {'subnav': self.format_subnav(**subnav_kwargs)}
+
+    def get(self):
+        return render_template('forms/admin/admin.html',
+                               **self.template_args())
+
+
+class PermissionsListing(AdminView):
+    def get(self):
+        return render_template('forms/admin/permissions.html',
+                               **self.template_args())
+
+
+class RoleListing(AdminView):
+    def get(self):
+        return render_template('forms/admin/roles.html',
+                               **self.template_args())
+
+
+class UserListing(AdminView):
+    def get(self):
+        return render_template('forms/admin/users.html',
+                               **self.template_args())
+
+
+class PermissionsCreation(AdminView):
     allowed_data_types =['site', 'observation',
                          'forecast', 'cdf_forecast_group']
     def __init__(self, data_type):
@@ -30,49 +69,20 @@ class PermissionsCreation(BaseView):
         table_data = list_request.json()
         return render_template("forms/admin/permissions_form.html",
                                table_data=table_data,
-                               data_type=self.data_type)
+                               data_type=self.data_type,
+                               **self.template_args())
 
     def post(self):
         request.form
         return jsonify(request.form)
 
 
-class AdminView(BaseView):
-    subnav_format = {
-        '{users_url}': 'Users',
-        '{roles_url}': 'Roles',
-        '{permissions_url}': 'Permissions',
-    }
-
-
-    def template_args(self):
-        subnav_kwargs = {
-            'users_url': url_for('admin.users'),
-            'roles_url':url_for('admin.roles'),
-            'permissions_url':url_for('admin.permissions'),
-        }
-        return {'subnav': self.format_subnav(**subnav_kwargs)}
-
-
-class PermissionsListing(AdminView):
-    def get(self):
-        return render_template('forms/admin/permissions.html',
-                               **self.template_args())
-
-
-class RoleListing(AdminView):
-    def get(self):
-        return render_template('forms/admin/roles.html',
-                               **self.template_args())
-
-
-class UserListing(AdminView):
-    def get(self):
-        return render_template('forms/admin/users.html',
-                               **self.template_args())
-
-
 admin_blp = Blueprint('admin', 'admin', url_prefix='/admin')
+admin_blp.add_url_rule('/',
+                       view_func=AdminView.as_view(
+                            'admin')
+                       )
+                    
 admin_blp.add_url_rule('/permissions/',
                        view_func=PermissionsListing.as_view(
                             'permissions')    
