@@ -122,11 +122,12 @@ class MetadataForm(BaseView):
         tracking_keys = {
             'fixed': ['surface_tilt', 'surface_azimuth'],
             'single_axis': ['axis_azimuth', 'backtrack',
-                            'axis_tilt', 'ground_coverage_ratio'],
+                            'axis_tilt', 'ground_coverage_ratio',
+                            'max_rotation_angle'],
         }
         modeling_keys = ['ac_capacity', 'dc_capacity',
                          'ac_loss_factor', 'dc_loss_factor',
-                         'temperature_coefficient', 'tracking_type']
+                         'temperature_coefficient', 'tracking_type',]
 
         top_level_keys = ['name', 'elevation', 'latitude',
                           'longitude', 'timezone', 'extra_parameters']
