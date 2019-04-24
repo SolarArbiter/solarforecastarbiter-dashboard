@@ -127,7 +127,7 @@ class MetadataForm(BaseView):
         }
         modeling_keys = ['ac_capacity', 'dc_capacity',
                          'ac_loss_factor', 'dc_loss_factor',
-                         'temperature_coefficient', 'tracking_type',]
+                         'temperature_coefficient', 'tracking_type']
 
         top_level_keys = ['name', 'elevation', 'latitude',
                           'longitude', 'timezone', 'extra_parameters']
