@@ -19,6 +19,7 @@ def api_to_dash_varname(api_varname):
 def api_varname_to_units(api_varname):
     return ALLOWED_VARIABLES[api_varname]
 
+
 def human_friendly_datatype(data_type):
     return data_type_mapping[data_type]
 
