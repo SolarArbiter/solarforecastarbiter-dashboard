@@ -1,5 +1,22 @@
 {% extends "dash/data.html" %}
 {% set page_title = 'Roles' %}
 {% block content %}
-Roles n stuff.
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Description</th>
+      <th scope="col">Organization</th>
+    </tr>
+  </thead>
+  <tbody>
+      {% for role in table_data %}
+        <tr>
+            <td><a href="{{ url_for('admin.role_view', uuid=role['role_id']) }}">{{ role["name"] }}</a></td>
+            <td>{{ role["description"] }}</td>
+            <td>{{ role["organization"] }} </td>
+        </tr>
+      {% endfor %}
+  </tbody>
+</table>
 {% endblock %}

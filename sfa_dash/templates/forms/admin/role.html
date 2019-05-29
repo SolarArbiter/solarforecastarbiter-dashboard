@@ -1,0 +1,36 @@
+{% extends "dash/data.html" %}
+{% set page_title = 'Roles' %}
+{% block content %}
+{% if role is defined %}
+<div class="data-metadata border mt-2">
+    <h3>Role Data</h3>
+    <div class="row">
+        <ul class="data-metadata-fields col-md-6 col-xs-12">
+            <li><b>Name:</b> {{ role['name'] }}</li>
+            <li><b>Description:</b> {{ role['description'] }}</li>
+            <li><b>Organization:</b> {{ role['organization'] }} </li>
+        </ul>
+        <ul class="data-metadata-fields col-md-6 col-xs-12">
+            <li><b>Created:</b> {{ role['created_at'] }}</li>
+            <li><b>Last Modified:</b> {{ role['modified_at'] }}</li>
+        </ul>
+    </div>
+</div>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Permission ID</th>
+      <th scope="col">Date Added</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for perm_id, perm in role['permissions'].items() %}
+      <tr>
+          <td><a href="{{ url_for('admin.permission_view', uuid=perm_id) }}">{{ perm['description'] }}</a></td>
+          <td>{{ perm['added_to_role'] }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

@@ -9,4 +9,27 @@
   <a class="btn-sm btn-primary" href='{{ url_for("admin.site_permission") }}'>Sites</a>
   <a class="btn-sm btn-primary" href='{{ url_for("admin.cdf_forecast_group_permission") }}'>Probabilistic Forecast Groups</a>
 </div>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Description</th>
+      <th scope="col">Action</th>
+      <th scope="col">Object Type</th>
+      <th scope="col">Applies to all</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if table_data is defined %}
+      {% for perm in table_data %}
+        <tr>
+            <td><a href="{{ url_for('admin.permission_view', uuid=perm['permission_id'])}}">{{ perm["description"] }}</a></td>
+            <td>{{ perm["action"] }}</td>
+            <td>{{ perm["object_type"] }} </td>
+
+            <td>{% if perm["applies_to_all"] %}&#10004;{% endif %} </td>
+        </tr>
+      {% endfor %}
+    {% endif %}
+  </tbody>
+</table>
 {% endblock %}

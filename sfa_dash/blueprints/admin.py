@@ -1,10 +1,14 @@
+import pdb
 import json
 
 from flask import (Blueprint, render_template, request, jsonify,
                    abort, redirect, url_for, make_response)
 import pandas as pd
-from sfa_dash.api_interface import (sites, observations, forecasts,
-                                    cdf_forecast_groups)
+from sfa_dash.api_interface import (
+    sites, observations, forecasts,
+    cdf_forecast_groups, roles, users,
+    permissions
+)
 from sfa_dash.blueprints.base import BaseView
 
 
@@ -31,19 +35,46 @@ class AdminView(BaseView):
 
 class PermissionsListing(AdminView):
     def get(self):
+        permissions_list = permissions.list_metadata().json()
+
         return render_template('forms/admin/permissions.html',
+                               table_data=permissions_list,
+                               **self.template_args())
+class PermissionView(AdminView):
+    def get(self, uuid):
+        permission = permissions.get_metadata(uuid).json()
+        return render_template('forms/admin/permission.html',
+                               permission=permission,
                                **self.template_args())
 
 
 class RoleListing(AdminView):
     def get(self):
+        roles_list = roles.list_metadata().json()
+        #permission_list = permissions.list_metadata().json()
+        #permission_map = {perm['permission_id']:perm for perm in permission_list}
+        #for role in roles_list:
+        #    role['permissions'] = {k: {'added_to_role':v, **permission_map[k]} for k,v in role['permissions'].items()}
         return render_template('forms/admin/roles.html',
+                               table_data=roles_list,
                                **self.template_args())
 
 
+class RoleView(AdminView):
+    def get(self, uuid):
+        role = roles.get_metadata(uuid).json()
+        permission_list = permissions.list_metadata().json()
+        permission_map = {perm['permission_id']:perm for perm in permission_list}
+        role['permissions'] = {k: {'added_to_role':v, **permission_map[k]} for k,v in role['permissions'].items()}
+        return render_template('forms/admin/role.html',
+                               role=role,
+                               **self.template_args())
+
 class UserListing(AdminView):
     def get(self):
+        users_list = users.list_metadata().json()
         return render_template('forms/admin/users.html',
+                               table_data=users_list,
                                **self.template_args())
 
 
@@ -87,6 +118,10 @@ admin_blp.add_url_rule('/permissions/',
                        view_func=PermissionsListing.as_view(
                             'permissions')    
                        )
+admin_blp.add_url_rule('/permissions/<uuid>',
+                       view_func=PermissionView.as_view(
+                           'permission_view')
+                       )
 for data_type in PermissionsCreation.allowed_data_types:
     admin_blp.add_url_rule(f'/permissions/create/{data_type}',
                            view_func=PermissionsCreation.as_view(
@@ -95,5 +130,7 @@ for data_type in PermissionsCreation.allowed_data_types:
                            )
 admin_blp.add_url_rule('/roles/',
                        view_func=RoleListing.as_view('roles'))
+admin_blp.add_url_rule('/roles/<uuid>',
+                       view_func=RoleView.as_view('role_view'))
 admin_blp.add_url_rule('/users/',
                        view_func=UserListing.as_view('users'))

@@ -1,0 +1,38 @@
+{% extends "dash/data.html" %}
+{% set page_title = 'Permissions' %}
+{% block content %}
+{% if permission is defined %}
+<div class="data-metadata border mt-2">
+    <h3>Permission Data</h3>
+    <div class="row">
+        <ul class="data-metadata-fields col-md-6 col-xs-12">
+            <li><b>Description:</b> {{ permission['description'] }}</li>
+            <li><b>Action:</b> {{ permission['action'] }}</li>
+            <li><b>Object Type:</b> {{ permission['object_type'] }}</li>
+            <li><b>Organization:</b> {{ permission['organization'] }} </li>
+        </ul>
+        <ul class="data-metadata-fields col-md-6 col-xs-12">
+            <li><b>Created:</b> {{ permission['created_at'] }}</li>
+        </ul>
+    </div>
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Object UUID</th>
+      <th scope="col">Date Added</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for obj, created in permission['objects'].items() %}
+      <tr>
+        <td>{{ obj }}</td>
+        <td>{{ created }} </td>
+      </tr>
+
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

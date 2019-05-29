@@ -2,11 +2,21 @@
 {% set page_title = 'Users' %}
 {% block content %}
 <table class="table">
-<thead>
-
-</thead>
-<tbody>
-  
-</tbody>
+  <thead>
+    <tr>
+      <th scope="col">User ID</th>
+      <th scope="col">Organization</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if table_data is defined %}
+      {% for role in table_data %}
+        <tr>
+            <td>{{ role["user_id"] }}</td>
+            <td>{{ role["organization"] }} </td>
+        </tr>
+      {% endfor %}
+    {% endif %}
+  </tbody>
 </table>
 {% endblock %}
