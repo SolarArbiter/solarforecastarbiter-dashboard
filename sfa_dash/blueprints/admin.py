@@ -41,20 +41,50 @@ class PermissionsListing(AdminView):
                                table_data=permissions_list,
                                **self.template_args())
 class PermissionView(AdminView):
+    def get_api_handler(self, object_type):
+        # The api interface should have a factory method to handle this logic
+        # instead of repeating this logic everywhere
+        if object_type == 'sites':
+            api_handler = sites
+        elif object_type == 'observations':
+            api_handler = observations
+        elif object_type == 'forecasts':
+            api_handler = forecasts
+        elif object_type == 'cdf_forecasts':
+            api_handler = cdf_forecast_groups
+        elif object_type == 'users':
+            api_handler = users
+        elif object_type == 'permissions':
+            api_handler = permissions
+        elif object_type == 'roles':
+            api_handler = roles
+        else:
+            raise ValueError('Invalid object_type')
+        return api_handler
+
     def get(self, uuid):
         permission = permissions.get_metadata(uuid).json()
+        api_handler = self.get_api_handler(permission['object_type'])
+        # dashboard uses singular object names as labels to differentiate
+        # single views from listings
+        object_type = permission['object_type'][:-1]
+        # create a dict of objects where keys are uuid and values are objects
+        objects = api_handler.list_metadata()
+        object_list = objects.json()
+        object_map = {obj[f'{object_type}_id']:obj for obj in object_list}
+        # rebuild the 'objects' dict with the uuid: object structure instead
+        # of uuid: created_at
+        permission['objects'] = {k: {'added_to_permission':v, **object_map[k]}
+                                  for k,v in permission['objects'].items()}
         return render_template('forms/admin/permission.html',
                                permission=permission,
+                               dashboard_type=object_type,
                                **self.template_args())
 
 
 class RoleListing(AdminView):
     def get(self):
         roles_list = roles.list_metadata().json()
-        #permission_list = permissions.list_metadata().json()
-        #permission_map = {perm['permission_id']:perm for perm in permission_list}
-        #for role in roles_list:
-        #    role['permissions'] = {k: {'added_to_role':v, **permission_map[k]} for k,v in role['permissions'].items()}
         return render_template('forms/admin/roles.html',
                                table_data=roles_list,
                                **self.template_args())
