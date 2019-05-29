@@ -1,12 +1,16 @@
+from flask import (Blueprint, render_template,
+                   url_for, abort)
+
+
+from solarforecastarbiter.plotting import timeseries
+
+
 from sfa_dash.blueprints.dash import DataDashView
 from sfa_dash.blueprints.data_listing import DataListingView
 from sfa_dash.blueprints.sites import SingleSiteView, SitesListingView
 from sfa_dash.blueprints.delete import DeleteConfirmation
-from sfa_dash.plotting import timeseries
 from sfa_dash.api_interface import (observations, forecasts,
                                     cdf_forecasts, cdf_forecast_groups)
-from flask import (Blueprint, render_template,
-                   url_for, abort)
 
 
 class SingleObservationView(DataDashView):
@@ -43,7 +47,7 @@ class SingleObservationView(DataDashView):
         values_request = observations.get_values(uuid)
         if values_request.status_code == 200:
             try:
-                bokeh_script, plot = timeseries.generate_figure(
+                bokeh_script, plot = timeseries.generate_observation_figure(
                     self.metadata,
                     values_request.json())
             except ValueError:
@@ -109,7 +113,7 @@ class SingleCDFForecastView(DataDashView):
         values_request = cdf_forecasts.get_values(uuid)
         if values_request.status_code == 200:
             try:
-                bokeh_script, plot = timeseries.generate_figure(
+                bokeh_script, plot = timeseries.generate_forecast_figure(
                     self.metadata,
                     values_request.json())
             except ValueError:
@@ -168,7 +172,7 @@ class SingleForecastView(DataDashView):
         values_request = forecasts.get_values(uuid)
         if values_request.status_code == 200:
             try:
-                bokeh_script, plot = timeseries.generate_figure(
+                bokeh_script, plot = timeseries.generate_forecast_figure(
                     self.metadata,
                     values_request.json())
             except ValueError:
