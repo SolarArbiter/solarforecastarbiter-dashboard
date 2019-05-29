@@ -16,10 +16,10 @@
   </thead>
   <tbody>
     {% if table_data is defined %}
-      {% for role in table_data %}
+      {% for user in table_data %}
         <tr>
-            <td>{{ role["user_id"] }}</td>
-            <td>{{ role["organization"] }} </td>
+            <td><a href="{{ url_for('admin.user_view', uuid=user['user_id']) }}">{{ user["user_id"] }}</a></td>
+            <td>{{ user["organization"] }} </td>
         </tr>
       {% endfor %}
     {% endif %}

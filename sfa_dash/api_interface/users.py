@@ -1,7 +1,7 @@
 from sfa_dash.api_interface import get_request, post_request, delete_request
 
 
-def get_metadta(user_id):
+def get_metadata(user_id):
     req = get_request(f'/users/{user_id}')
     return req
 

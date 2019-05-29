@@ -64,18 +64,22 @@ class PermissionView(AdminView):
 
     def get(self, uuid):
         permission = permissions.get_metadata(uuid).json()
-        api_handler = self.get_api_handler(permission['object_type'])
-        # dashboard uses singular object names as labels to differentiate
-        # single views from listings
-        object_type = permission['object_type'][:-1]
-        # create a dict of objects where keys are uuid and values are objects
-        objects = api_handler.list_metadata()
-        object_list = objects.json()
-        object_map = {obj[f'{object_type}_id']:obj for obj in object_list}
-        # rebuild the 'objects' dict with the uuid: object structure instead
-        # of uuid: created_at
-        permission['objects'] = {k: {'added_to_permission':v, **object_map[k]}
-                                  for k,v in permission['objects'].items()}
+        if 'errors' in permission:
+            permission = None
+            object_type = None
+        else:
+            api_handler = self.get_api_handler(permission['object_type'])
+            # dashboard uses singular object names as labels to differentiate
+            # single views from listings
+            object_type = permission['object_type'][:-1]
+            # create a dict of objects where keys are uuid and values are objects
+            objects = api_handler.list_metadata()
+            object_list = objects.json()
+            object_map = {obj[f'{object_type}_id']:obj for obj in object_list}
+            # rebuild the 'objects' dict with the uuid: object structure instead
+            # of uuid: created_at
+            permission['objects'] = {k: {'added_to_permission':v, **object_map[k]}
+                                      for k,v in permission['objects'].items()}
         return render_template('forms/admin/permission.html',
                                permission=permission,
                                dashboard_type=object_type,
@@ -93,9 +97,12 @@ class RoleListing(AdminView):
 class RoleView(AdminView):
     def get(self, uuid):
         role = roles.get_metadata(uuid).json()
-        permission_list = permissions.list_metadata().json()
-        permission_map = {perm['permission_id']:perm for perm in permission_list}
-        role['permissions'] = {k: {'added_to_role':v, **permission_map[k]} for k,v in role['permissions'].items()}
+        if 'errors' in role:
+            role = None
+        else:
+            permission_list = permissions.list_metadata().json()
+            permission_map = {perm['permission_id']:perm for perm in permission_list}
+            role['permissions'] = {k: {'added_to_role':v, **permission_map[k]} for k,v in role['permissions'].items()}
         return render_template('forms/admin/role.html',
                                role=role,
                                **self.template_args())
@@ -106,6 +113,21 @@ class UserListing(AdminView):
         return render_template('forms/admin/users.html',
                                table_data=users_list,
                                **self.template_args())
+
+
+class UserView(AdminView):
+    def get(self, uuid):
+        user = users.get_metadata(uuid).json()
+        if 'errors' in user:
+            user = None
+        else:
+            role_list = roles.list_metadata().json()
+            role_map = {role['role_id']:role for role in role_list}
+            user['roles'] = {k: {'added_to_user':v, **role_map[k]} for k,v in user['roles'].items()}
+        return render_template('forms/admin/user.html',
+                               user=user,
+                               **self.template_args())
+
 
 
 class PermissionsCreation(AdminView):
@@ -164,3 +186,5 @@ admin_blp.add_url_rule('/roles/<uuid>',
                        view_func=RoleView.as_view('role_view'))
 admin_blp.add_url_rule('/users/',
                        view_func=UserListing.as_view('users'))
+admin_blp.add_url_rule('/users/<uuid>',
+                       view_func=UserView.as_view('user_view'))
