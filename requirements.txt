@@ -13,3 +13,4 @@ blinker
 cryptography
 bokeh
 git+git://github.com/alorenzo175/solarforecastarbiter-core@validationplot#egg=solarforecastarbiter [all]
+tables==3.5.1
