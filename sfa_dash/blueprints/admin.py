@@ -31,7 +31,8 @@ class AdminView(BaseView):
 class PermissionsListing(AdminView):
     def get(self):
         permissions_list = permissions.list_metadata().json()
-
+        if 'errors' in permissions_list:
+            permissions_list = None
         return render_template('forms/admin/permissions.html',
                                table_data=permissions_list,
                                **self.template_args())
@@ -80,6 +81,7 @@ class PermissionView(AdminView):
             permission['objects'] = {
                 k: {'added_to_permission': v, **object_map[k]}
                 for k, v in permission['objects'].items()
+                if k in object_map
             }
         return render_template('forms/admin/permission.html',
                                permission=permission,
@@ -90,6 +92,8 @@ class PermissionView(AdminView):
 class RoleListing(AdminView):
     def get(self):
         roles_list = roles.list_metadata().json()
+        if 'errors' in roles_list:
+            roles_list = None
         return render_template('forms/admin/roles.html',
                                table_data=roles_list,
                                **self.template_args())
@@ -105,7 +109,8 @@ class RoleView(AdminView):
             permission_map = {perm['permission_id']: perm
                               for perm in permission_list}
             role['permissions'] = {k: {'added_to_role': v, **permission_map[k]}
-                                   for k, v in role['permissions'].items()}
+                                   for k, v in role['permissions'].items()
+                                   if k in permission_map}
         return render_template('forms/admin/role.html',
                                role=role,
                                **self.template_args())
@@ -114,6 +119,8 @@ class RoleView(AdminView):
 class UserListing(AdminView):
     def get(self):
         users_list = users.list_metadata().json()
+        if 'errors' in users_list:
+            users_list = None
         return render_template('forms/admin/users.html',
                                table_data=users_list,
                                **self.template_args())
@@ -128,7 +135,8 @@ class UserView(AdminView):
             role_list = roles.list_metadata().json()
             role_map = {role['role_id']: role for role in role_list}
             user['roles'] = {k: {'added_to_user': v, **role_map[k]}
-                             for k, v in user['roles'].items()}
+                             for k, v in user['roles'].items()
+                             if k in role_map}
         return render_template('forms/admin/user.html',
                                user=user,
                                **self.template_args())
@@ -165,6 +173,11 @@ class PermissionsCreation(AdminView):
         return jsonify(request.form)
 
 
+class RoleCreation(AdminView):
+    def get(self):
+        return render_template("forms/admin/role_form.html",
+                               **self.template_args())
+
 admin_blp = Blueprint('admin', 'admin', url_prefix='/admin')
 admin_blp.add_url_rule('/',
                        view_func=AdminView.as_view(
@@ -186,6 +199,8 @@ for data_type in PermissionsCreation.allowed_data_types:
                            )
 admin_blp.add_url_rule('/roles/',
                        view_func=RoleListing.as_view('roles'))
+admin_blp.add_url_rule('/roles/create',
+                       view_func=RoleCreation.as_view('create_role'))
 admin_blp.add_url_rule('/roles/<uuid>',
                        view_func=RoleView.as_view('role_view'))
 admin_blp.add_url_rule('/users/',
