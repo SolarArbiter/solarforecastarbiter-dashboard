@@ -2,13 +2,11 @@ from flask import (Blueprint, render_template,
                    url_for, abort)
 
 
-from solarforecastarbiter.plotting import timeseries
-
-
 from sfa_dash.blueprints.dash import DataDashView
 from sfa_dash.blueprints.data_listing import DataListingView
 from sfa_dash.blueprints.sites import SingleSiteView, SitesListingView
 from sfa_dash.blueprints.delete import DeleteConfirmation
+from sfa_dash.blueprints.util import timeseries_adapter
 from sfa_dash.api_interface import (observations, forecasts,
                                     cdf_forecasts, cdf_forecast_groups)
 
@@ -46,19 +44,19 @@ class SingleObservationView(DataDashView):
         temp_args = self.template_args(**kwargs)
         values_request = observations.get_values(uuid)
         if values_request.status_code == 200:
-            try:
-                bokeh_script, plot = timeseries.generate_observation_figure(
-                    self.metadata,
-                    values_request.json())
-            except ValueError:
+            script_plot = timeseries_adapter(
+                'observation',
+                self.metadata,
+                values_request.json())
+            if script_plot is None:
                 temp_args.update(
                     {'messages':
                         {'Data': ["No data available for this Observation."]}
                      }
                 )
             else:
-                temp_args.update({'plot': plot,
-                                  'bokeh_script': bokeh_script})
+                temp_args.update({'plot': script_plot[1],
+                                  'bokeh_script': script_plot[0]})
         self.metadata['site_link'] = self.generate_site_link(self.metadata)
         temp_args['metadata'] = render_template(
             'data/metadata/observation_metadata.html',
@@ -112,19 +110,19 @@ class SingleCDFForecastView(DataDashView):
         temp_args = self.template_args(**kwargs)
         values_request = cdf_forecasts.get_values(uuid)
         if values_request.status_code == 200:
-            try:
-                bokeh_script, plot = timeseries.generate_forecast_figure(
-                    self.metadata,
-                    values_request.json())
-            except ValueError:
+            script_plot = timeseries_adapter(
+                'forecast',
+                self.metadata,
+                values_request.json())
+            if script_plot is None:
                 temp_args.update(
                     {'messages':
                         {'Data': ["No data available for this Forecast."]}
                      }
                 )
             else:
-                temp_args.update({'plot': plot,
-                                  'bokeh_script': bokeh_script})
+                temp_args.update({'plot': script_plot[1],
+                                  'bokeh_script': script_plot[0]})
         self.metadata['site_link'] = self.generate_site_link(self.metadata)
         temp_args['metadata'] = render_template(
             'data/metadata/cdf_forecast_metadata.html',
@@ -171,19 +169,19 @@ class SingleForecastView(DataDashView):
         temp_args = self.template_args(**kwargs)
         values_request = forecasts.get_values(uuid)
         if values_request.status_code == 200:
-            try:
-                bokeh_script, plot = timeseries.generate_forecast_figure(
-                    self.metadata,
-                    values_request.json())
-            except ValueError:
+            script_plot = timeseries_adapter(
+                'forecast',
+                self.metadata,
+                values_request.json())
+            if script_plot is None:
                 temp_args.update(
                     {'messages':
                         {'Data': ["No data available for this Forecast."]}
                      }
                 )
             else:
-                temp_args.update({'plot': plot,
-                                  'bokeh_script': bokeh_script})
+                temp_args.update({'plot': script_plot[1],
+                                  'bokeh_script': script_plot[0]})
         self.metadata['site_link'] = self.generate_site_link(self.metadata)
         temp_args['metadata'] = render_template(
             'data/metadata/forecast_metadata.html',
