@@ -25,6 +25,7 @@
   <thead>
     <tr>
       <th scope="col">Name</th>
+      <th scope="col">Organization</th>
       <th scope="col">Date Added</th>
     </tr>
   </thead>
@@ -32,6 +33,7 @@
     {% for role_id, role in user['roles'].items() %}
       <tr>
           <td><a href="{{ url_for('admin.role_view', uuid=role_id) }}">{{ role['name'] }}</a></td>
+          <td>{{ role['organization'] }}</td>
           <td>{{ role['added_to_user'] }}</td>
       </tr>
     {% endfor %}
