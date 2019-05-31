@@ -224,8 +224,10 @@ def timeseries_adapter(type_, metadata, json_value_response):
     if type_ == 'forecast':
         obj = datamodel.Forecast.from_dict(metadata)
         data = io_utils.json_payload_to_forecast_series(json_value_response)
-        return timeseries.generate_forecast_figure(obj, data)
+        return timeseries.generate_forecast_figure(
+            obj, data, return_components=True)
     else:
         obj = datamodel.Observation.from_dict(metadata)
         data = io_utils.json_payload_to_observation_df(json_value_response)
-        return timeseries.generate_observation_figure(obj, data)
+        return timeseries.generate_observation_figure(
+            obj, data, return_components=True)
