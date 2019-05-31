@@ -178,6 +178,7 @@ class RoleCreation(AdminView):
         return render_template("forms/admin/role_form.html",
                                **self.template_args())
 
+
 admin_blp = Blueprint('admin', 'admin', url_prefix='/admin')
 admin_blp.add_url_rule('/',
                        view_func=AdminView.as_view(
