@@ -1,5 +1,7 @@
 from flask import Flask, redirect, url_for, render_template, session, request
 from flask_seasurf import SeaSurf
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 
 from sfa_dash.blueprints.auth0 import (make_auth0_blueprint,
@@ -11,6 +13,8 @@ from sfa_dash import error_handlers
 
 
 def create_app(config=None):
+    sentry_sdk.init(send_default_pii=False,
+                    integrations=[FlaskIntegration()])
     app = Flask(__name__)
     config = config or 'sfa_dash.config.DevConfig'
     app.config.from_object(config)
@@ -72,6 +76,14 @@ def create_app(config=None):
     for blp in (data_dash_blp, forms_blp):
         blp.before_request(protect_endpoint)
         app.register_blueprint(blp)
+    return app
+
+
+def create_app_with_metrics(config=None):  # pragma: no cover  # NOQA
+    from prometheus_flask_exporter.multiprocess import (
+        GunicornPrometheusMetrics)
+    app = create_app(config)
+    GunicornPrometheusMetrics(app=app, group_by='url_rule')
     return app
 
 
