@@ -11,6 +11,7 @@
   <thead>
     <tr>
       <th scope="col">User ID</th>
+      <th scope="col">Username</th>
       <th scope="col">Organization</th>
     </tr>
   </thead>
@@ -19,6 +20,7 @@
       {% for user in table_data %}
         <tr>
             <td><a href="{{ url_for('admin.user_view', uuid=user['user_id']) }}">{{ user["user_id"] }}</a></td>
+            <td>&lt;usernames coming soon&gt;</td>
             <td>{{ user["organization"] }} </td>
         </tr>
       {% endfor %}
