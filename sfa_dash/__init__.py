@@ -1,3 +1,6 @@
+import os
+
+
 from flask import Flask, redirect, url_for, render_template, session, request
 from flask_seasurf import SeaSurf
 import sentry_sdk
@@ -15,6 +18,7 @@ from sfa_dash import error_handlers
 def create_app(config=None):
     sentry_sdk.init(send_default_pii=False,
                     integrations=[FlaskIntegration()])
+
     app = Flask(__name__)
     config = config or 'sfa_dash.config.DevConfig'
     app.config.from_object(config)
@@ -69,6 +73,13 @@ def create_app(config=None):
         global_template_args['user'] = session.get('userinfo')
         global_template_args.update(template_variables())
         return global_template_args
+
+    @app.errorhandler(500)
+    def server_error_handler(error):
+        return render_template(
+            "500.html",
+            sentry_event_id=sentry_sdk.last_event_id(),
+            dsn=os.getenv('SENTRY_DSN', '')), 500
 
     from sfa_dash.blueprints.main import data_dash_blp
     from sfa_dash.blueprints.form import forms_blp
