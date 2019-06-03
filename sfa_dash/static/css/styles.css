@@ -7,7 +7,7 @@ table.table{
     table-layout: fixed;
 }
 @media (min-width: 992px){
-    table.results thead tr :first-child {
+    table.results thead tr th:first-child {
         width: 40%;
     }
 }
