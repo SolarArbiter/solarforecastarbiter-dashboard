@@ -289,3 +289,6 @@ a.help-button{
 #site-banner a{
     color: #000;
 }
+#site-banner p{
+    margin-bottom: 0;
+}
