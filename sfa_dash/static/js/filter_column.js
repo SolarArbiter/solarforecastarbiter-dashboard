@@ -5,9 +5,9 @@ $(document).ready(function() {
         availableOrgs.add(orgs[i].textContent);
     }
     //$(".provider-th")
-    var filter_div = $("<div class='org-filters'>org-filters</div>");
-    filter_div.appendTo(".observation-tools");
-    availableOrgs.forEach(function (e) {$(".org-filters").append(`<input class="org-filter-option"value="${e}" type="checkbox" checked>${e}`)});
+    var filter_div = $("<div id='org-filters' class='collapse'>Filter by Organization <br/><hr><ul class='org-filter-options'></ul></div>");
+    filter_div.appendTo("#provider-header");
+    availableOrgs.forEach(function (e) {$(".org-filter-options").append(`<li><input class="org-filter-option"value="${e}" type="checkbox" checked>${e}</li>`)});
     
     $(".org-filter-option").change(function() {
         console.log(`${this.checked}`);
