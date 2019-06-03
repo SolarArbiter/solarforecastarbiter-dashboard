@@ -8,7 +8,7 @@
         <ul class="data-metadata-fields col-md-6 col-xs-12">
             <li><b>ID:</b> {{ user['user_id'] }}</li>
             <li><b>Email:</b> notyetimplemented@solarforecastarbiter.org</li>
-            <li><b>Organization:</b> {{ user['organization'] }} </li>
+            <li ><b>Organization:</b> {{ user['organization'] }} </li>
         </ul>
         <ul class="data-metadata-fields col-md-6 col-xs-12">
             <li><b>Created:</b> {{user['created_at']}}</li>
@@ -26,7 +26,9 @@
   <thead>
     <tr>
       <th scope="col">Name</th>
-      <th scope="col">Organization</th>
+      <th scope="col" id="provider-header">
+          <button type="button" class="btn btn-th dropdown-toggle" data-toggle="collapse" data-target="#org-filters" >Organization</button>
+      </th>
       <th scope="col">Date Added</th>
     </tr>
   </thead>

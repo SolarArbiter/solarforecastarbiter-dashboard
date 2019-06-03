@@ -2,8 +2,11 @@
 table.table th{
 	border-top: unset;
 }
-.table{
+table.table{
     table-layout: fixed;
+}
+.provider-column{
+    min-width: fit-content;
 }
 
 /* General css */
