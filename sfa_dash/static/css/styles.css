@@ -1,13 +1,17 @@
 /* Bootstrap overrides */
+
 table.table th{
 	border-top: unset;
 }
 table.table{
     table-layout: fixed;
 }
-.provider-column{
-    min-width: fit-content;
+@media (min-width: 992px){
+    table.results thead tr :first-child {
+        width: 40%;
+    }
 }
+
 
 /* General css */
 
