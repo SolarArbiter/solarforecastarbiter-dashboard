@@ -2,6 +2,9 @@
 table.table th{
 	border-top: unset;
 }
+.table{
+    table-layout: fixed;
+}
 
 /* General css */
 
