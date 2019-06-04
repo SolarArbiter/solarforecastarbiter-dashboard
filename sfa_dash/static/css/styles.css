@@ -274,6 +274,23 @@ a.help-button{
     border-radius: 5px;
     padding: .5rem;
 }
+#org-filter-collapse{
+    font-family: monospace;
+    color: #000;
+    border: 1px solid black;
+    border-radius: 3px;
+    margin-left: 1rem;
+    padding: .1rem 0.3rem;
+}
+#org-filter-collapse:hover{
+    text-decoration: none;
+    background-color: #ddd;
+    transition: background-color .2s;
+}
+#org-filter-collapse:after{
+    content: "\00d7";
+    font-size: 1rem;
+}
 .org-filter-options{
     list-style: none;
     padding-left: 0;
