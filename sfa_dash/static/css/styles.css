@@ -21,13 +21,26 @@ html{
 body{
   color: #333;
 }
-main{
-  margin-top: 11rem;
-  // margin-top: 7rem;
+main { 
   margin-bottom: 2rem;
+}
+@media (min-width: 768px){
+  main{
+    margin-top: 11rem;
+  }
+}
+@media (max-width: 767px){
+  main{
+    margin-top: 12rem;
+  }
 }
 .menu-list{
   list-style: none;
+}
+@media (min-width: 768px){
+  div.sidebar-wrapper {
+    border-right: 1px solid #dee2e6!important;
+  }
 }
 ul.sidebar-menu{
   padding-left: 0; 
@@ -170,7 +183,6 @@ ul.data-metadata-fields{
   width: 100%;
 }
 .time-field{
-  width: unset;
   display: inline-block;
 }
 .form-element .well-known-text-field{
