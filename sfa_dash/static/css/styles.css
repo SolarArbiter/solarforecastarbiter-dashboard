@@ -159,6 +159,7 @@ ul.data-metadata-fields{
 
 /* Forms */
 .form-group{
+  width: 100%;
   float: left;
 }
 .form-element label{
