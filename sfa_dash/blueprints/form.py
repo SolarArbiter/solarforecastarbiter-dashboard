@@ -305,6 +305,11 @@ class UploadForm(BaseView):
         elif posted_file.mimetype == 'application/json':
             posted_data = json.load(posted_file)
             post_request = self.api_handle.post_values(uuid, posted_data)
+        else:
+            errors = {
+                'mime-type': [f'Unsupported file type {posted_file.mimetype}.']
+            }
+            return render_template(self.template, uuid=uuid, errors=errors)
         if post_request.status_code != 201:
             errors = post_request.json()['errors']
             return render_template(self.template, uuid=uuid, errors=errors)
