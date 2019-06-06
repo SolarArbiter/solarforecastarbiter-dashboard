@@ -296,7 +296,10 @@ class UploadForm(BaseView):
         posted_file = request.files[f'{self.data_type}-data']
         if posted_file.filename == '':
             return 'no filename'
-        if posted_file.mimetype == 'text/csv':
+        if (
+                posted_file.mimetype == 'text/csv' or
+                posted_file.mimetype == 'application/vnd.ms-excel'
+        ):
             posted_data = posted_file.read()
             post_request = self.api_handle.post_values(
                 uuid,
