@@ -18,9 +18,9 @@ $(document).ready(function() {
             console.log(`${this.checked}`);
             console.log(` content: ${this.value}`);
             if (this.checked) {
-                $(`.provider-column:contains("${this.value}")`).parent().show();
+                $(`.provider-column:contains("${this.value}")`).parent().attr('visible') = true;
             } else {
-               $(`.provider-column:contains("${this.value}")`).parent().hide();
+               $(`.provider-column:contains("${this.value}")`).parent().attr('visible') = false;
             }
         });
     }
