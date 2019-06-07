@@ -67,7 +67,8 @@ $(document).ready(function() {
         /* Gets a list of table rows, and then builds a list of all the
          * rows to be excluded due to filters, removes the rows to hide
          * from all rows, sets the remainder to visible and hides the
-         */ others.
+         * others.
+         */
         allRows = $(".results tbody tr").not('.warning.no-result');
         rowsToHide = allHiddenElements();
         visibleRows = allRows.not(rowsToHide);
