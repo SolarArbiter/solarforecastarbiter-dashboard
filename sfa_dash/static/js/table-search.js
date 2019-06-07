@@ -21,7 +21,7 @@ $(document).ready(function() {
      * to hide.
      */
     function searchTable() {
-        /* 
+        /*
          * Reads the value of the search input and creates a list of rows to hide
          * based on which rows do not contain the search term
          */
@@ -30,7 +30,7 @@ $(document).ready(function() {
         return $(".results tbody tr").not(":containsi('" + searchSplit + "')")
     }
     function filteredOrgs() {
-        /* 
+        /*
          * Iterates through the `.org-filter-option` checkboxes, for each unchecked box,
          * builds a list of tr elements whose `.provider-column` fields contain the
          * checkboxes value and returns the concatenated list.
@@ -43,13 +43,12 @@ $(document).ready(function() {
         });
         return orgsToHide
     }
-    
     /*
      * Filter application functions
      */
     var toHideFns = []
     function allHiddenElements(){
-        /* 
+        /*
          * Returns a JQuery object list of rows that need to be hidden
          * by concatenating the results of calls to the toHideFns.
          */
@@ -60,7 +59,7 @@ $(document).ready(function() {
         return elements
     }
     function applyTableFilters() {
-        /* 
+        /*
          * Gets a list of table rows, and then builds a list of all the
          * rows to be excluded due to filters, removes the rows to hide
          * from all rows, sets the remainder to visible and hides the
@@ -76,10 +75,8 @@ $(document).ready(function() {
         if(jobCount == '0') {$('.no-result').show();}
         else {$('.no-result').hide();}
     }
-
-
     toHideFns.push(searchTable);
-    /* 
+    /*
      * If the Provider header id exists, build a dropdown ul of checkboxes from the
      * list of organizations in the table.
      */
@@ -97,7 +94,6 @@ $(document).ready(function() {
         });
         toHideFns.push(filteredOrgs);
     }
-    
     /*
      * Register DOM element callbacks
      */
