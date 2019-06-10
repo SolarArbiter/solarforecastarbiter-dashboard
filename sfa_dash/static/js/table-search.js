@@ -10,7 +10,10 @@
 $(document).ready(function() {
     /* Add containsi filter to JQuery selectors that selects for any word in a phrase */
     $.extend($.expr[':'], {'containsi': function(elem, i, match, array){
-            return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+            lowerElementText = (elem.textContent || elem.innerText || '').toLowerCase()
+            // Here, match is the array the anonymous filter  function was applied on,
+            // and the 3rd element is the text of the search box.
+            return lowerElementText.indexOf((match[3] || "").toLowerCase()) >= 0;
         }
     });
 
