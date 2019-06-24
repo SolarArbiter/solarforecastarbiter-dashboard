@@ -34,3 +34,12 @@
 
 <script src="/static/js/table-search.js"></script>
 <script src="/static/js/table-checkall.js"></script>
+<script src="/static/js/filter_column.js"></script>
+<script src="/static/js/report-handling.js"></script>
+
+
+{% if page_data is defined %}
+<script>
+    var page_data = JSON.parse('{{ page_data | tojson | safe}}');
+</script>
+{% endif %}

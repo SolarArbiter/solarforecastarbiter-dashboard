@@ -173,6 +173,20 @@ ul.data-metadata-fields{
 }
 
 /* Forms */
+li.object-pair {
+  list-style: none;
+  padding-right: 1em;
+  overflow: auto;
+  position: relative;
+}
+ul.object-pair-list{
+  padding-left: 0;
+}
+a.object-pair-delete-button{
+    position: absolute;
+    top: 50%;
+    color: #A00 !important;
+}
 .form-group{
   width: 100%;
   float: left;
@@ -337,4 +351,8 @@ a.help-button{
 }
 #site-banner p{
     margin-bottom: 0;
+}
+
+[role="button"]{
+    cursor: pointer;
 }
