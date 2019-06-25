@@ -176,7 +176,6 @@ ul.data-metadata-fields{
 li.object-pair {
   list-style: none;
   padding-right: 1em;
-  overflow: auto;
   position: relative;
 }
 ul.object-pair-list{
@@ -196,7 +195,7 @@ a.object-pair-delete-button{
 }
 @media (min-width: 769px) {
   .form-element{
-    width: 50%;
+    width: 49%;
   }
 }
 @media (max-width: 768px){
@@ -205,7 +204,8 @@ a.object-pair-delete-button{
   }
 }
 .form-element{
-  float: left;
+  display: inline-block;
+  box-sizing: border-box;
   padding: .5em 1em;
   position: relative;
 }
