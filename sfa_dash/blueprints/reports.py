@@ -121,9 +121,11 @@ class ReportForm(BaseView):
             # flatten error response to handle nesting
             errors = post_req.json()['errors']
             return super().get(form_data=form_data, errors=errors)
+        elif post_req.status_code == 404:
+            errors = {'error': ['Permission to create report denied.']}
         else:
-            errors = {'error': 'Terrible things happened'}
-            return super().get(form_data=form_data, errors=errors)
+            errors = {'error': ['An unrecoverable error occured.']}
+        return super().get(form_data=form_data, errors=errors)
 
 
 class ReportView(BaseView):
