@@ -55,7 +55,7 @@ $(document).ready(function() {
                     <div class="form-element">
                       <label>Observation</label><br>
                       <div class="input-wrapper">
-                        <select class="form-control  observation-field" name="observation-${pair_index}">
+                        <select class="form-control observation-field" name="observation-${pair_index}" required>
                         <option disabled value selected>select an observation</option>
                         </select>
                       </div>
@@ -65,7 +65,7 @@ $(document).ready(function() {
                     <div class="form-element">
                       <label>Forecast</label><br>
                       <div class="input-wrapper">
-                        <select class="form-control  forecast-field" name="forecast-${pair_index}">
+                        <select class="form-control forecast-field" name="forecast-${pair_index}" required>
                         <option disabled value selected>select a forecast</option>
                         </select>
                       </div>
