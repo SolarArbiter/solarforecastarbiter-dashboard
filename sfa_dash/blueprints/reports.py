@@ -3,7 +3,11 @@
 import json
 from flask import request, redirect, url_for, abort
 import pandas as pd
+from requests.exceptions import HTTPError
 
+from solarforecastarbiter.io.api import APISession
+from solarforecastarbiter.reports.main import report_to_html_body
+from sfa_dash import oauth_request_session
 from sfa_dash.api_interface import observations, forecasts, reports
 from sfa_dash.blueprints.base import BaseView
 
@@ -132,13 +136,13 @@ class ReportView(BaseView):
     template = 'data/report.html'
 
     def template_args(self):
-        return {'report_metadata': self.metadata}
+        return {'report': report_to_html_body(self.metadata)}
 
     def get(self, uuid):
-        # TODO: use core to buid templates
-        report_request = reports.get_metadata(uuid)
-        if report_request.status_code == 200:
-            self.metadata = report_request.json()
-        else:
-            abort(404)
+        token = oauth_request_session.token['access_token']
+        session = APISession(token)
+        try:
+            report_request = session.get_report(uuid)
+        except HTTPError as e:
+            abort(404);
         return super().get()
