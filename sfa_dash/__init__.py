@@ -102,3 +102,7 @@ def create_app_with_metrics(config=None):  # pragma: no cover  # NOQA
 if __name__ == '__main__':
     app = create_app()
     app.run()
+
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
