@@ -1,7 +1,6 @@
 """Draft of reports endpoints/pages. Need to integrate core report generation.
 """
 from flask import request, redirect, url_for, abort, render_template
-import pandas as pd
 from requests.exceptions import HTTPError
 
 from solarforecastarbiter.reports.main import report_to_html_body
@@ -76,7 +75,6 @@ class ReportForm(BaseView):
         to configure these filters
         """
         return []
-
 
     def parse_report_parameters(self, form_data):
         params = {}
