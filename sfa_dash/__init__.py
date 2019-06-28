@@ -22,6 +22,7 @@ from sfa_dash import error_handlers  # NOQA
 
 def create_app(config=None):
     sentry_sdk.init(send_default_pii=False,
+                    release=f'sfa-dash@{__version__}'
                     integrations=[FlaskIntegration()])
 
     app = Flask(__name__)
