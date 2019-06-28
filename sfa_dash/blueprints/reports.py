@@ -1,6 +1,5 @@
 """Draft of reports endpoints/pages. Need to integrate core report generation.
 """
-import json
 from flask import request, redirect, url_for, abort, render_template
 import pandas as pd
 from requests.exceptions import HTTPError
@@ -78,7 +77,7 @@ class ReportForm(BaseView):
         """
         return []
 
-    def dt_fields_to_iso(self, form_data, field_prefix):
+    def dt_fields_to_iso(self, form_data):
         """Concatenates the values from a date and time field with a shared prefix
         and returns the iso 8601 represenation.
         """
@@ -92,8 +91,8 @@ class ReportForm(BaseView):
         params['object_pairs'] = self.zip_object_pairs(form_data)
         params['metrics'] = self.parse_metrics(form_data)
         params['filters'] = self.parse_filters(form_data)
-        params['start'] = self.dt_fields_to_iso(form_data, 'period-start')
-        params['end'] = self.dt_fields_to_iso(form_data, 'period-end')
+        params['start'] = form_data['period-start']
+        params['end'] = form_data['period-end']
         return params
 
     def report_formatter(self, form_data):

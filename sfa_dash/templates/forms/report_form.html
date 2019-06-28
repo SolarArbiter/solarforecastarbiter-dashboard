@@ -6,19 +6,38 @@
 {% if form_title %}<h3>{{ form_title }}</h3> {% endif %}
 <form action="{{ url_for('forms.create_report') }}" method="post" id="report-form">
   <div class="form-group">
-     {% set form_data = {} %}
+      {% if form_data is not defined %} {% set form_data = {} %}{% endif %}
      <div class="form-element full-width">
        {{ form.input('Name', 'text', 'name', 'Name of the Report.', form_data=form_data) }}
      </div>
 	 <div class="form-element">
        <label for="start">Start (UTC):</label><br/>
+       <div class="input-wrapper">
+         <input type="text" name="period-start" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data is defined %}value="{{form_data['period-start']}}"{% endif %}></input>
+       </div>
+       {{ form.help_button('period-start') }}
+       <span class="period-start-help-text form-text text-muted help-text collapse" aria-hidden>
+           The start of the analysis period as an ISO 8601 datetime.
+       </span>
+
+       {#
        <input type="date" id="start-date" name="period-start-date" {% if form_data is defined %}value="{{form_data['period-start-date']}}"{% endif %}required>
        <input type="time" id="start-time" name="period-start-time" {% if form_data is defined %}value="{{form_data['period-start-time']}}"{% else %} value="00:00"{% endif %} required>
+       #}
      </div>
      <div class="form-element">
        <label for="end">End (UTC)</label><br/>
+       <div class="input-wrapper">
+         <input type="text" name="period-end" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data is defined %}value="{{form_data['period-end']}}"{% endif %}></input>
+       </div>
+       {{ form.help_button('period-end') }}
+       <span class="period-end-help-text form-text text-muted help-text collapse" aria-hidden>
+           The end of the analysis period as an ISO 8601 datetime.
+       </span>
+       {#
        <input type="date" id="end-date" name="period-end-date" {% if form_data is defined %}value="{{form_data['period-end-date']}}"{% endif %}required>
        <input type="time" id="end-time" name="period-end-time" {% if form_data is defined %}value="{{form_data['period-end-time']}}"{% else %} value="00:00"{% endif %} required>
+       #}
      </div>
      {# The following empty list is a target for the javascript found in report-handling.js
         list items are added dynamically on page load #}
