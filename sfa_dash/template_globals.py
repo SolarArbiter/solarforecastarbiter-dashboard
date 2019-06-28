@@ -19,7 +19,7 @@ TIMEZONE_OPTIONS = {tz: tz.replace('_', ' ') for tz in TIMEZONES}
 
 def template_variables():
     return {
-        'dashboard_verison': sfa_dash.__version__,
+        'dashboard_version': sfa_dash.__version__,
         'variable_options': VARIABLE_OPTIONS,
         'timezone_options': TIMEZONE_OPTIONS,
     }
