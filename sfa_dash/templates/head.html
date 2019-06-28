@@ -39,6 +39,6 @@
 
 {% if page_data is defined %}
 <script>
-    var page_data = JSON.parse('{{ page_data | tojson | safe}}');
+    var page_data = JSON.parse('{{ page_data | tojson }}');
 </script>
 {% endif %}
