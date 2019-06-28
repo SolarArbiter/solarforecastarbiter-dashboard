@@ -116,5 +116,4 @@ $(document).ready(function() {
     }
     registerDatetimeValidator('period-start');
     registerDatetimeValidator('period-end')
-    
 });

@@ -77,14 +77,6 @@ class ReportForm(BaseView):
         """
         return []
 
-    def dt_fields_to_iso(self, form_data):
-        """Concatenates the values from a date and time field with a shared prefix
-        and returns the iso 8601 represenation.
-        """
-        field_date = form_data[f"{field_prefix}-date"]
-        field_time = form_data[f"{field_prefix}-time"]
-        field_dt = pd.Timestamp(f'{field_date} {field_time}', tz='utc')
-        return field_dt.isoformat()
 
     def parse_report_parameters(self, form_data):
         params = {}
@@ -128,7 +120,7 @@ class ReportView(BaseView):
     def template_args(self):
         report_template = report_to_html_body(self.metadata)
         return {'report': report_template,
-                'bokeh_script': ''}
+                'bokeh_script': True}
 
     def get(self, uuid):
         self.metadata = reports.get_metadata(uuid)
