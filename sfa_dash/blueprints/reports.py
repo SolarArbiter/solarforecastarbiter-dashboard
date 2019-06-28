@@ -95,6 +95,12 @@ class ReportForm(BaseView):
     def post(self):
         form_data = request.form
         api_payload = self.report_formatter(form_data)
+        if len(api_payload['report_parameters']['object_pairs']) == 0:
+            errors = {
+                'error': [('Must include at least 1 Forecast, Observation '
+                           'pair.')],
+            }
+            return super().get(form_data=form_data, errors=errors)
         try:
             reports.post_metadata(api_payload)
         except HTTPError as e:
