@@ -1,6 +1,7 @@
 {% import "forms/form_macros.jinja" as form %}
 {% extends "dash/data.html" %}
 {% block content %}
+<script src="/static/js/report-handling.js"></script>
 {{ metadata | safe }}
 {% include "sections/notifications.html" %}
 {% if form_title %}<h3>{{ form_title }}</h3> {% endif %}

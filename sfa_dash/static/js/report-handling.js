@@ -40,12 +40,10 @@ $(document).ready(function() {
             return new_object_pair;
         }
         
-
         function createPairSelector(){
           /* 
            * Generate the two select widgets and button for adding new object pairs  
            */
-
           var widgetContainer = $('<div class="pair-selector-wrapper show"></div>');
           var obsSelector = $(`<div class="form-element">
                         <label>Select an Observation</label><br>
@@ -75,28 +73,31 @@ $(document).ready(function() {
                     $('<option></option>')
                         .html(this.name)
                         .val(this.observation_id)
-                        .attr('data-site-id', this.site_id));
+                        .attr('data-site-id', this.site_id)
+                        .attr('data-variable', this.variable));
             });
             $.each(page_data['forecasts'], function(){
                 forecast_select.append(
                     $('<option></option>')
                         .html(this.name)
                         .val(this.forecast_id)
-                        .attr('data-site-id', this.site_id));
+                        .attr('data-site-id', this.site_id)
+                        .attr('data-variable', this.variable));
             });
             observation_select.change(function (){
                 /*
                  * React to a change in observation to hide any non-applicable forecasts from the
                  * select list and remove the current selection if it is invalid.
                  */
-                observation_site = observation_select.find('option:selected').attr('data-site-id')
+                observation = observation_select.find('option:selected');
+                observation_site = observation.attr('data-site-id');
+                observation_variable = observation.attr('data-variable');
                 if (observation_site){
                     forecasts = forecast_select.find('option');
                     forecasts.removeAttr('hidden');
                     forecasts.each(function (fx){
-                        if (this.dataset.siteId != observation_site){
+                        if (this.dataset.siteId != observation_site || this.dataset.variable != observation_variable){
                             this.hidden = true;
-                            
                         } else if (this.hidden){
                             this.hidden = false;
                         }
@@ -134,13 +135,19 @@ $(document).ready(function() {
                     observation_select.val('');
                     forecast_select.val('');
                     $(".empty-reports-list")[0].hidden = true;
+                    forecast_select.css('border', '');
+                    observation_select.css('border', '');
                 } else {
-                    // TODO: prompt to make a selection
+                    if (forecast_select.val() == null){
+                        forecast_select.css('border', '2px solid #F99');
+                    }
+                    if (observation_select.val() == null){
+                        observation_select.css('border', '2px solid #F99');
+                    }
                 }
             });
             return widgetContainer;
         }
-        
   
         /*
          * Initialize global variables
@@ -153,9 +160,7 @@ $(document).ready(function() {
         pair_control_container = $('.object-pair-control')
         pair_index = 0;
         
-        // 
         pair_selector = createPairSelector();
-        console.log(pair_selector);
         pair_control_container.append($('<a role="button" class="full-width object-pair-button" data-toggle="collapse" data-target=".pair-selector-wrapper">Add Observation Forecast pairs</a>'));
         pair_control_container.append(pair_selector);
         
