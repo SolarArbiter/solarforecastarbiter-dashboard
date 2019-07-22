@@ -41,7 +41,6 @@ class ReportForm(BaseView):
 
     def template_args(self):
         return {
-            "form_title": "Create new Report",
             "page_data": self.get_pairable_objects(),
         }
 

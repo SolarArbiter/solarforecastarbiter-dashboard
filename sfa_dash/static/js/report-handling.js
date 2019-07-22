@@ -56,7 +56,7 @@ $(document).ready(function() {
                         <label>Select a Forecast</label><br>
                         <div class="input-wrapper">
                           <select id="forecast-select" class="form-control forecast-field" name="forecast-select" size="15">
-                            <option name="no-forecasts" disabled hidden>No matching Forecasts</option>
+                            <option name="no-forecasts" disabled>No matching Forecasts</option>
                           </select>
                         </div>
                      </div>`);
@@ -81,6 +81,7 @@ $(document).ready(function() {
                     $('<option></option>')
                         .html(this.name)
                         .val(this.forecast_id)
+                        .attr('hidden', true)
                         .attr('data-site-id', this.site_id)
                         .attr('data-variable', this.variable));
             });
@@ -132,8 +133,6 @@ $(document).ready(function() {
                     
                     pair_container.append(pair);
                     pair_index++;
-                    observation_select.val('');
-                    forecast_select.val('');
                     $(".empty-reports-list")[0].hidden = true;
                     forecast_select.css('border', '');
                     observation_select.css('border', '');
