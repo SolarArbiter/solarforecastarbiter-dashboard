@@ -303,11 +303,12 @@ class UploadForm(BaseView):
             posted_data = posted_file.read()
             try:
                 decoded_data = posted_data.decode('utf-8')
-            except UnicodeDecodeError as e:
+            except UnicodeDecodeError:
                 errors = {
-                    'file-type': ['Failed to decode file. Please ensure file is a CSV '
-                                  'with UTF-8 encoding. This error can sometimes occur '
-                                  'when a csv is improperly exported from excel.'],
+                    'file-type': [
+                        'Failed to decode file. Please ensure file is a CSV '
+                        'with UTF-8 encoding. This error can sometimes occur '
+                        'when a csv is improperly exported from excel.'],
                 }
                 return render_template(self.template, uuid=uuid, errors=errors)
             else:
