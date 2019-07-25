@@ -16,19 +16,17 @@ $(document).ready(function() {
     if ($('.object-pair-list')[0]){
         function addPair(obsName, obsId, fxName, fxId){
             var new_object_pair = $(`<div class="object-pair object-pair-${pair_index}">
+                    <div class="input-wrapper">
                       <div class="form-element">
-                        <div class="input-wrapper">
                           <input type="text" class="form-control observation-field" name="observation-name-${pair_index}"  required disabled value="${obsName}"/>
                           <input type="hidden" class="form-control observation-field" name="observation-id-${pair_index}" required value="${obsId}"/>
-                        </div>
                       </div>
                       <div class="form-element">
-                        <div class="input-wrapper">
-                          <input type="text" class="form-control forecast-field" name="forecast-name-${pair_index}" required disabled value="${fxName}"/>
-                          <input type="hidden" class="form-control forecast-field" name="forecast-id-${pair_index}" required value="${fxId}"/>
-                        </div>
+                        <input type="text" class="form-control forecast-field" name="forecast-name-${pair_index}" required disabled value="${fxName}"/>
+                        <input type="hidden" class="form-control forecast-field" name="forecast-id-${pair_index}" required value="${fxId}"/>
                       </div>
-                    <a role="button" class="object-pair-delete-button">x</a>
+                     </div>
+                     <a role="button" class="object-pair-delete-button">x</a>
                    </div>`);
             var remove_button = new_object_pair.find(".object-pair-delete-button");
             remove_button.click(function(){
