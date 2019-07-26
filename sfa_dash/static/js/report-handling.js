@@ -42,35 +42,54 @@ $(document).ready(function() {
           /* 
            * Generate the two select widgets and button for adding new object pairs  
            */
-          var widgetContainer = $('<div class="pair-selector-wrapper show"></div>');
-          var obsSelector = $(`<div class="form-element">
+          var widgetContainer = $('<div class="pair-selector-wrapper collapse"></div>');
+          var siteSelector = $(`<div class="form-element full-width site-select-wrapper">
+                        <label>Select a Site</label><br>
+                        <div class="input-wrapper">
+                          <select id="site-select" class="form-control site-field" name="site-select" size="5">
+                        </select>
+                        </div>
+                      </div>`);
+
+          var obsSelector = $(`<div class="form-element full-width observation-select-wrapper collapse">
                         <label>Select an Observation</label><br>
                         <div class="input-wrapper">
-                          <select id="observation-select" class="form-control observation-field" name="observation-select" size="15">
+                          <select id="observation-select" class="form-control observation-field" name="observation-select" size="5">
+                            <option id="no-observations" disabled hidden>No matching Observations</option>
                           </select>
                         </div>
                       </div>`);
-          var fxSelector = $(`<div class="form-element">
+          var fxSelector = $(`<div class="form-element full-width forecast-select-wrapper collapse">
                         <label>Select a Forecast</label><br>
                         <div class="input-wrapper">
-                          <select id="forecast-select" class="form-control forecast-field" name="forecast-select" size="15">
-                            <option name="no-forecasts" disabled>No matching Forecasts</option>
+                          <select id="forecast-select" class="form-control forecast-field" name="forecast-select" size="5">
+                            <option id="no-forecasts" disabled hidden>No matching Forecasts</option>
                           </select>
                         </div>
                      </div>`);
             var addButton = $('<a role="button" class="btn btn-primary" id="add-object-pair" style="padding-left: 1em">Add a Forecast, Observation pair</a>');
-            widgetContainer.append(obsSelector);
+            widgetContainer.append(siteSelector);
             widgetContainer.append(fxSelector);
+            widgetContainer.append(obsSelector);
             widgetContainer.append(addButton);
 
             // add options to the select elements from page_data
             var observation_select = obsSelector.find('#observation-select');
             var forecast_select = fxSelector.find('#forecast-select');
+            var site_select = siteSelector.find('#site-select');
+            $.each(page_data['sites'], function(){
+                site_select.append(
+                    $('<option></option>')
+                        .html(this.name)
+                        .val(this.site_id)
+                        .attr('data-site-id', this.site_id));
+            });
             $.each(page_data['observations'], function(){
                 observation_select.append(
                     $('<option></option>')
                         .html(this.name)
                         .val(this.observation_id)
+                        .attr('hidden', true)
                         .attr('data-site-id', this.site_id)
                         .attr('data-variable', this.variable));
             });
@@ -83,34 +102,70 @@ $(document).ready(function() {
                         .attr('data-site-id', this.site_id)
                         .attr('data-variable', this.variable));
             });
-            observation_select.change(function (){
-                /*
-                 * React to a change in observation to hide any non-applicable forecasts from the
-                 * select list and remove the current selection if it is invalid.
-                 */
-                observation = observation_select.find('option:selected');
-                observation_site = observation.attr('data-site-id');
-                observation_variable = observation.attr('data-variable');
-                if (observation_site){
-                    forecasts = forecast_select.find('option');
+            site_select.change(function (){
+                site = site_select.find('option:selected');
+                site_id = site.attr('data-site-id');
+                if (site_id){
+                    forecasts = forecast_select.find('option').slice(1);
                     forecasts.removeAttr('hidden');
+                    matching_forecasts = 0;
                     forecasts.each(function (fx){
-                        if (this.dataset.siteId != observation_site || this.dataset.variable != observation_variable){
+                        if (this.dataset.siteId != site_id){
                             this.hidden = true;
-                        } else if (this.hidden){
+                        } else {
                             this.hidden = false;
+                            matching_forecasts++;
                         }
                     });
                     // if the currently selected forecast is hidden, deselect it.
                     if (forecast_select.find(':selected')[0] && forecast_select.find(':selected')[0].hidden ) {
                         forecast_select.val('');
                     }
+
                     // Hide/show the "no matching forecasts options
-                    if (forecast_select.find('option').not(":hidden").length == 0){
-                        $('[name="no-forecasts"]')[0].hidden = false;
+                    if (matching_forecasts == 0){
+                        $('#no-forecasts')[0].hidden = false;
                     } else {
-                        $('[name="no-forecasts"]')[0].hidden = true;
+                        $('#no-forecasts')[0].hidden = true;
                     }
+                    forecast_select.change();
+                    $('.forecast-select-wrapper').collapse('show')
+                                    }
+            });
+            forecast_select.change(function (){
+                /*
+                 * React to a change in observation to hide any non-applicable forecasts from the
+                 * select list and remove the current selection if it is invalid.
+                 */
+                forecast = forecast_select.find('option:selected');
+                forecast_site = forecast.attr('data-site-id');
+                forecast_variable = forecast.attr('data-variable');
+                observations = observation_select.find('option').slice(1);
+                observations.removeAttr('hidden');
+                matching_observations = 0;
+                observations.each(function (){
+                    if (this.dataset.siteId != forecast_site || this.dataset.variable != forecast_variable){
+                        this.hidden = true;
+                    } else{
+                        this.hidden = false;
+                        matching_observations++;
+                    }
+                });
+                // if the currently selected forecast is hidden, deselect it.
+                if (observation_select.find(':selected')[0] && observation_select.find(':selected')[0].hidden ) {
+                    observation_select.val('');
+                }
+                // Hide/show the "no matching observations options
+                var hidden_obs = observations.not(":hidden").length
+                if (matching_observations == 0){
+                    $('#no-observations')[0].hidden = false;
+                } else {
+                    $('#no-observations')[0].hidden = true;
+                }
+                if (forecast_select.val() == null){
+                    $('.observation-select-wrapper').collapse('hide');
+                } else {
+                    $('.observation-select-wrapper').collapse('show');
                 }
             });
             addButton.click(function(){
@@ -158,7 +213,7 @@ $(document).ready(function() {
         pair_index = 0;
         
         pair_selector = createPairSelector();
-        pair_control_container.append($('<a role="button" class="full-width object-pair-button" data-toggle="collapse" data-target=".pair-selector-wrapper">Add Observation Forecast pairs</a>'));
+        pair_control_container.append($('<a role="button" class="full-width object-pair-button collapsed" data-toggle="collapse" data-target=".pair-selector-wrapper">Create Forecast Observation pairs</a>'));
         pair_control_container.append(pair_selector);
         
     }
