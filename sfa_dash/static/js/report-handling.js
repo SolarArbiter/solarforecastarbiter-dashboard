@@ -157,7 +157,7 @@ $(document).ready(function() {
             selectedSite = $('#site-select :selected');
             site_id = selectedSite.attr('data-site-id');
             $('#no-site-selection').attr('hidden', true);
-            variable_select = $('#variable-select :selected');
+            variable_select = $('#variable-select');
             variable = variable_select.val();
 
             // create a set of elements to hide from selected site, variable and search
