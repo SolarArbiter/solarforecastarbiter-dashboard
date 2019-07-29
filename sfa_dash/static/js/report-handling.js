@@ -134,7 +134,7 @@ $(document).ready(function() {
              * Filter the Site Options Via the text found in the #site-option-search input
              */
             sites = siteSelector.find('option').slice(1);
-            sites.attr('hidden', false);
+            sites.removeAttr('hidden');
 
             toHide = searchSelect('#site-option-search', '#site-select', 1);
             if (toHide.length == sites.length){
@@ -152,7 +152,7 @@ $(document).ready(function() {
              * site and variable.
              */
             forecasts = $('#forecast-select option').slice(2);
-            forecasts.attr('hidden', false);
+            forecasts.removeAttr('hidden');
 
             selectedSite = $('#site-select :selected');
             site_id = selectedSite.attr('data-site-id');
@@ -175,7 +175,7 @@ $(document).ready(function() {
             // if all options are hidden, show "no matching forecasts"
             if (toHide.length == forecasts.length){
                 forecast_select.val('');
-                $('#no-forecasts').attr('hidden', false);
+                $('#no-forecasts').removeAttr('hidden');
             } else {
                 $('#no-forecasts').attr('hidden', true);
             }
@@ -206,7 +206,7 @@ $(document).ready(function() {
                     observation_select.val('');
                 }
                 if (toHide.length == observations.length){
-                    $('#no-observations').attr('hidden', false);
+                    $('#no-observations').removeAttr('hidden');
                 } else {
                     $('#no-observations').attr('hidden', true);
                 }
