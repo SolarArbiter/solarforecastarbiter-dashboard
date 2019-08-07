@@ -179,6 +179,14 @@ class RoleCreation(AdminView):
                                **self.template_args())
 
 
+class UserInvites(AdminView):
+    def get(self):
+        token = oauth_request_session.token['access_token']
+        session = APISession(token, base_url=app.config['SFA_API_URL'])
+        req = session.get('/users/invites')
+        return req.get_json()
+
+
 admin_blp = Blueprint('admin', 'admin', url_prefix='/admin')
 admin_blp.add_url_rule('/',
                        view_func=AdminView.as_view(
