@@ -2,20 +2,8 @@
 {% set page_title = 'Roles' %}
 {% block content %}
 {% if role is not none %}
-<div class="data-metadata border mt-2">
-    <h3>Role Data</h3>
-    <div class="row">
-        <ul class="data-metadata-fields col-md-6 col-xs-12">
-            <li><b>Name:</b> {{ role['name'] }}</li>
-            <li><b>Description:</b> {{ role['description'] }}</li>
-            <li><b>Organization:</b> {{ role['organization'] }} </li>
-        </ul>
-        <ul class="data-metadata-fields col-md-6 col-xs-12">
-            <li><b>Created:</b> {{ role['created_at'] | format_datetime}}</li>
-            <li><b>Last Modified:</b> {{ role['modified_at'] |format_datetime }}</li>
-        </ul>
-    </div>
-</div>
+{% include 'data/metadata/role_metadata.html' %}
+<a role="button" class="btn btn-danger btn-sm" href="{{ url_for('admin.delete_role', uuid=role['role_id']) }}">Delete</a>
 <h3>Permissions</h3>
 <div class="tools {{ table_type }}-tools mt-1">
    {% block tools %}
@@ -27,6 +15,7 @@
     <tr>
       <th scope="col">Name</th>
       <th scope="col">Date Added to Role</th>
+      <th scope="col"></th>
     </tr>
   </thead>
   <tbody>
@@ -34,6 +23,7 @@
       <tr>
           <td><a href="{{ url_for('admin.permission_view', uuid=perm_id) }}">{{ perm['description'] }}</a></td>
           <td>{{ perm['added_to_role'] | format_datetime}}</td>
+          <td><a role="button" class="role-permission-delete-button" href="{{ url_for('admin.role_perm_removal', uuid=role['role_id'], permission_id=perm['permission_id']) }}">Remove</a></td>
       </tr>
     {% endfor %}
   </tbody>

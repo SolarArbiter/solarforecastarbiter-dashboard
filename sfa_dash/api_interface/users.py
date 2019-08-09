@@ -9,3 +9,8 @@ def get_metadata(user_id):
 def list_metadata():
     req = get_request('/users/')
     return req
+
+
+def current():
+    req = get_request('/users/current')
+    return req

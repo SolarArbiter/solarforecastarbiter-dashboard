@@ -48,7 +48,7 @@
     <div class="scrollbox">
       <table class="table results" id='permission-table'>
         <thead>
-          <th scope="col"></th>
+          <th class="selection-column" scope="col"></th>
           <th scope="col">Name</th>
           {% if data_type != 'site' %}
           <th scope="col">Variable</th>
@@ -62,8 +62,8 @@
               No Result
             </td>
           </tr> 
-          {% for row in table_data %}
-          {{ row_macro(data_type, row) }}
+          {% for i in range(table_data | length) %}
+          {{ row_macro(data_type, table_data[i], i) }}
           {% endfor %}
         </tbody>
       </table>
