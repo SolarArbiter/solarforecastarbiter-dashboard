@@ -99,6 +99,60 @@ class UserView(AdminView):
                                **self.template_args())
 
 
+class UserRoleAddition(AdminView):
+    template = 'forms/admin/user_role_addition.html'
+
+    def get(self, uuid):
+        user_request = users.get_metadata(uuid)
+        user = user_request.json()
+        user_roles = list(user['roles'].keys())
+        role_request = roles.list_metadata()
+        all_roles = role_request.json()
+        all_roles = self.filter_by_org(all_roles, 'organization')
+        # remove any roles the user already has
+        all_roles = [role for role in all_roles
+                     if role['role_id'] not in user_roles]
+        return render_template(self.template,
+                               user=user,
+                               table_data=all_roles,
+                               **self.template_args())
+
+    def post(self, uuid):
+        form_data = request.form
+        roles = filter_form_fields('user-role-', form_data)
+        for role in roles:
+            add_role_request = users.add_role(uuid, role)
+            if add_role_request.status_code != 204:
+                abort(404)  # TODO: do something meaningful
+        return redirect(url_for('admin.user_view', uuid=uuid))
+
+
+class UserRoleRemoval(AdminView):
+    template = "forms/admin/user_role_removal.html"
+
+    def get(self, uuid, role_id, **kwargs):
+        """Confirmation view for removing a role from a user
+        """
+        user_req = users.get_metadata(uuid)
+        user = user_req.json()
+        role_req = roles.get_metadata(role_id)
+        role = role_req.json()
+        return render_template(self.template,
+                               user=user,
+                               role=role,
+                               **kwargs,
+                               **self.template_args())
+
+    def post(self, uuid, role_id):
+        """Removes a role from a user
+        """
+        delete_request = users.remove_role(uuid, role_id)
+        if delete_request.status_code != 204:
+            errors = delete_request.json()
+            return self.get(uuid, role_id, errors=errors)
+        return redirect(url_for("admin.user_view", uuid=uuid))
+
+
 # Roles Views
 class RoleListing(AdminView):
     def get(self):
@@ -154,6 +208,34 @@ class RoleCreation(AdminView):
         messages = {'Success': f'Role {role["name"]} created.'}
         return redirect(url_for('admin.roles',
                                 messages=messages))
+
+
+class RolePermissionAddition(AdminView):
+    template = 'forms/admin/role_permission_addition.html'
+
+    def get(self, uuid):
+        role_request = roles.get_metadata(uuid)
+        role = role_request.json()
+        role_perms = list(role['permissions'].keys())
+        perm_request = permissions.list_metadata()
+        all_perms = perm_request.json()
+        all_perms = self.filter_by_org(all_perms, 'organization')
+        # remove any roles the user already has
+        all_perms = [perm for perm in all_perms
+                     if perm['permission_id'] not in role_perms]
+        return render_template(self.template,
+                               role=role,
+                               table_data=all_perms,
+                               **self.template_args())
+
+    def post(self, uuid):
+        form_data = request.form
+        perms = filter_form_fields('role-permission-', form_data)
+        for perm in perms:
+            add_perm_request = roles.add_permission(uuid, perm)
+            if add_perm_request.status_code != 204:
+                abort(404)  # TODO: do something meaningful
+        return redirect(url_for('admin.role_view', uuid=uuid))
 
 
 class RoleDeletionView(AdminView):
@@ -360,6 +442,38 @@ class PermissionDeletionView(AdminView):
             return self.get(uuid, errors=errors)
 
 
+class PermissionObjectAddition(PermissionView):
+    template = 'forms/admin/permission_object_addition.html'
+
+    def get(self, uuid):
+        permission_request = permissions.get_metadata(uuid)
+        permission = permission_request.json()
+        data_type = permission['object_type'][:-1]
+        api = self.get_api_handler(permission['object_type'])
+        perm_objects = list(permission['objects'].keys())
+        object_request = api.list_metadata()
+        all_objects = object_request.json()
+        all_objects = self.filter_by_org(all_objects, 'provider')
+        # remove any objects alread on the permission
+        object_id_key = f"{data_type}_id"
+        all_objects = [obj for obj in all_objects
+                       if obj[object_id_key] not in perm_objects]
+        return render_template(self.template,
+                               permission=permission,
+                               table_data=all_objects,
+                               data_type=data_type,
+                               **self.template_args())
+
+    def post(self, uuid):
+        form_data = request.form
+        objects = filter_form_fields('objects-list-', form_data)
+        for obj in objects:
+            add_object_request = permissions.add_object(uuid, obj)
+            if add_object_request.status_code != 204:
+                abort(404)  # TODO: do something meaningful
+        return redirect(url_for('admin.permission_view', uuid=uuid))
+
+
 class PermissionObjectRemoval(AdminView):
     template = "forms/admin/permission_object_removal.html"
 
@@ -398,6 +512,9 @@ admin_blp.add_url_rule('/permissions/',
 admin_blp.add_url_rule('/permissions/<uuid>',
                        view_func=PermissionView.as_view(
                            'permission_view'))
+admin_blp.add_url_rule('/permissions/<uuid>/add',
+                       view_func=PermissionObjectAddition.as_view(
+                           'permission_object_addition'))
 admin_blp.add_url_rule('/permissions/<uuid>/remove/<object_id>',
                        view_func=PermissionObjectRemoval.as_view(
                            'permission_object_removal'))
@@ -418,6 +535,9 @@ admin_blp.add_url_rule('/roles/<uuid>/delete',
                        view_func=RoleDeletionView.as_view('delete_role'))
 admin_blp.add_url_rule('/roles/<uuid>',
                        view_func=RoleView.as_view('role_view'))
+admin_blp.add_url_rule('/roles/<uuid>/add/',
+                       view_func=RolePermissionAddition.as_view(
+                           'role_perm_addition'))
 admin_blp.add_url_rule('/roles/<uuid>/remove/<permission_id>',
                        view_func=RolePermissionRemoval.as_view(
                            'role_perm_removal'))
@@ -426,3 +546,7 @@ admin_blp.add_url_rule('/users/',
                        view_func=UserListing.as_view('users'))
 admin_blp.add_url_rule('/users/<uuid>',
                        view_func=UserView.as_view('user_view'))
+admin_blp.add_url_rule('/users/<uuid>/remove/<role_id>',
+                       view_func=UserRoleRemoval.as_view('user_role_removal'))
+admin_blp.add_url_rule('/users/<uuid>/add/',
+                       view_func=UserRoleAddition.as_view('user_role_update'))
