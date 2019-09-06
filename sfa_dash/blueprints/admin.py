@@ -3,7 +3,7 @@ from flask import (Blueprint, render_template, request,
 from sfa_dash.api_interface import (
     sites, observations, forecasts,
     cdf_forecast_groups, roles, users,
-    permissions,
+    permissions, reports
 )
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.util import filter_form_fields
@@ -31,6 +31,8 @@ class AdminView(BaseView):
             api_handler = permissions
         elif object_type == 'roles':
             api_handler = roles
+        elif object_type == 'reports':
+            api_handler = reports
         else:
             raise ValueError('Invalid object_type')
         return api_handler
@@ -323,11 +325,15 @@ class PermissionView(AdminView):
             # dashboard uses singular object names as labels to differentiate
             # single views from listings
             object_type = permission['object_type'][:-1]
+            if 'forecast' in object_type:
+                id_key = 'forecast_id'
+            else:
+                id_key = f'{object_type}_id'
             # create a dict of objects where keys are uuid and values are
             # objects
             objects = api_handler.list_metadata()
             object_list = objects.json()
-            object_map = {obj[f'{object_type}_id']: obj
+            object_map = {obj[id_key]: obj
                           for obj in object_list}
             # rebuild the 'objects' dict with the uuid: object structure
             # instead of uuid: created_at
