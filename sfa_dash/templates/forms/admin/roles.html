@@ -19,6 +19,9 @@
     </tr>
   </thead>
   <tbody>
+    <tr class="warning no-result">
+      <td colspan="4"><i class="fa fa-warning"></i>No result</td>
+    </tr>
       {% for role in table_data %}
         <tr>
             <td><a href="{{ url_for('admin.role_view', uuid=role['role_id']) }}">{{ role["name"] }}</a></td>

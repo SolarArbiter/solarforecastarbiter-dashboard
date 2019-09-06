@@ -390,3 +390,15 @@ a:not([href]).object-pair-button:hover{
 th.selection-column{
     width: 2em;
 }
+.nav-tabs .nav-item.active{
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-bottom: 1px solid #FFF;
+}
+.nav-tabs .nav-item{
+    background-color: #e9ecef;
+}
+.nav-tabs .nav-link:hover{
+    background-color: #c9cccf;
+    border-color: #a9acaf;
+}

@@ -168,6 +168,7 @@ class RoleListing(AdminView):
 
 class RoleView(AdminView):
     def get(self, uuid, **kwargs):
+        role_table = request.args.get('table', 'permissions')
         role = roles.get_metadata(uuid).json()
         if 'errors' in role:
             role = None
@@ -178,8 +179,17 @@ class RoleView(AdminView):
             role['permissions'] = {k: {'added_to_role': v, **permission_map[k]}
                                    for k, v in role['permissions'].items()
                                    if k in permission_map}
+            user_list = users.list_metadata().json()
+            user_map = {user['user_id']: user
+                        for user in user_list}
+            role['users'] = {k: {'user_id': k,
+                                 'added_to_user': v,
+                                 'organization': user_map[k]['organization']}
+                             for k, v in role['users'].items()
+                             if k in user_map}
         return render_template('forms/admin/role.html',
                                role=role,
+                               role_table=role_table,
                                **kwargs,
                                **self.template_args())
 
