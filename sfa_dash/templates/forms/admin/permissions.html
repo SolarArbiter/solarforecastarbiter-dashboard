@@ -28,7 +28,12 @@
     {% if table_data is defined %}
       {% for perm in table_data %}
         <tr>
-            <td><a href="{{ url_for('admin.permission_view', uuid=perm['permission_id'])}}">{{ perm["description"] }}</a></td>
+            <td>
+            {% if perm['object_type'] != 'reports' %}
+              <a href="{{ url_for('admin.permission_view', uuid=perm['permission_id'])}}">{{ perm["description"] }}</a>
+            {% else %}
+              {{ perm["description"] }}</td>
+            {% endif %}</td>
             <td>{{ perm["action"] }}</td>
             <td>{{ perm["object_type"] }} </td>
 
