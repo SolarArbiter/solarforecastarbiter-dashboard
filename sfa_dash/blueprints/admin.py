@@ -1,5 +1,5 @@
 from flask import (Blueprint, render_template, request,
-                   url_for, redirect, abort)
+                   url_for, redirect, abort, session)
 from sfa_dash.api_interface import (
     sites, observations, forecasts,
     cdf_forecast_groups, roles, users,
@@ -105,6 +105,8 @@ class UserRoleAddition(AdminView):
     template = 'forms/admin/user_role_addition.html'
 
     def get(self, uuid):
+        """Form for adding roles to a user.
+        """
         user_request = users.get_metadata(uuid)
         user = user_request.json()
         user_roles = list(user['roles'].keys())
@@ -120,6 +122,9 @@ class UserRoleAddition(AdminView):
                                **self.template_args())
 
     def post(self, uuid):
+        """Parses a list of role ids and attempts to add them to
+        a user.
+        """
         form_data = request.form
         roles = filter_form_fields('user-role-', form_data)
         for role in roles:
@@ -136,23 +141,44 @@ class UserRoleRemoval(AdminView):
         """Confirmation view for removing a role from a user
         """
         user_req = users.get_metadata(uuid)
-        user = user_req.json()
+        # Check if the user is readable. For roles shared outside
+        # an org this may not be true, but we still need to pass
+        # user_id to the template for building urls and display.
+        if user_req.status_code == 200:
+            user = user_req.json()
+        else:
+            user = {'user_id': uuid}
         role_req = roles.get_metadata(role_id)
         role = role_req.json()
+        redirect_link = request.headers['Referer']
+        # set a redirect link, because we can be directed here
+        # from a role or user page.
+        session['redirect_link'] = redirect_link
         return render_template(self.template,
                                user=user,
                                role=role,
+                               redirect_link=redirect_link,
                                **kwargs,
                                **self.template_args())
 
     def post(self, uuid, role_id):
         """Removes a role from a user
         """
+        confirmation_url = url_for(
+            'admin.user_role_removal',
+            _external=True,
+            uuid=uuid,
+            role_id=role_id)
+        if request.headers['Referer'] != confirmation_url:
+            redirect(confirmation_url)
         delete_request = users.remove_role(uuid, role_id)
         if delete_request.status_code != 204:
             errors = delete_request.json()
             return self.get(uuid, role_id, errors=errors)
-        return redirect(url_for("admin.user_view", uuid=uuid))
+        redirect_url = session.pop(
+            'redirect_link',
+            url_for("admin.user_view", uuid=uuid))
+        return redirect(redirect_url)
 
 
 # Roles Views
@@ -184,14 +210,49 @@ class RoleView(AdminView):
                         for user in user_list}
             role['users'] = {k: {'user_id': k,
                                  'added_to_user': v,
-                                 'organization': user_map[k]['organization']}
-                             for k, v in role['users'].items()
-                             if k in user_map}
+                                 'organization': user_map.get(
+                                     k, {}).get('organization', '')}
+                             for k, v in role['users'].items()}
         return render_template('forms/admin/role.html',
                                role=role,
                                role_table=role_table,
                                **kwargs,
                                **self.template_args())
+
+
+class RoleGrant(AdminView):
+    def get(self, uuid, **kwargs):
+        role = roles.get_metadata(uuid).json()
+        if 'errors' in role:
+            role = None
+        redirect_link = request.headers['Referer']
+        # set a redirect link, because we can be directed here
+        # from a role or user page.
+        session['redirect_link'] = redirect_link
+        return render_template('forms/admin/role_grant.html',
+                               role=role,
+                               **kwargs,
+                               redirect_link=redirect_link,
+                               **self.template_args())
+
+    def post(self, uuid):
+        form_data = request.form
+        user_id = form_data.get('user_id', '')
+        grant_role_request = users.add_role(user_id, uuid)
+        if grant_role_request.status_code != 204:
+            role = roles.get_metadata(uuid).json()
+            errors = {
+                'Error': ['Failed to grant role.'],
+            }
+            return render_template(
+                'forms/admin/role_grant.html',
+                role=role,
+                errors=errors,
+                **self.template_args())
+        redirect_url = session.pop(
+            'redirect_link',
+            url_for('admin.role_view', uuid=uuid))
+        return redirect(redirect_url)
 
 
 class RoleCreation(AdminView):
@@ -557,7 +618,9 @@ admin_blp.add_url_rule('/roles/<uuid>/add/',
 admin_blp.add_url_rule('/roles/<uuid>/remove/<permission_id>',
                        view_func=RolePermissionRemoval.as_view(
                            'role_perm_removal'))
-
+admin_blp.add_url_rule('/roles/<uuid>/grant/',
+                       view_func=RoleGrant.as_view(
+                           'role_grant'))
 admin_blp.add_url_rule('/users/',
                        view_func=UserListing.as_view('users'))
 admin_blp.add_url_rule('/users/<uuid>',
