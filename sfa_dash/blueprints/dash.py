@@ -37,11 +37,11 @@ class DataDashView(BaseView):
         try:
             start = pd.Timestamp(start_arg)
         except ValueError:
-            start = pd.Timestamp.now() - pd.Timedelta('3days')
+            start = pd.Timestamp.utcnow() - pd.Timedelta('3days')
         try:
             end = pd.Timestamp(end_arg)
         except ValueError:
-            end = pd.Timestamp.now()
+            end = pd.Timestamp.utcnow()
         return start.isoformat(), end.isoformat()
 
     def get(self, **kwargs):
