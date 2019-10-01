@@ -7,6 +7,8 @@ from sfa_dash.api_interface import (sites, observations, forecasts,
                                     cdf_forecasts, cdf_forecast_groups)
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.reports import ReportForm
+from sfa_dash.blueprints.util import handle_response
+from sfa_dash.errors import DataRequestException
 
 
 class MetadataForm(BaseView):
@@ -211,11 +213,7 @@ class CreateForm(MetadataForm):
         super().__init__(data_type)
 
     def get_site_metadata(self, site_id):
-        site_metadata_request = sites.get_metadata(site_id)
-        if site_metadata_request.status_code != 200:
-            abort(404)
-        site_metadata = site_metadata_request.json()
-        return site_metadata
+        return handle_response(sites.get_metadata(site_id))
 
     def render_metadata_section(self, metadata):
         return render_template(self.metadata_template, **metadata)
@@ -280,13 +278,19 @@ class UploadForm(BaseView):
         return render_template(self.metadata_template, **metadata)
 
     def get(self, uuid):
-        metadata_request = self.api_handle.get_metadata(uuid)
-        if metadata_request.status_code != 200:
-            abort(404)
-        metadata_dict = metadata_request.json()
-        metadata_dict['site_link'] = self.generate_site_link(metadata_dict)
-        metadata = self.render_metadata_section(metadata_dict)
-        return render_template(self.template, uuid=uuid, metadata=metadata)
+        temp_args = {}
+        try:
+            metadata_dict = handle_response(
+                self.api_handle.get_metadata(uuid))
+            metadata_dict['site_link'] = self.generate_site_link(
+                metadata_dict)
+        except DataRequestException as e:
+            errors = e.errors
+            temp_args = {'errors': e.errors}
+        else:
+            temp_args.update(
+                {'metadata': self.render_metadata_section(metadata_dict)})
+        return render_template(self.template, uuid=uuid, **temp_args)
 
     def post(self, uuid):
         if request.mimetype != 'multipart/form-data':
@@ -324,9 +328,10 @@ class UploadForm(BaseView):
                 'mime-type': [f'Unsupported file type {posted_file.mimetype}.']
             }
             return render_template(self.template, uuid=uuid, errors=errors)
-        if post_request.status_code != 201:
-            errors = post_request.json()['errors']
-            return render_template(self.template, uuid=uuid, errors=errors)
+        try:
+            handle_response(post_request)
+        except DataRequestException as e:
+            return render_template(self.template, uuid=uuid, errors=e.errors)
         else:
             return redirect(url_for(f'data_dashboard.{self.data_type}_view',
                                     uuid=uuid))
@@ -382,10 +387,11 @@ class DownloadForm(BaseView):
         return headers, params
 
     def template_args(self, uuid):
-        metadata_request = self.api_handle.get_metadata(uuid)
-        if metadata_request.status_code != 200:
-            abort(404)
-        metadata_dict = metadata_request.json()
+        try:
+            metadata_dict = handle_response(
+                self.api_handle.get_metadata(uuid))
+        except DataRequestException as e:
+            return {'errors': e.errors}
         metadata_dict['site_link'] = self.generate_site_link(metadata_dict)
         metadata = render_template(self.metadata_template, **metadata_dict)
         return {'metadata': metadata, 'uuid': uuid}
@@ -404,25 +410,26 @@ class DownloadForm(BaseView):
                 errors=errors, **self.template_args(uuid)), 400)
             return response
         else:
-            data_request = self.api_handle.get_values(uuid,
-                                                      headers=headers,
-                                                      params=params)
-            if data_request.status_code != 200:
-                abort(404)
-            elif form_data['format'] == 'application/json':
-                data = data_request.json()
-                response = make_response(json.dumps(data))
-                response.headers.set('Content-Type', 'application/json')
-                response.headers.set(
-                    'Content-Disposition', 'attachment', filename='data.json')
-            elif form_data['format'] == 'text/csv':
-                csv_data = data_request.text
-                response = make_response(csv_data)
-                response.headers.set('Content-Type', 'text/csv')
-                response.headers.set(
-                    'Content-Disposition', 'attachment', filename='data.csv')
+            try:
+                data = handle_response(
+                   self.api_handle.get_values(
+                       uuid, headers=headers, params=params))
+            except DataRequestException as e:
+                return render_template(
+                    self.template, **self.template_args, errors=e.errors)
             else:
-                raise ValueError('Invalid Format.')
+                if form_data['format'] == 'application/json':
+                    response = make_response(json.dumps(data))
+                    response.headers.set('Content-Type', 'application/json')
+                    response.headers.set(
+                        'Content-Disposition', 'attachment', filename='data.json')
+                elif form_data['format'] == 'text/csv':
+                    response = make_response(data)
+                    response.headers.set('Content-Type', 'text/csv')
+                    response.headers.set(
+                        'Content-Disposition', 'attachment', filename='data.csv')
+                else:
+                    raise ValueError('Invalid Format.')
             return response
 
 
