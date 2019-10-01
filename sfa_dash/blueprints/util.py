@@ -1,3 +1,4 @@
+import pdb
 """ Utility classes/functions. Mostly for handling api data.
 """
 from copy import deepcopy
@@ -11,6 +12,7 @@ from solarforecastarbiter.plotting import timeseries
 
 from sfa_dash.api_interface import (sites, forecasts, observations,
                                     cdf_forecast_groups)
+from sfa_dash.errors import DataRequestException
 
 
 class DataTables(object):
@@ -257,3 +259,36 @@ def filter_form_fields(prefix, form_data):
     return [form_data[key]
             for key in form_data.keys()
             if key.startswith(prefix)]
+
+
+def handle_response(request_object):
+    """Pass a request object to attempt to parse the response.
+
+    Parameters
+    ----------
+    request_object: requests.Response
+        The response object from an executed request.
+
+    Returns
+    -------
+    dict
+        The parsed json of a response.
+
+    Raises
+    ------
+    sfa_dash.errors.DataRequestException
+        If a recoverable 400 level error has been encountered.
+        The errors attribute will contain a dict of errors.
+    """
+    if request_object.status_code != 200:
+        if request_object.status_code == 400:
+            errors = request_object.json()
+            raise DataRequestException(request_object.status_code, **errors)
+        if request_object.status_code == 404:
+            errors = {'404': 'The requested object could not be found.'}
+            raise DataRequestException(request_object.status_code, **errors)
+        # Any other errors should be due to bugs and not by attempts
+        # to reach inaccessible data. Allow exceptions to be raised
+        # so that they can be reported to Sentry.
+    if request_object.request.method == 'GET':
+        return request_object.json()
