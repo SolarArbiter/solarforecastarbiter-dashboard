@@ -287,12 +287,14 @@ def handle_response(request_object):
         if request_object.status_code == 404:
             errors = {'404': 'The requested object could not be found.'}
             raise DataRequestException(request_object.status_code, **errors)
-        # With the exception of a 204, which will not return content, any
-        # other errors should be due to bugs and not by attempts to reach
+        # Other errors should be due to bugs and not by attempts to reach
         # inaccessible data. Allow exceptions to be raised
         # so that they can be reported to Sentry.
     if request_object.request.method == 'GET':
         if request_object.headers['Content-Type'] == 'application/json':
             return request_object.json()
         else:
+            return request_object.text
+    if request_object.request.method == 'POST':
+        if request_object.status_code != 204:
             return request_object.text

@@ -6,8 +6,8 @@ from sfa_dash.api_interface import (
     permissions, reports
 )
 from sfa_dash.blueprints.base import BaseView
-from sfa_dash.blueprints.util import filter_form_fields
-
+from sfa_dash.blueprints.util import filter_form_fields, handle_response
+from sfa_dash.errors import DataRequestException
 
 class AdminView(BaseView):
     subnav_format = {
@@ -87,39 +87,46 @@ class UserListing(AdminView):
 
 class UserView(AdminView):
     def get(self, uuid):
-        user = users.get_metadata(uuid).json()
-        if 'errors' in user:
-            user = None
+        temp_args = self.template_args()
+        try:
+            user = handle_response(users.get_metadata(uuid))
+            role_list = handle_response(roles.list_metadata())
+        except DataRequestException as e:
+            temp_args.update({'errors': e.errors})
         else:
-            role_list = roles.list_metadata().json()
             role_map = {role['role_id']: role for role in role_list}
             user['roles'] = {k: {'added_to_user': v, **role_map[k]}
                              for k, v in user['roles'].items()
                              if k in role_map}
         return render_template('forms/admin/user.html',
-                               user=user,
-                               **self.template_args())
+                               user=user, **temp_args)
 
 
 class UserRoleAddition(AdminView):
     template = 'forms/admin/user_role_addition.html'
 
-    def get(self, uuid):
+    def get(self, uuid, **kwargs):
         """Form for adding roles to a user.
         """
-        user_request = users.get_metadata(uuid)
-        user = user_request.json()
-        user_roles = list(user['roles'].keys())
-        role_request = roles.list_metadata()
-        all_roles = role_request.json()
-        all_roles = self.filter_by_org(all_roles, 'organization')
-        # remove any roles the user already has
-        all_roles = [role for role in all_roles
-                     if role['role_id'] not in user_roles]
+        try:
+            user = handle_response(users.get_metadata(uuid))
+            all_roles = handle_response(roles.list_metadata())
+        except DataRequestException as e:
+            return render_template(
+                self.template, errors=e.errors, **self.template_args())
+        else:
+            user_roles = list(user['roles'].keys())
+            role_request = roles.list_metadata()
+            all_roles = role_request.json()
+            all_roles = self.filter_by_org(all_roles, 'organization')
+            # remove any roles the user already has
+            all_roles = [role for role in all_roles
+                         if role['role_id'] not in user_roles]
         return render_template(self.template,
                                user=user,
                                table_data=all_roles,
-                               **self.template_args())
+                               **self.template_args(),
+                               **kwargs)
 
     def post(self, uuid):
         """Parses a list of role ids and attempts to add them to
@@ -127,10 +134,17 @@ class UserRoleAddition(AdminView):
         """
         form_data = request.form
         roles = filter_form_fields('user-role-', form_data)
+        messages = {}
+        errors = {}
         for role in roles:
-            add_role_request = users.add_role(uuid, role)
-            if add_role_request.status_code != 204:
-                abort(404)  # TODO: do something meaningful
+            try:
+                handle_response(users.add_role(uuid, role))
+            except DataRequestException as e:
+                errors[role] = [f'Failed to add role {role} to user.']
+            else:
+                messages[role] = f'Successfully added role {role} to user.'
+        if errors:
+            return self.get(uuid, errors=errors, messages=messages)
         return redirect(url_for('admin.user_view', uuid=uuid))
 
 
@@ -256,14 +270,15 @@ class RoleGrant(AdminView):
 
 
 class RoleCreation(AdminView):
-    def get(self):
+    def get(self, **kwargs):
         list_request = permissions.list_metadata()
         table_data = list_request.json()
         table_data = self.filter_by_org(table_data, 'organization')
         return render_template(
             "forms/admin/role_form.html",
             table_data=table_data,
-            **self.template_args())
+            **self.template_args(),
+            **kwargs)
 
     def post(self):
         form_data = request.form
@@ -271,13 +286,23 @@ class RoleCreation(AdminView):
             'name': form_data['name'],
             'description': form_data['description'],
         }
-        create_role_request = roles.post_metadata(role)
-        role_id = create_role_request.text
+        try:
+            role_id = handle_response(roles.post_metadata(role))
+        except DataRequestException as e:
+            return self.get(errors=e.errors)
+        errors={}
+        messages={}
         permissions = filter_form_fields('role-permission-', form_data)
         for perm_id in permissions:
-            add_perm_request = roles.add_permission(role_id, perm_id)
-            if add_perm_request.status_code != 204:
-                return abort(404)  # TODO: do something meaningful
+            try:
+                 handle_response(
+                     roles.add_permission(role_id, perm_id))
+            except DataRequestException as e:
+                errors[perm_id] = [f'Failed to add permission {perm_id} to role.']
+            else:
+                messages[perm_id] = [f'Successfully added permission {perm_id} to role.']
+        if errors:
+            return self.get(errors=errors, messages=messages)
         messages = {'Success': f'Role {role["name"]} created.'}
         return redirect(url_for('admin.roles',
                                 messages=messages))
@@ -486,17 +511,20 @@ class PermissionDeletionView(AdminView):
     template = 'forms/admin/admin_deletion_form.html'
 
     def get(self, uuid):
-        perm_request = permissions.get_metadata(uuid)
-        perm = perm_request.json()
-        metadata = render_template(
-            self.meta_template,
-            data_type="permission",
-            permission=perm)
-        return render_template(
-            self.template,
-            uuid=perm['permission_id'],
-            data_type='permission',
-            metadata=metadata)
+        temp_args = {}
+        try:
+            perm = handle_response(permissions.get_metadata(uuid))
+        except DataRequestException as e:
+            temp_args['errors'] = e.errors
+        else:
+            temp_args['metadata'] = render_template(
+                self.meta_template,
+                data_type="permission",
+                permission=perm)
+            temp_args['uuid'] = perm['permission_id']
+        temp_args['data_type'] == 'permission'
+        return render_template(self.template, **temp_args)
+
 
     def post(self, uuid):
         confirmation_url = url_for(
@@ -522,32 +550,38 @@ class PermissionDeletionView(AdminView):
 class PermissionObjectAddition(PermissionView):
     template = 'forms/admin/permission_object_addition.html'
 
-    def get(self, uuid):
-        permission_request = permissions.get_metadata(uuid)
-        permission = permission_request.json()
-        data_type = permission['object_type'][:-1]
-        api = self.get_api_handler(permission['object_type'])
-        perm_objects = list(permission['objects'].keys())
-        object_request = api.list_metadata()
-        all_objects = object_request.json()
-        all_objects = self.filter_by_org(all_objects, 'provider')
-        # remove any objects alread on the permission
-        object_id_key = f"{data_type}_id"
-        all_objects = [obj for obj in all_objects
-                       if obj[object_id_key] not in perm_objects]
+    def get(self, uuid, **kwargs):
+        try:
+            permission = handle_response(
+                permissions.get_metadata(uuid))
+        except DataRequestException as e:
+            return render_template(self.template, errors=e.errors)
+        else:
+            data_type = permission['object_type'][:-1]
+            api = self.get_api_handler(permission['object_type'])
+            perm_objects = list(permission['objects'].keys())
+            all_objects = handle_response(api.list_metadata())
+            all_objects = self.filter_by_org(all_objects, 'provider')
+            # remove any objects alread on the permission
+            object_id_key = f"{data_type}_id"
+            all_objects = [obj for obj in all_objects
+                           if obj[object_id_key] not in perm_objects]
         return render_template(self.template,
                                permission=permission,
                                table_data=all_objects,
                                data_type=data_type,
-                               **self.template_args())
+                               **self.template_args(),
+                               **kwargs)
 
     def post(self, uuid):
         form_data = request.form
         objects = filter_form_fields('objects-list-', form_data)
+        errors = {}
         for obj in objects:
-            add_object_request = permissions.add_object(uuid, obj)
-            if add_object_request.status_code != 204:
-                abort(404)  # TODO: do something meaningful
+            try:
+                 permissions.add_object(uuid, obj)
+            except DataRequestException as e:
+                return render_template(self.template, errors=e.errors)
         return redirect(url_for('admin.permission_view', uuid=uuid))
 
 
@@ -555,17 +589,19 @@ class PermissionObjectRemoval(AdminView):
     template = "forms/admin/permission_object_removal.html"
 
     def get(self, uuid, object_id, **kwargs):
-        permission_request = permissions.get_metadata(uuid)
-        permission = permission_request.json()
-        api = self.get_api_handler(permission['object_type'])
-        object_request = api.get_metadata(object_id)
-        object_data = object_request.json()
-        return render_template(self.template,
-                               permission=permission,
-                               object_data=object_data,
-                               object_id=object_id,
-                               **kwargs,
-                               **self.template_args())
+        try:
+            permission = handle_response(permissions.get_metadata(uuid))
+            api = self.get_api_handler(permission['object_type'])
+            object_data = handle_response(api.get_metadata(object_id))
+        except DataRequestException as e:
+            return render_template(self.template, errors=e.errors)
+        else:
+            return render_template(self.template,
+                permission=permission,
+                object_data=object_data,
+                object_id=object_id,
+                **kwargs,
+                **self.template_args())
 
     def post(self, uuid, object_id):
         """Remove an object from a permission by passing the
