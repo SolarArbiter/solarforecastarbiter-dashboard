@@ -1,5 +1,4 @@
-from flask import (Blueprint, render_template,
-                   url_for, abort)
+from flask import Blueprint, render_template, url_for
 
 
 from sfa_dash.api_interface import (observations, forecasts,
