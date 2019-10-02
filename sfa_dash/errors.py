@@ -19,4 +19,3 @@ class UnverifiedUserException(BaseDashboardException):
 class DataRequestException(BaseDashboardException):
     def __init__(self, status_code, errors=None, **kwargs):
         super().__init__(status_code, errors=errors, **kwargs)
-        

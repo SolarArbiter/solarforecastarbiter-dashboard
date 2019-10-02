@@ -145,7 +145,8 @@ class UserRoleAddition(AdminView):
             else:
                 messages[role] = f'Successfully added role {role} to user.'
         if errors:
-            return self.get(uuid, errors=errors, messages=messages)
+            return self.get(
+                uuid, errors=errors, messages=messages, form_data=form_data)
         return redirect(url_for('admin.user_view', uuid=uuid))
 
 
@@ -240,19 +241,23 @@ class RoleView(AdminView):
 
 
 class RoleGrant(AdminView):
+    template = 'forms/admin/role_grant.html'
+
     def get(self, uuid, **kwargs):
-        role = roles.get_metadata(uuid).json()
-        if 'errors' in role:
-            role = None
+        template_args = self.template_args()
+        try:
+            role = handle_response(roles.get_metadata(uuid))
+        except DataRequestException as e:
+            template_args['errors'] = e.errors
         redirect_link = request.headers['Referer']
         # set a redirect link, because we can be directed here
         # from a role or user page.
         session['redirect_link'] = redirect_link
-        return render_template('forms/admin/role_grant.html',
+        return render_template(self.template,
                                role=role,
                                **kwargs,
                                redirect_link=redirect_link,
-                               **self.template_args())
+                               **template_args)
 
     def post(self, uuid):
         form_data = request.form
@@ -264,9 +269,10 @@ class RoleGrant(AdminView):
                 'Error': ['Failed to grant role.'],
             }
             return render_template(
-                'forms/admin/role_grant.html',
+                self.template,
                 role=role,
                 errors=errors,
+                form_data=form_data,
                 **self.template_args())
         redirect_url = session.pop(
             'redirect_link',
@@ -275,15 +281,14 @@ class RoleGrant(AdminView):
 
 
 class RoleCreation(AdminView):
+    template = "/forms/admin/role_form.html"
+
     def get(self, **kwargs):
         list_request = permissions.list_metadata()
         table_data = list_request.json()
         table_data = self.filter_by_org(table_data, 'organization')
-        return render_template(
-            "forms/admin/role_form.html",
-            table_data=table_data,
-            **self.template_args(),
-            **kwargs)
+        return render_template(self.template, table_data=table_data,
+                               **self.template_args(), **kwargs)
 
     def post(self):
         form_data = request.form
@@ -309,7 +314,8 @@ class RoleCreation(AdminView):
                 messages[perm_id] = [
                     f'Successfully added permission {perm_id} to role.']
         if errors:
-            return self.get(errors=errors, messages=messages)
+            return self.get(
+                form_data=form_data, errors=errors, messages=messages)
         messages = {'Success': f'Role {role["name"]} created.'}
         return redirect(url_for('admin.roles',
                                 messages=messages))
@@ -350,7 +356,8 @@ class RolePermissionAddition(AdminView):
             else:
                 messages[perm] = [f'Successfully added perm {perm} to role.']
         if errors:
-            return self.get(uuid, errors=errors, messages=messages)
+            return self.get(
+                uuid, errors=errors, messages=messages, form_data=form_data)
         return redirect(url_for('admin.role_view', uuid=uuid))
 
 

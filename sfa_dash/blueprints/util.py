@@ -292,7 +292,7 @@ def handle_response(request_object):
             previous_page = request.headers['Referer']
             errors = {'404': (
                 'The requested object could not be found. You may need to '
-                'request accessfrom the data owner.')
+                'request access from the data owner.')
             }
             if previous_page != request.url:
                 errors['404'] = errors['404'] + (
