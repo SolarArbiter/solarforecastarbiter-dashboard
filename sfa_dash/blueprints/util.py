@@ -3,7 +3,7 @@
 from copy import deepcopy
 
 
-from flask import render_template, url_for
+from flask import render_template, url_for, request
 from solarforecastarbiter import datamodel
 from solarforecastarbiter.io import utils as io_utils
 from solarforecastarbiter.plotting import timeseries
@@ -283,8 +283,21 @@ def handle_response(request_object):
         if request_object.status_code == 400:
             errors = request_object.json()
             raise DataRequestException(request_object.status_code, **errors)
+        if request_object.status_code == 401:
+            errors = {
+                '401': "You do not have permission to create this resource."
+            }
+            raise DataRequestException(request_object.status_code, **errors)
         if request_object.status_code == 404:
-            errors = {'404': 'The requested object could not be found.'}
+            previous_page = request.headers['Referer']
+            errors = {'404': (
+                'The requested object could not be found. You may need to '
+                'request accessfrom the data owner.')
+            }
+            if previous_page != request.url:
+                errors['404'] = errors['404'] + (
+                    f' <a href="{previous_page}">Return to the previous '
+                    'page.</a>')
             raise DataRequestException(request_object.status_code, **errors)
         # Other errors should be due to bugs and not by attempts to reach
         # inaccessible data. Allow exceptions to be raised

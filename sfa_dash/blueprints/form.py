@@ -230,30 +230,29 @@ class CreateForm(MetadataForm):
     def post(self, uuid=None):
         form_data = request.form
         formatted_form = self.formatter(form_data)
-        response = self.api_handle.post_metadata(formatted_form)
         template_args = {}
-        if uuid is not None:
-            site_metadata = self.get_site_metadata(uuid)
-            template_args['site_metadata'] = site_metadata
-            template_args['metadata'] = self.render_metadata_section(
-                site_metadata)
-        if response.status_code == 201:
-            created_uuid = response.text
-            return redirect(url_for(f'data_dashboard.{self.data_type}_view',
-                                    uuid=created_uuid))
-        elif response.status_code == 400:
-            errors = response.json()['errors']
-            template_args['errors'] = self.flatten_dict(errors)
-        elif response.status_code == 401:
-            template_args['errors'] = {'Unauthorized': 'You do not have'
-                                       'permissions to create resources '
-                                       f'of type {self.data_type}'}
-        else:
-            template_args['errors'] = {'Error': ['Something went wrong, '
-                                       'contact a site administrator.']}
-
-        return render_template(self.template, form_data=form_data,
-                               **template_args)
+        try:
+            created_uuid = handle_response(
+                self.api_handle.post_metadata(formatted_form))
+        except DataRequestException as e:
+            if 'errors' in template_args:
+                template_args['errors'].update(
+                    self.flatten_dict(e.errors))
+            else:
+                template_args['errors'] = self.flatten_dict(e.errors)
+            if uuid is not None:
+                try:
+                    site_metadata = self.get_site_metadata(uuid)
+                except DataRequestException as e:
+                    template_args['errors'].update(self.flatten_dict(e.errors))
+                else:
+                    template_args['site_metadata'] = site_metadata
+                    template_args['metadata'] = self.render_metadata_section(
+                        site_metadata)
+                return render_template(
+                    self.template, form_data=form_data, **template_args)
+        return redirect(url_for(f'data_dashboard.{self.data_type}_view',
+                                uuid=created_uuid))
 
 
 class UploadForm(BaseView):
