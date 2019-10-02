@@ -13,7 +13,6 @@ from sfa_dash.blueprints.util import timeseries_adapter, handle_response
 from sfa_dash.errors import DataRequestException
 
 
-
 class SingleObservationView(DataDashView):
     template = 'data/asset.html'
 
@@ -58,7 +57,8 @@ class SingleObservationView(DataDashView):
                 if script_plot is None:
                     temp_args.update(
                         {'messages':
-                            {'Data': ["No data available for this Observation."]}
+                            {'Data': [
+                                "No data available for this Observation."]}
                          }
                     )
                 else:
@@ -112,7 +112,7 @@ class SingleCDFForecastView(DataDashView):
             self.metadata = handle_response(
                 cdf_forecasts.get_metadata(uuid))
             self.metadata['site'] = self.get_site_metadata(
-                    self.metadata['site_id'])
+                self.metadata['site_id'])
         except DataRequestException as e:
             temp_args = {'errors': e.errors}
         else:
@@ -175,7 +175,7 @@ class SingleForecastView(DataDashView):
             self.metadata = handle_response(
                 forecasts.get_metadata(uuid))
             self.metadata['site'] = self.get_site_metadata(
-                    self.metadata['site_id'])
+                self.metadata['site_id'])
         except DataRequestException as e:
             temp_args = {'errors': e.errors}
         else:
@@ -241,7 +241,7 @@ class SingleCDFForecastGroupView(DataDashView):
             self.metadata = handle_response(
                 cdf_forecast_groups.get_metadata(uuid))
             self.metadata['site'] = self.get_site_metadata(
-                    self.metadata['site_id'])
+                self.metadata['site_id'])
         except DataRequestException as e:
             temp_args = {'errors': e.errors}
         else:

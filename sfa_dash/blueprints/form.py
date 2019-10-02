@@ -285,7 +285,6 @@ class UploadForm(BaseView):
             metadata_dict['site_link'] = self.generate_site_link(
                 metadata_dict)
         except DataRequestException as e:
-            errors = e.errors
             temp_args = {'errors': e.errors}
         else:
             temp_args.update(
@@ -412,8 +411,8 @@ class DownloadForm(BaseView):
         else:
             try:
                 data = handle_response(
-                   self.api_handle.get_values(
-                       uuid, headers=headers, params=params))
+                    self.api_handle.get_values(
+                        uuid, headers=headers, params=params))
             except DataRequestException as e:
                 return render_template(
                     self.template, **self.template_args, errors=e.errors)
@@ -422,12 +421,16 @@ class DownloadForm(BaseView):
                     response = make_response(json.dumps(data))
                     response.headers.set('Content-Type', 'application/json')
                     response.headers.set(
-                        'Content-Disposition', 'attachment', filename='data.json')
+                        'Content-Disposition',
+                        'attachment',
+                        filename='data.json')
                 elif form_data['format'] == 'text/csv':
                     response = make_response(data)
                     response.headers.set('Content-Type', 'text/csv')
                     response.headers.set(
-                        'Content-Disposition', 'attachment', filename='data.csv')
+                        'Content-Disposition',
+                        'attachment',
+                        filename='data.csv')
                 else:
                     raise ValueError('Invalid Format.')
             return response
@@ -468,5 +471,4 @@ forms_blp.add_url_rule('/forecasts/cdf/<uuid>/download',
                            'download_cdf_forecast_data',
                            data_type='cdf_forecast'))
 forms_blp.add_url_rule('/reports/create',
-                       view_func=ReportForm.as_view(
-                           'create_report'))
+                       view_func=ReportForm.as_view('create_report'))

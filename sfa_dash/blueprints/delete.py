@@ -1,4 +1,4 @@
-from flask import url_for, request, render_template, abort, redirect
+from flask import url_for, request, render_template, redirect
 
 from sfa_dash.api_interface import (sites, observations, forecasts,
                                     cdf_forecast_groups)
