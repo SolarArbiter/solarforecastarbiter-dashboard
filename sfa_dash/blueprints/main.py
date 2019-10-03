@@ -57,8 +57,9 @@ class SingleObservationView(DataDashView):
                 if script_plot is None:
                     temp_args.update(
                         {'messages':
-                            {'Data': [("No data available for this Observation "
-                                       "during this period.")]}
+                            {'Data': [
+                                ("No data available for this Observation "
+                                 "during this period.")]}
                          }
                     )
                 else:
