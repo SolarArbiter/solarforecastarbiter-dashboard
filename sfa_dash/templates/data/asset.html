@@ -11,7 +11,6 @@
 <a role="button" class="btn btn-danger btn-sm" href="{{ delete_link }}">Delete</a>
 {% endif %}
 {% include "sections/notifications.html" %}
-{% if plot is defined %}
 <script src="/static/js/plot-bound-parsing.js"></script>
 <div class="form-group">
 <div class="form-element">
@@ -31,6 +30,7 @@
 <input type="text" id="start" name="start" hidden>
 <input type="text" id="end" name="end" hidden>
 </div>
+{% if plot is defined %}
 <div class="row data-plots-wrapper">
     {{ plot | safe }}
 </div>

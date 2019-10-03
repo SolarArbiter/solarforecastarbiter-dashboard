@@ -57,8 +57,8 @@ class SingleObservationView(DataDashView):
                 if script_plot is None:
                     temp_args.update(
                         {'messages':
-                            {'Data': [
-                                "No data available for this Observation."]}
+                            {'Data': [("No data available for this Observation "
+                                       "during this period.")]}
                          }
                     )
                 else:
@@ -128,7 +128,8 @@ class SingleCDFForecastView(DataDashView):
                 if script_plot is None:
                     temp_args.update(
                         {'messages':
-                            {'Data': ["No data available for this Forecast."]}
+                            {'Data': [("No data available for this Forecast "
+                                       "during this period.")]}
                          }
                     )
                 else:
@@ -191,7 +192,8 @@ class SingleForecastView(DataDashView):
                 if script_plot is None:
                     temp_args.update(
                         {'messages':
-                            {'Data': ["No data available for this Forecast."]}
+                            {'Data': [("No data available for this Forecast "
+                                       "during this period.")]}
                          }
                     )
                 else:
