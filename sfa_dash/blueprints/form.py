@@ -238,8 +238,9 @@ class CreateForm(MetadataForm):
             if e.status_code == 404:
                 errors = {
                     '404': [('You do not have permission to create '
-                    f'{self.data_type}s. You may need to request '
-                    'permissions from your organization administrator.')]
+                            f'{self.data_type}s. You may need to request '
+                             'permissions from your organization '
+                             'administrator.')]
                 }
             else:
                 errors = e.errors
@@ -252,7 +253,7 @@ class CreateForm(MetadataForm):
                 try:
                     site_metadata = self.get_site_metadata(uuid)
                 except DataRequestException as e:
-                   template_args['errors'].update(self.flatten_dict(e.errors))
+                    template_args['errors'].update(self.flatten_dict(e.errors))
                 else:
                     template_args['site_metadata'] = site_metadata
                     template_args['metadata'] = self.render_metadata_section(
