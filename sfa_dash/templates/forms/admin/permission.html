@@ -35,7 +35,9 @@
           {% endif %}
         {% endif %}
         <td>{{ obj['added_to_permission'] | format_datetime}} </td>
+        {% if not permission['applies_to_all'] %}
         <td><a role="button" class="permission-object-delete-button" href="{{ url_for('admin.permission_object_removal', uuid=permission['permission_id'], object_id=uuid)}}">Remove</a></td>
+        {% endif %}
       </tr>
 
     {% endfor %}
