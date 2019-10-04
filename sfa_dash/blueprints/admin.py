@@ -534,7 +534,7 @@ class PermissionsCreation(AdminView):
         permission = {
             'description': form_data['description'],
             'action': form_data['action'],
-            'applies_to_all': form_data.get('applies_to_all', False),
+            'applies_to_all': ('applies-to-all' in form_data),
             'object_type': self.data_type + 's',
         }
         return permission
@@ -620,8 +620,12 @@ class PermissionObjectAddition(PermissionView):
             data_type = permission['object_type'][:-1]
             api = self.get_api_handler(permission['object_type'])
             perm_objects = list(permission['objects'].keys())
-            all_objects = handle_response(api.list_metadata())
-            all_objects = self.filter_by_org(all_objects, 'provider')
+            if data_type == 'report':
+                all_objects = api.list_metadata()
+                all_objects = [rep.to_dict() for rep in all_objects]
+            else:
+                all_objects = handle_response(api.list_metadata())
+                all_objects = self.filter_by_org(all_objects, 'provider')
             # remove any objects alread on the permission
             object_id_key = f"{data_type}_id"
             all_objects = [obj for obj in all_objects
