@@ -37,23 +37,23 @@ class SingleObservationView(DataDashView):
         return breadcrumb
 
     def get(self, uuid, **kwargs):
+        start, end = self.parse_start_end_from_querystring()
         try:
-            metadata_request = observations.get_metadata(uuid)
-            self.metadata = handle_response(metadata_request)
+            self.metadata = handle_response(
+                observations.get_metadata(uuid))
             self.metadata['site'] = self.get_site_metadata(
                 self.metadata['site_id'])
+            values = handle_response(observations.get_values(
+                uuid, params={'start': start, 'end': end}))
         except DataRequestException as e:
             temp_args = {'errors': e.errors}
         else:
             temp_args = self.template_args(**kwargs)
-            start, end = self.parse_start_end_from_querystring()
-            values_request = observations.get_values(
-                uuid, params={'start': start, 'end': end})
-            if values_request.status_code == 200:
+            if len(values) != 0:
                 script_plot = timeseries_adapter(
                     'observation',
                     self.metadata,
-                    values_request.json())
+                    values)
                 if script_plot is None:
                     temp_args.update(
                         {'messages':
@@ -109,23 +109,23 @@ class SingleCDFForecastView(DataDashView):
         return breadcrumb
 
     def get(self, uuid, **kwargs):
+        start, end = self.parse_start_end_from_querystring()
         try:
             self.metadata = handle_response(
                 cdf_forecasts.get_metadata(uuid))
             self.metadata['site'] = self.get_site_metadata(
                 self.metadata['site_id'])
+            values = handle_response(cdf_forecasts.get_values(
+                uuid, params={'start': start, 'end': end}))
         except DataRequestException as e:
             temp_args = {'errors': e.errors}
         else:
             temp_args = self.template_args(**kwargs)
-            start, end = self.parse_start_end_from_querystring()
-            values_request = cdf_forecasts.get_values(
-                uuid, params={'start': start, 'end': end})
-            if values_request.status_code == 200:
+            if len(values) != 0:
                 script_plot = timeseries_adapter(
                     'forecast',
                     self.metadata,
-                    values_request.json())
+                    values)
                 if script_plot is None:
                     temp_args.update(
                         {'messages':
@@ -173,23 +173,23 @@ class SingleForecastView(DataDashView):
         return breadcrumb
 
     def get(self, uuid, **kwargs):
+        start, end = self.parse_start_end_from_querystring()
         try:
             self.metadata = handle_response(
                 forecasts.get_metadata(uuid))
             self.metadata['site'] = self.get_site_metadata(
                 self.metadata['site_id'])
+            values = handle_response(forecasts.get_values(
+                uuid, params={'start': start, 'end': end}))
         except DataRequestException as e:
             temp_args = {'errors': e.errors}
         else:
             temp_args = self.template_args(**kwargs)
-            start, end = self.parse_start_end_from_querystring()
-            values_request = forecasts.get_values(
-                uuid, params={'start': start, 'end': end})
-            if values_request.status_code == 200:
+            if len(values) != 0:
                 script_plot = timeseries_adapter(
                     'forecast',
                     self.metadata,
-                    values_request.json())
+                    values)
                 if script_plot is None:
                     temp_args.update(
                         {'messages':

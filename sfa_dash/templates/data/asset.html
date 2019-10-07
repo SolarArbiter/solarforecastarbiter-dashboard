@@ -10,13 +10,14 @@
 {% if delete_link is defined %}
 <a role="button" class="btn btn-danger btn-sm" href="{{ delete_link }}">Delete</a>
 {% endif %}
-{% include "sections/notifications.html" %}
 <script src="/static/js/plot-bound-parsing.js"></script>
+{% include "sections/notifications.html" %}
 {% if plot is defined %}
 <div class="row data-plots-wrapper">
 {{ plot | safe }}
 </div>
 {% endif %}
+{% if metadata is defined %}
 <div class="form-group mt-3">
 <div class="form-element">
   <label for="start">Start (UTC):</label><br/>
@@ -35,5 +36,5 @@
 <input type="text" id="start" name="start" hidden>
 <input type="text" id="end" name="end" hidden>
 </div>
-
+{% endif %}
 {% endblock %}

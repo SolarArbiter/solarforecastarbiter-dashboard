@@ -31,8 +31,7 @@ class DataTables(object):
     def create_table_elements(cls, data_list, id_key, **kwargs):
         """Creates a list of objects to be rendered as table by jinja template
         """
-        sites_list_request = sites.list_metadata()
-        sites_list = sites_list_request.json()
+        sites_list = handle_response(sites.list_metadata())
         site_dict = {site['site_id']: site for site in sites_list}
         table_rows = []
         for data in data_list:
@@ -74,8 +73,8 @@ class DataTables(object):
             new Observation' button.
         """
         creation_link = cls.creation_link('observation', site_id)
-        obs_data_request = observations.list_metadata(site_id=site_id)
-        obs_data = obs_data_request.json()
+        obs_data = handle_response(
+            observations.list_metadata(site_id=site_id))
         rows = cls.create_table_elements(obs_data, 'observation_id', **kwargs)
         rendered_table = render_template(cls.observation_template,
                                          table_rows=rows,
@@ -97,9 +96,16 @@ class DataTables(object):
         string
             Rendered HTML table with search bar and a 'Create
             new Forecast' button.
+
+        Raises
+        ------
+        DataRequestException
+            If a site_id is passed and the user does not have access
+            to that site or some other api error has occurred.
         """
         creation_link = cls.creation_link('forecast', site_id)
-        forecast_data = forecasts.list_metadata(site_id=site_id).json()
+        forecast_data = handle_response(
+            forecasts.list_metadata(site_id=site_id))
         rows = cls.create_table_elements(forecast_data,
                                          'forecast_id',
                                          **kwargs)
@@ -123,11 +129,16 @@ class DataTables(object):
         string
             Rendered HTML table with search bar and a 'Create
             new Probabilistic Forecast' button.
+
+        Raises
+        ------
+        DataRequestException
+            If a site_id is passed and the user does not have access
+            to that site or some other api error has occurred.
         """
         creation_link = cls.creation_link('cdf_forecast_group', site_id)
-        cdf_forecast_request = cdf_forecast_groups.list_metadata(
-            site_id=site_id)
-        cdf_forecast_data = cdf_forecast_request.json()
+        cdf_forecast_data = handle_response(
+            cdf_forecast_groups.list_metadata(site_id=site_id))
         rows = cls.create_cdf_forecast_elements(cdf_forecast_data,
                                                 **kwargs)
         rendered_table = render_template(cls.cdf_forecast_template,
@@ -138,8 +149,7 @@ class DataTables(object):
 
     @classmethod
     def create_cdf_forecast_elements(cls, data_list, **kwargs):
-        sites_list_request = sites.list_metadata()
-        sites_list = sites_list_request.json()
+        sites_list = handle_response(sites.list_metadata())
         site_dict = {site['site_id']: site for site in sites_list}
         table_rows = []
         for data in data_list:
@@ -173,9 +183,14 @@ class DataTables(object):
         string
             The rendered html template, including a table of sites, with search
             bar and 'Create new Site' button.
+
+        Raises
+        ------
+        DataRequestException
+            If a site_id is passed and the user does not have access
+            to that site or some other api error has occurred.
         """
-        site_data_request = sites.list_metadata()
-        site_data = site_data_request.json()
+        site_data = handle_response(sites.list_metadata())
         rows = cls.create_site_table_elements(site_data, create, **kwargs)
         if create is None:
             # If the create argument is present, we don't need a "Create
