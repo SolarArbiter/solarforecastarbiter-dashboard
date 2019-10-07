@@ -43,7 +43,7 @@ class DataTables(object):
                                     uuid=data['site_id'])
                 site_link = f'<a href={site_href}>{site_name}</a>'
             else:
-                site_link = "Site Unavailable"
+                site_link = 'Site Unavailable'
             table_row['name'] = data['name']
             table_row['variable'] = data['variable']
             table_row['provider'] = data.get('provider', '')
@@ -154,10 +154,14 @@ class DataTables(object):
         table_rows = []
         for data in data_list:
             table_row = {}
-            site_name = site_dict[data['site_id']]['name']
-            site_href = url_for('data_dashboard.site_view',
-                                uuid=data['site_id'])
-            site_link = f'<a href={site_href}>{site_name}</a>'
+            site = site_dict.get(data['site_id'])
+            if site is not None:
+                site_name = site['name']
+                site_href = url_for('data_dashboard.site_view',
+                                    uuid=data['site_id'])
+                site_link = f'<a href={site_href}>{site_name}</a>'
+            else:
+                site_link = 'Site Unavailable'
             table_row['name'] = data['name']
             table_row['variable'] = data['variable']
             table_row['provider'] = data.get('provider', '')
