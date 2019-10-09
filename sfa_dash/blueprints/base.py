@@ -13,13 +13,14 @@ class BaseView(MethodView):
         # so we must extract site data from the nested dict
         site_dict = metadata.get('site')
         if site_dict is None:
-            site_name = metadata.get('name')
+            site_name = metadata.get('site_id')
+            link_html = site_name
         else:
             site_name = site_dict['name']
-        site_id = metadata['site_id']
-        site_href = url_for('data_dashboard.site_view',
-                            uuid=site_id)
-        link_html = f'<a href="{site_href}">{site_name}</a>'
+            site_id = metadata['site_id']
+            site_href = url_for('data_dashboard.site_view',
+                                uuid=site_id)
+            link_html = f'<a href="{site_href}">{site_name}</a>'
         return link_html
 
     def format_subnav(self, **kwargs):

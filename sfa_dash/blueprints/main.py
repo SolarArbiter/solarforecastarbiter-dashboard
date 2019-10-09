@@ -19,17 +19,23 @@ class SingleObservationView(DataDashView):
     def breadcrumb_html(self, **kwargs):
         breadcrumb_format = '/<a href="{url}">{text}</a>'
         breadcrumb = ''
-        breadcrumb += breadcrumb_format.format(
-            url=url_for('data_dashboard.sites'),
-            text='Sites')
-        breadcrumb += breadcrumb_format.format(
-            url=url_for('data_dashboard.site_view',
-                        uuid=self.metadata['site_id']),
-            text=self.metadata['site']['name'])
-        breadcrumb += breadcrumb_format.format(
-            url=url_for('data_dashboard.observations',
-                        uuid=self.metadata['site_id']),
-            text='Observations')
+        if self.metadata.get('site') is not None:
+            breadcrumb += breadcrumb_format.format(
+                url=url_for('data_dashboard.sites'),
+                text='Sites')
+            breadcrumb += breadcrumb_format.format(
+                url=url_for('data_dashboard.site_view',
+                            uuid=self.metadata['site_id']),
+                text=self.metadata['site']['name'])
+            breadcrumb += breadcrumb_format.format(
+                url=url_for('data_dashboard.observations',
+                            uuid=self.metadata['site_id']),
+                text='Observations')
+        else:
+            breadcrumb += breadcrumb_format.format(
+                url=url_for('data_dashboard.observations'),
+                text='Observations')
+
         breadcrumb += breadcrumb_format.format(
             url=url_for('data_dashboard.observation_view',
                         uuid=self.metadata['observation_id']),
@@ -38,33 +44,45 @@ class SingleObservationView(DataDashView):
 
     def get(self, uuid, **kwargs):
         start, end = self.parse_start_end_from_querystring()
+        temp_args = {}
+        # fetch observation metadata
         try:
             self.metadata = handle_response(
                 observations.get_metadata(uuid))
-            self.metadata['site'] = self.get_site_metadata(
-                self.metadata['site_id'])
-            values = handle_response(observations.get_values(
-                uuid, params={'start': start, 'end': end}))
         except DataRequestException as e:
-            temp_args = {'errors': e.errors}
+            temp_args.update({'errors': e.errors})
         else:
-            temp_args = self.template_args(**kwargs)
-            if len(values) != 0:
-                script_plot = timeseries_adapter(
-                    'observation',
-                    self.metadata,
-                    values)
-                if script_plot is None:
-                    temp_args.update(
-                        {'messages':
-                            {'Data': [
-                                ("No data available for this Observation "
-                                 "during this period.")]}
-                         }
-                    )
+            # fetch site metadata
+            try:
+                self.metadata['site'] = self.get_site_metadata(
+                    self.metadata['site_id'])
+            except DataRequestException:
+                temp_args.update({'warnings': {
+                    'Site Access': ['Could not read site.']}})
+            else:
+                try:
+                    values = handle_response(observations.get_values(
+                        uuid, params={'start': start, 'end': end}))
+                except DataRequestException:
+                    temp_args.update({'warnings': {
+                        'Value Access': ['Could not read observation values']}})
                 else:
-                    temp_args.update({'plot': script_plot[1],
-                                      'bokeh_script': script_plot[0]})
+                    if len(values) != 0:
+                        script_plot = timeseries_adapter(
+                            'observation', self.metadata, values)
+                        if script_plot is None:
+                            temp_args.update({
+                                'messages':
+                                    {'Data': [
+                                        ("No data available for this Observation "
+                                         "during this period.")]},
+                            })
+                        else:
+                            temp_args.update({'plot': script_plot[1],
+                                              'bokeh_script': script_plot[0]})
+            finally:
+                temp_args.update(self.template_args(**kwargs))
+
             self.metadata['site_link'] = self.generate_site_link(self.metadata)
             temp_args['metadata'] = render_template(
                 'data/metadata/observation_metadata.html',

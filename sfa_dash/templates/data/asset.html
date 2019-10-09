@@ -17,7 +17,7 @@
 {{ plot | safe }}
 </div>
 {% endif %}
-{% if metadata is defined %}
+{% if plot is not none %}
 <div class="form-group mt-3">
 <div class="form-element">
   <label for="start">Start (UTC):</label><br/>
