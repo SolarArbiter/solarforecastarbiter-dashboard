@@ -181,6 +181,7 @@ class SingleObjectView(DataDashView):
 class SingleCDFForecastGroupView(DataDashView):
     template = 'data/cdf_forecast.html'
     metadata_template = 'data/metadata/cdf_forecast_group_metadata.html'
+    human_label = human_friendly_datatype('cdf_forecast')
 
     def get_breadcrumb_dict(self, **kwargs):
         breadcrumb_dict = OrderedDict()
@@ -189,11 +190,11 @@ class SingleCDFForecastGroupView(DataDashView):
             breadcrumb_dict[self.metadata['site']['name']] = url_for(
                 'data_dashboard.site_view',
                 uuid=self.metadata['site_id'])
-            breadcrumb_dict['CDF Forecasts'] = url_for(
+            breadcrumb_dict[self.human_label+'s'] = url_for(
                 'data_dashboard.cdf_forecast_groups',
                 uuid=self.metadata['site_id'])
         else:
-            breadcrumb_dict['CDF Forecasts'] = url_for(
+            breadcrumb_dict[self.human_label+'s'] = url_for(
                 'data_dashboard.cdf_forecast_groups')
         breadcrumb_dict[self.metadata['name']] = url_for(
             'data_dashboard.cdf_forecast_group_view',
