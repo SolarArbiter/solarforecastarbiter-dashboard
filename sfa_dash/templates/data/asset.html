@@ -12,7 +12,7 @@
 {% endif %}
 <script src="/static/js/plot-bound-parsing.js"></script>
 {% include "sections/notifications.html" %}
-{% if plot is defined %}
+{% if plot is not none %}
 <div class="row data-plots-wrapper">
 {{ plot | safe }}
 </div>

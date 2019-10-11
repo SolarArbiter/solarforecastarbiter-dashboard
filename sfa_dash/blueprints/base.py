@@ -35,7 +35,7 @@ class BaseView(MethodView):
         """Build the breadcrumb navigation from keyword arguments.
         """
         breadcrumb = ''
-        for link_text, href in breadcrumb_dict:
+        for link_text, href in breadcrumb_dict.items():
             breadcrumb += f'/<a href="{href}">{link_text}</a>'
         return breadcrumb
 

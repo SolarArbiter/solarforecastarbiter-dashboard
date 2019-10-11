@@ -284,7 +284,9 @@ def filter_form_fields(prefix, form_data):
 
 
 def handle_response(request_object):
-    """Pass a request object to attempt to parse the response.
+    """Parses the response from a request object. On an a resolvable
+    error, raises a DataRequestException with a default error
+    message.
 
     Parameters
     ----------
