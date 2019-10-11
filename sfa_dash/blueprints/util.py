@@ -304,16 +304,16 @@ def handle_response(request_object):
         If a recoverable 400 level error has been encountered.
         The errors attribute will contain a dict of errors.
     """
-    if request_object.status_code != 200:
+    if not request_object.ok:
         if request_object.status_code == 400:
             errors = request_object.json()
             raise DataRequestException(request_object.status_code, **errors)
-        if request_object.status_code == 401:
+        elif request_object.status_code == 401:
             errors = {
                 '401': "You do not have permission to create this resource."
             }
             raise DataRequestException(request_object.status_code, **errors)
-        if request_object.status_code == 404:
+        elif request_object.status_code == 404:
             previous_page = request.headers.get('Referer', None)
             errors = {'404': (
                 'The requested object could not be found. You may need to '
@@ -324,9 +324,11 @@ def handle_response(request_object):
                     f' <a href="{previous_page}">Return to the previous '
                     'page.</a>')
             raise DataRequestException(request_object.status_code, **errors)
-        # Other errors should be due to bugs and not by attempts to reach
-        # inaccessible data. Allow exceptions to be raised
-        # so that they can be reported to Sentry.
+        else:
+            # Other errors should be due to bugs and not by attempts to reach
+            # inaccessible data. Allow exceptions to be raised
+            # so that they can be reported to Sentry.
+            request_object.raise_for_status()
     if request_object.request.method == 'GET':
         if request_object.headers['Content-Type'] == 'application/json':
             return request_object.json()
