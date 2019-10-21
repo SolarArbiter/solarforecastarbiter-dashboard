@@ -23,13 +23,12 @@ def unverified_user(error):
     """
     messages = {
         "Email Unverified": [
-            "You've signed up successfully and now need to validate "
-            "your email account.  Please check your inbox for the "
-            "validation link from Solar Forecast Arbiter.  Remember "
-            "to check your spam and junk mail folders if you don’t "
-            "see the message in your inbox. If you think you may have "
-            f'gotten here by mistake, please <a href="{url_for("logout")}">'
-            "Log out and try again as a different user.</a>"]}
+            "Please complete the sign up process by verifying your "
+            "email account. You should receive a verification email "
+            "from Solar Forecast Arbiter. The verification email is "
+            "usually sent immediately, so remember to check your "
+            "spam and junk mail folders if you don't see the message "
+            "in your inbox."]}
     return render_template('index.html', messages=messages), 401
 
 
