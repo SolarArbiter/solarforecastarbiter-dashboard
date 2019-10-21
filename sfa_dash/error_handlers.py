@@ -21,13 +21,16 @@ def unverified_user(error):
     """Displays the front page with an error that the user must verify their
     email before accessing data.
     """
-    errors = {
-        "Error": ['Account email must be verified before logging in. You '
-                  'should have received a verification email from Auth0. '
-                  'Please verify and refresh the page or '
-                  '<a href="{url_for("logout")}">Log out and try again as '
-                  'a diferent user.</a>']}
-    return render_template('index.html', errors=errors), 401
+    messages = {
+        "Email Unverified": [
+            "You've signed up successfully and now need to validate "
+            "your email account.  Please check your inbox for the "
+            "validation link from Solar Forecast Arbiter.  Remember "
+            "to check your spam and junk mail folders if you don’t "
+            "see the message in your inbox. If you think you may have "
+            f'gotten here by mistake, please <a href="{url_for("logout")}">'
+            "Log out and try again as a different user.</a>"]}
+    return render_template('index.html', messages=messages), 401
 
 
 def register_handlers(app):
