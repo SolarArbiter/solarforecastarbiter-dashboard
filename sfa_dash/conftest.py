@@ -1,4 +1,6 @@
+import pdb
 import os
+import requests
 
 
 import pytest
@@ -6,6 +8,28 @@ import pytest
 
 from sfa_dash import create_app
 
+BASE_URL='http://localhost'
+
+
+no_arg_routes = [ 
+    '/observations/', '/forecasts/']
+
+
+@pytest.fixture(scope='session')
+def auth_token():
+    token_req = requests.post(
+        'https://solarforecastarbiter.auth0.com/oauth/token',
+        headers={'content-type': 'application/json'},
+        data=('{"grant_type": "password", '
+              '"username": "testing@solarforecastarbiter.org",'
+              '"password": "Thepassword123!", '
+              '"audience": "https://api.solarforecastarbiter.org", '
+              '"client_id": "c16EJo48lbTCQEhqSztGGlmxxxmZ4zX7"}'))
+    if token_req.status_code != 200:
+        pytest.skip('Cannot retrieve valid Auth0 token')
+    else:
+        token = token_req.json()
+        return token
 
 @pytest.fixture()
 def expired_token():
@@ -14,25 +38,128 @@ def expired_token():
 
 
 @pytest.fixture()
-def mocked_storage(mocker, expired_token):
-    class fake_storage:
-        def __init__(*args, **kwargs):
-            pass
+def mocked_storage(mocker, auth_token, expired_token):
+    def make_storage(authenticated=False):
+        if authenticated:
+            token = auth_token
+        else:
+            token = expired_token
+        class fake_storage:
+            def __init__(*args, **kwargs):
+                pass
 
-        def get(self, *args):
-            return expired_token
+            def get(self, *args):
+                return token
 
-        def set(self, *args):
-            pass
+            def set(self, *args):
+                pass
 
-        def delete(self, *args):
-            pass
-    storage = mocker.patch('sfa_dash.session_storage',
-                           new=fake_storage)
-    return storage
+            def delete(self, *args):
+                pass
+        return fake_storage
+    return make_storage
 
 
 @pytest.fixture()
-def app(mocked_storage):
+def mocked_unauth_storage(mocker, mocked_storage):
+    storage = mocker.patch('sfa_dash.session_storage',
+                           new=mocked_storage())
+
+
+@pytest.fixture()
+def mocked_auth_storage(mocker, mocked_storage):
+    storage = mocker.patch('sfa_dash.session_storage',
+                           new=mocked_storage(True))
+
+
+@pytest.fixture()
+def app_unauth(mocked_unauth_storage):
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
     return create_app('sfa_dash.config.TestConfig')
+
+
+@pytest.fixture()
+def app(mocked_auth_storage):
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+    return create_app('sfa_dash.config.TestConfig')
+
+
+admin_routes_list = [
+    '/admin/permissions/<uuid>',
+    '/admin/users/<uuid>',
+    '/admin/roles/<uuid>',
+    '/admin/permissions/create/cdf_forecast_group',
+    '/admin/permissions/create/observation',
+    '/admin/permissions/create/forecast',
+    '/admin/permissions/create/report',
+    '/admin/permissions/create/site',
+    '/admin/roles/create',
+    '/admin/permissions/',
+    '/admin/roles/',
+    '/admin/users/',
+    '/admin/permissions/<uuid>/delete',
+    '/admin/roles/<uuid>/delete',
+    '/admin/permissions/<uuid>/add',
+    '/admin/users/<uuid>/add/',
+    '/admin/roles/<uuid>/add/',
+    '/admin/permissions/<uuid>/remove/<object_id>',
+    '/admin/roles/<uuid>/remove/<permission_id>',
+    '/admin/users/<uuid>/remove/<role_id>',
+    '/admin/roles/<uuid>/grant/']
+
+
+no_arg_routes_list = [
+    '/sites/',
+    '/observations/',
+    '/forecasts/single/',
+    '/forecasts/cdf/',
+    '/reports/']
+
+
+create_form_routes_list = [
+    '/sites/create',
+    '/sites/<uuid>/forecasts/single/create',
+    '/sites/<uuid>/forecasts/cdf/create',
+    '/sites/<uuid>/observations/create',
+    '/sites/<uuid>/observations/create',
+    '/reports/create',
+    '/observations/<uuid>/download',
+    '/forecasts/single/<uuid>/download',
+    '/forecasts/cdf/<uuid>/download']
+
+
+delete_form_routes_list = [
+    '/observations/<uuid>/delete',
+    '/forecasts/single/<uuid>/delete',
+    '/forecasts/cdf/<uuid>/delete',
+    '/reports/<uuid>/delete',
+    '/sites/<uuid>/delete']
+
+
+upload_form_routes_list = [
+    '/observations/<uuid>/upload',
+    '/forecasts/cdf/single/<uuid>/upload',
+    '/forecasts/single/<uuid>/upload',]
+
+
+single_object_routes_list = [
+    '/sites/<uuid>/',
+    '/observations/<uuid>',
+    '/forecasts/cdf/single/<uuid>',
+    '/forecasts/single/<uuid>',
+    '/forecasts/cdf/<uuid>',
+    '/reports/<uuid>']
+
+# 
+test_metadata_dict = {
+    'observation': {},
+    'forecast': {},
+    'cdf_forecast': {},
+    'report': {},
+    'user': {},
+    'permission': {},
+    'role': {},
+}
+@pytest.fixture(params=no_arg_routes_list)
+def no_arg_route(request):
+    return request.param
