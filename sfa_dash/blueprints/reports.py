@@ -49,8 +49,8 @@ class ReportForm(BaseView):
         }
 
     def zip_object_pairs(self, form_data):
-        """Create a list of observation, forecast tuples from the the
-        (forecast-n, observation-n) input elements inserted by
+        """Create a list of observation, forecast tuples in the form
+        (forecast-n, observation-n) from input elements inserted by
         report-handling.js
         """
         fx = filter_form_fields('forecast-id-', form_data)
