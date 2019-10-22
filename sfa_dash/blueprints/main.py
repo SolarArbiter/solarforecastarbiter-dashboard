@@ -53,17 +53,7 @@ class SingleObjectView(DataDashView):
         self.human_label = human_friendly_datatype(self.data_type)
 
     def get_breadcrumb_dict(self):
-        """Creates an Ordered dictionary used for building the page's
-        breadcrumb. Output can be passed to the BaseView.breadcrumb_html
-        function.
-
-        Notes
-        -----
-        The breadcrumb dictionary should be built in the form:
-
-            { "link text": "url", ...}
-
-        Where the order of the keys is rendered from left to right.
+        """See BaseView.get_breadcrumb_dict.
         """
         breadcrumb_dict = OrderedDict()
         if self.data_type == 'cdf_forecast':
@@ -76,11 +66,11 @@ class SingleObjectView(DataDashView):
             breadcrumb_dict[self.metadata['site']['name']] = url_for(
                 'data_dashboard.site_view',
                 uuid=self.metadata['site_id'])
-            breadcrumb_dict[self.human_label + 's'] = url_for(
+            breadcrumb_dict[f'{self.human_label}s'] = url_for(
                 f'data_dashboard.{listing_view}',
                 uuid=self.metadata['site_id'])
         else:
-            breadcrumb_dict[self.human_label + 's'] = url_for(
+            breadcrumb_dict[f'{self.human_label}s'] = url_for(
                 f'data_dashboard.{listing_view}')
         # Insert a parent link for cdf_forecasts
         if self.data_type == 'cdf_forecast':
@@ -121,6 +111,9 @@ class SingleObjectView(DataDashView):
         """Generate a plot and bokeh script for the data between
         start and end. Note that the core library requires a 'site'
         key with the full site metadata to create a plot.
+
+        This inserts the rendered plot html and bokeh script into
+        the temp_args keys plot and bokeh_script respectively.
         """
         try:
             values = handle_response(self.api_handle.get_values(
@@ -184,17 +177,21 @@ class SingleCDFForecastGroupView(DataDashView):
     human_label = human_friendly_datatype('cdf_forecast')
 
     def get_breadcrumb_dict(self, **kwargs):
+        """See BaseView.get_breadcrumb_dict.
+        """
         breadcrumb_dict = OrderedDict()
         if self.metadata.get('site') is not None:
+            # If the site is accessible, add /sites/<site name>
+            # to the breadcrumb.
             breadcrumb_dict['Sites'] = url_for('data_dashboard.sites')
             breadcrumb_dict[self.metadata['site']['name']] = url_for(
                 'data_dashboard.site_view',
                 uuid=self.metadata['site_id'])
-            breadcrumb_dict[self.human_label+'s'] = url_for(
+            breadcrumb_dict[f'{self.human_label}s'] = url_for(
                 'data_dashboard.cdf_forecast_groups',
                 uuid=self.metadata['site_id'])
         else:
-            breadcrumb_dict[self.human_label+'s'] = url_for(
+            breadcrumb_dict[f'{self.human_label}s'] = url_for(
                 'data_dashboard.cdf_forecast_groups')
         breadcrumb_dict[self.metadata['name']] = url_for(
             'data_dashboard.cdf_forecast_group_view',

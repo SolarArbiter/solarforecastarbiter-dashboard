@@ -324,6 +324,9 @@ def handle_response(request_object):
                     f' <a href="{previous_page}">Return to the previous '
                     'page.</a>')
             raise DataRequestException(request_object.status_code, **errors)
+        elif request_object.status_code == 422:
+            errors = {'422': ['Failed to compute aggregate Values']}
+            raise DataRequestException(request_object.status_code, **errors)
         else:
             # Other errors should be due to bugs and not by attempts to reach
             # inaccessible data. Allow exceptions to be raised
