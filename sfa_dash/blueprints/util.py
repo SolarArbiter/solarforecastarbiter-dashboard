@@ -295,14 +295,21 @@ def handle_response(request_object):
 
     Returns
     -------
-    dict
-        The parsed json of a response.
+    dict, str or None
+        Note that this function checks the content-type of a response
+        and returns the appropriate type. A Dictionary parsed from a
+        JSON object, or a string. Returns None when a 204 is encountered.
+        Users should be mindful of the expected response body from the
+        API.
 
     Raises
     ------
     sfa_dash.errors.DataRequestException
         If a recoverable 400 level error has been encountered.
         The errors attribute will contain a dict of errors.
+    requests.exceptions.HTTPError
+        If the status code received from the API could not be
+        handled.
     """
     if not request_object.ok:
         if request_object.status_code == 400:
@@ -333,10 +340,13 @@ def handle_response(request_object):
             # so that they can be reported to Sentry.
             request_object.raise_for_status()
     if request_object.request.method == 'GET':
+        # all GET endpoints should return a JSON object
         if request_object.headers['Content-Type'] == 'application/json':
             return request_object.json()
         else:
             return request_object.text
+    # POST responses should contain a single string uuid of a newly created
+    # object unless a 204 No Content was returned.
     if request_object.request.method == 'POST':
         if request_object.status_code != 204:
             return request_object.text
