@@ -314,12 +314,10 @@ def handle_response(request_object):
     if not request_object.ok:
         if request_object.status_code == 400:
             errors = request_object.json()
-            raise DataRequestException(request_object.status_code, **errors)
         elif request_object.status_code == 401:
             errors = {
                 '401': "You do not have permission to create this resource."
             }
-            raise DataRequestException(request_object.status_code, **errors)
         elif request_object.status_code == 404:
             previous_page = request.headers.get('Referer', None)
             errors = {'404': (
@@ -330,9 +328,9 @@ def handle_response(request_object):
                 errors['404'] = errors['404'] + (
                     f' <a href="{previous_page}">Return to the previous '
                     'page.</a>')
-            raise DataRequestException(request_object.status_code, **errors)
         elif request_object.status_code == 422:
             errors = {'422': ['Failed to compute aggregate Values']}
+        if errors:
             raise DataRequestException(request_object.status_code, **errors)
         else:
             # Other errors should be due to bugs and not by attempts to reach
