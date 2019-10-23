@@ -312,6 +312,7 @@ def handle_response(request_object):
         handled.
     """
     if not request_object.ok:
+        errors = {}
         if request_object.status_code == 400:
             errors = request_object.json()
         elif request_object.status_code == 401:
