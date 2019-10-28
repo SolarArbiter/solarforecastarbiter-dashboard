@@ -56,8 +56,3 @@ def test_permission_id_routes(client, permission_id_route, permission_id):
 def test_role_id_routes(client, role_id_route, role_id):
     resp = client.get(role_id_route(role_id), base_url=BASE_URL)
     assert resp.status_code == 200
-
-
-def test_route_context(test_url):
-    pass
-    #assert test_url('auth0.login') == ""
