@@ -49,7 +49,7 @@ jobs:
       displayName: 'Install api'
 
     - script: |
-        sfa-api devserver
+        nohup sfa-api devserver
       displayName: 'Run API Test instance'
 
     - script: |
