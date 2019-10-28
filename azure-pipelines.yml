@@ -22,6 +22,37 @@ jobs:
       displayName: 'Use Python $(python.version)'
 
     - script: |
+        git clone https://github.com/SolarArbiter/solarforecastarbiter-api.git
+      displayName: 'Clone API'
+
+    - task: DockerCompose@0
+      displayName: 'start mysql'
+      inputs:
+        action: Run services
+        dockerComposeFile: solarforecastarbiter-api/datastore/docker-compose.yml
+        buildImages: true
+        abortOnContainerExit: false
+        detached: true
+  
+    - script: |
+        echo "##vso[task.setvariable variable=mysql.host]127.0.0.1"
+        echo "##vso[task.setvariable variable=mysql.port]$(docker port solararbitersolarforecastarbiter-api_mysql_1 3306 | rev | cut -d':' -f 1 | rev)"
+      displayName: 'Set env variables'
+
+    - script: docker wait solararbitersolarforecastarbiter-api_migrate_schemas_1
+          displayName: 'Wait for mysql'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install -r solarforecastarbiter-api/requirements.txt
+        pip install solarforecastarbiter-api/.
+      displayName: 'Install api'
+
+    - script: |
+        sfa-api devserver
+      displayName: 'Run API Test instance'
+
+    - script: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-test.txt
