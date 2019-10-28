@@ -40,7 +40,7 @@ jobs:
       displayName: 'Set env variables'
 
     - script: docker wait solararbitersolarforecastarbiter-api_migrate_schemas_1
-          displayName: 'Wait for mysql'
+      displayName: 'Wait for mysql'
 
     - script: |
         python -m pip install --upgrade pip
