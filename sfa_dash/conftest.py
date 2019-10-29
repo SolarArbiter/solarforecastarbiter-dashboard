@@ -7,6 +7,7 @@ import pytest
 from flask import url_for
 
 
+from sfa_api import create_app as create_api
 from sfa_dash import create_app
 
 BASE_URL='http://localhost'
@@ -14,6 +15,12 @@ BASE_URL='http://localhost'
 
 no_arg_routes = [ 
     '/observations/', '/forecasts/']
+
+
+@pytest.fixture(scope='session')
+def api_instance():
+    app = create_api('TestingConfig')
+    app.run(port=5000)
 
 
 @pytest.fixture(scope='session')
@@ -74,13 +81,13 @@ def mocked_auth_storage(mocker, mocked_storage):
 
 
 @pytest.fixture()
-def app_unauth(mocked_unauth_storage):
+def app_unauth(mocked_unauth_storage, api_instance):
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
     return create_app('sfa_dash.config.TestConfig')
 
 
 @pytest.fixture()
-def app(mocked_auth_storage):
+def app(mocked_auth_storage, api_instance):
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
     return create_app('sfa_dash.config.TestConfig')
 
@@ -356,3 +363,4 @@ def permission_id(cursor, role_id):
         '= UUID_TO_BIN(%s, 1) ) LIMIT 1', role_id)
     permission_id = cursor.fetchone()[0]
     return permission_id
+
