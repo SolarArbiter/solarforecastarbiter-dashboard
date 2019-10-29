@@ -5,6 +5,7 @@ from flask import (Blueprint, render_template, request,
 import pandas as pd
 from sfa_dash.api_interface import (sites, observations, forecasts,
                                     cdf_forecasts, cdf_forecast_groups)
+from sfa_dash.blueprints.aggregates import AggregateForm
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.reports import ReportForm
 from sfa_dash.blueprints.util import handle_response
@@ -480,3 +481,6 @@ forms_blp.add_url_rule('/forecasts/cdf/single/<uuid>/download',
                            data_type='cdf_forecast'))
 forms_blp.add_url_rule('/reports/create',
                        view_func=ReportForm.as_view('create_report'))
+forms_blp.add_url_rule('/aggregates/create',
+                       view_func=AggregateForm.as_view(
+                           'create_aggregate'))

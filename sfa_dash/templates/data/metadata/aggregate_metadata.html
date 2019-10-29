@@ -1,0 +1,14 @@
+{% extends "data/metadata/meta_container.html" %}
+{% import "data/metadata/meta_macro.jinja" as macro %}
+{% block metadata %}
+<ul class="data-metadata-fields col-md-6 col-sm-12">
+      {{ macro.li('Name', metadata_object.name) }}
+      {{ macro.li('Description', metadata_object.description) }}
+</ul>
+<ul class="data-metadata-fields col-md-6 col-sm-12">
+  {{ macro.li('Variable', metadata_object.variable)}}
+  {{ macro.li('Interval label', metadata_object.interval_label ) }}
+  {{ macro.li('Interval length', metadata_object.interval_length ) }}
+  {{ macro.li('Value type', metadata_object.interval_value_type ) }}
+</ul>
+{% endblock %}

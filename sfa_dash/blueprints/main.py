@@ -6,6 +6,8 @@ from flask import Blueprint, render_template, url_for, request
 
 from sfa_dash.api_interface import (observations, forecasts,
                                     cdf_forecasts, cdf_forecast_groups)
+from sfa_dash.blueprints.aggregates import (AggregatesView, AggregateForm,
+                                            AggregateView, DeleteAggregateView)
 from sfa_dash.blueprints.dash import DataDashView
 from sfa_dash.blueprints.data_listing import DataListingView
 from sfa_dash.blueprints.delete import DeleteConfirmation
@@ -268,6 +270,9 @@ data_dash_blp.add_url_rule(
 data_dash_blp.add_url_rule(
     '/reports/',
     view_func=ReportsView.as_view('reports'))
+data_dash_blp.add_url_rule(
+    '/aggregates/',
+    view_func=AggregatesView.as_view('aggregates'))
 
 # Views for a single piece of metadata
 # view name pattern: '<data_type>_view'
@@ -292,6 +297,9 @@ data_dash_blp.add_url_rule(
 data_dash_blp.add_url_rule(
     '/reports/<uuid>',
     view_func=ReportView.as_view('report_view'))
+data_dash_blp.add_url_rule(
+    '/aggregates/<uuid>',
+    view_func=AggregateView.as_view('aggregate_view'))
 
 # Deletion forms
 # View name pattern: 'delete_<data_type>'
@@ -313,3 +321,6 @@ data_dash_blp.add_url_rule(
 data_dash_blp.add_url_rule(
     '/reports/<uuid>/delete',
     view_func=DeleteReportView.as_view('delete_report'))
+data_dash_blp.add_url_rule(
+    '/aggregates/<uuid>/delete',
+    view_func=DeleteAggregateView.as_view('delete_aggregate'))
