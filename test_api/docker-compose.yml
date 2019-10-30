@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: 'testpassword'
       MYSQL_DATABASE: arbiter_data
     volumes:
-      - ./solarforecastarbiter-api/datastore/conf:/usr/local/mysqlconf
+      - ./conf:/usr/local/mysqlconf
     ports:
       - "3306"
     entrypoint:
@@ -29,14 +29,16 @@ services:
     build: .
     environment:
       MYSQL_HOST: "test_api_mysql_1"
-      MYSQL_PORT: "3306"
+      MYSQL_PORT: 3306
       FLASK_APP: "sfa_api:create_app('DevelopmentConfig')"
       FLASK_ENV: "development"
+      FLASK_RUN_PORT: 5000
+      FLASK_RUN_HOST: "0.0.0.0"
     ports:
         - "5000:5000"
     networks:
       - default
     entrypoint:
-      flask run --host=0.0.0.0 -p 5000
+      flask run
     depends_on:
       - migrate_schemas
