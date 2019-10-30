@@ -22,7 +22,7 @@ jobs:
       displayName: 'Use Python $(python.version)'
 
     - script: |
-        git clone https://github.com/SolarArbiter/solarforecastarbiter-api.git test_api/.
+        git clone https://github.com/SolarArbiter/solarforecastarbiter-api.git test_api/solarforecastarbiter-api
       displayName: 'Clone API'
 
     - task: DockerCompose@0
