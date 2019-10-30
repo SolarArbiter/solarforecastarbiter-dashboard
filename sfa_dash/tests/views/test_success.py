@@ -1,7 +1,6 @@
 import pytest
 
 
-from bs4 import BeautifulSoup as bs
 from flask import url_for
 from sfa_dash.conftest import BASE_URL
 
