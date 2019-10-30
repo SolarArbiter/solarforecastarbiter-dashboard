@@ -9,7 +9,8 @@ def no_refresh_token(mocker):
     return ref
 
 
-def test_token_refresh_invalid_clientid_error(app_unauth, mocker, no_refresh_token):
+def test_token_refresh_invalid_clientid_error(
+        app_unauth, mocker, no_refresh_token):
     """Test redirect to login when refreshing an expired token fails with
     InvalidClientIdError"""
     no_refresh_token.side_effect = InvalidClientIdError

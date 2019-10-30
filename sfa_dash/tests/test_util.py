@@ -1,6 +1,4 @@
-import json
 import pytest
-from requests import Response
 from requests.exceptions import HTTPError
 
 
@@ -21,6 +19,7 @@ def mock_response(mocker):
         return resp
     return fn
 
+
 @pytest.fixture()
 def mock_request(mocker):
     mocker.patch('sfa_dash.blueprints.util.request')
@@ -32,8 +31,8 @@ def test_handle_response_requesterror(mock_response, code, mock_request):
     with pytest.raises(DataRequestException):
         handle_response(mock_response(code))
 
-@pytest.mark.parametrize('code', [ 500, 502, 504])
-def test_handle_response_requesterror(mock_response, code, mock_request):
+
+@pytest.mark.parametrize('code', [500, 502, 504])
+def test_handle_response_requesterror_500(mock_response, code, mock_request):
     with pytest.raises(HTTPError):
         handle_response(mock_response(code))
-

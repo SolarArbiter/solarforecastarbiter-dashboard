@@ -1,7 +1,3 @@
-import pytest
-
-
-from flask import url_for
 from sfa_dash.conftest import BASE_URL
 
 
