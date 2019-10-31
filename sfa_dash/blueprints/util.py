@@ -349,3 +349,34 @@ def handle_response(request_object):
     if request_object.request.method == 'POST':
         if request_object.status_code != 204:
             return request_object.text
+
+
+def parse_timedelta(data_dict, key_root):
+    """Parse values from a timedelta form element, and return the value in
+    minutes
+
+    Parameters
+    ----------
+    data_dict: dict
+        Dictionary of posted form data
+
+    key_root: string
+        The shared part of the name attribute of the inputs to parse.
+        e.g. 'lead_time' will parse and concatenate 'lead_time_number'
+        and 'lead_time_units'
+
+    Returns
+    -------
+    int
+        The number of minutes in the Timedelta.
+    """
+    value = int(data_dict[f'{key_root}_number'])
+    units = data_dict[f'{key_root}_units']
+    if units == 'minutes':
+        return value
+    elif units == 'hours':
+        return value * 60
+    elif units == 'days':
+        return value * 1440
+    else:
+        raise ValueError('Invalid selection in time units field.')

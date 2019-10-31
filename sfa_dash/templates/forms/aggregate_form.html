@@ -1,7 +1,7 @@
 {% import "forms/form_macros.jinja" as form %}
 {% extends "dash/data.html" %}
 {% block content %}
-<script src="/static/js/report-handling.js"></script>
+<script src="/static/js/aggregate-handling.js"></script>
 {{ metadata | safe }}
 {% include "sections/notifications.html" %}
 <h3>Create New Aggregate</h3>
@@ -41,9 +41,8 @@
 
      <h5>Observations</h5>
 	 <div class="form-element full-width border" style="border-radius:10px;margin:.5em 1em;">
-       <div class="form-element">Observations</div>
        <div class="aggregate-observation-list">
-         <div class="empty-aggregate-observation-list alert alert-warning">No Pairs Selected</div>
+         <div class="empty-aggregate-observation-list alert alert-warning">No observations selected</div>
        </div>
        <div class="aggregate-observation-control">
        </div>
@@ -51,5 +50,5 @@
     {{ form.token() }}
   </div>
 </form>
-<button type="submit" form="report-form" value="Submit" class="btn btn-primary">Submit</button>
+<button type="submit" form="aggregate-form" value="Submit" class="btn btn-primary">Submit</button>
 {% endblock %}
