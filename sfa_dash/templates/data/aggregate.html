@@ -1,23 +1,23 @@
 {% extends "dash/data.html" %}
 {% block content %}
 {{ metadata | safe }}
+<a role="button" class="btn btn-primary btn-sm" href="{{ url_for('forms.update_aggregate_observations', uuid=aggregate['aggregate_id'] ) }}">Add Observation</a>
 {% if upload_link is defined %}
 <a role="button" class="btn btn-primary btn-sm" href="{{upload_link}}">Upload data</a>
 {% endif %}
 {% if download_link is defined %}
 <a role="button" class="btn btn-primary btn-sm" href="{{download_link}}">Download data</a>
 {% endif %}
-{% if delete_link is defined %}
-<a role="button" class="btn btn-danger btn-sm" href="{{ delete_link }}">Delete</a>
-{% endif %}
+<a role="button" class="btn btn-danger btn-sm" href="{{ url_for('data_dashboard.delete_aggregate', uuid=aggregate['aggregate_id']) }}">Delete</a>
 {% include "sections/notifications.html" %}
 
-{# <input type="text" placeholder="Search" class="search"> #}
 <h3>Observations</h3>
 <table class="aggregate-observation-table table results">
   <thead>
-    <td scope="col">Name</td>
-    <td scope="col">Organization</td>
+    <th scope="col">Name</th>
+    <th scope="col">Organization</th>
+    <th scope="col">Effective From</th>
+    <th scope="col">Effective Until</th>
   </thead>
   <tbody>
     <tr class="warning no-result">
@@ -27,6 +27,8 @@
     <tr class="aggregate-observation-row">
         <td scope="col"><a href="{{ url_for('data_dashboard.observation_view', uuid=obs["observation_id"]) }}">{{ obs["name"] }}</a></td>
         <td scope="col">{{ obs["provider"] }}</td>
+        <td scope="col">{{ obs["effective_from"] }}</td>
+        <td scope="col">{{ obs["effective_until"] }}</td>
     </tr>
     {% endfor %}
   </tbody>

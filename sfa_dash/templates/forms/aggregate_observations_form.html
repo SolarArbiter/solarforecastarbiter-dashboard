@@ -1,0 +1,63 @@
+{% import "forms/form_macros.jinja" as form %}
+{% extends "dash/data.html" %}
+{% block content %}
+{{ metadata | safe }}
+{% include "sections/notifications.html" %}
+{% if aggregate is not none %}
+<h3>Update Aggregate Observations</h3>
+<form action="{{ url_for('forms.update_aggregate_observations', uuid=aggregate['aggregate_id']) }}" method="post" enctype="application/json" id="update-aggregate-observations-form">
+  <div class="form-group">
+  <div class="form-element full-width collapse show" id="object-selector">
+    <div class="aggregate-observation-table">
+      <label>Observations</label>
+      <p>Select the observations to add to the aggregate.</p>
+      <div class="tools aggregate-observations-table mt-1">
+        <input type="text" placeholder="Search" class="search">
+        <button type='button' class="btn-sm btn-primary mt-1" id='check-button'>Check All</button>
+        <button type='button' class="btn-sm btn-primary mt-1" id='uncheck-button'>Uncheck All</button>
+      </div>
+      <div class="scrollbox">
+        <table class="table results" id='permission-table'>
+          <thead>
+            <th class="selection-column" scope="col"></th>
+            <th scope="col">Name</th>
+            <th scope="col">Site</th>
+            <th scope="col" id="provider-header"><button type="button" class="btn btn-th dropdown-toggle" data-toggle="collapse" data-target="#org-filters" >Organization</button></th>
+          </thead>
+          
+          <tbody>
+            <tr class="warning no-result">
+              <td>
+                <i class="fa fa-warning"></i>
+                No Result
+              </td>
+            </tr> 
+            {% for i in range(observations | length)  %}
+            <tr visible="true" class="aggregate-observation-row">
+              {% set obs = observations[i] %}
+              <td><input type="checkbox" name="observation-{{ i }}" value="{{ obs['observation_id'] }}"></td>
+              <td class="name-column"><a href="{{ url_for('data_dashboard.observation_view', uuid=id) }}">{{ obs["name"] }}</a></td>
+              <td class="site-column">{{ obs['site']['name'] }}</td>
+              <td class="provider-column">{{ obs["provider"] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="form-element">
+    <label for="end">Effective From</label><br/>
+    <input type="date" id="effective-from-date" name="effective-from-date" {% if form_data is defined %}value="{{form_data['effective-from-date']}}"{% endif %}required>
+    <input type="time" id="effective-from-time" name="effective-from-time" {% if form_data is defined %}value="{{form_data['effective-from-time']}}"{% else %} value="00:00"{% endif %} required>
+    {{ form.help_button('effective-from-help-text') }}
+    <span class="effective-from-help-text form-text text-muted help-text collapse" aria-hidden>
+      The beginning of the period for which the observation should be considered part of the aggregate.
+    </span>
+  </div>
+  {{ form.token() }}
+  </div>
+</form>
+<button type="submit" form="update-aggregate-observations-form" value="Submit" class="btn btn-primary">Submit</button>
+{% endif %}
+{% endblock %}

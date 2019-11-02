@@ -1,7 +1,6 @@
 {% import "forms/form_macros.jinja" as form %}
 {% extends "dash/data.html" %}
 {% block content %}
-<script src="/static/js/aggregate-handling.js"></script>
 {{ metadata | safe }}
 {% include "sections/notifications.html" %}
 <h3>Create New Aggregate</h3>
@@ -14,12 +13,6 @@
      <div class="form-element full-width">
         <label>Description</label><br/>
         <input type="text" class="form-control" name="description">
-     </div>
-     <div class="form-element">
-       {{ form.select('Interval Value Type', 'interval_value_type',
-                      {"interval_mean": "Interval Mean",
-                       "instantaneous": "Instantaneous"},
-                       form_data=form_data) }}
      </div>
      <div class="form-element">
        {{ form.select('Interval Label', 'interval_label',
@@ -38,15 +31,24 @@
                       variable_options,
                       form_data=form_data) }}
      </div>
-
-     <h5>Observations</h5>
-	 <div class="form-element full-width border" style="border-radius:10px;margin:.5em 1em;">
-       <div class="aggregate-observation-list">
-         <div class="empty-aggregate-observation-list alert alert-warning">No observations selected</div>
-       </div>
-       <div class="aggregate-observation-control">
-       </div>
-	 </div>
+     <div class="form-element">
+       {{ form.select('Timezone', 'timezone',
+                      timezone_options,
+                      required=True, form_data=form_data)}}
+     </div>
+    <div class="form-element">
+       {{ form.select('Aggregation Type', 'aggregate_type',
+                      {'sum': 'Beginning',
+                       'mean': 'Mean',
+                       'median': 'Median',
+                       'max': 'Max',
+                       'min': 'Min'},
+                       'Type of aggregation to perform.') }}
+     </div>
+     <div class="form-element full-width">
+       <label>Extra Parameters</label>
+       <textarea name="extra_parameters" cols="40" rows="5" class="form-control extra-parameters-field" placeholder="This field will store any ASCII text. We recommend using it to store other parameters you have collected in a format such as YAML or JSON."></textarea>
+     </div>
     {{ form.token() }}
   </div>
 </form>
