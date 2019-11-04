@@ -19,17 +19,18 @@
                       {'beginning': 'Beginning',
                        'ending': 'Ending',
                        'instant': 'Instant'},
-                       'Indicates if a time labels the start or the end of an interval.') }}
+                       'Indicates if a time labels the start or the end of an interval of the aggregate values. Constituent observations will be normalized.') }}
      </div>
      <div class="form-element">
        {{ form.timedelta('Interval length', 'interval_length',
-                         'The length of time that each data point represents. Values must be integers.',
+                         'The length of time that each data point represents. All observations that make up the aggregate must .',
                          form_data=form_data) }}
      </div>
      <div class="form-element">
        {{ form.select('Variable', 'variable',
                       variable_options,
-                      form_data=form_data) }}
+                      form_data=form_data,
+                      help_text='Variable described by the aggregate. All observations that make up the Aggregate must also have this variable.') }}
      </div>
      <div class="form-element">
        {{ form.select('Timezone', 'timezone',
@@ -38,7 +39,7 @@
      </div>
     <div class="form-element">
        {{ form.select('Aggregation Type', 'aggregate_type',
-                      {'sum': 'Beginning',
+                      {'sum': 'Sum',
                        'mean': 'Mean',
                        'median': 'Median',
                        'max': 'Max',

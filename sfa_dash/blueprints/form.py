@@ -5,7 +5,9 @@ from flask import (Blueprint, render_template, request,
 import pandas as pd
 from sfa_dash.api_interface import (sites, observations, forecasts,
                                     cdf_forecasts, cdf_forecast_groups)
-from sfa_dash.blueprints.aggregates import AggregateForm, AggregateUpdateForm
+from sfa_dash.blueprints.aggregates import (AggregateForm,
+                                            AggregateObservationAdditionForm,
+                                            AggregateObservationRemovalForm)
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.reports import ReportForm
 from sfa_dash.blueprints.util import handle_response
@@ -484,6 +486,9 @@ forms_blp.add_url_rule('/reports/create',
 forms_blp.add_url_rule('/aggregates/create',
                        view_func=AggregateForm.as_view(
                            'create_aggregate'))
-forms_blp.add_url_rule('/aggregates/<uuid>/update',
-                       view_func=AggregateUpdateForm.as_view(
-                           'update_aggregate_observations'))
+forms_blp.add_url_rule('/aggregates/<uuid>/add',
+                       view_func=AggregateObservationAdditionForm.as_view(
+                           'add_aggregate_observations'))
+forms_blp.add_url_rule('/aggregates/<uuid>/remove/<observation_id>',
+                       view_func=AggregateObservationRemovalForm.as_view(
+                           'remove_aggregate_observations'))

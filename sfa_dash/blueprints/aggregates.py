@@ -7,7 +7,7 @@ import pandas as pd
 from sfa_dash.api_interface import observations, sites, aggregates
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.util import (filter_form_fields, handle_response,
-                                      parse_timedelta)
+                                      parse_timedelta, flatten_dict)
 from sfa_dash.errors import DataRequestException
 
 
@@ -58,10 +58,10 @@ class AggregateForm(BaseView):
                                 uuid=aggregate_id))
 
 
-class AggregateUpdateForm(BaseView):
+class AggregateObservationAdditionForm(BaseView):
     """Form for adding new observations to an aggregate
     """
-    template = 'forms/aggregate_observations_form.html'
+    template = 'forms/aggregate_observations_addition_form.html'
     metadata_template = 'data/metadata/aggregate_metadata.html'
 
     def get_breadcrumb_dict(self):
@@ -85,14 +85,29 @@ class AggregateUpdateForm(BaseView):
         """
         sites_list = handle_response(sites.list_metadata())
         observations_list = handle_response(observations.list_metadata())
+
         # Remove observations with greater interval length
         observations_list = list(filter(
             lambda x: x['interval_length'] <= self.metadata['interval_length'],
             observations_list))
+
         # Remove observations with different variables
         observations_list = list(filter(
             lambda x: x['variable'] == self.metadata['variable'],
             observations_list))
+
+        # Remove observations that exist in the aggregate and do not
+        # have an effective_until set.
+        effective_observations = [
+            obs['observation_id']
+            for obs in self.metadata['observations']
+            if obs['effective_until'] is None]
+        observations_list = list(filter(
+            lambda x: x['observation_id'] not in effective_observations,
+            observations_list))
+
+        # Finally remove extra parameters, which may cause templating
+        # issues.
         for obs in observations_list:
             del obs['extra_parameters']
         for site in sites_list:
@@ -102,19 +117,21 @@ class AggregateUpdateForm(BaseView):
             obs['site'] = site_dict.get(obs['site_id'], None)
         return observations_list
 
-    def template_args(self):
+    def template_args(self, **kwargs):
         observations = self.get_sites_and_observations()
         metadata = render_template(
             self.metadata_template, metadata_object=self.metadata)
         aggregate = self.metadata.copy()
         del aggregate['extra_parameters']
-        return {
+        template_arguments = {
             "observations": observations,
             "aggregate": aggregate,
             "metadata": metadata,
             "breadcrumb": self.breadcrumb_html(
                 self.get_breadcrumb_dict()),
         }
+        template_arguments.update(kwargs)
+        return template_arguments
 
     def parse_observations(self, form_data):
         observation_ids = filter_form_fields('observation-', form_data)
@@ -141,26 +158,112 @@ class AggregateUpdateForm(BaseView):
         formatted['observations'] = observation_json
         return formatted
 
-    def get(self, uuid):
+    def get(self, uuid, **kwargs):
         try:
             self.metadata = handle_response(
                 aggregates.get_metadata(uuid))
         except DataRequestException as e:
             return render_template(
                 self.template, errors=e.errors)
-        template_args = self.template_args()
-
+        template_args = self.template_args(**kwargs)
         return render_template(self.template, **template_args)
 
     def post(self, uuid):
         form_data = request.form
         api_payload = self.aggregate_observation_formatter(form_data)
         try:
-            aggregates.update(uuid, api_payload)
+            handle_response(
+                aggregates.update(uuid, api_payload))
         except DataRequestException as e:
-            return render_template(self.template,
-                                   form_data=form_data,
-                                   errors=e.errors)
+            if 'observations' in e.errors:
+                # unpack list of errors related to observations
+                errors = {
+                    e: [msg] for e, msg in e.errors['observations'][0].items()}
+            else:
+                errors = e.errors
+            return self.get(uuid, form_data=form_data,
+                            errors=flatten_dict(errors))
+        return redirect(url_for('data_dashboard.aggregate_view', uuid=uuid))
+
+
+class AggregateObservationRemovalForm(BaseView):
+    """Form for adding new observations to an aggregate
+    """
+    template = 'forms/aggregate_observations_removal_form.html'
+    metadata_template = 'data/metadata/aggregate_metadata.html'
+
+    def get_breadcrumb_dict(self):
+        breadcrumb_dict = OrderedDict()
+        breadcrumb_dict['Aggregates'] = url_for('data_dashboard.aggregates')
+        breadcrumb_dict[self.metadata['name']] = url_for(
+            'data_dashboard.aggregate_view',
+            uuid=self.metadata['aggregate_id'])
+        breadcrumb_dict['Remove Observation'] = ''
+        return breadcrumb_dict
+
+    def aggregate_observation_formatter(self, form_data, observation_id):
+        formatted = {}
+        effective_until_date = form_data['effective-until-date']
+        effective_until_time = form_data['effective-until-time']
+        effective_until_dt = pd.Timestamp(
+            f'{effective_until_date} {effective_until_time}', tz='utc')
+        effective_until = effective_until_dt.isoformat()
+        observation_json = [{
+            'observation_id': observation_id,
+            'effective_until': effective_until,
+        }]
+        formatted['observations'] = observation_json
+        return formatted
+
+    def template_args(self, observation_id, **kwargs):
+        metadata = render_template(
+            self.metadata_template, metadata_object=self.metadata)
+        aggregate = self.metadata.copy()
+        del aggregate['extra_parameters']
+        template_arguments = {
+            "aggregate": aggregate,
+            "metadata": metadata,
+            "breadcrumb": self.breadcrumb_html(
+                self.get_breadcrumb_dict()),
+        }
+        try:
+            observation = handle_response(
+                observations.get_metadata(observation_id))
+        except DataRequestException:
+            template_arguments['warnings'] = {
+                'observation': ['Observation could not be read.']
+            }
+        else:
+            template_arguments['observation'] = observation
+        template_arguments.update(kwargs)
+        return template_arguments
+
+    def get(self, uuid, observation_id, **kwargs):
+        try:
+            self.metadata = handle_response(
+                aggregates.get_metadata(uuid))
+        except DataRequestException as e:
+            return render_template(
+                self.template, errors=e.errors)
+        template_args = self.template_args(observation_id, **kwargs)
+        return render_template(self.template, **template_args)
+
+    def post(self, uuid, observation_id):
+        form_data = request.form
+        api_payload = self.aggregate_observation_formatter(
+            form_data, observation_id)
+        try:
+            handle_response(
+                aggregates.update(uuid, api_payload))
+        except DataRequestException as e:
+            if 'observations' in e.errors:
+                # unpack list of errors related to observations
+                errors = {
+                    e: [msg] for e, msg in e.errors['observations'][0].items()}
+            else:
+                errors = e.errors
+            return self.get(uuid, form_data=form_data,
+                            errors=flatten_dict(errors))
         return redirect(url_for('data_dashboard.aggregate_view', uuid=uuid))
 
 

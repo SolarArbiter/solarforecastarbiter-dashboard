@@ -380,3 +380,17 @@ def parse_timedelta(data_dict, key_root):
         return value * 1440
     else:
         raise ValueError('Invalid selection in time units field.')
+
+
+def flatten_dict(to_flatten):
+    """Flattens nested dictionaries, removing keys of the nested elements.
+    Useful for flattening API responses for prefilling forms on the
+    dashboard.
+    """
+    flattened = {}
+    for key, value in to_flatten.items():
+        if isinstance(value, dict):
+            flattened.update(flatten_dict(value))
+        else:
+            flattened[key] = value
+    return flattened
