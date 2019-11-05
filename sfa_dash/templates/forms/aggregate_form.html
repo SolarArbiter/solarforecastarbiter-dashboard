@@ -23,7 +23,7 @@
      </div>
      <div class="form-element">
        {{ form.timedelta('Interval length', 'interval_length',
-                         'The length of time that each data point represents. All observations that make up the aggregate must .',
+                         'The length of time that each data point represents. All observations that make up the aggregate must have an interval length shorter than or equal to this value.',
                          form_data=form_data) }}
      </div>
      <div class="form-element">
