@@ -10,7 +10,7 @@ from solarforecastarbiter.plotting import timeseries
 
 
 from sfa_dash.api_interface import (sites, forecasts, observations,
-                                    cdf_forecast_groups)
+                                    cdf_forecast_groups, aggregates)
 from sfa_dash.errors import DataRequestException
 
 
@@ -28,32 +28,66 @@ class DataTables(object):
             return url_for('data_dashboard.sites', create=data_type)
 
     @classmethod
-    def create_table_elements(cls, data_list, id_key, **kwargs):
+    def create_observation_table_elements(cls, data_list, **kwargs):
         """Creates a list of objects to be rendered as table by jinja template
         """
         sites_list = handle_response(sites.list_metadata())
-        site_dict = {site['site_id']: site for site in sites_list}
+        sites_dict = {site['site_id']: site for site in sites_list}
         table_rows = []
         for data in data_list:
             table_row = {}
-            site = site_dict.get(data['site_id'])
+            if data['site_id'] is not None:
+                site_id = data['site_id']
+                site = sites_dict.get(site_id)
             if site is not None:
-                site_name = site_dict[data['site_id']]['name']
+                site_name = site['name']
                 site_href = url_for('data_dashboard.site_view',
-                                    uuid=data['site_id'])
-                site_link = f'<a href={site_href}>{site_name}</a>'
+                                    uuid=site_id)
+                site_link = f'<a href="{site_href}">{site_name}</a>'
             else:
                 site_link = 'Site Unavailable'
             table_row['name'] = data['name']
             table_row['variable'] = data['variable']
             table_row['provider'] = data.get('provider', '')
             table_row['site'] = site_link
-            if id_key == 'forecast_id':
-                table_row['link'] = url_for('data_dashboard.forecast_view',
-                                            uuid=data[id_key])
+            table_row['link'] = url_for('data_dashboard.observation_view',
+                                        uuid=data['observation_id'])
+            table_rows.append(table_row)
+        return table_rows
+
+    @classmethod
+    def create_table_elements(cls, data_list, view_name, **kwargs):
+        """Creates a list of objects to be rendered as table by jinja template
+        """
+        sites_list = handle_response(sites.list_metadata())
+        location_dict = {site['site_id']: site for site in sites_list}
+        aggregates_list = handle_response(aggregates.list_metadata())
+        location_dict.update({agg['aggregate_id']: agg
+                              for agg in aggregates_list})
+        table_rows = []
+        for data in data_list:
+            table_row = {}
+            if data['site_id'] is not None:
+                location_id = data['site_id']
+                location_view_name = 'data_dashboard.site_view'
             else:
-                table_row['link'] = url_for('data_dashboard.observation_view',
-                                            uuid=data[id_key])
+                location_id = data['aggregate_id']
+                location_view_name = 'data_dashboard.aggregate_view'
+            location = location_dict.get(location_id)
+            if location is not None:
+                location_name = location['name']
+                location_href = url_for(location_view_name,
+                                        uuid=location_id)
+                location_link = (f'<a href="{location_href}">'
+                                 f'{location_name}</a>')
+            else:
+                location_link = 'Site/Aggregate Unavailable'
+            table_row['name'] = data['name']
+            table_row['variable'] = data['variable']
+            table_row['provider'] = data.get('provider', '')
+            table_row['location'] = location_link
+            table_row['link'] = url_for(view_name,
+                                        uuid=data['forecast_id'])
             table_rows.append(table_row)
         return table_rows
 
@@ -75,7 +109,7 @@ class DataTables(object):
         creation_link = cls.creation_link('observation', site_id)
         obs_data = handle_response(
             observations.list_metadata(site_id=site_id))
-        rows = cls.create_table_elements(obs_data, 'observation_id', **kwargs)
+        rows = cls.create_observation_table_elements(obs_data, **kwargs)
         rendered_table = render_template(cls.observation_template,
                                          table_rows=rows,
                                          creation_link=creation_link,
@@ -107,7 +141,7 @@ class DataTables(object):
         forecast_data = handle_response(
             forecasts.list_metadata(site_id=site_id))
         rows = cls.create_table_elements(forecast_data,
-                                         'forecast_id',
+                                         'data_dashboard.forecast_view',
                                          **kwargs)
         rendered_table = render_template(cls.forecast_template,
                                          table_rows=rows,
@@ -139,38 +173,15 @@ class DataTables(object):
         creation_link = cls.creation_link('cdf_forecast_group', site_id)
         cdf_forecast_data = handle_response(
             cdf_forecast_groups.list_metadata(site_id=site_id))
-        rows = cls.create_cdf_forecast_elements(cdf_forecast_data,
-                                                **kwargs)
+        rows = cls.create_table_elements(
+            cdf_forecast_data,
+            'data_dashboard.cdf_forecast_group_view',
+            **kwargs)
         rendered_table = render_template(cls.cdf_forecast_template,
                                          table_rows=rows,
                                          creation_link=creation_link,
                                          **kwargs)
         return rendered_table
-
-    @classmethod
-    def create_cdf_forecast_elements(cls, data_list, **kwargs):
-        sites_list = handle_response(sites.list_metadata())
-        site_dict = {site['site_id']: site for site in sites_list}
-        table_rows = []
-        for data in data_list:
-            table_row = {}
-            site = site_dict.get(data['site_id'])
-            if site is not None:
-                site_name = site['name']
-                site_href = url_for('data_dashboard.site_view',
-                                    uuid=data['site_id'])
-                site_link = f'<a href={site_href}>{site_name}</a>'
-            else:
-                site_link = 'Site Unavailable'
-            table_row['name'] = data['name']
-            table_row['variable'] = data['variable']
-            table_row['provider'] = data.get('provider', '')
-            table_row['site'] = site_link
-            table_row['link'] = url_for(
-                'data_dashboard.cdf_forecast_group_view',
-                uuid=data['forecast_id'])
-            table_rows.append(table_row)
-        return table_rows
 
     @classmethod
     def get_site_table(cls, create=None, **kwargs):
