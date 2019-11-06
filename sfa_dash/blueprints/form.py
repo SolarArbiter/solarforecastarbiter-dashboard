@@ -300,7 +300,7 @@ class CreateAggregateForecastForm(MetadataForm):
 
     def render_metadata_section(self, metadata):
         return render_template(
-            self.metadata_template, metadata_object=metadata)
+            self.metadata_template, **metadata)
 
     def get(self, uuid=None):
         template_args = {}
