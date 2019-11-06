@@ -1,4 +1,4 @@
-"""Helper functions for all Solar Forecast Arbiter /sites/* endpoints.
+"""Helper functions for all Solar Forecast Arbiter /aggregates/* endpoints.
 """
 from sfa_dash.api_interface import get_request, post_request, delete_request
 
