@@ -120,7 +120,7 @@ class AggregateObservationAdditionForm(BaseView):
     def template_args(self, **kwargs):
         observations = self.get_sites_and_observations()
         metadata = render_template(
-            self.metadata_template, metadata_object=self.metadata)
+            self.metadata_template, **self.metadata)
         aggregate = self.metadata.copy()
         del aggregate['extra_parameters']
         template_arguments = {
@@ -217,7 +217,7 @@ class AggregateObservationRemovalForm(BaseView):
 
     def template_args(self, observation_id, **kwargs):
         metadata = render_template(
-            self.metadata_template, metadata_object=self.metadata)
+            self.metadata_template, **self.metadata)
         aggregate = self.metadata.copy()
         del aggregate['extra_parameters']
         template_arguments = {
@@ -284,8 +284,7 @@ class AggregateView(BaseView):
     def template_args(self):
         return {
             'metadata': render_template(
-                self.metadata_template,
-                metadata_object=self.metadata),
+                self.metadata_template, **self.metadata),
             'observations': self.observation_list,
             'breadcrumb': self.breadcrumb_html(
                 self.get_breadcrumb_dict()),
@@ -317,7 +316,7 @@ class DeleteAggregateView(BaseView):
             'metadata': render_template(
                 self.metadata_template,
                 data_type='Aggregate',
-                metadata_object=self.metadata
+                **self.metadata
             ),
         }
 
