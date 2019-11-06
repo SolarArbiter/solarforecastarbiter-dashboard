@@ -2,8 +2,9 @@
 on site-section.
 """
 from sfa_dash.blueprints.base import BaseView
-from sfa_dash.api_interface import sites
+from sfa_dash.api_interface import sites, aggregates
 from sfa_dash.blueprints.util import handle_response
+from sfa_dash.errors import DataRequestException
 from flask import render_template, request, url_for
 import pandas as pd
 
@@ -86,7 +87,10 @@ class DataDashView(BaseView):
                 link_html = f'<a href="{aggregate_href}">{aggregate_name}</a>'
             else:
                 link_html = self.metadata['aggregate_id']
+        else:
+            link_html = 'Object Deleted'
         self.metadata['location_link'] = link_html
+
     def parse_start_end_from_querystring(self):
         """Attempts to find the start and end query parameters. If not found,
         returns defaults spanning the last three days. Used for setting
