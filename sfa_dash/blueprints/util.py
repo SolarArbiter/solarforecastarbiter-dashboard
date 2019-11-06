@@ -25,7 +25,7 @@ class DataTables(object):
         if site_id is not None:
             return url_for(f'forms.create_{data_type}', uuid=site_id)
         else:
-            return url_for('data_dashboard.sites', create=data_type)
+            return None
 
     @classmethod
     def create_observation_table_elements(cls, data_list, **kwargs):
