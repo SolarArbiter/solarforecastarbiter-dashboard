@@ -6,7 +6,6 @@ from sfa_dash.api_interface import sites, aggregates
 from sfa_dash.blueprints.util import handle_response
 from sfa_dash.errors import DataRequestException
 from flask import render_template, request, url_for
-import pandas as pd
 
 
 class DataDashView(BaseView):
@@ -29,7 +28,7 @@ class DataDashView(BaseView):
         sets a warning, sets the 'plot' template argument to None and
         reraises the DataRequestError.
         """
-        if self.metadata['site_id'] is not None:
+        if self.metadata.get('site_id') is not None:
             try:
                 self.metadata['site'] = self.get_site_metadata(
                     self.metadata['site_id'])
@@ -41,7 +40,7 @@ class DataDashView(BaseView):
                     },
                 })
                 raise
-        else:
+        elif self.metadata.get('aggregate_id'):
             try:
                 self.metadata['aggregate'] = handle_response(
                     aggregates.get_metadata(self.metadata['aggregate_id']))
@@ -90,29 +89,6 @@ class DataDashView(BaseView):
         else:
             link_html = 'Object Deleted'
         self.metadata['location_link'] = link_html
-
-    def parse_start_end_from_querystring(self):
-        """Attempts to find the start and end query parameters. If not found,
-        returns defaults spanning the last three days. Used for setting
-        reasonable defaults for requesting data for plots.
-
-        Returns
-        -------
-        start,end
-            Tuple of ISO 8601 datetime strings representing the start, end.
-        """
-        # set default arg to an invalid timestamp, to trigger ValueError
-        start_arg = request.args.get('start', 'x')
-        end_arg = request.args.get('end', 'x')
-        try:
-            start = pd.Timestamp(start_arg)
-        except ValueError:
-            start = pd.Timestamp.utcnow() - pd.Timedelta('3days')
-        try:
-            end = pd.Timestamp(end_arg)
-        except ValueError:
-            end = pd.Timestamp.utcnow()
-        return start.isoformat(), end.isoformat()
 
     def get(self, **kwargs):
         return render_template(self.template, **self.template_args(**kwargs))

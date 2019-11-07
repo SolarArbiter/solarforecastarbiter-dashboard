@@ -28,51 +28,29 @@ class DataTables(object):
             return None
 
     @classmethod
-    def create_observation_table_elements(cls, data_list, **kwargs):
-        """Creates a list of objects to be rendered as table by jinja template
-        """
-        sites_list = handle_response(sites.list_metadata())
-        sites_dict = {site['site_id']: site for site in sites_list}
-        table_rows = []
-        for data in data_list:
-            table_row = {}
-            if data['site_id'] is not None:
-                site_id = data['site_id']
-                site = sites_dict.get(site_id)
-            if site is not None:
-                site_name = site['name']
-                site_href = url_for('data_dashboard.site_view',
-                                    uuid=site_id)
-                site_link = f'<a href="{site_href}">{site_name}</a>'
-            else:
-                site_link = 'Site Unavailable'
-            table_row['name'] = data['name']
-            table_row['variable'] = data['variable']
-            table_row['provider'] = data.get('provider', '')
-            table_row['site'] = site_link
-            table_row['link'] = url_for('data_dashboard.observation_view',
-                                        uuid=data['observation_id'])
-            table_rows.append(table_row)
-        return table_rows
-
-    @classmethod
-    def create_table_elements(cls, data_list, view_name, **kwargs):
+    def create_table_elements(cls, data_list, id_key, view_name, **kwargs):
         """Creates a list of objects to be rendered as table by jinja template
         """
         sites_list = handle_response(sites.list_metadata())
         location_dict = {site['site_id']: site for site in sites_list}
-        aggregates_list = handle_response(aggregates.list_metadata())
-        location_dict.update({agg['aggregate_id']: agg
-                              for agg in aggregates_list})
+        if id_key != 'observation_id':
+            no_location_text = 'Site/Aggregate unavailable'
+            aggregates_list = handle_response(aggregates.list_metadata())
+            location_dict.update({agg['aggregate_id']: agg
+                                  for agg in aggregates_list})
+        else:
+            no_location_text = 'Site unavailable'
         table_rows = []
         for data in data_list:
             table_row = {}
-            if data['site_id'] is not None:
+            if data.get('site_id') is not None:
                 location_id = data['site_id']
                 location_view_name = 'data_dashboard.site_view'
-            else:
+            elif data.get('aggregate_id') is not None:
                 location_id = data['aggregate_id']
                 location_view_name = 'data_dashboard.aggregate_view'
+            else:
+                location_id = None
             location = location_dict.get(location_id)
             if location is not None:
                 location_name = location['name']
@@ -81,13 +59,44 @@ class DataTables(object):
                 location_link = (f'<a href="{location_href}">'
                                  f'{location_name}</a>')
             else:
-                location_link = 'Site/Aggregate Unavailable'
+                location_link = no_location_text
             table_row['name'] = data['name']
             table_row['variable'] = data['variable']
             table_row['provider'] = data.get('provider', '')
             table_row['location'] = location_link
             table_row['link'] = url_for(view_name,
-                                        uuid=data['forecast_id'])
+                                        uuid=data[id_key])
+            table_rows.append(table_row)
+        return table_rows
+
+    @classmethod
+    def create_site_table_elements(cls, data_list, create=None, **kwargs):
+        """Creates a dictionary to feed to the Site table template as the
+        `table_rows` parameter.
+
+        Parameters
+        ----------
+        data_list: list
+            List of site metadata dictionaries, typically an API response from
+            the /sites/ endpoint.
+
+        Returns
+        -------
+        dict
+            A dict of site data to pass to the template.
+        """
+        if create not in ['observation', 'forecast', 'cdf_forecast_group']:
+            link_view = 'data_dashboard.site_view'
+        else:
+            link_view = f'forms.create_{create}'
+        table_rows = []
+        for data in data_list:
+            table_row = {}
+            table_row['name'] = data['name']
+            table_row['provider'] = data.get('provider', '')
+            table_row['latitude'] = data['latitude']
+            table_row['longitude'] = data['longitude']
+            table_row['link'] = url_for(link_view, uuid=data['site_id'])
             table_rows.append(table_row)
         return table_rows
 
@@ -109,7 +118,11 @@ class DataTables(object):
         creation_link = cls.creation_link('observation', site_id)
         obs_data = handle_response(
             observations.list_metadata(site_id=site_id))
-        rows = cls.create_observation_table_elements(obs_data, **kwargs)
+        rows = cls.create_table_elements(
+            obs_data,
+            'observation_id',
+            'data_dashboard.observation_view',
+            **kwargs)
         rendered_table = render_template(cls.observation_template,
                                          table_rows=rows,
                                          creation_link=creation_link,
@@ -140,9 +153,11 @@ class DataTables(object):
         creation_link = cls.creation_link('forecast', site_id)
         forecast_data = handle_response(
             forecasts.list_metadata(site_id=site_id))
-        rows = cls.create_table_elements(forecast_data,
-                                         'data_dashboard.forecast_view',
-                                         **kwargs)
+        rows = cls.create_table_elements(
+            forecast_data,
+            'forecast_id',
+            'data_dashboard.forecast_view',
+            **kwargs)
         rendered_table = render_template(cls.forecast_template,
                                          table_rows=rows,
                                          creation_link=creation_link,
@@ -175,6 +190,7 @@ class DataTables(object):
             cdf_forecast_groups.list_metadata(site_id=site_id))
         rows = cls.create_table_elements(
             cdf_forecast_data,
+            'forecast_id',
             'data_dashboard.cdf_forecast_group_view',
             **kwargs)
         rendered_table = render_template(cls.cdf_forecast_template,
@@ -219,50 +235,31 @@ class DataTables(object):
                                          table_rows=rows)
         return rendered_table
 
-    @classmethod
-    def create_site_table_elements(cls, data_list, create=None, **kwargs):
-        """Creates a dictionary to feed to the Site table template as the
-        `table_rows` parameter.
-
-        Parameters
-        ----------
-        data_list: list
-            List of site metadata dictionaries, typically an API response from
-            the /sites/ endpoint.
-
-        Returns
-        -------
-        dict
-            A dict of site data to pass to the template.
-        """
-        if create not in ['observation', 'forecast', 'cdf_forecast_group']:
-            link_view = 'data_dashboard.site_view'
-        else:
-            link_view = f'forms.create_{create}'
-        table_rows = []
-        for data in data_list:
-            table_row = {}
-            table_row['name'] = data['name']
-            table_row['provider'] = data.get('provider', '')
-            table_row['latitude'] = data['latitude']
-            table_row['longitude'] = data['longitude']
-            table_row['link'] = url_for(link_view, uuid=data['site_id'])
-            table_rows.append(table_row)
-        return table_rows
-
 
 def timeseries_adapter(type_, metadata, json_value_response):
     metadata = deepcopy(metadata)
     # ignores any modeling parameters as they aren't need for this
-    site = datamodel.Site.from_dict(metadata['site'], raise_on_extra=False)
-    metadata['site'] = site
+    if 'site' in metadata:
+        site = datamodel.Site.from_dict(metadata['site'], raise_on_extra=False)
+        metadata['site'] = site
+    elif 'aggregate' in metadata:
+        # Patch aggregates so data model doesn't throw an error. We don't
+        # need to load all of the observations when plotting forecasts.
+        metadata['aggregate']['observations'] = []
     if type_ == 'forecast':
         obj = datamodel.Forecast.from_dict(metadata)
         data = io_utils.json_payload_to_forecast_series(json_value_response)
         return timeseries.generate_forecast_figure(
             obj, data, return_components=True, limit=None)
-    else:
+    elif type_ == 'observation':
         obj = datamodel.Observation.from_dict(metadata)
+        data = io_utils.json_payload_to_observation_df(json_value_response)
+        return timeseries.generate_observation_figure(
+            obj, data, return_components=True, limit=None)
+    else:
+        # remove observations, we aren't using them for plotting aggregates
+        metadata['observations'] = []
+        obj = datamodel.Aggregate.from_dict(metadata, raise_on_extra=False)
         data = io_utils.json_payload_to_observation_df(json_value_response)
         return timeseries.generate_observation_figure(
             obj, data, return_components=True, limit=None)

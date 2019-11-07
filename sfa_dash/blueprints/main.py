@@ -14,143 +14,12 @@ from sfa_dash.blueprints.delete import DeleteConfirmation
 from sfa_dash.blueprints.reports import (ReportsView, ReportView,
                                          DeleteReportView)
 from sfa_dash.blueprints.sites import SingleSiteView, SitesListingView
-from sfa_dash.blueprints.util import timeseries_adapter, handle_response
+from sfa_dash.blueprints.util import handle_response
 from sfa_dash.errors import DataRequestException
 from sfa_dash.filters import human_friendly_datatype
 
 
 class SingleObjectView(DataDashView):
-    """View for a single data object of type observation, forecast
-    or cdf_forecast.
-    """
-    template = 'data/asset.html'
-
-    def __init__(self, data_type):
-        """Configures attributes of the view that vary between data type.
-        The `data_type` can be configured when registering a url rule,
-            e.g.
-            <blueprint>.add_url_rule(
-                SingleObjectView.as_view('observations',
-                                         data_type='observation'))
-        Examples can be found at the bottom of this file.
-        """
-        self.data_type = data_type
-        if data_type == 'observation':
-            self.api_handle = observations
-            self.metadata_template = 'data/metadata/observation_metadata.html'
-            self.id_key = 'observation_id'
-            self.plot_type = 'observation'
-        else:
-            raise ValueError('Invalid data_type.')
-        self.human_label = human_friendly_datatype(self.data_type)
-
-    def get_breadcrumb_dict(self):
-        """See BaseView.get_breadcrumb_dict.
-        """
-        breadcrumb_dict = OrderedDict()
-        listing_view = f'{self.data_type}s'
-        # Insert site link if available
-        if self.metadata.get('site') is not None:
-            breadcrumb_dict['Sites'] = url_for('data_dashboard.sites')
-            breadcrumb_dict[self.metadata['site']['name']] = url_for(
-                'data_dashboard.site_view',
-                uuid=self.metadata['site_id'])
-            breadcrumb_dict[f'{self.human_label}s'] = url_for(
-                f'data_dashboard.{listing_view}',
-                uuid=self.metadata['site_id'])
-        else:
-            breadcrumb_dict[f'{self.human_label}s'] = url_for(
-                f'data_dashboard.{listing_view}')
-        breadcrumb_dict[self.metadata['name']] = url_for(
-            f'data_dashboard.{self.data_type}_view',
-            uuid=self.metadata[self.id_key])
-        return breadcrumb_dict
-
-    def set_template_args(self, **kwargs):
-        """Insert necessary template arguments. See data/asset.html in the
-        template folder for how these are layed out.
-        """
-        self.temp_args['current_path'] = request.path
-        self.temp_args['subnav'] = self.format_subnav(**kwargs)
-        self.temp_args['breadcrumb'] = self.breadcrumb_html(
-            self.get_breadcrumb_dict())
-        self.temp_args['metadata'] = render_template(self.metadata_template,
-                                                     **self.metadata)
-        self.temp_args['upload_link'] = url_for(
-            f'forms.upload_{self.data_type}_data',
-            uuid=self.metadata[self.id_key])
-        self.temp_args['download_link'] = url_for(
-            f'forms.download_{self.data_type}_data',
-            uuid=self.metadata[self.id_key])
-        self.temp_args['delete_link'] = url_for(
-            f'data_dashboard.delete_{self.data_type}',
-            uuid=self.metadata[self.id_key])
-
-    def insert_plot(self, uuid, start, end):
-        """Generate a plot and bokeh script for the data between
-        start and end. Note that the core library requires a 'site'
-        key with the full site metadata to create a plot.
-
-        This inserts the rendered plot html and bokeh script into
-        the temp_args keys plot and bokeh_script respectively.
-        """
-        try:
-            values = handle_response(self.api_handle.get_values(
-                uuid, params={'start': start, 'end': end}))
-        except DataRequestException:
-            self.temp_args.update({'warnings': {
-                'Value Access': [f'{self.human_label} values inaccessible.']},
-            })
-        else:
-            script_plot = timeseries_adapter(
-                self.plot_type, self.metadata, values)
-            if script_plot is None:
-                self.temp_args.update({
-                    'messages': {
-                        'Data': [
-                            (f"No data available for this {self.human_label} "
-                             "during this period.")]},
-                })
-            else:
-                self.temp_args.update({
-                    'plot': script_plot[1],
-                    'bokeh_script': script_plot[0]
-                })
-
-    def get(self, uuid, **kwargs):
-        self.temp_args = {}
-        start, end = self.parse_start_end_from_querystring()
-        # Attempt a request for the object's metadata. On an error,
-        # inject the errors into the template arguments and skip
-        # any further processing.
-        try:
-            self.metadata = handle_response(
-                self.api_handle.get_metadata(uuid))
-        except DataRequestException as e:
-            self.temp_args.update({'errors': e.errors})
-        else:
-            try:
-                self.metadata['site'] = self.get_site_metadata(
-                    self.metadata['site_id'])
-            except DataRequestException:
-                self.temp_args.update({
-                    'warnings': {
-                        'Site Access': [
-                            'Site inaccessible. Plots will not be displayed.']
-                    },
-                    'plot': None,
-                })
-            else:
-                # If site data is available, try to create a plot
-                self.insert_plot(uuid, start, end)
-            finally:
-                self.metadata['site_link'] = self.generate_site_link(
-                    self.metadata)
-                self.set_template_args(**kwargs)
-        return render_template(self.template, **self.temp_args)
-
-
-class SingleForecastObjectView(DataDashView):
     """View for a single data object of type observation, forecast
     or cdf_forecast.
     """
@@ -176,6 +45,11 @@ class SingleForecastObjectView(DataDashView):
             self.metadata_template = 'data/metadata/cdf_forecast_metadata.html'
             self.id_key = 'forecast_id'
             self.plot_type = 'forecast'
+        elif data_type == 'observation':
+            self.api_handle = observations
+            self.metadata_template = 'data/metadata/observation_metadata.html'
+            self.id_key = 'observation_id'
+            self.plot_type = 'observation'
         else:
             raise ValueError('Invalid data_type.')
         self.human_label = human_friendly_datatype(self.data_type)
@@ -188,7 +62,7 @@ class SingleForecastObjectView(DataDashView):
             listing_view = 'cdf_forecast_groups'
         else:
             listing_view = f'{self.data_type}s'
-        # Insert site link if available
+        # Insert site/aggregate link if available
         if self.metadata.get('site') is not None:
             breadcrumb_dict['Sites'] = url_for('data_dashboard.sites')
             breadcrumb_dict[self.metadata['site']['name']] = url_for(
@@ -244,37 +118,6 @@ class SingleForecastObjectView(DataDashView):
                 f'data_dashboard.delete_{self.data_type}',
                 uuid=self.metadata[self.id_key])
 
-    def insert_plot(self, uuid, start, end):
-        """Generate a plot and bokeh script for the data between
-        start and end. Note that the core library requires a 'site'
-        key with the full site metadata to create a plot.
-
-        This inserts the rendered plot html and bokeh script into
-        the temp_args keys plot and bokeh_script respectively.
-        """
-        try:
-            values = handle_response(self.api_handle.get_values(
-                uuid, params={'start': start, 'end': end}))
-        except DataRequestException:
-            self.temp_args.update({'warnings': {
-                'Value Access': [f'{self.human_label} values inaccessible.']},
-            })
-        else:
-            script_plot = timeseries_adapter(
-                self.plot_type, self.metadata, values)
-            if script_plot is None:
-                self.temp_args.update({
-                    'messages': {
-                        'Data': [
-                            (f"No data available for this {self.human_label} "
-                             "during this period.")]},
-                })
-            else:
-                self.temp_args.update({
-                    'plot': script_plot[1],
-                    'bokeh_script': script_plot[0]
-                })
-
     def get(self, uuid, **kwargs):
         self.temp_args = {}
         start, end = self.parse_start_end_from_querystring()
@@ -292,16 +135,14 @@ class SingleForecastObjectView(DataDashView):
             except DataRequestException:
                 self.temp_args.update({'plot': None})
             else:
-                # If site data is available, try to create a plot
-                if self.metadata.get('site') is not None:
-                    self.insert_plot(uuid, start, end)
+                self.insert_plot(uuid, start, end)
             finally:
                 self.set_site_or_aggregate_link()
                 self.set_template_args(**kwargs)
         return render_template(self.template, **self.temp_args)
 
 
-class SingleCDFForecastGroupView(SingleForecastObjectView):
+class SingleCDFForecastGroupView(SingleObjectView):
     template = 'data/cdf_forecast.html'
     metadata_template = 'data/metadata/cdf_forecast_group_metadata.html'
     human_label = human_friendly_datatype('cdf_forecast')
@@ -423,11 +264,11 @@ data_dash_blp.add_url_rule(
         'observation_view', data_type='observation'))
 data_dash_blp.add_url_rule(
     '/forecasts/single/<uuid>',
-    view_func=SingleForecastObjectView.as_view(
+    view_func=SingleObjectView.as_view(
         'forecast_view', data_type='forecast'))
 data_dash_blp.add_url_rule(
     '/forecasts/cdf/single/<uuid>',
-    view_func=SingleForecastObjectView.as_view(
+    view_func=SingleObjectView.as_view(
         'cdf_forecast_view', data_type='cdf_forecast'))
 data_dash_blp.add_url_rule(
     '/forecasts/cdf/<uuid>',

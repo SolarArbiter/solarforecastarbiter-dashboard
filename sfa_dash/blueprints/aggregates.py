@@ -272,6 +272,9 @@ class AggregateView(BaseView):
     """
     template = 'data/aggregate.html'
     metadata_template = 'data/metadata/aggregate_metadata.html'
+    api_handle = aggregates
+    plot_type = 'aggregate'
+    human_label = 'Aggregate'
 
     def get_breadcrumb_dict(self):
         breadcrumb_dict = OrderedDict()
@@ -281,27 +284,39 @@ class AggregateView(BaseView):
             uuid=self.metadata['aggregate_id'])
         return breadcrumb_dict
 
-    def template_args(self):
-        return {
+    def set_template_args(self):
+        self.temp_args.update({
             'metadata': render_template(
                 self.metadata_template, **self.metadata),
             'observations': self.observation_list,
             'breadcrumb': self.breadcrumb_html(
                 self.get_breadcrumb_dict()),
             'aggregate': self.metadata,
-        }
+        })
+
+    def template_args(self):
+        return self.temp_args
 
     def get(self, uuid):
-        self.metadata = handle_response(aggregates.get_metadata(uuid))
-        self.observation_list = []
-        observations_list = handle_response(observations.list_metadata())
-        observation_dict = {obs['observation_id']: obs
-                            for obs in observations_list}
-        for obs in self.metadata['observations']:
-            if obs['observation_id'] in observation_dict:
-                observation = observation_dict[obs['observation_id']].copy()
-                observation.update(obs)
-                self.observation_list.append(observation)
+        self.temp_args = {}
+        start, end = self.parse_start_end_from_querystring()
+        try:
+            self.metadata = handle_response(self.api_handle.get_metadata(uuid))
+        except DataRequestException as e:
+            self.temp_args.update({'errors': e.errors})
+        else:
+            self.observation_list = []
+            observations_list = handle_response(observations.list_metadata())
+            observation_dict = {obs['observation_id']: obs
+                                for obs in observations_list}
+            for obs in self.metadata['observations']:
+                curr_id = obs['observation_id']
+                if curr_id in observation_dict:
+                    observation = observation_dict[curr_id].copy()
+                    observation.update(obs)
+                    self.observation_list.append(observation)
+            self.insert_plot(uuid, start, end)
+            self.set_template_args()
         return super().get()
 
 
