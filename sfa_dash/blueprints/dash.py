@@ -66,7 +66,7 @@ class DataDashView(BaseView):
             indicating that the current user does not have access to the
             site or aggregate.
         """
-        if self.metadata['site_id'] is not None:
+        if self.metadata.get('site_id') is not None:
             if self.metadata.get('site') is not None:
                 site_metadata = self.metadata.get('site')
                 site_name = site_metadata['name']
@@ -76,7 +76,7 @@ class DataDashView(BaseView):
                 link_html = f'<a href="{site_href}">{site_name}</a>'
             else:
                 link_html = self.metadata['site_id']
-        elif self.metadata['aggregate_id'] is not None:
+        elif self.metadata.get('aggregate_id') is not None:
             if self.metadata.get('aggregate') is not None:
                 aggregate_metadata = self.metadata.get('aggregate')
                 aggregate_name = aggregate_metadata['name']
