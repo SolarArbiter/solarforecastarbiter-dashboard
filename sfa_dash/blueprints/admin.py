@@ -233,11 +233,14 @@ class RoleView(AdminView):
             user_list = users.list_metadata().json()
             user_map = {user['user_id']: user
                         for user in user_list}
-            role['users'] = {k: {'user_id': k,
-                                 'added_to_user': v,
-                                 'organization': user_map.get(
-                                     k, {}).get('organization', '')}
-                             for k, v in role['users'].items()}
+            role['users'] = {
+                k: {'user_id': k,
+                    'added_to_user': v,
+                    'email': user_map.get(k, {}).get(
+                        'email', 'Email Unavailable'),
+                    'organization': user_map.get(k, {}).get(
+                        'organization', 'Organization Unavailable')}
+                for k, v in role['users'].items()}
         return render_template(self.template,
                                role=role,
                                role_table=role_table,
@@ -267,9 +270,10 @@ class RoleGrant(AdminView):
 
     def post(self, uuid):
         form_data = request.form
-        user_id = form_data.get('user_id', '')
-        grant_role_request = users.add_role(user_id, uuid)
-        if grant_role_request.status_code != 204:
+        user_email = form_data.get('user_email', '')
+        try:
+            handle_response(users.add_role_by_email(user_email, uuid))
+        except DataRequestException:
             role = roles.get_metadata(uuid).json()
             errors = {
                 'Error': ['Failed to grant role.'],

@@ -21,7 +21,7 @@
     <tr>
       <th scope="col">Name</th>
       <th scope="col">Date Added to Role</th>
-      <th scope="col"></th>
+      <th scope="col" id="removal-header"></th>
     </tr>
   </thead>
   <tbody>
@@ -53,7 +53,7 @@
       <th scope="col" id="provider-header">
         <button type="button" class="btn btn-th dropdown-toggle" data-toggle="collapse" data-target="#org-filters" >Organization</button>
       </th>
-      <th scope="col"></th>
+      <th scope="col" id="removal-header"></th>
     </tr>
   </thead>
   <tbody>
@@ -63,7 +63,7 @@
     {% for user_id, user in role['users'].items() %}
       <tr>
           <td><a href="{{ url_for('admin.user_view', uuid=user['user_id']) }}">{{ user['user_id'] }}</a></td>
-          <td>&lt;email coming soon&gt;</td>
+          <td class="email-column"> {{ user['email'] }}</td>
           <td class="provider-column">{{ user['organization'] }} </td>
           <td><a href={{ url_for('admin.user_role_removal', uuid=user_id, role_id=role['role_id']) }}>Remove</a></td>
       </tr>
