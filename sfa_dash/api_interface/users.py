@@ -40,3 +40,8 @@ def add_role_by_email(email, role_id):
 def remove_role_by_email(email, role_id):
     req = delete_request(f'/users-by-email/{email}/roles/{role_id}')
     return req
+
+
+def get_email(user_id):
+    req = get_request(f'/users/{user_id}/email')
+    return req

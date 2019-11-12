@@ -216,6 +216,14 @@ class RoleListing(AdminView):
 class RoleView(AdminView):
     template = 'forms/admin/role.html'
 
+    def get_email(self, user_id):
+        try:
+            email = handle_response(users.get_email(user_id))
+        except DataRequestException:
+            return 'Email Unavailable'
+        else:
+            return email
+
     def get(self, uuid, **kwargs):
         role_table = request.args.get('table', 'permissions')
         try:
@@ -237,7 +245,7 @@ class RoleView(AdminView):
                 k: {'user_id': k,
                     'added_to_user': v,
                     'email': user_map.get(k, {}).get(
-                        'email', 'Email Unavailable'),
+                        'email', self.get_email(k)),
                     'organization': user_map.get(k, {}).get(
                         'organization', 'Organization Unavailable')}
                 for k, v in role['users'].items()}
