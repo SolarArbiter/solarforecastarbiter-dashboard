@@ -6,7 +6,6 @@ import pandas as pd
 
 from sfa_dash.api_interface import observations, sites, aggregates
 from sfa_dash.blueprints.base import BaseView
-from sfa_dash.blueprints.data_listing import DataListingView
 from sfa_dash.blueprints.util import (filter_form_fields, handle_response,
                                       parse_timedelta, flatten_dict)
 from sfa_dash.errors import DataRequestException
@@ -276,6 +275,11 @@ class AggregateView(BaseView):
     api_handle = aggregates
     plot_type = 'aggregate'
     human_label = 'Aggregate'
+    subnav_format = subnav_format = {
+        '{observations_url}': 'Observations',
+        '{forecasts_url}': 'Forecasts',
+        '{cdf_forecasts_url}': 'Probabilistic Forecasts',
+    }
 
     def get_breadcrumb_dict(self):
         breadcrumb_dict = OrderedDict()
@@ -285,6 +289,19 @@ class AggregateView(BaseView):
             uuid=self.metadata['aggregate_id'])
         return breadcrumb_dict
 
+    def get_subnav_kwargs(self):
+        return {
+            'observations_url': url_for(
+                'data_dashboard.aggregate_view',
+                uuid=self.metadata['aggregate_id']),
+            'forecasts_url': url_for(
+                'data_dashboard.forecasts',
+                aggregate_id=self.metadata['aggregate_id']),
+            'cdf_forecasts_url': url_for(
+                'data_dashboard.cdf_forecast_groups',
+                aggregate_id=self.metadata['aggregate_id']),
+        }
+
     def set_template_args(self):
         self.temp_args.update({
             'metadata': render_template(
@@ -293,6 +310,7 @@ class AggregateView(BaseView):
             'breadcrumb': self.breadcrumb_html(
                 self.get_breadcrumb_dict()),
             'aggregate': self.metadata,
+            'subnav': self.format_subnav(**self.get_subnav_kwargs())
         })
 
     def template_args(self):
@@ -318,7 +336,7 @@ class AggregateView(BaseView):
                     self.observation_list.append(observation)
             self.insert_plot(uuid, start, end)
             self.set_template_args()
-        return super().get()
+        return render_template(self.template, **self.template_args())
 
 
 class DeleteAggregateView(BaseView):
@@ -372,25 +390,3 @@ class DeleteAggregateView(BaseView):
         return redirect(url_for(
             f'data_dashboard.aggregates',
             messages={'delete': ['Success']}))
-
-
-class AggregateForecastsView(DataListingView):
-    def __init__(self, data_type, **kwargs):
-        if data_type == 'forecast':
-            self.table_function = DataTables.get_forecast_table
-        elif data_type == 'cdf_forecast_group':
-            self.table_function = DataTables.get_cdf_forecast_table
-        else:
-            raise Exception
-        self.data_type = data_Type
-
-    def get_breadcrumb_dict(self, aggregate_id):
-        breadcrumb_dict = OrderedDict()
-        breadcrumb_dict['Aggregates'] = url_for('data_dashboard.aggregates')
-
-
-        try:
-            aggregates.get_metadata(aggregate_id)
-        except DataRequestException:
-            pass
-        

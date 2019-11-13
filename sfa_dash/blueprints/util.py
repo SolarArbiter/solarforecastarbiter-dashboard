@@ -1,4 +1,3 @@
-import pdb
 """ Utility classes/functions. Mostly for handling api data.
 """
 from copy import deepcopy
@@ -23,10 +22,14 @@ class DataTables(object):
 
     @classmethod
     def creation_link(cls, data_type, site_id=None, aggregate_id=None):
+        """Supplies the url for forms to create a new object of type `data_type`
+        for the given site or aggregate, else returns None.
+        """
         if site_id is not None:
             return url_for(f'forms.create_{data_type}', uuid=site_id)
         elif aggregate_id is not None:
-            return url_for(f'forms.create_aggregate_{data_type}', uuid=aggregat_id)
+            return url_for(f'forms.create_aggregate_{data_type}',
+                           uuid=aggregate_id)
         else:
             return None
 
@@ -73,7 +76,7 @@ class DataTables(object):
         return table_rows
 
     @classmethod
-    def create_site_table_elements(cls, data_list, create=None, **kwargs):
+    def create_site_table_elements(cls, data_list, **kwargs):
         """Creates a dictionary to feed to the Site table template as the
         `table_rows` parameter.
 
@@ -88,10 +91,6 @@ class DataTables(object):
         dict
             A dict of site data to pass to the template.
         """
-        if create not in ['observation', 'forecast', 'cdf_forecast_group']:
-            link_view = 'data_dashboard.site_view'
-        else:
-            link_view = f'forms.create_{create}'
         table_rows = []
         for data in data_list:
             table_row = {}
@@ -99,7 +98,8 @@ class DataTables(object):
             table_row['provider'] = data.get('provider', '')
             table_row['latitude'] = data['latitude']
             table_row['longitude'] = data['longitude']
-            table_row['link'] = url_for(link_view, uuid=data['site_id'])
+            table_row['link'] = url_for('data_dashboard.site_view',
+                                        uuid=data['site_id'])
             table_rows.append(table_row)
         return table_rows
 
@@ -118,7 +118,7 @@ class DataTables(object):
             Rendered HTML table with search bar and a 'Create
             new Observation' button.
         """
-        creation_link = cls.creation_link('observation', site_id)
+        creation_link = cls.creation_link('observation', site_id=site_id)
         obs_data = handle_response(
             observations.list_metadata(site_id=site_id))
         rows = cls.create_table_elements(
@@ -155,13 +155,16 @@ class DataTables(object):
         """
         request_kwargs = {}
         if site_id is not None:
-            creation_link = cls.creation_link('forecast', site_id)
+            creation_link = cls.creation_link('forecast',
+                                              site_id=site_id)
             request_kwargs['site_id'] = site_id
         elif aggregate_id is not None:
-            creation_link = cls.creation_link('forecast', aggregate_id)
+            creation_link = cls.creation_link('forecast',
+                                              aggregate_id=aggregate_id)
             request_kwargs['aggregate_id'] = aggregate_id
         else:
             creation_link = None
+
         forecast_data = handle_response(
             forecasts.list_metadata(**request_kwargs))
         rows = cls.create_table_elements(
@@ -176,7 +179,7 @@ class DataTables(object):
         return rendered_table
 
     @classmethod
-    def get_cdf_forecast_table(cls, site_id=None, **kwargs):
+    def get_cdf_forecast_table(cls, site_id=None, aggregate_id=None, **kwargs):
         """Generates an html element containing a table of CDF Forecasts.
 
         Parameters
@@ -196,9 +199,20 @@ class DataTables(object):
             If a site_id is passed and the user does not have access
             to that site or some other api error has occurred.
         """
-        creation_link = cls.creation_link('cdf_forecast_group', site_id)
+        request_kwargs = {}
+        if site_id is not None:
+            creation_link = cls.creation_link('cdf_forecast_group',
+                                              site_id=site_id)
+            request_kwargs['site_id'] = site_id
+        elif aggregate_id is not None:
+            creation_link = cls.creation_link('cdf_forecast_group',
+                                              aggregate_id=aggregate_id)
+            request_kwargs['aggregate_id'] = aggregate_id
+        else:
+            creation_link = None
+
         cdf_forecast_data = handle_response(
-            cdf_forecast_groups.list_metadata(site_id=site_id))
+            cdf_forecast_groups.list_metadata(**request_kwargs))
         rows = cls.create_table_elements(
             cdf_forecast_data,
             'forecast_id',
@@ -211,14 +225,8 @@ class DataTables(object):
         return rendered_table
 
     @classmethod
-    def get_site_table(cls, create=None, **kwargs):
+    def get_site_table(cls, **kwargs):
         """Generates an html element containing a table of Sites.
-
-        Parameters
-        ----------
-        create: {'None', 'observation', 'forecast', 'cdf_forecast_group'}
-            If set, Site names will be links to create an object of type
-            `create` for the given site.
 
         Returns
         -------
@@ -233,14 +241,8 @@ class DataTables(object):
             to that site or some other api error has occurred.
         """
         site_data = handle_response(sites.list_metadata())
-        rows = cls.create_site_table_elements(site_data, create, **kwargs)
-        if create is None:
-            # If the create argument is present, we don't need a "Create
-            # Site" button, because we're using the view as a selector for
-            # another object's `site` field.
-            creation_link = url_for('forms.create_site')
-        else:
-            creation_link = None
+        rows = cls.create_site_table_elements(site_data, **kwargs)
+        creation_link = url_for('forms.create_site')
         rendered_table = render_template(cls.site_template,
                                          creation_link=creation_link,
                                          table_rows=rows)
