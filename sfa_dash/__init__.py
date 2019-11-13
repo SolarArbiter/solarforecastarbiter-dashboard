@@ -107,13 +107,11 @@ def create_app_with_metrics(config='sfa_dash.config.ProdConfig'):  # pragma: no 
 
 def __getattr__(name):  # pragma: no cover
     if name == 'app':
-        return create_app('sfa_dash.config.ProdConfig')
+        return create_app_with_metrics('sfa_dash.config.ProdConfig')
     elif name == 'dev_app':
-        return create_app('sfa_dash.config.DevConfig')
+        return create_app_with_metrics('sfa_dash.config.DevConfig')
     elif name == 'local_app':
         return create_app('sfa_dash.config.LocalConfig')
-    elif name == 'app_with_metrics':
-        return create_app_with_metrics()
     else:
         raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
 
