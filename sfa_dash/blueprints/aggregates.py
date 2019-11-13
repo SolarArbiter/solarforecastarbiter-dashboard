@@ -6,6 +6,7 @@ import pandas as pd
 
 from sfa_dash.api_interface import observations, sites, aggregates
 from sfa_dash.blueprints.base import BaseView
+from sfa_dash.blueprints.data_listing import DataListingView
 from sfa_dash.blueprints.util import (filter_form_fields, handle_response,
                                       parse_timedelta, flatten_dict)
 from sfa_dash.errors import DataRequestException
@@ -371,3 +372,25 @@ class DeleteAggregateView(BaseView):
         return redirect(url_for(
             f'data_dashboard.aggregates',
             messages={'delete': ['Success']}))
+
+
+class AggregateForecastsView(DataListingView):
+    def __init__(self, data_type, **kwargs):
+        if data_type == 'forecast':
+            self.table_function = DataTables.get_forecast_table
+        elif data_type == 'cdf_forecast_group':
+            self.table_function = DataTables.get_cdf_forecast_table
+        else:
+            raise Exception
+        self.data_type = data_Type
+
+    def get_breadcrumb_dict(self, aggregate_id):
+        breadcrumb_dict = OrderedDict()
+        breadcrumb_dict['Aggregates'] = url_for('data_dashboard.aggregates')
+
+
+        try:
+            aggregates.get_metadata(aggregate_id)
+        except DataRequestException:
+            pass
+        

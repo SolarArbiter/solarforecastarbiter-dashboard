@@ -1,3 +1,4 @@
+import pdb
 """ Utility classes/functions. Mostly for handling api data.
 """
 from copy import deepcopy
@@ -21,9 +22,11 @@ class DataTables(object):
     cdf_forecast_template = 'data/table/cdf_forecast_table.html'
 
     @classmethod
-    def creation_link(cls, data_type, site_id=None):
+    def creation_link(cls, data_type, site_id=None, aggregate_id=None):
         if site_id is not None:
             return url_for(f'forms.create_{data_type}', uuid=site_id)
+        elif aggregate_id is not None:
+            return url_for(f'forms.create_aggregate_{data_type}', uuid=aggregat_id)
         else:
             return None
 
@@ -130,7 +133,7 @@ class DataTables(object):
         return rendered_table
 
     @classmethod
-    def get_forecast_table(cls, site_id=None, **kwargs):
+    def get_forecast_table(cls, site_id=None, aggregate_id=None, **kwargs):
         """Generates an html element containing a table of Forecasts
 
         Parameters
@@ -150,9 +153,17 @@ class DataTables(object):
             If a site_id is passed and the user does not have access
             to that site or some other api error has occurred.
         """
-        creation_link = cls.creation_link('forecast', site_id)
+        request_kwargs = {}
+        if site_id is not None:
+            creation_link = cls.creation_link('forecast', site_id)
+            request_kwargs['site_id'] = site_id
+        elif aggregate_id is not None:
+            creation_link = cls.creation_link('forecast', aggregate_id)
+            request_kwargs['aggregate_id'] = aggregate_id
+        else:
+            creation_link = None
         forecast_data = handle_response(
-            forecasts.list_metadata(site_id=site_id))
+            forecasts.list_metadata(**request_kwargs))
         rows = cls.create_table_elements(
             forecast_data,
             'forecast_id',
