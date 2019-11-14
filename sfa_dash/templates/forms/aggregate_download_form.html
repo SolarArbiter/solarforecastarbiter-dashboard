@@ -1,13 +1,13 @@
 {% extends "forms/base/download_form.html" %}
 {% set page_title = 'Download Aggregate data' %}
-{% set data_type = 'observation' %}
+{% set data_type = 'aggregate' %}
 {% block example %}
 <div class="form-element full-width">
   <div class="download-example csv show">
   <p>CSV downloads will have the following format.</p>
   <pre class="example-text">
-# aggregate_id: 123e4567-e89b-12d3-a456-426655440000
-# metadata: https://api.solarforecastarbiter.org/observations/123e4567-e89b-12d3-a456-426655440000/metadata
+# aggregate_id: 458ffc27-df0b-11e9-b622-62adb5fd6af0
+# metadata: https://api.solarforecastarbiter.org/aggregates/458ffc27-df0b-11e9-b622-62adb5fd6af0/metadata
 timestamp,value,quality_flag
 2018-11-22T18:01:00Z,10.23,0
 2018-11-22T18:02:00Z,10.67,0
@@ -18,9 +18,9 @@ timestamp,value,quality_flag
   <div class="download-example json collapse">
     <p>JSON downloads will have the following format.</p>
     <pre class="example-text">{
-    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "id": "458ffc27-df0b-11e9-b622-62adb5fd6af0",
     "_links": {
-        "metadata": "https://api.solarforecastarbiter.org/observations/123e4567-e89b-12d3-a456-426655440000/metadata",
+        "metadata": "https://api.solarforecastarbiter.org/aggregates/458ffc27-df0b-11e9-b622-62adb5fd6af0/metadata",
     },
     “values”: [
         {
