@@ -34,7 +34,7 @@ class DataTables(object):
             return None
 
     @classmethod
-    def create_table_elements(cls, data_list, id_key, view_name, **kwargs):
+    def create_table_elements(cls, data_list, id_key, view_name):
         """Creates a list of objects to be rendered as table by jinja template
         """
         sites_list = handle_response(sites.list_metadata())
@@ -76,7 +76,7 @@ class DataTables(object):
         return table_rows
 
     @classmethod
-    def create_site_table_elements(cls, data_list, **kwargs):
+    def create_site_table_elements(cls, data_list):
         """Creates a dictionary to feed to the Site table template as the
         `table_rows` parameter.
 
@@ -104,7 +104,7 @@ class DataTables(object):
         return table_rows
 
     @classmethod
-    def get_observation_table(cls, site_id=None, **kwargs):
+    def get_observation_table(cls, site_id=None, aggregate_id=None):
         """Generates an html element containing a table of Observations
 
         Parameters
@@ -124,16 +124,14 @@ class DataTables(object):
         rows = cls.create_table_elements(
             obs_data,
             'observation_id',
-            'data_dashboard.observation_view',
-            **kwargs)
+            'data_dashboard.observation_view')
         rendered_table = render_template(cls.observation_template,
                                          table_rows=rows,
-                                         creation_link=creation_link,
-                                         **kwargs)
+                                         creation_link=creation_link)
         return rendered_table
 
     @classmethod
-    def get_forecast_table(cls, site_id=None, aggregate_id=None, **kwargs):
+    def get_forecast_table(cls, site_id=None, aggregate_id=None):
         """Generates an html element containing a table of Forecasts
 
         Parameters
@@ -153,33 +151,26 @@ class DataTables(object):
             If a site_id is passed and the user does not have access
             to that site or some other api error has occurred.
         """
-        request_kwargs = {}
-        if site_id is not None:
-            creation_link = cls.creation_link('forecast',
-                                              site_id=site_id)
-            request_kwargs['site_id'] = site_id
-        elif aggregate_id is not None:
-            creation_link = cls.creation_link('forecast',
-                                              aggregate_id=aggregate_id)
-            request_kwargs['aggregate_id'] = aggregate_id
+        if site_id is not None or aggregate_id is not None:
+            creation_link = cls.creation_link(
+                'forecast', site_id=site_id, aggregate_id=aggregate_id)
         else:
             creation_link = None
 
         forecast_data = handle_response(
-            forecasts.list_metadata(**request_kwargs))
+            forecasts.list_metadata(site_id=site_id,
+                                    aggregate_id=aggregate_id))
         rows = cls.create_table_elements(
             forecast_data,
             'forecast_id',
-            'data_dashboard.forecast_view',
-            **kwargs)
+            'data_dashboard.forecast_view')
         rendered_table = render_template(cls.forecast_template,
                                          table_rows=rows,
-                                         creation_link=creation_link,
-                                         **kwargs)
+                                         creation_link=creation_link)
         return rendered_table
 
     @classmethod
-    def get_cdf_forecast_table(cls, site_id=None, aggregate_id=None, **kwargs):
+    def get_cdf_forecast_table(cls, site_id=None, aggregate_id=None):
         """Generates an html element containing a table of CDF Forecasts.
 
         Parameters
@@ -199,33 +190,27 @@ class DataTables(object):
             If a site_id is passed and the user does not have access
             to that site or some other api error has occurred.
         """
-        request_kwargs = {}
-        if site_id is not None:
-            creation_link = cls.creation_link('cdf_forecast_group',
-                                              site_id=site_id)
-            request_kwargs['site_id'] = site_id
-        elif aggregate_id is not None:
-            creation_link = cls.creation_link('cdf_forecast_group',
-                                              aggregate_id=aggregate_id)
-            request_kwargs['aggregate_id'] = aggregate_id
+        if site_id is not None or aggregate_id is not None:
+            creation_link = cls.creation_link(
+                'cdf_forecast_group',
+                site_id=site_id,
+                aggregate_id=aggregate_id)
         else:
             creation_link = None
-
         cdf_forecast_data = handle_response(
-            cdf_forecast_groups.list_metadata(**request_kwargs))
+            cdf_forecast_groups.list_metadata(site_id=site_id,
+                                              aggregate_id=aggregate_id))
         rows = cls.create_table_elements(
             cdf_forecast_data,
             'forecast_id',
-            'data_dashboard.cdf_forecast_group_view',
-            **kwargs)
+            'data_dashboard.cdf_forecast_group_view')
         rendered_table = render_template(cls.cdf_forecast_template,
                                          table_rows=rows,
-                                         creation_link=creation_link,
-                                         **kwargs)
+                                         creation_link=creation_link)
         return rendered_table
 
     @classmethod
-    def get_site_table(cls, **kwargs):
+    def get_site_table(cls):
         """Generates an html element containing a table of Sites.
 
         Returns
@@ -241,7 +226,7 @@ class DataTables(object):
             to that site or some other api error has occurred.
         """
         site_data = handle_response(sites.list_metadata())
-        rows = cls.create_site_table_elements(site_data, **kwargs)
+        rows = cls.create_site_table_elements(site_data)
         creation_link = url_for('forms.create_site')
         rendered_table = render_template(cls.site_template,
                                          creation_link=creation_link,

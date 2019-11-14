@@ -289,19 +289,6 @@ class AggregateView(BaseView):
             uuid=self.metadata['aggregate_id'])
         return breadcrumb_dict
 
-    def get_subnav_kwargs(self):
-        return {
-            'observations_url': url_for(
-                'data_dashboard.aggregate_view',
-                uuid=self.metadata['aggregate_id']),
-            'forecasts_url': url_for(
-                'data_dashboard.forecasts',
-                aggregate_id=self.metadata['aggregate_id']),
-            'cdf_forecasts_url': url_for(
-                'data_dashboard.cdf_forecast_groups',
-                aggregate_id=self.metadata['aggregate_id']),
-        }
-
     def set_template_args(self):
         self.temp_args.update({
             'metadata': render_template(
@@ -310,7 +297,16 @@ class AggregateView(BaseView):
             'breadcrumb': self.breadcrumb_html(
                 self.get_breadcrumb_dict()),
             'aggregate': self.metadata,
-            'subnav': self.format_subnav(**self.get_subnav_kwargs())
+            'subnav': self.format_subnav(
+                observations_url=url_for(
+                    'data_dashboard.aggregate_view',
+                    uuid=self.metadata['aggregate_id']),
+                forecasts_url=url_for(
+                    'data_dashboard.forecasts',
+                    aggregate_id=self.metadata['aggregate_id']),
+                cdf_forecasts_url=url_for(
+                    'data_dashboard.cdf_forecast_groups',
+                    aggregate_id=self.metadata['aggregate_id']))
         })
 
     def template_args(self):

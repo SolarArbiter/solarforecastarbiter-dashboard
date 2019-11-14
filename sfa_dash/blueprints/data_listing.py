@@ -36,87 +36,92 @@ class DataListingView(BaseView):
             raise Exception
         self.data_type = data_type
 
-    def get_breadcrumb_dict(self, **kwargs):
-        """Build the breadcrumb dictionary for the listing page. If site_id
-        or aggregate_id are passed as key word arguments, prepends the
-        appropriate links. Note that these links depend on the existence of
-        the self.location_data attribute, that should only be set by during
-        a successful fetch of the site/aggregates metadata.
+    def get_breadcrumb_dict(self, location_metadata={}):
+        """Build the breadcrumb dictionary for the listing page.
+        Parameters
+        ----------
+        location_metadata:  dict
+            Dict of aggregate or site metadata to use for building
+            the breadcrumb.
         """
         breadcrumb_dict = OrderedDict()
         human_label = human_friendly_datatype(self.data_type)
-        if 'site_id' in kwargs:
+        if 'site_id' in location_metadata:
             breadcrumb_dict['Sites'] = url_for('data_dashboard.sites')
-            breadcrumb_dict[self.location_data['name']] = url_for(
-                'data_dashboard.site_view', uuid=kwargs['site_id'])
-        elif 'aggregate_id' in kwargs:
+            breadcrumb_dict[location_metadata['name']] = url_for(
+                'data_dashboard.site_view', uuid=location_metadata['site_id'])
+            breadcrumb_dict[f'{human_label}s'] = url_for(
+                f'data_dashboard.{self.data_type}s',
+                site_id=location_metadata['site_id'])
+        elif 'aggregate_id' in location_metadata:
             breadcrumb_dict['Aggregates'] = url_for(
                 'data_dashboard.aggregates')
-            breadcrumb_dict[self.location_data['name']] = url_for(
-                'data_dashboard.aggregate_view', uuid=kwargs['aggregate_id'])
-        breadcrumb_dict[f'{human_label}s'] = url_for(
-            f'data_dashboard.{self.data_type}s', **kwargs)
+            breadcrumb_dict[location_metadata['name']] = url_for(
+                'data_dashboard.aggregate_view',
+                uuid=location_metadata['aggregate_id'])
+            breadcrumb_dict[f'{human_label}s'] = url_for(
+                f'data_dashboard.{self.data_type}s',
+                aggregate_id=location_metadata['aggregate_id'])
         return breadcrumb_dict
 
-    def get_subnav_kwargs(self, **kwargs):
-        """Creates a dict to be used when formating the sub navigation. The
-        resulting dict is used to format the fstring keys found in the
-        DataListingView.subnav_format variable.
+    def get_subnav_kwargs(self, site_id=None, aggregate_id=None):
+        """Creates a dict to be unpacked as arguments when calling the
+        BaseView.format_subnav function resulting dict is used to format the
+        fstring keys found in the DataListingView.subnav_format variable.
         """
         subnav_kwargs = {}
-        if 'aggregate_id' in kwargs:
+        if aggregate_id is not None:
             subnav_kwargs['observations_url'] = url_for(
-                'data_dashboard.aggregate_view', uuid=kwargs['aggregate_id'])
+                'data_dashboard.aggregate_view', uuid=aggregate_id)
         else:
             subnav_kwargs['observations_url'] = url_for(
-                'data_dashboard.observations', **kwargs)
+                'data_dashboard.observations',
+                site_id=site_id, aggregate_id=aggregate_id)
         subnav_kwargs['forecasts_url'] = url_for(
-            'data_dashboard.forecasts', **kwargs)
+            'data_dashboard.forecasts',
+            site_id=site_id, aggregate_id=aggregate_id)
         subnav_kwargs['cdf_forecasts_url'] = url_for(
-            'data_dashboard.cdf_forecast_groups', **kwargs)
+            'data_dashboard.cdf_forecast_groups',
+            site_id=site_id, aggregate_id=aggregate_id)
         return subnav_kwargs
 
-    def get_template_args(self, **kwargs):
-        """Create a dictionary containing the required arguments for the
-        template. Special keyword arguments of `site_id` or `aggregate_id` can
-        be passed to filter results by a site or aggregate.
+    def get_template_args(self, site_id=None, aggregate_id=None):
+        """Builds a dictionary of the appropriate template arguments.
         """
         template_args = {}
-        template_args['subnav'] = self.format_subnav(
-            **self.get_subnav_kwargs(**kwargs))
-        template_args['data_table'] = self.table_function(**kwargs)
-        template_args['current_path'] = request.path
-        # If kwargs is not empty, a site_id or aggregate_id was passed
-        if kwargs:
+        # If an id was passed in, set the breadcrumb. The request for location
+        # metadata may triggers an error if the object doesnt exist or the user
+        # does not have access. So we can handle with a 404 message instead of
+        # silently failing and listing all objects.
+        if site_id is not None or aggregate_id is not None:
+            if site_id is not None:
+                location_metadata = handle_response(
+                    sites.get_metadata(site_id))
+            else:
+                location_metadata = handle_response(
+                    aggregates.get_metadata(aggregate_id))
             template_args['breadcrumb'] = self.breadcrumb_html(
-                self.get_breadcrumb_dict(**kwargs))
+                self.get_breadcrumb_dict(location_metadata))
         else:
             template_args['page_title'] = 'Forecasts and Observations'
+
+        template_args['subnav'] = self.format_subnav(
+            **self.get_subnav_kwargs(site_id=site_id,
+                                     aggregate_id=aggregate_id))
+        template_args['data_table'] = self.table_function(
+            site_id, aggregate_id)
+        template_args['current_path'] = request.path
         return template_args
 
     def get(self):
+        """This endpoints results in creating a table of the datatype passed to
+        __init__. A site_id or aggregate_id can passed to create a filtered
+        list of the given type for that site or aggregate.
         """
-        """
-        # Check for a site id or aggregate id in the query parameters.If found,
-        # sets location_id and api_handle to later request metadata of the site
-        # or aggregate and adds the id to a key word argument dict to be passed
-        # to other setup functions.
-        template_kwargs = {}
-        if 'site_id' in request.args:
-            location_id = request.args.get('site_id')
-            api_handle = sites
-            template_kwargs.update({'site_id': location_id})
-        elif 'aggregate_id' in request.args:
-            location_id = request.args.get('aggregate_id')
-            template_kwargs.update({'aggregate_id': location_id})
-            api_handle = aggregates
-        else:
-            api_handle = None
         try:
-            if api_handle:
-                self.location_data = handle_response(
-                    api_handle.get_metadata(location_id))
-            temp_args = self.get_template_args(**template_kwargs)
+            temp_args = self.get_template_args(
+                request.args.get('site_id'),
+                request.args.get('aggregate_id'))
         except DataRequestException as e:
             temp_args = {'errors': e.errors}
         return render_template(self.template, **temp_args)
