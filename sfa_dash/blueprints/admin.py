@@ -242,13 +242,13 @@ class RoleView(AdminView):
             user_map = {user['user_id']: user
                         for user in user_list}
             role['users'] = {
-                k: {'user_id': k,
-                    'added_to_user': v,
-                    'email': user_map.get(k, {}).get(
-                        'email', self.get_email(k)),
-                    'organization': user_map.get(k, {}).get(
-                        'organization', 'Organization Unavailable')}
-                for k, v in role['users'].items()}
+                uid: {'user_id': uid,
+                      'added_to_user': user,
+                      'email': user_map.get(uid, {}).get(
+                          'email', self.get_email(uid)),
+                      'organization': user_map.get(uid, {}).get(
+                          'organization', 'Organization Unavailable')}
+                for uid, user in role['users'].items()}
         return render_template(self.template,
                                role=role,
                                role_table=role_table,
