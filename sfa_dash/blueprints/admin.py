@@ -241,14 +241,19 @@ class RoleView(AdminView):
             user_list = users.list_metadata().json()
             user_map = {user['user_id']: user
                         for user in user_list}
-            role['users'] = {
-                uid: {'user_id': uid,
-                      'added_to_user': user,
-                      'email': user_map.get(uid, {}).get(
-                          'email', self.get_email(uid)),
-                      'organization': user_map.get(uid, {}).get(
-                          'organization', 'Organization Unavailable')}
-                for uid, user in role['users'].items()}
+            role_users = {}
+            for uid, user in role['users'].items():
+                user_dict = user_map.get(uid, {})
+                email = user_dict.get('email', None)
+                if email is None:
+                    email = self.get_email(uid)
+                role_users[uid] = {
+                    'user_id': uid,
+                    'added_to_user': user,
+                    'email': email,
+                    'organization': user_dict.get(
+                        'organization', 'Organization Unavailable')}
+            role['users'] = role_users
         return render_template(self.template,
                                role=role,
                                role_table=role_table,
