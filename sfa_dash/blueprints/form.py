@@ -389,43 +389,47 @@ class UploadForm(BaseView):
         if request.mimetype != 'multipart/form-data':
             abort(415)
         if f'{self.data_type}-data' not in request.files:
-            return 'no file part in request'
+            errors = {"file-part": ['No file part in request.']}
         posted_file = request.files[f'{self.data_type}-data']
         if posted_file.filename == '':
-            return 'no filename'
-        if (
-                posted_file.mimetype == 'text/csv' or
-                posted_file.mimetype == 'application/vnd.ms-excel'
-        ):
-            posted_data = posted_file.read()
-            try:
-                decoded_data = posted_data.decode('utf-8')
-            except UnicodeDecodeError:
-                errors = {
-                    'file-type': [
-                        'Failed to decode file. Please ensure file is a CSV '
-                        'with UTF-8 encoding. This error can sometimes occur '
-                        'when a csv is improperly exported from excel.'],
-                }
+            errors = {'filename': ['No filename.']}
+        # if the file was not found in the request, skip parsing
+        if not errors:
+            if (
+                    posted_file.mimetype == 'text/csv' or
+                    posted_file.mimetype == 'application/vnd.ms-excel'
+            ):
+                posted_data = posted_file.read()
+                try:
+                    decoded_data = posted_data.decode('utf-8')
+                except UnicodeDecodeError:
+                    errors = {
+                        'file-type': [
+                            'Failed to decode file. Please ensure file is a '
+                            'CSV with UTF-8 encoding. This error can sometimes'
+                            ' occur when a csv is improperly exported from '
+                            'excel.'],
+                    }
+                else:
+                    post_request = self.api_handle.post_values(
+                        uuid,
+                        decoded_data,
+                        json=False)
+            elif posted_file.mimetype == 'application/json':
+                try:
+                    posted_data = json.load(posted_file)
+                except JSONDecodeError:
+                    errors = {
+                        'json': ["Error parsing JSON file."]
+                    }
+                else:
+                    post_request = self.api_handle.post_values(uuid,
+                                                               posted_data)
             else:
-                post_request = self.api_handle.post_values(
-                    uuid,
-                    decoded_data,
-                    json=False)
-        elif posted_file.mimetype == 'application/json':
-            try:
-                posted_data = json.load(posted_file)
-            except JSONDecodeError:
                 errors = {
-                    'json': ["Error parsing JSON file."]
+                    'mime-type': [
+                        f'Unsupported file type {posted_file.mimetype}.']
                 }
-            else:
-                post_request = self.api_handle.post_values(uuid, posted_data)
-        else:
-            errors = {
-                'mime-type': [f'Unsupported file type {posted_file.mimetype}.']
-            }
-
         if errors:
             return render_template(self.template, uuid=uuid, errors=errors)
         try:
