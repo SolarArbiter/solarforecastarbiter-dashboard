@@ -1,4 +1,5 @@
 import json
+from json.decoder import JSONDecodeError
 
 from flask import (Blueprint, render_template, request,
                    abort, redirect, url_for, make_response)
@@ -384,6 +385,7 @@ class UploadForm(BaseView):
         return render_template(self.template, uuid=uuid, **temp_args)
 
     def post(self, uuid):
+        errors = {}
         if request.mimetype != 'multipart/form-data':
             abort(415)
         if f'{self.data_type}-data' not in request.files:
@@ -405,19 +407,26 @@ class UploadForm(BaseView):
                         'with UTF-8 encoding. This error can sometimes occur '
                         'when a csv is improperly exported from excel.'],
                 }
-                return render_template(self.template, uuid=uuid, errors=errors)
             else:
                 post_request = self.api_handle.post_values(
                     uuid,
                     decoded_data,
                     json=False)
         elif posted_file.mimetype == 'application/json':
-            posted_data = json.load(posted_file)
-            post_request = self.api_handle.post_values(uuid, posted_data)
+            try:
+                posted_data = json.load(posted_file)
+            except JSONDecodeError:
+                errors = {
+                    'json': ["Error parsing JSON file."]
+                }
+            else:
+                post_request = self.api_handle.post_values(uuid, posted_data)
         else:
             errors = {
                 'mime-type': [f'Unsupported file type {posted_file.mimetype}.']
             }
+
+        if errors:
             return render_template(self.template, uuid=uuid, errors=errors)
         try:
             handle_response(post_request)
