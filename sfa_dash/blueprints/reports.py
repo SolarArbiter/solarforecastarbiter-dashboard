@@ -4,7 +4,8 @@ from flask import request, redirect, url_for, render_template
 from requests.exceptions import HTTPError
 
 from solarforecastarbiter.reports.main import report_to_html_body
-from sfa_dash.api_interface import observations, forecasts, sites, reports
+from sfa_dash.api_interface import (observations, forecasts, sites, reports,
+                                    aggregates)
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.util import filter_form_fields, handle_response
 
@@ -31,16 +32,20 @@ class ReportForm(BaseView):
             observations.list_metadata())
         forecast_list = handle_response(forecasts.list_metadata())
         site_list = handle_response(sites.list_metadata())
+        aggregate_list = handle_response(aggregates.list_metadata())
         for obs in observation_list:
             del obs['extra_parameters']
         for fx in forecast_list:
             del fx['extra_parameters']
         for site in site_list:
             del site['extra_parameters']
+        for agg in aggregate_list:
+            del agg['extra_parameters']
         return {
             'observations': observation_list,
             'forecasts': forecast_list,
-            'sites': site_list
+            'sites': site_list,
+            'aggregates': aggregate_list
         }
 
     def template_args(self):
@@ -49,13 +54,19 @@ class ReportForm(BaseView):
         }
 
     def zip_object_pairs(self, form_data):
-        """Create a list of observation, forecast tuples in the form
-        (forecast-n, observation-n) from input elements inserted by
-        report-handling.js
+        """Create a list of object pair dictionaries containing a
+        forecast and either an observation or aggregate.
         """
+        # Forecasts can be parsed directly
         fx = filter_form_fields('forecast-id-', form_data)
-        obs = filter_form_fields('observation-id-', form_data)
-        pairs = list(zip(fx, obs))
+
+        # observations and aggregates are passed in as truth-id-{index}
+        # and truth-type-{index}, so we must match these with the
+        # appropriately indexed forecast.
+        truth_ids = filter_form_fields('truth-id-', form_data)
+        truth_types = filter_form_fields('truth-type-', form_data)
+        pair_list = list(zip(fx, truth_types, truth_ids))
+        pairs = [{'forecast': p[0], p[1]: p[2]} for p in pair_list]
         return pairs
 
     def parse_metrics(self, form_data):
