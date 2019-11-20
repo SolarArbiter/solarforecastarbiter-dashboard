@@ -299,7 +299,7 @@ $(document).ready(function() {
         var fxVariableSelector = createVariableSelect();
         fxSelector.find('.report-field-filters').append(fxVariableSelector);
         var addObsButton = $('<a role="button" class="btn btn-primary" id="add-obs-object-pair" style="padding-left: 1em">Add a Forecast, Observation pair</a>');
-        var addAggButton = $('<a role="button" class="btn btn-primary" id="add-agg-object-pair" style="padding-left: 1em">Add a Forecast, aggregate pair</a>');
+        var addAggButton = $('<a role="button" class="btn btn-primary" id="add-agg-object-pair" style="padding-left: 1em">Add a Forecast, Aggregate pair</a>');
 
 
         // Radio button for selecting between an aggregate or site
