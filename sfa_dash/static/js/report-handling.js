@@ -197,7 +197,7 @@ $(document).ready(function() {
             compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
             if (compareTo == 'observation'){
                 selectedSite = $('#site-select :selected');
-                site_id = selectedSite.attr('data-site-id');
+                site_id = selectedSite.data('site-id');
                 if (site_id){
                     $('#no-forecast-site-selection').attr('hidden', true);
                 } else {
@@ -240,9 +240,13 @@ $(document).ready(function() {
             aggregates.removeAttr('hidden');
             selectedForecast = $('#forecast-select :selected');
             if (selectedForecast.length){
-                aggregate_id = selectedForecast.attr('data-aggregate-id');
+                aggregate_id = selectedForecast.data('aggregate-id');
                 toHide = searchSelect('#aggregate-option-search', '#aggregate-select', 1);
                 toHide = toHide.add(aggregates.not(`[data-aggregate-id=${aggregate_id}]`));
+                current_interval = selectedForecast.data('interval-length');
+                toHide = toHide.add(aggregates.filter(function(){
+                    return parseInt(this.dataset['intervalLength']) > current_interval;
+                }));
                 if ((toHide.length == aggregates.length) && aggregate_id){
                     $('#no-aggregates').removeAttr('hidden');
                 } else {
@@ -264,8 +268,8 @@ $(document).ready(function() {
                 // Show all of the observations
                 observations.removeAttr('hidden');
                 // retrieve the current site id and variable from the selected forecast
-                site_id = selectedForecast.attr('data-site-id');
-                variable = selectedForecast.attr('data-variable');
+                site_id = selectedForecast.data('site-id');
+                variable = selectedForecast.data('variable');
                 $('#no-observation-forecast-selection').attr('hidden', true);
 
                 // Build the list of optiosn to hide by creating a set from
@@ -273,6 +277,10 @@ $(document).ready(function() {
                 var toHide = searchSelect('#observation-option-search', '#observation-select', 2);
                 toHide = toHide.add(observations.not(`[data-site-id=${site_id}]`));
                 toHide = toHide.add(observations.not(`[data-variable=${variable}]`));
+                current_interval = selectedForecast.data('interval-length');
+                toHide = toHide.add(observations.filter(function(){
+                    return parseInt(this.dataset['intervalLength']) > current_interval
+                }));
                 toHide.attr('hidden', true);
                 // if the current selection is hidden, deselect it
                 if (toHide.filter(':selected').length){
@@ -355,6 +363,7 @@ $(document).ready(function() {
                     .val(this.observation_id)
                     .attr('hidden', true)
                     .attr('data-site-id', this.site_id)
+                    .attr('data-interval-length', this.interval_length)
                     .attr('data-variable', this.variable));
         });
         $.each(page_data['forecasts'], function(){
@@ -365,6 +374,7 @@ $(document).ready(function() {
                     .attr('hidden', true)
                     .attr('data-site-id', this.site_id)
                     .attr('data-aggregate-id', this.aggregate_id)
+                    .attr('data-interval-length', this.interval_length)
                     .attr('data-variable', this.variable));
         });
         $.each(page_data['aggregates'], function(){
@@ -374,6 +384,7 @@ $(document).ready(function() {
                     .val(this.aggregate_id)
                     .attr('hidden', true)
                     .attr('data-aggregate-id', this.aggregate_id)
+                    .attr('data-interval-length', this.interval_length)
                     .attr('data-variable', this.variable));
         });
         
