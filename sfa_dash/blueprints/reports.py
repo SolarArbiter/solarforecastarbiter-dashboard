@@ -1,3 +1,4 @@
+import pdb
 """Draft of reports endpoints/pages. Need to integrate core report generation.
 """
 from flask import request, redirect, url_for, render_template
@@ -65,8 +66,9 @@ class ReportForm(BaseView):
         # appropriately indexed forecast.
         truth_ids = filter_form_fields('truth-id-', form_data)
         truth_types = filter_form_fields('truth-type-', form_data)
-        pair_list = list(zip(fx, truth_types, truth_ids))
-        pairs = [{'forecast': p[0], p[1]: p[2]} for p in pair_list]
+        pdb.set_trace()
+        pairs = [{'forecast': f, truth_types[i]: truth_ids[i]}
+                 for i, f in enumerate(fx)]
         return pairs
 
     def parse_metrics(self, form_data):
