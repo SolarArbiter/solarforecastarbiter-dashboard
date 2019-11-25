@@ -78,10 +78,16 @@
      #}
      <div class="form-element">
      <label>Metrics</label><br>
-       <input type="checkbox" name="MAE" value="metrics">MAE<br>
-       <input type="checkbox" name="RMSE" value="metrics">RMSE<br>
-       <input type="checkbox" name="MBE" value="metrics">MBE<br>
-       {#<input type="checkbox" name="metrics" value="Skill over">Skill over <input type='text' class="form-control" style="width:inherit"/><br>#}
+       {% for metric in deterministic_metrics %}
+       <input type="checkbox" name="metrics" value="{{ metric }}">
+       <a href="https://solarforecastarbiter.org/metrics/#{{ metric |replace('^', '') }}" target="_blank"> {{ metric }}</a><br/>
+       {% endfor %}
+     </div>
+     <div class="form-element">
+     <label>Categories</label></br>
+     {% for category in metric_categories %}
+     <input type="checkbox" name="categories" value="{{ category }}"> {{ category }}<br/>
+     {% endfor %}
      </div>
     {{ form.token() }}
   </div>
