@@ -134,7 +134,15 @@ class ReportView(BaseView):
                 'bokeh_script': True}
 
     def get(self, uuid):
-        self.metadata = reports.get_metadata(uuid)
+        try:
+            self.metadata = reports.get_metadata(uuid)
+        except ValueError as e:
+            # Core threw an error trying to calculate the report
+            errors = {
+                'Access': ['Report could not be loaded in the failed state.'],
+                'errors': [str(e)],
+            }
+            return render_template(self.template, uuid=uuid, errors=errors)
         return super().get()
 
 
@@ -153,9 +161,17 @@ class DeleteReportView(BaseView):
             ),
         }
 
-    def get(self, uuid, **kwargs):
-        self.metadata = reports.get_metadata(uuid)
-        return super().get(**kwargs)
+    def get(self, uuid):
+        try:
+            self.metadata = reports.get_metadata(uuid)
+        except ValueError as e:
+            errors = {
+                'Access': ['Report could not be loaded in the failed state.'],
+                'Report Computation': [str(e)],
+            }
+            return render_template(self.template, data_type='report',
+                                   uuid=uuid, errors=errors)
+        return super().get()
 
     def post(self, uuid):
         confirmation_url = url_for(f'data_dashboard.delete_report',
