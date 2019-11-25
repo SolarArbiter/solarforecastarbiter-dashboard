@@ -1,4 +1,3 @@
-import pdb
 """Draft of reports endpoints/pages. Need to integrate core report generation.
 """
 from flask import request, redirect, url_for, render_template
@@ -66,7 +65,6 @@ class ReportForm(BaseView):
         # appropriately indexed forecast.
         truth_ids = filter_form_fields('truth-id-', form_data)
         truth_types = filter_form_fields('truth-type-', form_data)
-        pdb.set_trace()
         pairs = [{'forecast': f, truth_types[i]: truth_ids[i]}
                  for i, f in enumerate(fx)]
         return pairs
