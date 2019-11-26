@@ -69,13 +69,6 @@ class ReportForm(BaseView):
                  for i, f in enumerate(fx)]
         return pairs
 
-    def parse_metrics(self, form_data):
-        """Collect the keys (name attributes) of the form elements with a value
-        attribute of metrics. These elements are checkbox inputs, and are only
-        included in the form data when selected.
-        """
-        return [k.lower() for k, v in form_data.items() if v == 'metrics']
-
     def parse_filters(self, form_data):
         """Return an empty array until we know more about how we want
         to configure these filters
@@ -85,7 +78,8 @@ class ReportForm(BaseView):
     def parse_report_parameters(self, form_data):
         params = {}
         params['object_pairs'] = self.zip_object_pairs(form_data)
-        params['metrics'] = self.parse_metrics(form_data)
+        params['metrics'] = request.form.getlist('metrics')
+        params['categories'] = request.form.getlist('categories')
         # filters do not currently work in API
         # params['filters'] = self.parse_filters(form_data)
         params['start'] = form_data['period-start']
