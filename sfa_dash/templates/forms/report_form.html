@@ -85,8 +85,8 @@
      </div>
      <div class="form-element">
      <label>Categories</label></br>
-     {% for category in metric_categories %}
-     <input type="checkbox" name="categories" value="{{ category }}"> {{ category }}<br/>
+     {% for category, label in metric_categories.items() %}
+     <input type="checkbox" name="categories" value="{{ category }}"> {{ label }}<br/>
      {% endfor %}
      </div>
     {{ form.token() }}

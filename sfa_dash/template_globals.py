@@ -6,7 +6,7 @@ import pytz
 
 import sfa_dash
 from sfa_dash import filters
-from solarforecastarbiter.metrics.calculator import AVAILABLE_CATEGORIES
+from solarforecastarbiter.datamodel import ALLOWED_CATEGORIES
 from solarforecastarbiter.metrics.deterministic import _MAP
 
 TIMEZONES = pytz.country_timezones('US') + list(
@@ -26,6 +26,6 @@ def template_variables():
         'dashboard_version': sfa_dash.__version__,
         'variable_options': VARIABLE_OPTIONS,
         'timezone_options': TIMEZONE_OPTIONS,
-        'metric_categories': AVAILABLE_CATEGORIES,
+        'metric_categories': ALLOWED_CATEGORIES,
         'deterministic_metrics': DETERMINISTIC_METRICS,
     }
