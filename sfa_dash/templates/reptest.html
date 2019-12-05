@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% macro plot_wrapper() %}
+{% endmacro %}
+{% block dash %}
+<!-- org name -->
+<h2 class="page-title">Testing Report Metrics nesting</h2>
+<h2 class="page-title">{{ breadcrumb|safe }}</h2>
+{% include "dash/subnav.html" %}
+<div id="metric-sorting">
+</div>
+<div id="metric-plot-wrapper">
+  <div class="metric-block" data-category="total" data-metric="mbe" data-forecast="a">
+    <h2>Total MBE forecast a</h2>
+    <p>Total MBE forecast a</p>
+  </div>
+  <div class="metric-block" data-category="monthly" data-metric="mbe" data-forecast="a">
+      <h2>Monthly MBE forecast a</h2>
+      <p>Monthly MBE forecast a</p>
+  </div>
+  <div class="metric-block" data-category="daily" data-metric="mbe" data-forecast="a">
+    <h2>Daily MBE forecast a</h2>
+    <p>Daily MBE forecast a</p>
+  </div>
+  <div class="metric-block" data-category="hourly" data-metric="mbe" data-forecast="a">
+    <h2>Hourly MBE forecast a</h2>
+    <p>Hourly MBE forecast a</p>
+  </div>
+  <div class="metric-block" data-category="total" data-metric="mae" data-forecast="a">
+    <h2>Total MAE forecast a</h2>
+    <p>Total MAE forecast a</p>
+  </div>
+  <div class="metric-block" data-category="monthly" data-metric="mae" data-forecast="a">
+      <h2>Monthly MAE forecast a</h2>
+      <p>Monthly MAE forecast a</p>
+  </div>
+  <div class="metric-block" data-category="daily" data-metric="mae" data-forecast="a">
+    <h2>Daily MAE forecast a</h2>
+    <p>Daily MAE forecast a</p>
+  </div>
+  <div class="metric-block" data-category="hourly" data-metric="mae" data-forecast="a">
+    <h2>Hourly MAE forecast a</h2>
+    <p>Hourly MAE forecast a</p>
+  </div>
+  <div class="metric-block" data-category="total" data-metric="mae" data-forecast="b">
+    <h2>Total MAE forecast b</h2>
+    <p>Total MAE forecast b</p>
+  </div>
+  <div class="metric-block" data-category="monthly" data-metric="mae" data-forecast="b">
+      <h2>Monthly MAE forecast b</h2>
+      <p>Monthly MAE forecast b</p>
+  </div>
+  <div class="metric-block" data-category="daily" data-metric="mae" data-forecast="b">
+    <h2>Daily MAE forecast b</h2>
+    <p>Daily MAE forecast b</p>
+  </div>
+  <div class="metric-block" data-category="hourly" data-metric="mae" data-forecast="b">
+    <h2>Hourly MAE forecast b</h2>
+    <p>Hourly MAE forecast b</p>
+  </div>
+  <div class="metric-block" data-category="total" data-metric="mbe" data-forecast="b">
+    <h2>Total MBE forecast b</h2>
+    <p>Total MBE forecast b</p>
+  </div>
+  <div class="metric-block" data-category="monthly" data-metric="mbe" data-forecast="b">
+      <h2>Monthly MBE forecast b</h2>
+      <p>Monthly MBE forecast b</p>
+  </div>
+  <div class="metric-block" data-category="daily" data-metric="mbe" data-forecast="b">
+    <h2>Daily MBE forecast b</h2>
+    <p>Daily MBE forecast b</p>
+  </div>
+  <div class="metric-block" data-category="hourly" data-metric="mbe" data-forecast="b">
+    <h2>Hourly MBE forecast b</h2>
+    <p>Hourly MBE forecast b</p>
+  </div>
+</div>
+<script src="/static/js/report-render-stuff.js"></script>
+{% endblock %}

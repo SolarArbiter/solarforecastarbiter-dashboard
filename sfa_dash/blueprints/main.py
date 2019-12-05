@@ -2,6 +2,7 @@ from collections import OrderedDict
 
 
 from flask import Blueprint, render_template, url_for, request
+from flask.views import MethodView
 
 
 from sfa_dash.api_interface import (observations, forecasts,
@@ -222,6 +223,9 @@ class AccessView(DataDashView):
 class TrialsView(DataDashView):
     template = 'data/trials.html'
 
+class RepTest(MethodView):
+    def get(self):
+        return render_template('reptest.html')
 
 # Url Rule Registration
 # The url rules here are broken into sections based on their function.
@@ -312,3 +316,4 @@ data_dash_blp.add_url_rule(
 data_dash_blp.add_url_rule(
     '/aggregates/<uuid>/delete',
     view_func=DeleteAggregateView.as_view('delete_aggregate'))
+data_dash_blp.add_url_rule('/reptest/', view_func=RepTest.as_view('reptest'))
