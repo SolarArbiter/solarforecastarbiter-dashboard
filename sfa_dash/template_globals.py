@@ -17,9 +17,8 @@ TIMEZONES = pytz.country_timezones('US') + list(
 VARIABLE_OPTIONS = {key: f'{value} ({filters.api_varname_to_units(key)})'
                     for key, value in filters.variable_mapping.items()}
 
-TIMEZONE_OPTIONS = {tz: tz.replace('_', ' ') for tz in TIMEZONES}
 
-DETERMINISTIC_METRICS = ALLOWED_DETERMINISTIC_METRICS.keys()
+TIMEZONE_OPTIONS = {tz: tz.replace('_', ' ') for tz in TIMEZONES}
 
 
 def template_variables():
@@ -28,5 +27,5 @@ def template_variables():
         'variable_options': VARIABLE_OPTIONS,
         'timezone_options': TIMEZONE_OPTIONS,
         'metric_categories': ALLOWED_CATEGORIES,
-        'deterministic_metrics': DETERMINISTIC_METRICS,
+        'deterministic_metrics': ALLOWED_DETERMINISTIC_METRICS,
     }
