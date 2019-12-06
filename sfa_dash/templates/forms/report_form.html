@@ -78,9 +78,9 @@
      #}
      <div class="form-element">
      <label>Metrics</label><br>
-       {% for metric in deterministic_metrics %}
+       {% for metric, label in deterministic_metrics.items() %}
        <input type="checkbox" name="metrics" value="{{ metric }}">
-       <a href="https://solarforecastarbiter.org/metrics/#{{ metric |replace('^', '') }}" target="_blank"> {{ metric }}</a><br/>
+       <a href="https://solarforecastarbiter.org/metrics/#{{ metric |replace('^', '') }}" target="_blank"> {{ label }}</a><br/>
        {% endfor %}
      </div>
      <div class="form-element">
