@@ -8,24 +8,24 @@ import pytest
 from sfa_dash import utils
 
 
-def test_sign_report_no_gpg(mocker):
+def test_sign_doc_no_gpg(mocker):
     mocker.patch.dict('sys.modules', {'gpg': None})
-    inp = 'TEST BODY'
+    inp = b'TEST BODY'
     with pytest.raises(utils.SigningError) as e:
-        utils.sign_report(inp, 'key', 'pw')
+        utils.sign_doc(inp, 'key', 'pw')
     assert 'Could not import gpg' in e.value.args[0]
 
 
-def test_sign_report_no_keys(mocker, tmpdir, monkeypatch):
+def test_sign_doc_no_keys(mocker, tmpdir, monkeypatch):
     pytest.importorskip('gpg')
     monkeypatch.setenv('GNUPGHOME', str(tmpdir))
-    inp = 'thebody'
+    inp = b'thebody'
     with pytest.raises(utils.SigningError) as e:
-        utils.sign_report(inp, 'key', 'pw')
+        utils.sign_doc(inp, 'key', 'pw')
     assert 'No key found in keyring' in e.value.args[0]
 
 
-def test_sign_report_invalid_key_id(mocker, tmp_path, monkeypatch):
+def test_sign_doc_invalid_key_id(mocker, tmp_path, monkeypatch):
     pytest.importorskip('gpg')
     tmp_path.chmod(0o700)
     monkeypatch.setenv('GNUPGHOME', str(tmp_path))
@@ -35,13 +35,13 @@ def test_sign_report_invalid_key_id(mocker, tmp_path, monkeypatch):
              "'TEST SFA <testing@solarforecastarbiter.org'"],
             check=True, capture_output=True
     )
-    inp = 'thebody'
+    inp = b'thebody'
     with pytest.raises(utils.SigningError) as e:
-        utils.sign_report(inp, 'key', '')
+        utils.sign_doc(inp, 'key', '')
     assert 'No key found in keyring' in e.value.args[0]
 
 
-def test_sign_report_no_pw_needed(mocker, tmp_path, monkeypatch):
+def test_sign_doc_no_pw_needed(mocker, tmp_path, monkeypatch):
     pytest.importorskip('gpg')
     tmp_path.chmod(0o700)
     monkeypatch.setenv('GNUPGHOME', str(tmp_path))
@@ -52,14 +52,13 @@ def test_sign_report_no_pw_needed(mocker, tmp_path, monkeypatch):
             check=True, capture_output=True
     )
     key = re.match('(?<=key ).*(?= marked)', key_create.stderr.decode())
-    inp = 'thebody'
-    out = utils.sign_report(inp, key, '')
-    assert out.startswith('<div hidden>\n-----BEGIN PGP SIGNED MESSAGE-----')
-    assert out.endswith('-----END PGP SIGNATURE-----\n')
-    assert inp in out
+    inp = b'thebody'
+    out = utils.sign_doc(inp, key, '')
+    assert out.startswith(b'-----BEGIN PGP MESSAGE-----')
+    assert out.endswith(b'-----END PGP MESSAGE-----\n')
 
 
-def test_sign_report(mocker, tmp_path, monkeypatch):
+def test_sign_doc(mocker, tmp_path, monkeypatch):
     pytest.importorskip('gpg')
     tmp_path.chmod(0o700)
     monkeypatch.setenv('GNUPGHOME', str(tmp_path))
@@ -73,16 +72,15 @@ def test_sign_report(mocker, tmp_path, monkeypatch):
             check=True, capture_output=True
     )
     key = re.match('(?<=key ).*(?= marked)', key_create.stderr.decode())
-    inp = 'thebody'
-    out = utils.sign_report(inp, key, tmp_path / 'passwd')
-    assert out.startswith('<div hidden>\n-----BEGIN PGP SIGNED MESSAGE-----')
-    assert out.endswith('-----END PGP SIGNATURE-----\n')
-    assert inp in out
+    inp = b'thebody'
+    out = utils.sign_doc(inp, key, tmp_path / 'passwd')
+    assert out.startswith(b'-----BEGIN PGP MESSAGE-----')
+    assert out.endswith(b'-----END PGP MESSAGE-----\n')
 
 
 @pytest.mark.parametrize('path,msg', [('passwd', 'Internal GPGME'),
                                       ('dne', 'No GPG password')])
-def test_sign_report_wrong_pw(mocker, tmp_path, monkeypatch, path, msg):
+def test_sign_doc_wrong_pw(mocker, tmp_path, monkeypatch, path, msg):
     pytest.importorskip('gpg')
     tmp_path.chmod(0o700)
     monkeypatch.setenv('GNUPGHOME', str(tmp_path))
@@ -96,7 +94,7 @@ def test_sign_report_wrong_pw(mocker, tmp_path, monkeypatch, path, msg):
             check=True, capture_output=True
     )
     key = re.match('(?<=key ).*(?= marked)', key_create.stderr.decode())
-    inp = 'thebody'
+    inp = b'thebody'
     with pytest.raises(utils.SigningError) as e:
-        utils.sign_report(inp, key, tmp_path / path)
+        utils.sign_doc(inp, key, tmp_path / path)
     assert msg in e.value.args[0]

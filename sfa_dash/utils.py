@@ -3,14 +3,14 @@ class SigningError(Exception):
     pass  # pragma: no cover
 
 
-def sign_report(body, key_id, passphrase_file):
+def sign_doc(doc, key_id, passphrase_file):
     """
-    Signs the body string with a OpenGPG.
+    Signs the document with a OpenGPG.
 
     Parameters
     ----------
-    body : str
-        Body or message to clear-sign with OpenGPG
+    doc : bytes
+        Message to clear-sign with OpenGPG
     key_id : str
         The key to use for signing
     passphrase_file : path
@@ -19,22 +19,19 @@ def sign_report(body, key_id, passphrase_file):
 
     Returns
     -------
-    signed_body : str
-        The body with the clear-sign signature.
-        The BEGIN PGP header will be placed in a hidden div
-        and the PGP signature will be visible at the end.
+    signature : bytes
+        The ASCII armored signature of the document.
 
     Raises
     ------
     SigningError
-        If the body could not be signed for any reason
+        If the document could not be signed for any reason
     """
     try:
         import gpg
         from gpg import gpgme
     except ImportError:
         raise SigningError('Could not import gpg')
-    pre_sign_body = '</div>\n' + body + '\n<pre>'
     with gpg.Context(
             armor=True,
             pinentry_mode=gpgme.GPGME_PINENTRY_MODE_LOOPBACK
@@ -48,12 +45,10 @@ def sign_report(body, key_id, passphrase_file):
         c.set_passphrase_cb(
             lambda *args: open(passphrase_file, 'rb').readline())
         try:
-            signed_body, _ = c.sign(pre_sign_body.encode(),
-                                    mode=gpg.constants.sig.mode.CLEAR)
+            signed_body, _ = c.sign(doc)
         except gpg.errors.GPGMEError as e:
             raise SigningError(f'Internal GPGME error: {str(e)}')
         except FileNotFoundError:
             raise SigningError('No GPG password file found')
 
-    out = '<div hidden>\n' + signed_body.decode() + '</pre>'
-    return out
+    return signed_body
