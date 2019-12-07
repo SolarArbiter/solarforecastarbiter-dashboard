@@ -12,7 +12,8 @@ from sfa_dash.blueprints.dash import DataDashView
 from sfa_dash.blueprints.data_listing import DataListingView
 from sfa_dash.blueprints.delete import DeleteConfirmation
 from sfa_dash.blueprints.reports import (ReportsView, ReportView,
-                                         DeleteReportView)
+                                         DeleteReportView,
+                                         DownloadReportView)
 from sfa_dash.blueprints.sites import SingleSiteView, SitesListingView
 from sfa_dash.blueprints.util import handle_response
 from sfa_dash.errors import DataRequestException
@@ -276,6 +277,9 @@ data_dash_blp.add_url_rule(
 data_dash_blp.add_url_rule(
     '/reports/<uuid>',
     view_func=ReportView.as_view('report_view'))
+data_dash_blp.add_url_rule(
+    '/reports/<uuid>/html',
+    view_func=DownloadReportView.as_view('html_report_view', format_='html'))
 data_dash_blp.add_url_rule(
     '/aggregates/<uuid>',
     view_func=AggregateView.as_view('aggregate_view'))
