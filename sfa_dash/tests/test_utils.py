@@ -1,5 +1,6 @@
 import re
 import subprocess
+from zipfile import ZipFile
 
 
 import pytest
@@ -54,8 +55,8 @@ def test_sign_doc_no_pw_needed(mocker, tmp_path, monkeypatch):
     key = re.match('(?<=key ).*(?= marked)', key_create.stderr.decode())
     inp = b'thebody'
     out = utils.sign_doc(inp, key, '')
-    assert out.startswith(b'-----BEGIN PGP MESSAGE-----')
-    assert out.endswith(b'-----END PGP MESSAGE-----\n')
+    assert out.startswith(b'-----BEGIN PGP SIGNATURE-----')
+    assert out.endswith(b'-----END PGP SIGNATURE-----\n')
 
 
 def test_sign_doc(mocker, tmp_path, monkeypatch):
@@ -74,8 +75,8 @@ def test_sign_doc(mocker, tmp_path, monkeypatch):
     key = re.match('(?<=key ).*(?= marked)', key_create.stderr.decode())
     inp = b'thebody'
     out = utils.sign_doc(inp, key, tmp_path / 'passwd')
-    assert out.startswith(b'-----BEGIN PGP MESSAGE-----')
-    assert out.endswith(b'-----END PGP MESSAGE-----\n')
+    assert out.startswith(b'-----BEGIN PGP SIGNATURE-----')
+    assert out.endswith(b'-----END PGP SIGNATURE-----\n')
 
 
 @pytest.mark.parametrize('path,msg', [('passwd', 'Internal GPGME'),
@@ -98,3 +99,22 @@ def test_sign_doc_wrong_pw(mocker, tmp_path, monkeypatch, path, msg):
     with pytest.raises(utils.SigningError) as e:
         utils.sign_doc(inp, key, tmp_path / path)
     assert msg in e.value.args[0]
+
+
+def test_make_hashes():
+    doc = b'all your base are belong to us'
+    out = utils.make_hashes(doc, ['sha1', 'md5', 'sha256'])
+    assert out['sha1'] == '3b96fcc52617490cff3d6a8b923a1ef217c099e6'
+    assert out['md5'] == '847dbeb849668d30722d8a67bced1c59'
+    assert out['sha256'] == '59404c168e9cafda28f960d052a262803e9f1f7ce7a4c856c32fc53b0cc77d8d'  # NOQA
+
+
+def test_check_sign_zip(mocker):
+    mocker.patch('sfa_dash.utils.sign_doc',
+                 return_value=b'signed')
+    doc = b'all your base?'
+    fname = 'mine.txt'
+    out = utils.check_sign_zip(doc, fname, '', '')
+    with ZipFile(out, 'r') as z:
+        assert set(z.namelist()) == {'mine.txt', 'md5.txt', 'sha1.txt',
+                                     'sha256.txt', 'mine.txt.asc'}
