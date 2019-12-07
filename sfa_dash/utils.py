@@ -102,7 +102,7 @@ def check_sign_zip(bytes_, filename, key_id, passphrase_file):
         PGP key to sign data with
     passphrase_file : str
         File with passphrase for the PGP key
-    
+
     Returns
     -------
     io.BytesIO
