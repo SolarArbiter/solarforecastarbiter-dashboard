@@ -160,7 +160,8 @@ class DownloadReportView(BaseView):
         if self.format_ == 'html':
             fname = metadata.name.replace(' ', '_')
             body = report_to_html_body(metadata)
-            bytes_out = full_html(body, request.url_root).encode('utf-8')
+            # should make a nice template for standalone reports
+            bytes_out = full_html(body).encode('utf-8')
         else:
             raise ValueError(
                 'Only html report downloads is currently supported')

@@ -141,7 +141,7 @@ class BaseView(MethodView):
         return OrderedDict()
 
     def template_args(self):
-        return {"dash_base": request.url_root}
+        return {}
 
     def get(self, **kwargs):
         if hasattr(self, 'subnav') and self.subnav is not None:
