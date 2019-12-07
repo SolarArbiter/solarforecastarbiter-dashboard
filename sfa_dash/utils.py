@@ -84,11 +84,32 @@ def make_hashes(doc, algs=['md5', 'sha1', 'sha256']):
 
 
 def check_sign_zip(bytes_, filename, key_id, passphrase_file):
+    """
+    For a given input, compute hashes and PGP signature, then
+    save everything into a zip archive
+
+    Parameters
+    ----------
+    bytes_ : bytes
+        Input data
+    filename : str
+        Filename to save data as in zip archive
+    key_id : str
+        PGP key to sign data with
+    passphrase_file : str
+        File with passphrase for the PGP key
+    
+    Returns
+    -------
+    io.BytesIO
+        Byte stream of the zip archive
+    """
     out = BytesIO()
     sig = sign_doc(bytes_, key_id, passphrase_file)
     with ZipFile(out, 'w') as z:
         z.writestr(filename, bytes_)
         for alg, hsh in make_hashes(bytes_).items():
-            z.writestr(f'{alg}.txt', hsh)
+            z.writestr(f'{alg}.txt', f'{hsh}  {filename}')
         z.writestr(f'{filename}.asc', sig)
+    out.seek(0)
     return out
