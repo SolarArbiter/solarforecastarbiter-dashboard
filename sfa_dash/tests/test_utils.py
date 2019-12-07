@@ -118,3 +118,16 @@ def test_check_sign_zip(mocker):
     with ZipFile(out, 'r') as z:
         assert set(z.namelist()) == {'mine.txt', 'md5.txt', 'sha1.txt',
                                      'sha256.txt', 'mine.txt.asc'}
+        for mem in ('md5.txt', 'sha1.txt', 'sha256.txt'):
+            assert 'mine.txt' in z.read(mem).decode()
+
+
+def test_check_sign_zip_sign_fail(mocker):
+    mocker.patch('sfa_dash.utils.sign_doc',
+                 side_effect=utils.SigningError)
+    doc = b'all your base?'
+    fname = 'mine.txt'
+    out = utils.check_sign_zip(doc, fname, '', '')
+    with ZipFile(out, 'r') as z:
+        assert set(z.namelist()) == {'mine.txt', 'md5.txt', 'sha1.txt',
+                                     'sha256.txt'}

@@ -1,6 +1,10 @@
 import hashlib
 from io import BytesIO
+import logging
 from zipfile import ZipFile
+
+
+logger = logging.getLogger(__name__)
 
 
 class SigningError(Exception):
@@ -105,11 +109,16 @@ def check_sign_zip(bytes_, filename, key_id, passphrase_file):
         Byte stream of the zip archive
     """
     out = BytesIO()
-    sig = sign_doc(bytes_, key_id, passphrase_file)
+    try:
+        sig = sign_doc(bytes_, key_id, passphrase_file)
+    except SigningError as e:
+        logger.error('Failed to sign data: %s', e)
+        sig = False
     with ZipFile(out, 'w') as z:
         z.writestr(filename, bytes_)
         for alg, hsh in make_hashes(bytes_).items():
             z.writestr(f'{alg}.txt', f'{hsh}  {filename}')
-        z.writestr(f'{filename}.asc', sig)
+        if sig:
+            z.writestr(f'{filename}.asc', sig)
     out.seek(0)
     return out
