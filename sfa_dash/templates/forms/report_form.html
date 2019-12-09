@@ -80,7 +80,7 @@
      <label>Metrics</label><br>
        {% for metric, label in deterministic_metrics.items() %}
        {% if metric != 's' %}
-       <input type="checkbox" name="metrics" value="{{ metric }}" {% if form_data and metric in form_data['report_parameters']['metrics'] %}checked{% endif %}>
+       <input type="checkbox" name="metrics" value="{{ metric }}" {% if form_data %}{% if metric in form_data['report_parameters']['metrics'] %}checked{% endif %}{% elif metric in default_metrics  %}checked{% endif %}>
        <a href="https://solarforecastarbiter.org/metrics/#{{ metric |replace('^', '') }}" target="_blank"> {{ label }}</a><br/>
        {% endif %}
        {% endfor %}
@@ -88,7 +88,7 @@
      <div class="form-element">
      <label>Categories</label></br>
      {% for category, label in metric_categories.items() %}
-     <input type="checkbox" name="categories" value="{{ category }}" {% if form_data and category in form_data['report_parameters']['categories'] %}checked{% endif %}> {{ label }}<br/>
+     <input type="checkbox" name="categories" value="{{ category }}" {% if form_data %}{% if category in form_data['report_parameters']['categories'] %}checked{% endif %}{% else %}checked{% endif %}> {{ label }}<br/>
      {% endfor %}
      </div>
     {{ form.token() }}

@@ -21,6 +21,9 @@ VARIABLE_OPTIONS = {key: f'{value} ({filters.api_varname_to_units(key)})'
 TIMEZONE_OPTIONS = {tz: tz.replace('_', ' ') for tz in TIMEZONES}
 
 
+DEFAULT_METRICS = ['mae', 'mbe', 'rmse']
+
+
 def template_variables():
     return {
         'dashboard_version': sfa_dash.__version__,
@@ -28,4 +31,5 @@ def template_variables():
         'timezone_options': TIMEZONE_OPTIONS,
         'metric_categories': ALLOWED_CATEGORIES,
         'deterministic_metrics': ALLOWED_DETERMINISTIC_METRICS,
+        'default_metrics': DEFAULT_METRICS,
     }
