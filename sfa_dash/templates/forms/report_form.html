@@ -15,7 +15,7 @@
 	 <div class="form-element">
        <label for="start">Start (UTC):</label><br/>
        <div class="input-wrapper">
-         <input type="text" name="period-start" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data is defined %}value="{{form_data['period-start']}}"{% endif %}></input>
+         <input type="text" name="period-start" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data %}value="{{form_data['report_parameters']['start']}}"{% endif %}></input>
        </div>
        {{ form.help_button('period-start') }}
        <span class="period-start-help-text form-text text-muted help-text collapse" aria-hidden>
@@ -25,7 +25,7 @@
      <div class="form-element">
        <label for="end">End (UTC)</label><br/>
        <div class="input-wrapper">
-         <input type="text" name="period-end" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data is defined %}value="{{form_data['period-end']}}"{% endif %}></input>
+         <input type="text" name="period-end" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data %}value="{{form_data['report_parameters']['end']}}"{% endif %}></input>
        </div>
        {{ form.help_button('period-end') }}
        <span class="period-end-help-text form-text text-muted help-text collapse" aria-hidden>
@@ -79,14 +79,14 @@
      <div class="form-element">
      <label>Metrics</label><br>
        {% for metric, label in deterministic_metrics.items() %}
-       <input type="checkbox" name="metrics" value="{{ metric }}">
+       <input type="checkbox" name="metrics" value="{{ metric }}" {% if form_data and metric in form_data['report_parameters']['metrics'] %}checked{% endif %}>
        <a href="https://solarforecastarbiter.org/metrics/#{{ metric |replace('^', '') }}" target="_blank"> {{ label }}</a><br/>
        {% endfor %}
      </div>
      <div class="form-element">
      <label>Categories</label></br>
      {% for category, label in metric_categories.items() %}
-     <input type="checkbox" name="categories" value="{{ category }}"> {{ label }}<br/>
+     <input type="checkbox" name="categories" value="{{ category }}" {% if form_data and category in form_data['report_parameters']['categories'] %}checked{% endif %}> {{ label }}<br/>
      {% endfor %}
      </div>
     {{ form.token() }}

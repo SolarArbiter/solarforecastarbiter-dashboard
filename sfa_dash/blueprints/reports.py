@@ -101,19 +101,18 @@ class ReportForm(BaseView):
                 'error': [('Must include at least 1 Forecast, Observation '
                            'pair.')],
             }
-            return super().get(form_data=form_data, errors=errors)
+            return super().get(form_data=api_payload, errors=errors)
         try:
             reports.post_metadata(api_payload)
         except HTTPError as e:
             if e.response.status_code == 400:
                 # flatten error response to handle nesting
                 errors = e.response.json()['errors']
-                return super().get(form_data=form_data, errors=errors)
             elif e.response.status_code == 404:
                 errors = {'error': ['Permission to create report denied.']}
             else:
                 errors = {'error': ['An unrecoverable error occured.']}
-            return super().get(form_data=form_data, errors=errors)
+            return super().get(form_data=api_payload, errors=errors)
         return redirect(url_for(
             'data_dashboard.reports',
             messages={'creation': 'successful'}))
