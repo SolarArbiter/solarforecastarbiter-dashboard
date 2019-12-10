@@ -278,11 +278,16 @@ data_dash_blp.add_url_rule(
     '/reports/<uuid>',
     view_func=ReportView.as_view('report_view'))
 data_dash_blp.add_url_rule(
-    '/reports/<uuid>/html',
-    view_func=DownloadReportView.as_view('html_report_view', format_='html'))
-data_dash_blp.add_url_rule(
     '/aggregates/<uuid>',
     view_func=AggregateView.as_view('aggregate_view'))
+
+
+# Download forms
+data_dash_blp.add_url_rule(
+    '/reports/<uuid>/download/html',
+    view_func=DownloadReportView.as_view(
+        'download_report_html', format_='html'))
+
 
 # Deletion forms
 # View name pattern: 'delete_<data_type>'
