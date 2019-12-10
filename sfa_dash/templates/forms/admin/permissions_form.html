@@ -29,7 +29,9 @@
   <p>Select the action this permission will allow.</p>
   <input type="radio" name="action" value="create" required>Create
   <input type="radio" name="action" value="read">Read
+  {% if data_type not in ['forecast', 'observation', 'site'] %}
   <input type="radio" name="action" value="update">Update 
+  {% endif %}
   <input type="radio" name="action" value="delete">Delete
   {% if data_type != "site" %}
   <input type="radio" name="action" value="read_values">Read Values
