@@ -14,22 +14,19 @@ function hideMetricsOnSearch(){
     /*
      * Hides metrics whose forecasts names do not match the search term.
      */
-    searchTerm = $(".search").val();
+    searchTerm = $(".search").val().toLowerCase();
     $('.metric-block').removeAttr('hidden');
     $('[class*="collapse-forecast-"]').removeAttr('hidden');
     noMatch = $('.metric-block').filter(function(i, el){
         plotForecast = el.dataset.forecast.toLowerCase();
-        return plotForecast == 'all' || plotForecast.indexOf(searchTerm) < 0;
+        return plotForecast != 'all' && plotForecast.indexOf(searchTerm) < 0;
     });
 
-    // Get a set of 
-    noMatchHeaderClasses = new Set(noMatch.data('forecast'));
+    noMatchHeaderClasses = new Set(noMatch.map(function(){return $(this).data('forecast')}));
     noMatchHeaderClasses.forEach(function(fx){
-        console.log(fx);
         headers = $(`.collapse-forecast-${fx.replace(/ /g,"-").toLowerCase()}`);
         noMatch = noMatch.add(headers);
     });
-    console.log(noMatch);
     noMatch.attr('hidden', true);
 }
 function genericSort(a, b){
@@ -120,9 +117,9 @@ function containerSelector(sortOrder, metricBlock){
      * in to.
      */
     firstType = sortOrder[0].toLowerCase();
-    firstValue = metricBlock.dataset[firstType].toLowerCase();
+    firstValue = metricBlock.dataset[firstType].replace(/\s+/g, '-').toLowerCase();
     secondType = sortOrder[1].toLowerCase();
-    secondValue = metricBlock.dataset[secondType].toLowerCase();
+    secondValue = metricBlock.dataset[secondType].replace(/\s+/g, '-').toLowerCase();
     return `.data-wrapper-${firstType}-${firstValue} .data-wrapper-${secondType}-${secondValue}`;
 }
 
