@@ -22,6 +22,7 @@ function hideMetricsOnSearch(){
         return plotForecast != 'all' && plotForecast.indexOf(searchTerm) < 0;
     });
 
+    // Hide the headers of non-matching forecasts to avoid empty sections
     noMatchHeaderClasses = new Set(noMatch.map(function(){return $(this).data('forecast')}));
     noMatchHeaderClasses.forEach(function(fx){
         headers = $(`.collapse-forecast-${fx.replace(/ /g,"-").toLowerCase()}`);
