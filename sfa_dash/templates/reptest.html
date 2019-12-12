@@ -3,6 +3,18 @@
 {% endmacro %}
 {% block dash %}
 <!-- org name -->
+<link
+    href="https://cdn.pydata.org/bokeh/release/bokeh-1.2.0.min.css"
+    rel="stylesheet" type="text/css">
+<link
+    href="https://cdn.pydata.org/bokeh/release/bokeh-widgets-1.2.0.min.css"
+    rel="stylesheet" type="text/css">
+<link
+    href="https://cdn.pydata.org/bokeh/release/bokeh-tables-1.2.0.min.css"
+    rel="stylesheet" type="text/css">
+<script src="https://cdn.pydata.org/bokeh/release/bokeh-1.2.0.min.js"></script>
+<script src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-1.2.0.min.js"></script>
+<script src="https://cdn.pydata.org/bokeh/release/bokeh-tables-1.2.0.min.js"></script>
 <h2 class="page-title">Testing Report Metrics nesting</h2>
 <h2 class="page-title">{{ breadcrumb|safe }}</h2>
 {% include "dash/subnav.html" %}
@@ -74,5 +86,6 @@
     <p>Hourly MBE forecast b</p>
   </div>
 </div>
-<script src="/static/js/report-render-stuff.js"></script>
+<script src="/static/js/report-rendering.js"></script>
 {% endblock %}
+

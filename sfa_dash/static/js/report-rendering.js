@@ -1,5 +1,13 @@
-/*
- * 
+/* 
+ * Adds functionality for searching/nesting metrics plots. Plots should be
+ * wrapped in a <div> element with class "metric-block" and the following data
+ * attributes:
+ *     data-category: The metric category, e.g. total, hourly.
+ *     data-metric: The metric described in the plot.
+ *     data-forecast: Name of the forecast.
+ *
+ * The content inside of the metric-block is arbitrary, this code only alters
+ * the layout of the page.
  */
 
 function hideMetricsOnSearch(){
@@ -8,10 +16,20 @@ function hideMetricsOnSearch(){
      */
     searchTerm = $(".search").val();
     $('.metric-block').removeAttr('hidden');
+    $('[class*="collapse-forecast-"]').removeAttr('hidden');
     noMatch = $('.metric-block').filter(function(i, el){
         plotForecast = el.dataset.forecast.toLowerCase();
-        return plotForecast.indexOf(searchTerm) < 0;
+        return plotForecast == 'all' || plotForecast.indexOf(searchTerm) < 0;
     });
+
+    // Get a set of 
+    noMatchHeaderClasses = new Set(noMatch.data('forecast'));
+    noMatchHeaderClasses.forEach(function(fx){
+        console.log(fx);
+        headers = $(`.collapse-forecast-${fx.replace(/ /g,"-").toLowerCase()}`);
+        noMatch = noMatch.add(headers);
+    });
+    console.log(noMatch);
     noMatch.attr('hidden', true);
 }
 function genericSort(a, b){
@@ -57,7 +75,7 @@ function createContainerDiv(parentValue, type, value){
      *     'data-wrapper-category-total.{metric name}'
      */
     wrapper_class = `data-wrapper-${type.toLowerCase()}-${value.replace(/ /g,"-").toLowerCase()}${parentValue ? ' '+parentValue: ''}`
-    collapse_button = $(`<a role="button" data-toggle="collapse" class="report-plot-section-heading collapsed"
+    collapse_button = $(`<a role="button" data-toggle="collapse" class="report-plot-section-heading collapse-${type.toLowerCase()}-${value.replace(/ /g,"-").toLowerCase()} collapsed"
                             data-target=".${wrapper_class.replace(/ /g,".")}">
                          <h3 class="report-plot-section-heading-text">${type}: ${value}</h3></a>`)
     wrapper = $(`<div class="plot-attribute-wrapper ${wrapper_class} collapse"></div>`);
@@ -97,21 +115,36 @@ function createSubsetContainers(sortOrder, valueSet){
 }
 
 function containerSelector(sortOrder, metricBlock){
+    /*
+     * Returns a selector for the proper container to insert the metricBlock
+     * in to.
+     */
     firstType = sortOrder[0].toLowerCase();
     firstValue = metricBlock.dataset[firstType].toLowerCase();
     secondType = sortOrder[1].toLowerCase();
     secondValue = metricBlock.dataset[secondType].toLowerCase();
     return `.data-wrapper-${firstType}-${firstValue} .data-wrapper-${secondType}-${secondValue}`;
 }
-function subsetMetricBlocks(sortOrder){
-    // First create a Sets from the unique metrics, categories and forecasts
-    // in the report
+
+function getSortedMetricBlocks(){
+    /*
+     * Builds and returns the new nested div structure based on the current
+     * state of the sorting list.
+     */
+    
+    // Determine the current order of the sorting list.
+    sortOrder = $('.metric-sort .metric-sort-value').map(function(){
+        return $(this).text();
+    });
+
+    // Create Sets from the unique metrics, categories and forecasts in the
+    // report. These Sets will be used to create unique containers.
     categories = new Set($('.metric-block').map(function(){return this.dataset.category;}));
     metrics = new Set($('.metric-block').map(function(){return this.dataset.metric;}));
     forecasts = new Set($('.metric-block').map(function(){return this.dataset.forecast;}));
 
-    // Create an ordered list of the set values based upon the current sorting
-    // order.
+    // Create an ordered list of Sets based upon the current sorting order so
+    // we can create containers from all permutations of the first two sets.
     orderedSets = sortOrder.map(function(){
         if (this == 'Category'){
             return categories;
@@ -121,24 +154,34 @@ function subsetMetricBlocks(sortOrder){
             return metrics;
         }
     });
-    // pre-sort the blocks they should remain sorted when they are placed in
-    // their respective divs
+
+    // Sort the metric blocks. Blocks should remain in order when they are
+    // later sorted into their respective containers.
     sortedMetricBlocks = $('.metric-block').sort(selectSortFn(sortOrder[-1]));
+
+    // Build nested divs for the first two sets of sorting attributes
     nestedContainers = createSubsetContainers(sortOrder, orderedSets);
+
+    // Insert each metric block into it's container.
     $('.metric-block').each(function(){
         nestedContainers.find(containerSelector(sortOrder, this)).append(this);
     });
-    $('#metric-plot-wrapper').html(nestedContainers);
+    return nestedContainers;
 }
 
 function applySorting(event, ui){
-    var sortOrder = $('.metric-sort .metric-sort-value').map(function(){
-        return $(this).text();
-    });
-    $("#metric-plot-wrapper").html(subsetMetricBlocks(sortOrder));
+    /*
+     * Callback fired when the sorting order changes. Replaces the html within
+     * the outermost wrapper div with the sorted result.
+     */
+    $("#metric-plot-wrapper").html(getSortedMetricBlocks());
 }
 
 function sortingLi(sortBy){
+    /*
+     * Generate a list element with prefixed up/down arrows for controlling the
+     * sorting order.
+     */
     liElem = $('<li class="metric-sort"></li>');
     upButton = $('<a role="button" class="arrow-up"></a>');
     upButton.click(upButtonCallback);
@@ -149,14 +192,22 @@ function sortingLi(sortBy){
     liElem.append(`<span class="metric-sort-value">${sortBy}</span>`);
     return liElem;
 }
+
+
 function upButtonCallback(){
+    // Move the current element's parent li before the next li in the list.
     $(this).parent().prev().before($(this).parent());
     applySorting();
 }
+
+
 function downButtonCallback(){
+    // Move the current element's parent li after the next li in the list.
     $(this).parent().next().after($(this).parent());
     applySorting();
 }
+
+
 $(document).ready(function(){
     /* Create sorting widgets to insert into the template, we do this here
      * because there may be cases where we won't include js, and want to
@@ -170,7 +221,6 @@ $(document).ready(function(){
     searchBar.keyup(hideMetricsOnSearch);
     $('#metric-sorting').prepend(searchBar);
     $('#metric-sorting').prepend(sortingWidgets);
-    // Add help text
     $('#metric-sorting').prepend($('<div><b>Use the arrows below to reorder the metrics plots.</b><div>'));
     applySorting();
 });
