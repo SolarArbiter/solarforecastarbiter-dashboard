@@ -1,7 +1,7 @@
 /* Jquery for filtering and searching tables.
  * 
  * For simple column filtering, give an html table header an id of '<name>-header' and
- * give each td in it's column the '<name>-column' class. add a call to the block of
+ * give each td in its column the '<name>-column' class. add a call to the block of
  * createFilterOptions() functions at the bottom of the file with the <name> applied to 
  * your html.
  *
