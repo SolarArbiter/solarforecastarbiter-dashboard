@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Report form now includes inputs to select which metrics and categories to
   include in a Report.
 
-- Ability to compare Forecasts to Aggregates during Report creation.
+- Ability to compare Forecasts to Aggregates in reports.
 
 - Report signatures and HTML downloads for reports. Available at
   `/reports/<report_id>/downloads/html`. Note that there are no currently
