@@ -16,7 +16,7 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
 - Report form now includes options to calculate metrics by categories Total,
   Year, Month, Date, and Hour of Day.
 
-- Ability to compare Forecasts to Aggregates in reports.
+- Ability to analyze forecasts of aggregated observations in reports.
 
 - Reports may be downloaded in HTML format at
   `/reports/<report_id>/downloads/html`.
