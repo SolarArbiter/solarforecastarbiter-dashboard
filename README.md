@@ -61,5 +61,5 @@ The Solar Forecat Arbiter Dashboard utilizes the following open source projects.
 
 Authenication services for the Solar Forecast Arbiter by provided by [Auth0](https://auth0.com/)
 
-Centralized logging for the Solar Forecast Arbiter framework provided by
+Centralized error reporting for the Solar Forecast Arbiter framework is provided by
 [Sentry](https://sentry.io).
