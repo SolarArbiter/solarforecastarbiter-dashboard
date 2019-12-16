@@ -30,12 +30,10 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
 
 - CHANGELOG.md (this file) for tracking and communicating changes.
 
-
 ### Fixed
 
 - Permissions acting on aggregates are now accessible via a Role's permission
   listing.
-
 
 ## [1.0beta2] - 2019-11-18
 
@@ -44,6 +42,7 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
 - Aggregates can be created through the dashboard. See  [Aggregate Documentation](https://solarforecastarbiter.org/documentation/dashboard/working-with-data/#create-new-aggregate) 
 
 - Day-ahead probabilistic reference forecasts based on the GEFS are available for DOE RTC, NOAA SURFRAD, NOAA SOLRAD, and NREL MIDC networks.
+
 ### Fixed
 
 - Issues with report plots and tables including inconsistent forecast ordering
@@ -64,7 +63,7 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
 - Reports now calculate monthly, daily, hourly metrics in the timezone
   specified by the site metadata instead of UTC.
 
-- Reference NWP forecasts now properly account for `interval_label`
+- Reference NWP forecasts now properly account for `interval_label`.
 
 ## [1.0alpha] - 2019-06-28
 
