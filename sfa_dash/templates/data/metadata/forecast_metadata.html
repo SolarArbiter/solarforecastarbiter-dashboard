@@ -5,7 +5,7 @@
 {% endif %}
 {% block extra_fields %}
 {{ macro.li('Issue time of day', issue_time_of_day+'Z') }}
-{{ macro.li('Run length / Issue frequency', run_length | display_timedelta) }}
+{{ macro.li('Run length', run_length | display_timedelta) }}
 {{ macro.li('Lead time to start', lead_time_to_start | display_timedelta) }}
 {# 
 We don't expect cdf_fields to be defined on a regular forecast,
