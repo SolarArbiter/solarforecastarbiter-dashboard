@@ -69,7 +69,7 @@ class BaseView(MethodView):
             end = pd.Timestamp(end_arg)
         except ValueError:
             end = pd.Timestamp.utcnow()
-        return start.isoformat(), end.isoformat()
+        return start, end
 
     def generate_site_link(self, metadata):
         """Generate html for a link to a site page from an observation,

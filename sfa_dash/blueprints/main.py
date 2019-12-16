@@ -1,7 +1,10 @@
+import json
 from collections import OrderedDict
 
 
-from flask import Blueprint, render_template, url_for, request
+from flask import Blueprint, render_template, url_for, request, make_response
+from flask.views import MethodView
+import pandas as pd
 
 
 from sfa_dash.api_interface import (observations, forecasts,
@@ -98,7 +101,7 @@ class SingleObjectView(DataDashView):
                 uuid=self.metadata[self.id_key])
         return breadcrumb_dict
 
-    def set_template_args(self, **kwargs):
+    def set_template_args(self, start, end, **kwargs):
         """Insert necessary template arguments. See data/asset.html in the
         template folder for how these are layed out.
         """
@@ -118,6 +121,11 @@ class SingleObjectView(DataDashView):
             self.temp_args['delete_link'] = url_for(
                 f'data_dashboard.delete_{self.data_type}',
                 uuid=self.metadata[self.id_key])
+        self.temp_args['period_start_date'] = start.strftime('%Y-%m-%d')
+        self.temp_args['period_start_time'] = start.strftime('%H:%M')
+        self.temp_args['period_end_date'] = end.strftime('%Y-%m-%d')
+        self.temp_args['period_end_time'] = end.strftime('%H:%M')
+        self.temp_args.update(kwargs)
 
     def get(self, uuid, **kwargs):
         self.temp_args = {}
@@ -136,11 +144,81 @@ class SingleObjectView(DataDashView):
             except DataRequestException:
                 self.temp_args.update({'plot': None})
             else:
-                self.insert_plot(uuid, start, end)
+                self.insert_plot(uuid, start.isoformat(), end.isoformat())
             finally:
                 self.set_site_or_aggregate_link()
-                self.set_template_args(**kwargs)
+                self.set_template_args(start=start, end=end, **kwargs)
         return render_template(self.template, **self.temp_args)
+
+    def format_params(self, form_data):
+        """Parses start and end time and the format from the posted form.
+        Returns headers and query parameters for requesting the data.
+
+        Parameters
+        ----------
+        form_data: dict
+            Dictionary of posted form values.
+
+        Returns
+        -------
+        headers: dict
+            The accept headers set to 'text/csv' or 'application/json'
+            based on the selected format.
+        params: dict
+            Query parameters start and end, both formatted in iso8601 and
+            localized to the provided timezone.
+        """
+        start_dt = pd.Timestamp(form_data['start'], tz='utc')
+        end_dt = pd.Timestamp(form_data['end'], tz='utc')
+        params = {
+            'start': start_dt.isoformat(),
+            'end': end_dt.isoformat(),
+        }
+        headers = {'Accept': form_data['format']}
+        return headers, params
+
+    def post(self, uuid, **kwargs):
+        form_data = request.form
+        try:
+            headers, params = self.format_params(form_data)
+        except ValueError:
+            errors = {'start-end': ['Invalid datetime']}
+            return self.get(uuid, form_data=form_data, errors=errors)
+        else:
+            try:
+                data = handle_response(
+                    self.api_handle.get_values(
+                        uuid, headers=headers, params=params))
+            except DataRequestException as e:
+                return render_template(
+                    self.template, **self.template_args(uuid), errors=e.errors)
+            else:
+                try:
+                    metadata = handle_response(
+                        self.api_handle.get_metadata(uuid))
+                except DataRequestException:
+                    filename = 'data'
+                else:
+                    name = metadata['name'].replace(' ', '_')
+                    time_range = f"{params['start']}-{params['end']}"
+                    filename = f'{name}_{time_range}'
+                if form_data['format'] == 'application/json':
+                    response = make_response(json.dumps(data))
+                    response.headers.set('Content-Type', 'application/json')
+                    response.headers.set(
+                        'Content-Disposition',
+                        'attachment',
+                        filename=f'{filename}.json')
+                elif form_data['format'] == 'text/csv':
+                    response = make_response(data)
+                    response.headers.set('Content-Type', 'text/csv')
+                    response.headers.set(
+                        'Content-Disposition',
+                        'attachment',
+                        filename=f'{filename}.csv')
+                else:
+                    raise ValueError('Invalid Format.')
+            return response
 
 
 class SingleCDFForecastGroupView(SingleObjectView):
