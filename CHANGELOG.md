@@ -6,19 +6,20 @@ in this file.
 Detailed changes to the Solar Forecast Arbiter Core python library can be found
 in the core documentation's [what's new](https://solarforecastarbiter-core.readthedocs.io/en/latest/whatsnew/index.html) series.
 
-## [Unreleased]
+## [1.0beta3] - 2019-12-16
 
 ### Added
 
 - Report form now includes all deterministic metrics options identified by
-  stakeholders. Also includes options to calculate metrics by categories Total,
+  stakeholders.
+
+- Report form now includes options to calculate metrics by categories Total,
   Year, Month, Date, and Hour of Day.
 
 - Ability to compare Forecasts to Aggregates in reports.
 
 - Reports may be downloaded in HTML format at
-  `/reports/<report_id>/downloads/html`. Note that there are no currently
-  functioning links to this endpoint.
+  `/reports/<report_id>/downloads/html`.
 
 - Report downloads contain a GPG signed report as well as md5, sha1 and sha256
   checksums for validation.
