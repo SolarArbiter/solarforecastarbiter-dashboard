@@ -114,9 +114,6 @@ class SingleObjectView(DataDashView):
         self.temp_args['upload_link'] = url_for(
             f'forms.upload_{self.data_type}_data',
             uuid=self.metadata[self.id_key])
-        self.temp_args['download_link'] = url_for(
-            f'forms.download_{self.data_type}_data',
-            uuid=self.metadata[self.id_key])
         if self.data_type != 'cdf_forecast':
             self.temp_args['delete_link'] = url_for(
                 f'data_dashboard.delete_{self.data_type}',

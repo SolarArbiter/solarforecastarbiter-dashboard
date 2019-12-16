@@ -1,7 +1,8 @@
 from collections import OrderedDict
 from requests.exceptions import HTTPError
 
-from flask import render_template, url_for, request, redirect
+from flask import (render_template, url_for, request,
+                   redirect, make_response, json)
 import pandas as pd
 
 from sfa_dash.api_interface import observations, sites, aggregates
@@ -289,7 +290,7 @@ class AggregateView(BaseView):
             uuid=self.metadata['aggregate_id'])
         return breadcrumb_dict
 
-    def set_template_args(self):
+    def set_template_args(self, start, end, **kwargs):
         self.temp_args.update({
             'metadata': render_template(
                 self.metadata_template, **self.metadata),
@@ -306,13 +307,18 @@ class AggregateView(BaseView):
                     aggregate_id=self.metadata['aggregate_id']),
                 cdf_forecasts_url=url_for(
                     'data_dashboard.cdf_forecast_groups',
-                    aggregate_id=self.metadata['aggregate_id']))
+                    aggregate_id=self.metadata['aggregate_id'])),
+            'period_start_date': start.strftime('%Y-%m-%d'),
+            'period_start_time': start.strftime('%H:%M'),
+            'period_end_date': end.strftime('%Y-%m-%d'),
+            'period_end_time': end.strftime('%H:%M'),
         })
+        self.temp_args.update(kwargs)
 
     def template_args(self):
         return self.temp_args
 
-    def get(self, uuid):
+    def get(self, uuid, **kwargs):
         self.temp_args = {}
         start, end = self.parse_start_end_from_querystring()
         try:
@@ -331,8 +337,60 @@ class AggregateView(BaseView):
                     observation.update(obs)
                     self.observation_list.append(observation)
             self.insert_plot(uuid, start, end)
-            self.set_template_args()
-        return render_template(self.template, **self.template_args())
+            self.set_template_args(start, end, **kwargs)
+        return render_template(self.template, **self.temp_args)
+
+    def format_params(self, form_data):
+        start_dt = pd.Timestamp(form_data['start'], tz='utc')
+        end_dt = pd.Timestamp(form_data['end'], tz='utc')
+        params = {
+            'start': start_dt.isoformat(),
+            'end': end_dt.isoformat(),
+        }
+        headers = {'Accept': form_data['format']}
+        return headers, params
+
+    def post(self, uuid):
+        form_data = request.form
+        try:
+            headers, params = self.format_params(form_data)
+        except ValueError:
+            errors = {'start-end': ['Invalid datetime']}
+            return self.get(uuid, form_data=form_data, errors=errors)
+        else:
+            try:
+                data = handle_response(
+                    self.api_handle.get_values(
+                        uuid, headers=headers, params=params))
+            except DataRequestException as e:
+                return self.get(uuid, errors=e.errors)
+            else:
+                try:
+                    metadata = handle_response(
+                        self.api_handle.get_metadata(uuid))
+                except DataRequestException:
+                    filename = 'data'
+                else:
+                    name = metadata['name'].replace(' ', '_')
+                    time_range = f"{params['start']}-{params['end']}"
+                    filename = f'{name}_{time_range}'
+                if form_data['format'] == 'application/json':
+                    response = make_response(json.dumps(data))
+                    response.headers.set('Content-Type', 'application/json')
+                    response.headers.set(
+                        'Content-Disposition',
+                        'attachment',
+                        filename=f'{filename}.json')
+                elif form_data['format'] == 'text/csv':
+                    response = make_response(data)
+                    response.headers.set('Content-Type', 'text/csv')
+                    response.headers.set(
+                        'Content-Disposition',
+                        'attachment',
+                        filename=f'{filename}.csv')
+                else:
+                    raise ValueError('Invalid Format.')
+            return response
 
 
 class DeleteAggregateView(BaseView):
