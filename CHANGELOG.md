@@ -21,6 +21,10 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
 - Reports may be downloaded in HTML format at
   `/reports/<report_id>/downloads/html`.
 
+- The API report schema's `object_pair` json objects have been updated to
+  support pairing forecasts with either observations or aggregates. See the
+  [api documentation](https://api.solarforecastarbiter.org/#tag/Reports/paths/~1reports~1{report_id}/get) for details.
+
 - Report downloads contain a GPG signed report as well as md5, sha1 and sha256
   checksums for validation.
 
