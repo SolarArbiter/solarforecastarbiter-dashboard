@@ -16,7 +16,7 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
 - Report form now includes options to calculate metrics by categories Total,
   Year, Month, Date, and Hour of Day.
 
-- Ability to compare Forecasts to Aggregates in reports.
+- Ability to analyze forecasts of aggregated observations in reports.
 
 - Reports may be downloaded in HTML format at
   `/reports/<report_id>/downloads/html`.
@@ -43,6 +43,7 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
 
 - Aggregates can be created through the dashboard. See  [Aggregate Documentation](https://solarforecastarbiter.org/documentation/dashboard/working-with-data/#create-new-aggregate) 
 
+- Day-ahead probabilistic reference forecasts based on the GEFS are available for DOE RTC, NOAA SURFRAD, NOAA SOLRAD, and NREL MIDC networks.
 ### Fixed
 
 - Issues with report plots and tables including inconsistent forecast ordering
