@@ -16,7 +16,7 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
 
 - Ability to compare Forecasts to Aggregates in reports.
 
-- Report's may be downloaded in HTML format at
+- Reports may be downloaded in HTML format at
   `/reports/<report_id>/downloads/html`. Note that there are no currently
   functioning links to this endpoint.
 
