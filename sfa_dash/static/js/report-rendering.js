@@ -93,6 +93,7 @@ function createSubsetContainers(sortOrder, valueSet){
      *     </div>
      *   </div>
      */
+    console.log(valueSet);
     container = $('<div class="plot-container"></div>');
     valueSet[0].forEach(function (firstSetItem){
         [top_level, top_collapse] = createContainerDiv(null, sortOrder[0], firstSetItem);
@@ -152,6 +153,9 @@ function getSortedMetricBlocks(){
             return metrics;
         }
     });
+    console.log(`orderedSets: ${orderedSets}`);
+    console.log(`sortOrder: ${sortOrder}`);
+
 
     // Sort the metric blocks. Blocks should remain in order when they are
     // later sorted into their respective containers.
@@ -217,8 +221,10 @@ $(document).ready(function(){
     sortingWidgets.append(sortingLi("Forecast"));
     searchBar = $('<input type="text" placeholder="Search by forecast name" class="search">');
     searchBar.keyup(hideMetricsOnSearch);
-    $('#metric-sorting').prepend(searchBar);
-    $('#metric-sorting').prepend(sortingWidgets);
-    $('#metric-sorting').prepend($('<div><b>Use the arrows below to reorder the metrics plots.</b><div>'));
+    metricSortingWrapper = $('<div id="metric-sorting"></div>')
+    metricSortingWrapper.prepend(searchBar);
+    metricSortingWrapper.prepend(sortingWidgets);
+    metricSortingWrapper.prepend($('<div><b>Use the arrows below to reorder the metrics plots.</b><div>'));
+    $('#metric-plot-wrapper').before($(metricSortingWrapper));
     applySorting();
 });

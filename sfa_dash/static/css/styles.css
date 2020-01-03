@@ -455,10 +455,10 @@ th.selection-column{
     margin-bottom: 1em;
 }
 
-#metric-plot-wrapper div div{
+#metric-plot-wrapper > div > div{
     padding-left: 2em;
 }
-#metric-plot-wrapper div div div{
+#metric-plot-wrapper > div > div > div{
     padding-left: 2em;
 }
 
