@@ -1,14 +1,12 @@
-"""Draft of reports endpoints/pages. Need to integrate core report generation.
-"""
 from flask import (request, redirect, url_for, render_template, send_file,
                    current_app)
 from requests.exceptions import HTTPError
+
 from solarforecastarbiter.reports.template import (
     get_template_and_kwargs, render_html)
+
 from sfa_dash.api_interface import (observations, forecasts, sites, reports,
                                     aggregates)
-
-
 from sfa_dash.utils import check_sign_zip
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.util import filter_form_fields, handle_response
@@ -125,7 +123,16 @@ class ReportForm(BaseView):
 class ReportView(BaseView):
     template = 'data/report.html'
 
+    def should_include_timeseries(self):
+        report_period = (self.metadata.end - self.metadata.start)
+        total_data_points = 0
+        for fxobs in self.metadata.raw_report.processed_forecasts_observations:
+            fxobs_data_points = report_period / fxobs.interval_length * 2
+            total_data_points = total_data_points + fxobs_data_points
+        return total_data_points < current_app.config['REPORT_DATA_LIMIT']
+
     def template_args(self):
+<<<<<<< HEAD
         report_template, kwargs = get_template_and_kwargs(
             self.metadata, request.url_root.rstrip('/'), True, True)
         kwargs.update({
@@ -133,6 +140,36 @@ class ReportView(BaseView):
             'bokeh_script': True
         })
         return kwargs
+=======
+        include_timeseries = self.should_include_timeseries()
+        report_template, report_kwargs = get_template_and_kwargs(
+            self.metadata,
+            request.url_root.rstrip('/'),
+            include_timeseries,
+            True
+        )
+        report_kwargs.update({
+            'report_template': report_template,
+            'report': self.metadata,
+            'dash_url': request.url_root.rstrip('/'),
+            'includes_bokeh': True
+        })
+        if not include_timeseries:
+            # display a message about omitting timeseries
+            download_link = url_for('data_dashboard.download_report_html',
+                                    uuid=self.metadata.report_id)
+            script = ''
+            div = f"""<div class="alert alert-warning">
+    <strong>Warning</strong> To improve performance timeseries plots have been
+    omitted from this report. You may download a copy of this report with the
+    timeseries plots included:
+    <a href="{download_link}">Download HTML Report.</a></div>"""
+            report_kwargs.update({
+                'timeseries_div': div,
+                'timeseries_script': script,
+            })
+        return report_kwargs
+>>>>>>> limit timeseries inclusion based on total number of data points
 
     def get(self, uuid):
         try:
