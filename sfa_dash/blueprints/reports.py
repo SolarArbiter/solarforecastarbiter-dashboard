@@ -3,7 +3,8 @@
 from flask import (request, redirect, url_for, render_template, send_file,
                    current_app)
 from requests.exceptions import HTTPError
-from solarforecastarbiter.reports.template import get_template_and_kwargs, render_html
+from solarforecastarbiter.reports.template import (
+    get_template_and_kwargs, render_html)
 from sfa_dash.api_interface import (observations, forecasts, sites, reports,
                                     aggregates)
 
