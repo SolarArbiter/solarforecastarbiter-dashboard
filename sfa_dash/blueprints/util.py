@@ -3,7 +3,7 @@
 from copy import deepcopy
 
 
-from flask import render_template, url_for, request
+from flask import render_template, url_for, request, make_response
 from solarforecastarbiter import datamodel
 from solarforecastarbiter.io import utils as io_utils
 from solarforecastarbiter.plotting import timeseries
@@ -400,3 +400,49 @@ def flatten_dict(to_flatten):
         else:
             flattened[key] = value
     return flattened
+
+def json_file_response(filename, values):
+    """Generates a flask.Response object containing a json file, and the
+    correct headers.
+
+    Parameters
+    ----------
+    filename: str
+    values: dict
+        API response of a values endpoint on the form of a dictionary.
+
+    Returns
+    -------
+    flask.Response
+        Contains a json file with Content-Type and Content-Disposition headers.
+    """
+    response = make_response(json.dumps(data))
+    response.headers.set('Content-Type', 'application/json')
+    response.headers.set(
+        'Content-Disposition',
+        'attachment',
+        filename=f'{filename}.json')
+    return response
+
+def csv_file_response(filename, values):
+    """Generates a flask.Response object containing a csv file, and the
+    correct headers.
+
+    Parameters
+    ----------
+    filename: str
+    values: dict
+        API response of a values endpoint on the form of a dictionary.
+
+    Returns
+    -------
+    flask.Response
+        Contains a csv file with Content-Type and Content-Disposition headers.
+    """
+    response = make_response(data)
+    response.headers.set('Content-Type', 'text/csv')
+    response.headers.set(
+        'Content-Disposition',
+        'attachment',
+        filename=f'{filename}.csv')
+    return response

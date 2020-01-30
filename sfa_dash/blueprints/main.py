@@ -18,7 +18,8 @@ from sfa_dash.blueprints.reports import (ReportsView, ReportView,
                                          DeleteReportView,
                                          DownloadReportView)
 from sfa_dash.blueprints.sites import SingleSiteView, SitesListingView
-from sfa_dash.blueprints.util import handle_response
+from sfa_dash.blueprints.util import (handle_response, csv_file_response,
+                                      json_file_response)
 from sfa_dash.errors import DataRequestException
 from sfa_dash.filters import human_friendly_datatype
 
@@ -147,37 +148,18 @@ class SingleObjectView(DataDashView):
                 self.set_template_args(start=start, end=end, **kwargs)
         return render_template(self.template, **self.temp_args)
 
-    def format_params(self, form_data):
-        """Parses start and end time and the format from the posted form.
-        Returns headers and query parameters for requesting the data.
-
-        Parameters
-        ----------
-        form_data: dict
-            Dictionary of posted form values.
-
-        Returns
-        -------
-        headers: dict
-            The accept headers set to 'text/csv' or 'application/json'
-            based on the selected format.
-        params: dict
-            Query parameters start and end, both formatted in iso8601 and
-            localized to the provided timezone.
-        """
-        start_dt = pd.Timestamp(form_data['start'], tz='utc')
-        end_dt = pd.Timestamp(form_data['end'], tz='utc')
-        params = {
-            'start': start_dt.isoformat(),
-            'end': end_dt.isoformat(),
-        }
-        headers = {'Accept': form_data['format']}
-        return headers, params
-
     def post(self, uuid, **kwargs):
+        """Data download endpoint.
+
+        Expects a `start` and `end` query parameter as well as posted form data
+        with the key `format` containing a Content-Type html header value.
+
+        The endpoint makes a request to the api, and returns a file of the
+        requested type.
+        """
         form_data = request.form
         try:
-            headers, params = self.format_params(form_data)
+            headers, params = self.format_download_params(form_data)
         except ValueError:
             errors = {'start-end': ['Invalid datetime']}
             return self.get(uuid, form_data=form_data, errors=errors)
@@ -200,19 +182,9 @@ class SingleObjectView(DataDashView):
                     time_range = f"{params['start']}-{params['end']}"
                     filename = f'{name}_{time_range}'
                 if form_data['format'] == 'application/json':
-                    response = make_response(json.dumps(data))
-                    response.headers.set('Content-Type', 'application/json')
-                    response.headers.set(
-                        'Content-Disposition',
-                        'attachment',
-                        filename=f'{filename}.json')
+                    response = json_file_response(filename, data)
                 elif form_data['format'] == 'text/csv':
-                    response = make_response(data)
-                    response.headers.set('Content-Type', 'text/csv')
-                    response.headers.set(
-                        'Content-Disposition',
-                        'attachment',
-                        filename=f'{filename}.csv')
+                    response = csv_file_response(filename, data)
                 else:
                     raise ValueError('Invalid Format.')
             return response
