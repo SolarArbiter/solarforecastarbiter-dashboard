@@ -223,9 +223,11 @@ class AccessView(DataDashView):
 class TrialsView(DataDashView):
     template = 'data/trials.html'
 
+
 class RepTest(MethodView):
     def get(self):
         return render_template('reptest.html')
+
 
 # Url Rule Registration
 # The url rules here are broken into sections based on their function.

@@ -31,10 +31,10 @@ def test_sign_doc_invalid_key_id(mocker, tmp_path, monkeypatch):
     tmp_path.chmod(0o700)
     monkeypatch.setenv('GNUPGHOME', str(tmp_path))
     subprocess.run(
-            ['gpg', '--yes', '--passphrase', '', '--batch',
-             '--quick-generate-key', '--pinentry-mode', 'loopback',
-             "'TEST SFA <testing@solarforecastarbiter.org'"],
-            check=True, capture_output=True
+        ['gpg', '--yes', '--passphrase', '', '--batch',
+         '--quick-generate-key', '--pinentry-mode', 'loopback',
+         "'TEST SFA <testing@solarforecastarbiter.org'"],
+        check=True, capture_output=True
     )
     inp = b'thebody'
     with pytest.raises(utils.SigningError) as e:
@@ -47,10 +47,10 @@ def test_sign_doc_no_pw_needed(mocker, tmp_path, monkeypatch):
     tmp_path.chmod(0o700)
     monkeypatch.setenv('GNUPGHOME', str(tmp_path))
     key_create = subprocess.run(
-            ['gpg', '--yes', '--passphrase', '', '--batch',
-             '--quick-generate-key', '--pinentry-mode', 'loopback',
-             "'TEST SFA <testing@solarforecastarbiter.org'"],
-            check=True, capture_output=True
+        ['gpg', '--yes', '--passphrase', '', '--batch',
+         '--quick-generate-key', '--pinentry-mode', 'loopback',
+         "'TEST SFA <testing@solarforecastarbiter.org'"],
+        check=True, capture_output=True
     )
     key = re.match('(?<=key ).*(?= marked)', key_create.stderr.decode())
     inp = b'thebody'
@@ -67,10 +67,10 @@ def test_sign_doc(mocker, tmp_path, monkeypatch):
     with open(tmp_path / 'passwd', 'wb') as f:
         f.write(passwd)
     key_create = subprocess.run(
-            ['gpg', '--yes', '--passphrase', passwd, '--batch',
-             '--quick-generate-key', '--pinentry-mode', 'loopback',
-             "'TEST SFA <testing@solarforecastarbiter.org'"],
-            check=True, capture_output=True
+        ['gpg', '--yes', '--passphrase', passwd, '--batch',
+         '--quick-generate-key', '--pinentry-mode', 'loopback',
+         "'TEST SFA <testing@solarforecastarbiter.org'"],
+        check=True, capture_output=True
     )
     key = re.match('(?<=key ).*(?= marked)', key_create.stderr.decode())
     inp = b'thebody'
@@ -89,10 +89,10 @@ def test_sign_doc_wrong_pw(mocker, tmp_path, monkeypatch, path, msg):
     with open(tmp_path / 'passwd', 'wb') as f:
         f.write(b'wrong')
     key_create = subprocess.run(
-            ['gpg', '--yes', '--passphrase', passwd, '--batch',
-             '--quick-generate-key', '--pinentry-mode', 'loopback',
-             "'TEST SFA <testing@solarforecastarbiter.org'"],
-            check=True, capture_output=True
+        ['gpg', '--yes', '--passphrase', passwd, '--batch',
+         '--quick-generate-key', '--pinentry-mode', 'loopback',
+         "'TEST SFA <testing@solarforecastarbiter.org'"],
+        check=True, capture_output=True
     )
     key = re.match('(?<=key ).*(?= marked)', key_create.stderr.decode())
     inp = b'thebody'
