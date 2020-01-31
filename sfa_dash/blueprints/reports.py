@@ -140,15 +140,6 @@ class ReportView(BaseView):
         return total_data_points < current_app.config['REPORT_DATA_LIMIT']
 
     def template_args(self):
-<<<<<<< HEAD
-        report_template, kwargs = get_template_and_kwargs(
-            self.metadata, request.url_root.rstrip('/'), True, True)
-        kwargs.update({
-            'report_template': report_template,
-            'bokeh_script': True
-        })
-        return kwargs
-=======
         include_timeseries = self.should_include_timeseries()
         report_template, report_kwargs = get_template_and_kwargs(
             self.metadata,
@@ -176,7 +167,6 @@ class ReportView(BaseView):
                 'timeseries_script': script,
             })
         return report_kwargs
->>>>>>> limit timeseries inclusion based on total number of data points
 
     def set_metadata(self, uuid):
         """Loads all necessary data for loading a
