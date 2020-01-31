@@ -1,5 +1,5 @@
 {% extends "dash/data.html" %}
 {% block content %}
-{% include 'sections/notifications.html' %}
-{{ report | safe }}
+{% include "sections/notifications.html" %}
+{% include "data/intermediate_report.html" %}
 {% endblock %}
