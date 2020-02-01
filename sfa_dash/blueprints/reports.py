@@ -129,7 +129,7 @@ class ReportView(BaseView):
         total_data_points = 0
         for fxobs in pfxobs:
             fxobs_data_points = fxobs['valid_point_count'] * 2
-            total_data_points = total_data_points + (fxobs_data_points)
+            total_data_points = total_data_points + fxobs_data_points
         return total_data_points < current_app.config['REPORT_DATA_LIMIT']
 
     def template_args(self):
