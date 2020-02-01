@@ -1,6 +1,5 @@
 from flask import (request, redirect, url_for, render_template, send_file,
                    current_app)
-import pandas as pd
 from requests.exceptions import HTTPError
 
 from solarforecastarbiter.reports.template import (
@@ -110,12 +109,13 @@ class ReportForm(BaseView):
             }
             return super().get(form_data=api_payload, errors=errors)
         try:
-            handle_response(reports.post_metadata(api_payload))
+            report_id = handle_response(reports.post_metadata(api_payload))
         except DataRequestException as e:
             return super().get(form_data=api_payload, errors=e.errors)
         return redirect(url_for(
-            'data_dashboard.reports',
-            messages={'creation': 'successful'}))
+            'data_dashboard.report_view',
+            uuid=report_id,
+        ))
 
 
 class ReportView(BaseView):
@@ -124,19 +124,12 @@ class ReportView(BaseView):
     def should_include_timeseries(self):
         if self.metadata['status'] != 'complete':
             return False
-        start_string = self.metadata['report_parameters'].get('start')
-        end_string = self.metadata['report_parameters'].get('end')
-        start = pd.Timestamp(start_string)
-        end = pd.Timestamp(end_string)
-        report_period = (end - start)
-        total_data_points = 0
         raw_report = self.metadata['raw_report']
         pfxobs = raw_report['processed_forecasts_observations']
+        total_data_points = 0
         for fxobs in pfxobs:
-            interval_length = pd.to_timedelta(fxobs['interval_length'],
-                                              unit='m')
-            fxobs_data_points = report_period / interval_length * 2
-            total_data_points = total_data_points + fxobs_data_points
+            fxobs_data_points = fxobs['valid_point_count'] * 2
+            total_data_points = total_data_points + (fxobs_data_points)
         return total_data_points < current_app.config['REPORT_DATA_LIMIT']
 
     def template_args(self):
@@ -174,34 +167,7 @@ class ReportView(BaseView):
         observations.
         """
         metadata = handle_response(reports.get_metadata(uuid))
-        pairs = []
-        for fxobs in metadata['report_parameters']['object_pairs']:
-            pair = {}
-            if 'observation' in fxobs:
-                observation = handle_response(
-                    observations.get_metadata(fxobs['observation']))
-                observation['site'] = handle_response(
-                    sites.get_metadata(observation['site_id']))
-                pair['observation'] = observation
-            if 'aggregate' in fxobs:
-                aggregate = handle_response(
-                    aggregates.get_metadata(fxobs['aggregate']))
-                obs_list = []
-                for obs in aggregate['observations']:
-                    observation = handle_response(
-                        observations.get_metadata(obs))
-                    observation['site'] = handle_response(
-                        sites.get_metadata(observation['site_id']))
-                    obs_list.append(observation)
-                aggregate['observations'] = obs_list
-                pair['aggregate'] = aggregate
-            forecast = handle_response(
-                forecasts.get_metadata(fxobs['forecast']))
-            forecast['site'] = handle_response(
-                sites.get_metadata(forecast['site_id']))
-            pair['forecast'] = forecast
-            pairs.append(pair)
-        metadata['report_parameters']['object_pairs'] = pairs
+        metadata['report_parameters']['object_pairs'] = []
         self.metadata = metadata
 
     def get(self, uuid, **kwargs):
