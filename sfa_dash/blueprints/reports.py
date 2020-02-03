@@ -135,8 +135,9 @@ class ReportView(BaseView):
 
     def template_args(self):
         include_timeseries = self.should_include_timeseries()
+        report_object = Report.from_dict(self.metadata)
         report_template, report_kwargs = get_template_and_kwargs(
-            self.metadata,
+            report_object,
             request.url_root.rstrip('/'),
             include_timeseries,
             True
