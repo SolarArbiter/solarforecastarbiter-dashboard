@@ -2,6 +2,7 @@ from flask import (request, redirect, url_for, render_template, send_file,
                    current_app)
 from requests.exceptions import HTTPError
 
+from solarforecastarbiter.datamodel import Report
 from solarforecastarbiter.reports.template import (
     get_template_and_kwargs, render_html)
 
@@ -178,22 +179,26 @@ class ReportView(BaseView):
         return super().get(**kwargs)
 
 
-class DownloadReportView(BaseView):
+class DownloadReportView(ReportView):
     def __init__(self, format_, **kwargs):
         self.format_ = format_
 
     def get(self, uuid):
         try:
-            metadata = handle_response(reports.get_metadata(uuid))
+            self.set_metadata(uuid)
         except DataRequestException as e:
             errors = {'errors': e.errors}
             return ReportView().get(uuid, errors=errors)
         # render to right format
         if self.format_ == 'html':
-            fname = metadata['report_parameters']['name'].replace(' ', '_')
-            bytes_out = render_html(metadata, request.url_root.rstrip('/'),
-                                    with_timeseries=True, body_only=False
-                                    ).encode('utf-8')
+            fname = self.metadata['report_parameters']['name'].replace(
+                ' ', '_')
+            report_object = Report.from_dict(self.metadata)
+            bytes_out = render_html(
+                report_object,
+                request.url_root.rstrip('/'),
+                with_timeseries=True, body_only=False
+            ).encode('utf-8')
         else:
             raise ValueError(
                 'Only html report downloads is currently supported')
