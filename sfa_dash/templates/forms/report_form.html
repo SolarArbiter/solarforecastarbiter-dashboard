@@ -65,7 +65,7 @@
        <p>Check quality flags to exclude from analysis. </p>
        {% for flag in quality_flags.keys() %}
        {% if metric != 's' %}
-       <input type="checkbox" name="quality_flags" value="{{ flag }}" {% if form_data %}{% if flag in form_data['report_parameters']['quality_flags'] %}checked{% endif %}{%endif %}>{{ flag }}<br/>
+       <input type="checkbox" name="quality_flags" value="{{ flag }}" {% if form_data %}{% if flag in form_data['report_parameters']['filters']['quality_flags'] %}checked{% endif %}{%endif %}>{{ flag }}<br/>
        {% endif %}
        {% endfor %}
      </div>
