@@ -8,6 +8,8 @@ import sfa_dash
 from sfa_dash import filters
 from solarforecastarbiter.datamodel import (
     ALLOWED_CATEGORIES, ALLOWED_DETERMINISTIC_METRICS)
+from solarforecastarbiter.validation.quality_mapping import \
+    DESCRIPTION_MASK_MAPPING
 
 
 TIMEZONES = pytz.country_timezones('US') + list(
@@ -32,4 +34,5 @@ def template_variables():
         'metric_categories': ALLOWED_CATEGORIES,
         'deterministic_metrics': ALLOWED_DETERMINISTIC_METRICS,
         'default_metrics': DEFAULT_METRICS,
+        'quality_flags': DESCRIPTION_MASK_MAPPING
     }
