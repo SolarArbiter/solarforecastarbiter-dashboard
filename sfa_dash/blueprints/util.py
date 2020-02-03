@@ -1,5 +1,6 @@
 """ Utility classes/functions. Mostly for handling api data.
 """
+import json
 from copy import deepcopy
 
 
@@ -401,6 +402,7 @@ def flatten_dict(to_flatten):
             flattened[key] = value
     return flattened
 
+
 def json_file_response(filename, values):
     """Generates a flask.Response object containing a json file, and the
     correct headers.
@@ -416,13 +418,14 @@ def json_file_response(filename, values):
     flask.Response
         Contains a json file with Content-Type and Content-Disposition headers.
     """
-    response = make_response(json.dumps(data))
+    response = make_response(json.dumps(values))
     response.headers.set('Content-Type', 'application/json')
     response.headers.set(
         'Content-Disposition',
         'attachment',
         filename=f'{filename}.json')
     return response
+
 
 def csv_file_response(filename, values):
     """Generates a flask.Response object containing a csv file, and the
@@ -439,7 +442,7 @@ def csv_file_response(filename, values):
     flask.Response
         Contains a csv file with Content-Type and Content-Disposition headers.
     """
-    response = make_response(data)
+    response = make_response(values)
     response.headers.set('Content-Type', 'text/csv')
     response.headers.set(
         'Content-Disposition',

@@ -1,8 +1,7 @@
 from collections import OrderedDict
 from requests.exceptions import HTTPError
 
-from flask import (render_template, url_for, request,
-                   redirect, make_response, json)
+from flask import render_template, url_for, request, redirect
 import pandas as pd
 
 from sfa_dash.api_interface import observations, sites, aggregates
