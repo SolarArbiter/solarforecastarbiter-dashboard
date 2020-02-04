@@ -72,11 +72,12 @@ function createContainerDiv(parentValue, type, value){
      * to select the specific category to expand like so:
      *     'data-wrapper-category-total.{metric name}'
      */
-    wrapper_class = `data-wrapper-${type.toLowerCase()}-${value.replace(/ /g,"-").toLowerCase()}${parentValue ? ' '+parentValue: ''}`
-    collapse_button = $(`<a role="button" data-toggle="collapse" class="report-plot-section-heading collapse-${type.toLowerCase()}-${value.replace(/ /g,"-").toLowerCase()} collapsed"
-                            data-target=".${wrapper_class.replace(/ /g,".")}">
+    parentValueClass = parentValue ? ' '+parentValue.replace(/ |\^/g, "-") : "";
+    wrapperClass = `data-wrapper-${type.toLowerCase()}-${value.replace(/ |\^/g,"-").toLowerCase()}${parentValueClass}`
+    collapse_button = $(`<a role="button" data-toggle="collapse" class="report-plot-section-heading collapse-${type.toLowerCase()}-${value.replace(/ |\^/g,"-").toLowerCase()} collapsed"
+                            data-target=".${wrapperClass.replace(/ /g,".")}">
                          <h3 class="report-plot-section-heading-text">${type}: ${value}</h3></a>`)
-    wrapper = $(`<div class="plot-attribute-wrapper ${wrapper_class} collapse"></div>`);
+    wrapper = $(`<div class="plot-attribute-wrapper ${wrapperClass} collapse"></div>`);
     return [wrapper, collapse_button]
 }
 
@@ -119,9 +120,9 @@ function containerSelector(sortOrder, metricBlock){
      * in to.
      */
     firstType = sortOrder[0].toLowerCase();
-    firstValue = metricBlock.dataset[firstType].replace(/\s+/g, '-').toLowerCase();
+    firstValue = metricBlock.dataset[firstType].replace(/\s+|\^/g, '-').toLowerCase();
     secondType = sortOrder[1].toLowerCase();
-    secondValue = metricBlock.dataset[secondType].replace(/\s+/g, '-').toLowerCase();
+    secondValue = metricBlock.dataset[secondType].replace(/\s+|\^/g, '-').toLowerCase();
     return `.data-wrapper-${firstType}-${firstValue} .data-wrapper-${secondType}-${secondValue}`;
 }
 
