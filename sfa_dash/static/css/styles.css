@@ -410,6 +410,10 @@ th.selection-column{
 
 /* report stuff */
 
+#report-block h1, #report-block h2, #report-block h3{
+    margin-top: 2rem;
+    margin-bottom: .5rem;
+}
 #metric-plot-wrapper{
     border-bottom: 1px solid #dee2e6;
     padding-bottom: 1em;

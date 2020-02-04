@@ -224,11 +224,6 @@ class TrialsView(DataDashView):
     template = 'data/trials.html'
 
 
-class RepTest(MethodView):
-    def get(self):
-        return render_template('reptest.html')
-
-
 # Url Rule Registration
 # The url rules here are broken into sections based on their function.
 # For instance, all views that display a tabulated listing of metadata
@@ -318,4 +313,3 @@ data_dash_blp.add_url_rule(
 data_dash_blp.add_url_rule(
     '/aggregates/<uuid>/delete',
     view_func=DeleteAggregateView.as_view('delete_aggregate'))
-data_dash_blp.add_url_rule('/reptest/', view_func=RepTest.as_view('reptest'))
