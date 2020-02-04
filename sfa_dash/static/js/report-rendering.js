@@ -94,7 +94,6 @@ function createSubsetContainers(sortOrder, valueSet){
      *     </div>
      *   </div>
      */
-    console.log(valueSet);
     container = $('<div class="plot-container"></div>');
     valueSet[0].forEach(function (firstSetItem){
         [top_level, top_collapse] = createContainerDiv(null, sortOrder[0], firstSetItem);
@@ -154,8 +153,6 @@ function getSortedMetricBlocks(){
             return metrics;
         }
     });
-    console.log(`orderedSets: ${orderedSets}`);
-    console.log(`sortOrder: ${sortOrder}`);
 
 
     // Sort the metric blocks. Blocks should remain in order when they are
