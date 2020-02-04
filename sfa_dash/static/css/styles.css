@@ -410,6 +410,12 @@ th.selection-column{
 
 /* report stuff */
 
+#metric-plot-wrapper{
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1em;
+    margin-bottom: 1em;
+}
+
 #metrics-sort-list{
     list-style: none;
     padding-left: 0;
