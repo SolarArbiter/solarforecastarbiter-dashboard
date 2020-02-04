@@ -2,7 +2,6 @@ from collections import OrderedDict
 
 
 from flask import Blueprint, render_template, url_for, request
-from flask.views import MethodView
 
 
 from sfa_dash.api_interface import (observations, forecasts,
