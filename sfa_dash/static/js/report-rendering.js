@@ -61,6 +61,23 @@ function selectSortFn(type){
     }
 }
 
+function humanReadableLabel(type, label){
+    /* Converts the internal label for a metric or category to a human-friendly
+     * format.
+     *
+     * WARNING: This function requires that the global variables 'deterministic_metrics'
+     * and 'metric_categories' be supplied as json objects mapping internal
+     * labels to their human-friendly versions.
+     */
+    if (type == 'Metric'){
+        return deterministic_metrics[label];
+    } else if (type == 'Category'){
+        return metric_categories[label];
+    } else {
+        return label;
+    }
+}
+
 function createContainerDiv(parentValue, type, value){
     /* Creates a heading and div for the type and value. The heading acts as a
      * collapse button for each div. When parentValue is not null, parentValue
@@ -74,9 +91,11 @@ function createContainerDiv(parentValue, type, value){
      */
     parentValueClass = parentValue ? ' '+parentValue.replace(/ |\^/g, "-") : "";
     wrapperClass = `data-wrapper-${type.toLowerCase()}-${value.replace(/ |\^/g,"-").toLowerCase()}${parentValueClass}`
+
+    label = humanReadableLabel(type, value);
     collapse_button = $(`<a role="button" data-toggle="collapse" class="report-plot-section-heading collapse-${type.toLowerCase()}-${value.replace(/ |\^/g,"-").toLowerCase()} collapsed"
                             data-target=".${wrapperClass.replace(/ /g,".")}">
-                         <h3 class="report-plot-section-heading-text">${type}: ${value}</h3></a>`)
+                         <h3 class="report-plot-section-heading-text">${type}: ${label}</h3></a>`)
     wrapper = $(`<div class="plot-attribute-wrapper ${wrapperClass} collapse"></div>`);
     return [wrapper, collapse_button]
 }
@@ -97,11 +116,61 @@ function createSubsetContainers(sortOrder, valueSet){
     container = $('<div class="plot-container"></div>');
     valueSet[0].forEach(function (firstSetItem){
         [top_level, top_collapse] = createContainerDiv(null, sortOrder[0], firstSetItem);
-        valueSet[1].forEach(function (secondSetItem){
-            [second_level, second_collapse] = createContainerDiv(firstSetItem, sortOrder[1], secondSetItem)
+
+        if (
+            sortOrder[0] == 'Forecast' &&
+            sortOrder[1] == 'Category' &&
+            firstSetItem == 'all'
+        ){
+            // Restrict forecast > category nesting to only include the 'total'
+            // catgory for the special 'all' forecast
+            [second_level, second_collapse] = createContainerDiv(
+                firstSetItem,
+                sortOrder[1],
+                'total'
+            );
             top_level.append(second_collapse);
             top_level.append(second_level);
-        })
+        }else if(
+            sortOrder[0] == 'Category' &&
+            sortOrder[1] == 'Forecast' &&
+            firstSetItem == 'total'
+        ){
+            // Restrict category > forecast nesting to only include the 'all'
+            // forecast for the special 'total' category
+            [second_level, second_collapse] = createContainerDiv(
+                firstSetItem,
+                sortOrder[1],
+                'all'
+            );
+            top_level.append(second_collapse);
+            top_level.append(second_level);
+        }else{
+            // Create and append child containers for each of the second-level
+            // set of values.
+            valueSet[1].forEach(function (secondSetItem){
+                // if the forecast > category or category > forecast ordering
+                // is selected, don't add the 'total' or 'all second level
+                // containers.
+                if ((sortOrder[0] == 'Forecast' &&
+                     sortOrder[1] == 'Category' &&
+                     secondSetItem == 'total') ||
+                    (sortOrder[0] == 'Category' &&
+                     sortOrder[1] == 'Forecast' &&
+                     secondSetItem == 'all')
+
+                ){
+                    return;
+                }
+                [second_level, second_collapse] = createContainerDiv(
+                    firstSetItem,
+                    sortOrder[1],
+                    secondSetItem
+                );
+                top_level.append(second_collapse);
+                top_level.append(second_level);
+            })
+        }
         container.append(top_collapse);
         container.append(top_level);
     });

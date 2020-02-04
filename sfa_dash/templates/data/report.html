@@ -2,5 +2,9 @@
 {% block content %}
 {% include "sections/notifications.html" %}
 {% include "data/intermediate_report.html" %}
+<script>
+    var metric_categories = JSON.parse('{{ metric_categories | tojson }}');
+    var deterministic_metrics = JSON.parse('{{ deterministic_metrics | tojson }}');
+</script>
 <script src="/static/js/report-rendering.js"></script>
 {% endblock %}
