@@ -10,6 +10,22 @@
  * the layout of the page.
  */
 
+function hideEmptyMetricSections(){
+    /* Hide all empty sections after a search for forecast.
+     */
+    metricSections = $('.plot-attribute-wrapper');
+    metricSections.removeAttr('hidden');
+    metricSections.prev().removeAttr('hidden');
+    $('.plot-attribute-wrapper').each(function(){
+        // this specific attribute selector is to avoid the less-specific
+        // behavior of jquery's :hidden selector which will select any element
+        // that is not currently visible. including child of hidden elements.
+        if ($(this).find('.metric-block:not([hidden=hidden])').length == 0){
+            $(this).attr('hidden', true);
+            $(this).prev().attr('hidden', true)
+        }
+    });
+}
 function hideMetricsOnSearch(){
     /*
      * Hides metrics whose forecasts names do not match the search term.
@@ -29,6 +45,7 @@ function hideMetricsOnSearch(){
         noMatch = noMatch.add(headers);
     });
     noMatch.attr('hidden', true);
+    hideEmptyMetricSections();
 }
 function genericSort(a, b){
     if (a > b){
@@ -95,7 +112,7 @@ function createContainerDiv(parentValue, type, value){
     label = humanReadableLabel(type, value);
     collapse_button = $(`<a role="button" data-toggle="collapse" class="report-plot-section-heading collapse-${type.toLowerCase()}-${value.replace(/ |\^/g,"-").toLowerCase()} collapsed"
                             data-target=".${wrapperClass.replace(/ /g,".")}">
-                         <h3 class="report-plot-section-heading-text">${type}: ${label}</h3></a>`)
+                         <p class="h3 report-plot-section-heading-text">${type}: ${label}</p></a>`)
     wrapper = $(`<div class="plot-attribute-wrapper ${wrapperClass} collapse"></div>`);
     return [wrapper, collapse_button]
 }
@@ -267,6 +284,7 @@ function upButtonCallback(){
     // Move the current element's parent li before the next li in the list.
     $(this).parent().prev().before($(this).parent());
     applySorting();
+    hideMetricsOnSearch();
 }
 
 
@@ -274,6 +292,7 @@ function downButtonCallback(){
     // Move the current element's parent li after the next li in the list.
     $(this).parent().next().after($(this).parent());
     applySorting();
+    hideMetricsOnSearch();
 }
 
 
@@ -294,4 +313,5 @@ $(document).ready(function(){
     metricSortingWrapper.prepend($('<div><b>Use the arrows below to reorder the metrics plots.</b><div>'));
     $('#metric-plot-wrapper').before($(metricSortingWrapper));
     applySorting();
+    hideMetricsOnSearch();
 });
