@@ -6,6 +6,41 @@ in this file.
 Detailed changes to the Solar Forecast Arbiter Core python library can be found
 in the core documentation's [what's new](https://solarforecastarbiter-core.readthedocs.io/en/latest/whatsnew/index.html) series.
 
+## [1.0beta4] - Unreleased
+
+### Added
+
+- Support for quality flag filtering of report values. Currently allows removal
+  of *user flagged* and *nighttime* values.
+
+- Reports now contain a summary of data affected by the data resampling and
+  alignment process. The summary includes the number of data points removed by
+  each phase of validation.
+
+- Reports now contain a table of all included metrics over the entire selected
+  period.
+
+- Reports in the *pending* and *failed* state now display a message to the user
+  about their status. For failed reports, this is a list of errors encountered
+  while processing the report.
+
+- The dashboard report view now allows for searching metric plots by forecast
+  as well as sorting metric plots by metric, category and forecast.
+
+- The dashboard now allows for report metrics to be downloaded as a csv.
+
+
+### Changed
+
+- The API's report response's `raw_report` attribute has updated to reflect the
+  set of processed report data needed for rendering a final report. The
+  `raw_report` attribute was previously presented as a serialized version of
+  the final rendered report.
+
+- Major refactoring of the core library's Report object. See the core
+  [what's new](https://solarforecastarbiter-core.readthedocs.io/en/latest/whatsnew/1.0.0b4.html)
+  for details.
+
 ## [1.0beta3] - 2019-12-16
 
 ### Added
