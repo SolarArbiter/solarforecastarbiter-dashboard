@@ -2,7 +2,8 @@ from flask import (request, redirect, url_for, render_template, send_file,
                    current_app)
 from requests.exceptions import HTTPError
 
-from solarforecastarbiter.datamodel import Report
+from solarforecastarbiter.datamodel import Report, RawReport
+from solarforecastarbiter.io.utils import deserialize_timeseries
 from solarforecastarbiter.reports.template import (
     get_template_and_kwargs, render_html)
 
@@ -133,9 +134,61 @@ class ReportView(BaseView):
             total_data_points = total_data_points + fxobs_data_points
         return total_data_points < current_app.config['REPORT_DATA_LIMIT']
 
+    def get_raw_report_processed_data(self, report_id, raw_report, values):
+        """
+        Load the processed forecast/observation data into the
+        datamodel.ProcessedForecastObservation objects of the raw_report. Note
+        This code is largely a duplication of the solarforecastarbiter.io.api
+        APISession object's instance method of the same name.
+
+        Parameters
+        ----------
+        report_id : str
+            ID of the report that values will be loaded from
+        raw_report : solarforecastarbiter.datamodel.RawReport
+            The raw report with processed_forecasts_observations to
+            be replaced
+        values : list or None
+            The report values dict as returned by the API. If None, fetch
+            the values from the API for the given report_id
+        Returns
+        -------
+        tuple
+           Of solarforecastarbiter.datamodel.ProcessedForecastObservation with
+           values loaded into `forecast_values` and `observation_values`
+        """
+        val_dict = {v['id']: v['processed_values'] for v in values}
+        out = []
+        for fxobs in raw_report.processed_forecasts_observations:
+            fx_vals = val_dict.get(fxobs.forecast_values, None)
+            if fx_vals is not None:
+                fx_vals = deserialize_timeseries(fx_vals)
+            obs_vals = val_dict.get(fxobs.observation_values, None)
+            if obs_vals is not None:
+                obs_vals = deserialize_timeseries(obs_vals)
+            new_fxobs = fxobs.replace(forecast_values=fx_vals,
+                                      observation_values=obs_vals)
+            out.append(new_fxobs)
+        return tuple(out)
+
+    def build_report(self):
+        """Reorganizes report processed values into the propper place for
+        plotting and creates a `solarforecastarbiter.datamodel.Report` object.
+        """
+        raw_report = RawReport.from_dict(self.metadata['raw_report'])
+        pfxobs = self.get_raw_report_processed_data(
+            self.metadata['report_id'],
+            raw_report,
+            self.metadata['values']
+        )
+        report = Report.from_dict(self.metadata)
+        report = report.replace(raw_report=raw_report.replace(
+            processed_forecasts_observations=pfxobs))
+        return report
+
     def template_args(self):
         include_timeseries = self.should_include_timeseries()
-        report_object = Report.from_dict(self.metadata)
+        report_object = self.build_report()
         report_template, report_kwargs = get_template_and_kwargs(
             report_object,
             request.url_root.rstrip('/'),
