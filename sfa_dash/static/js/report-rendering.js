@@ -133,61 +133,15 @@ function createSubsetContainers(sortOrder, valueSet){
     container = $('<div class="plot-container"></div>');
     valueSet[0].forEach(function (firstSetItem){
         [top_level, top_collapse] = createContainerDiv(null, sortOrder[0], firstSetItem);
-
-        if (
-            sortOrder[0] == 'Forecast' &&
-            sortOrder[1] == 'Category' &&
-            firstSetItem == 'all'
-        ){
-            // Restrict forecast > category nesting to only include the 'total'
-            // catgory for the special 'all' forecast
+        valueSet[1].forEach(function (secondSetItem){
             [second_level, second_collapse] = createContainerDiv(
                 firstSetItem,
                 sortOrder[1],
-                'total'
+                secondSetItem
             );
             top_level.append(second_collapse);
             top_level.append(second_level);
-        }else if(
-            sortOrder[0] == 'Category' &&
-            sortOrder[1] == 'Forecast' &&
-            firstSetItem == 'total'
-        ){
-            // Restrict category > forecast nesting to only include the 'all'
-            // forecast for the special 'total' category
-            [second_level, second_collapse] = createContainerDiv(
-                firstSetItem,
-                sortOrder[1],
-                'all'
-            );
-            top_level.append(second_collapse);
-            top_level.append(second_level);
-        }else{
-            // Create and append child containers for each of the second-level
-            // set of values.
-            valueSet[1].forEach(function (secondSetItem){
-                // if the forecast > category or category > forecast ordering
-                // is selected, don't add the 'total' or 'all second level
-                // containers.
-                if ((sortOrder[0] == 'Forecast' &&
-                     sortOrder[1] == 'Category' &&
-                     secondSetItem == 'total') ||
-                    (sortOrder[0] == 'Category' &&
-                     sortOrder[1] == 'Forecast' &&
-                     secondSetItem == 'all')
-
-                ){
-                    return;
-                }
-                [second_level, second_collapse] = createContainerDiv(
-                    firstSetItem,
-                    sortOrder[1],
-                    secondSetItem
-                );
-                top_level.append(second_collapse);
-                top_level.append(second_level);
-            })
-        }
+        })
         container.append(top_collapse);
         container.append(top_level);
     });
