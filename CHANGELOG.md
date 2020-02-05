@@ -10,8 +10,8 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
 
 ### Added
 
-- Support for quality flag filtering of report values. Currently allows removal
-  of *user flagged* and *nighttime* values.
+- Report data may now be filtered by quality flag. Currently allows
+  filtering of *user flagged* and *nighttime* values.
 
 - Reports now contain a summary of data affected by the data resampling and
   alignment process. The summary includes the number of data points removed by
@@ -24,20 +24,19 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
   about their status. For failed reports, this is a list of errors encountered
   while processing the report.
 
-- The dashboard report view now allows for searching metric plots by forecast
-  as well as sorting metric plots by metric, category and forecast.
+- The dashboard report view now allows users to search metric plots by
+  forecast ant to sort metric plots by metric, category and forecast.
 
-- The dashboard now allows for report metrics to be downloaded as a csv.
-
+- Dashboard users can now download report metrics as a csv.
 
 ### Changed
 
-- The API's report response's `raw_report` attribute has updated to reflect the
+- The API's report response's `raw_report` attribute was updated to reflect the
   set of processed report data needed for rendering a final report. The
   `raw_report` attribute was previously presented as a serialized version of
   the final rendered report.
 
-- Major refactoring of the core library's Report object. See the core
+- The core library's Report received a major refactoring. See the core
   [what's new](https://solarforecastarbiter-core.readthedocs.io/en/latest/whatsnew/1.0.0b4.html)
   for details.
 
