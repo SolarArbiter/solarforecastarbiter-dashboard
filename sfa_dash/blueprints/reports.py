@@ -78,8 +78,8 @@ class ReportForm(BaseView):
         return pairs
 
     def parse_filters(self, form_data):
-        """Return an empty array until we know more about how we want
-        to configure these filters
+        """Create a list of dictionary filters. Currently just supports
+        `quality_flags` which supports a list of quality flag names to exclude.
         """
         filters = []
         quality_flags = request.form.getlist('quality_flags')
