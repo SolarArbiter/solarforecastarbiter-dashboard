@@ -62,7 +62,7 @@
      </div>
      <div class="form-element">
        <label>Quality Flag Filters</label><br>
-       <p>Checked quality flags are excluded from analysis. </p>
+       <p>Data flagged with any checked quality flags is excluded from analysis. </p>
        {% for flag in quality_flags.keys() %}
        <input type="checkbox" name="quality_flags" value="{{ flag }}" {% if form_data %}{% if flag in form_data['report_parameters']['filters']['quality_flags'] %}checked{% endif %}{%endif %}> {{ flag }}<br/>
        {% endfor %}
