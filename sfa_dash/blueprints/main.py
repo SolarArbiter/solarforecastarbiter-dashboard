@@ -15,8 +15,7 @@ from sfa_dash.blueprints.reports import (ReportsView, ReportView,
                                          DeleteReportView,
                                          DownloadReportView)
 from sfa_dash.blueprints.sites import SingleSiteView, SitesListingView
-from sfa_dash.blueprints.util import (handle_response, csv_file_response,
-                                      json_file_response)
+from sfa_dash.blueprints.util import (handle_response, download_timeseries)
 from sfa_dash.errors import DataRequestException
 from sfa_dash.filters import human_friendly_datatype
 
@@ -145,46 +144,10 @@ class SingleObjectView(DataDashView):
                 self.set_template_args(start=start, end=end, **kwargs)
         return render_template(self.template, **self.temp_args)
 
-    def post(self, uuid, **kwargs):
+    def post(self, uuid):
         """Data download endpoint.
-
-        Expects a `start` and `end` query parameter as well as posted form data
-        with the key `format` containing a Content-Type html header value.
-
-        The endpoint makes a request to the api, and returns a file of the
-        requested type.
         """
-        form_data = request.form
-        try:
-            headers, params = self.format_download_params(form_data)
-        except ValueError:
-            errors = {'start-end': ['Invalid datetime']}
-            return self.get(uuid, form_data=form_data, errors=errors)
-        else:
-            try:
-                data = handle_response(
-                    self.api_handle.get_values(
-                        uuid, headers=headers, params=params))
-            except DataRequestException as e:
-                return render_template(
-                    self.template, **self.template_args(uuid), errors=e.errors)
-            else:
-                try:
-                    metadata = handle_response(
-                        self.api_handle.get_metadata(uuid))
-                except DataRequestException:
-                    filename = 'data'
-                else:
-                    name = metadata['name'].replace(' ', '_')
-                    time_range = f"{params['start']}-{params['end']}"
-                    filename = f'{name}_{time_range}'
-                if form_data['format'] == 'application/json':
-                    response = json_file_response(filename, data)
-                elif form_data['format'] == 'text/csv':
-                    response = csv_file_response(filename, data)
-                else:
-                    raise ValueError('Invalid Format.')
-            return response
+        return download_timeseries(self, uuid)
 
 
 class SingleCDFForecastGroupView(SingleObjectView):

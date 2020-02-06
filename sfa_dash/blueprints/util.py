@@ -449,3 +449,48 @@ def csv_file_response(filename, values):
         'attachment',
         filename=f'{filename}.csv')
     return response
+
+
+def download_timeseries(view_class, uuid):
+    """Handle downloading timeseries data given a methodView instance with a
+    set `api_handle` attribute.
+
+    Expects a `start` and `end` query parameter as well as posted form data
+     with the key `format` containing a Content-Type html header value.
+
+    The endpoint makes a request to the api, and returns a file of the
+    requested type.
+    """
+    form_data = request.form
+    try:
+        headers, params = view_class.format_download_params(form_data)
+    except ValueError:
+        errors = {'start-end': ['Invalid datetime']}
+        return view_class.get(uuid, form_data=form_data, errors=errors)
+    else:
+        try:
+            data = handle_response(
+                view_class.api_handle.get_values(
+                    uuid, headers=headers, params=params))
+        except DataRequestException as e:
+            return render_template(
+                view_class.template,
+                **view_class.template_args(uuid),
+                errors=e.errors)
+        else:
+            try:
+                metadata = handle_response(
+                    view_class.api_handle.get_metadata(uuid))
+            except DataRequestException:
+                filename = 'data'
+            else:
+                name = metadata['name'].replace(' ', '_')
+                time_range = f"{params['start']}-{params['end']}"
+                filename = f'{name}_{time_range}'
+            if form_data['format'] == 'application/json':
+                response = json_file_response(filename, data)
+            elif form_data['format'] == 'text/csv':
+                response = csv_file_response(filename, data)
+            else:
+                response = make_response("Invalid media type.", 415)
+        return response

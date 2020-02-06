@@ -8,7 +8,7 @@ from sfa_dash.api_interface import observations, sites, aggregates
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.util import (filter_form_fields, handle_response,
                                       parse_timedelta, flatten_dict,
-                                      json_file_response, csv_file_response)
+                                      download_timeseries)
 from sfa_dash.errors import DataRequestException
 
 
@@ -343,36 +343,7 @@ class AggregateView(BaseView):
     def post(self, uuid):
         """Download endpoint.
         """
-        form_data = request.form
-        try:
-            headers, params = self.format_download_params(form_data)
-        except ValueError:
-            errors = {'start-end': ['Invalid datetime']}
-            return self.get(uuid, form_data=form_data, errors=errors)
-        else:
-            try:
-                data = handle_response(
-                    self.api_handle.get_values(
-                        uuid, headers=headers, params=params))
-            except DataRequestException as e:
-                return self.get(uuid, errors=e.errors)
-            else:
-                try:
-                    metadata = handle_response(
-                        self.api_handle.get_metadata(uuid))
-                except DataRequestException:
-                    filename = 'data'
-                else:
-                    name = metadata['name'].replace(' ', '_')
-                    time_range = f"{params['start']}-{params['end']}"
-                    filename = f'{name}_{time_range}'
-                if form_data['format'] == 'application/json':
-                    response = json_file_response(filename, data)
-                elif form_data['format'] == 'text/csv':
-                    response = csv_file_response(filename, data)
-                else:
-                    raise ValueError('Invalid Format.')
-            return response
+        return download_timeseries(self, uuid)
 
 
 class DeleteAggregateView(BaseView):
