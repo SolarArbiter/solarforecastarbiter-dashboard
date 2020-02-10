@@ -25,7 +25,7 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
   while processing the report.
 
 - The dashboard report view now allows users to search metric plots by
-  forecast ant to sort metric plots by metric, category and forecast.
+  forecast and to sort metric plots by metric, category and forecast.
 
 - Dashboard users can now download report metrics as a csv.
 
