@@ -28,7 +28,7 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
   forecast and to sort metric plots by metric, category and forecast.
 
 - Dashboard users can now download report metrics as a csv.
-
+- Daily updating precomputed reports for select reference data.
 ### Changed
 
 - The API's report response's `raw_report` attribute was updated to reflect the
