@@ -19,7 +19,7 @@ in the core documentation's [what's new](https://solarforecastarbiter-core.readt
 - Reports now contain a table of all included metrics over the entire selected
   period.
 
-- Reports may be configured to filtered data by quality flag. Currently allows
+- Reports may be configured to filter data by quality flag. Currently allows
   filtering of *user flagged* and *nighttime* values.
 
 - The dashboard report view now allows users to search metric plots by
