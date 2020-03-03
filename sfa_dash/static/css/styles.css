@@ -521,3 +521,7 @@ th.selection-column{
 #report-block #observations-and-forecasts + p + table td:last-child{
     border-right: none;
 }
+
+.datetime-td{
+    word-break: break-word;
+}
