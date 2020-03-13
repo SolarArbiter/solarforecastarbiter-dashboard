@@ -120,7 +120,12 @@ function createContainerDiv(parentValue, type, value){
     wrapper = $(`<div class="plot-attribute-wrapper ${wrapperClass} collapse"></div>`);
 
     // register callback to load plots when expanded
-    wrapper.on("shown.bs.collapse", loadVisiblePlots);
+    wrapper.on("show.bs.collapse", function(){
+        $(this).addClass('loading-plots');
+    }).on("shown.bs.collapse", function(){
+        loadVisiblePlots();
+        $(this).removeClass('loading-plots');
+    });
     return [wrapper, collapse_button]
 }
 
@@ -255,6 +260,11 @@ function downButtonCallback(){
 }
 
 
+async function renderPlotly(div, plotSpec){
+    Plotly.newPlot(div, plotSpec);
+}
+
+
 function loadVisiblePlots(){
     console.log('loading visible plots');
     for(var key in metric_plots){
@@ -266,7 +276,7 @@ function loadVisiblePlots(){
             
             if(!isHidden && !plotExists && parentVisible){
                 console.log("Rendering ", key);
-                Plotly.newPlot(key, metric_plots[key]);
+                renderPlotly(plotDiv[0], metric_plots[key]);
             }
         }
     }
