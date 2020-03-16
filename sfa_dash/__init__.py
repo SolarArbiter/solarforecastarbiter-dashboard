@@ -14,6 +14,7 @@ from sentry_sdk.integrations.flask import FlaskIntegration  # NOQA
 
 from sfa_dash.blueprints.auth0 import (make_auth0_blueprint,  # NOQA
                                        oauth_request_session)  # NOQA
+from sfa_dash.api_interface import users
 from sfa_dash.database import db, session_storage  # NOQA
 from sfa_dash.filters import register_jinja_filters  # NOQA
 from sfa_dash.template_globals import template_variables  # NOQA
@@ -77,6 +78,9 @@ def create_app(config=None):
         # Injects variables into all rendered templates
         global_template_args = {}
         global_template_args['current_user'] = session.get('userinfo')
+        if 'uuid' in request.view_args:
+            uuid = request.view_args.get('uuid')
+            global_template_args['allowed_actions'] = users.actions_on(uuid)
         global_template_args.update(template_variables())
         return global_template_args
 
