@@ -266,7 +266,6 @@ async function renderPlotly(div, plotSpec){
 
 
 function loadVisiblePlots(){
-    console.log('loading visible plots');
     for(var key in metric_plots){
         if(metric_plots.hasOwnProperty(key)){
             var plotDiv = $(`#${key}`);
@@ -275,7 +274,6 @@ function loadVisiblePlots(){
             var plotExists = plotDiv.hasClass('js-plotly-plot');
             
             if(!isHidden && !plotExists && parentVisible){
-                console.log("Rendering ", key);
                 renderPlotly(plotDiv[0], metric_plots[key]);
             }
         }
