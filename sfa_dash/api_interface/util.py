@@ -39,7 +39,7 @@ def handle_response(request_object):
             errors = request_object.json()
         elif request_object.status_code == 401:
             errors = {
-                '401': "You do not have permission to create this resource."
+                '401': "Unauthorized."
             }
         elif request_object.status_code == 404:
             previous_page = request.headers.get('Referer', None)
