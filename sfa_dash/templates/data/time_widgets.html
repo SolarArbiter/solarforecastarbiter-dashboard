@@ -1,4 +1,6 @@
 {% import "forms/form_macros.jinja" as form %}
+
+{% if is_allowed('read_values') %}
 {# Time widgets are used for either setting the bounds of the plot or download #}
 <div class="form-group mt-3">
 <div class="form-element">
@@ -15,13 +17,11 @@
 <div class="form-element full-width">
   <button type="submit" form="plot-range-adjust" value="Submit" class="btn btn-primary">Update graph</button>
   <form action="" method="post" id="download-form" onsubmit="ParseStartEnd()">
-  {% if is_allowed('read_values') %}
   <button type="submit" form="download-form" value="Submit" class="btn btn-primary">Download data</button>
   <label for="format">Format: </label>
   <input type="radio" name="format" value="text/csv" checked>CSV</input>
   <input type="radio" name="format" value="application/json">JSON</input>
   &lpar;<a href="https://solarforecastarbiter.org/datamodel/#downloads" target="_blank">format examples</a>&rpar;
-  {% endif %}
   <input type="text" class="start" name="start" hidden>
   <input type="text" class="end" name="end" hidden>
   {{ form.token() }}
@@ -32,3 +32,4 @@
 <input type="text" class="start" name="start" hidden>
 <input type="text" class="end" name="end" hidden>
 <script src="/static/js/plot-bound-parsing.js"></script>
+{% endif %}
