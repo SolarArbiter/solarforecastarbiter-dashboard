@@ -12,7 +12,11 @@ $(document).ready(function() {
         if(nulls_exist){
             // hide skill, insert warning
             skill.attr('disabled', true);
-            $('<span id="reference-warning" class="warning-message"> (Requires reference forecast selection)</span>').insertAfter(skill.next());
+            if($('#reference-warning').length == 0){
+                $(`<span id="reference-warning" class="warning-message">
+                   (Requires reference forecast selection)</span>`
+                 ).insertAfter(skill.next());
+            }
             if(skill.is(':checked')){
                 skill.removeAttr('checked');
             }

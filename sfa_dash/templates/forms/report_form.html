@@ -5,7 +5,7 @@
 {{ metadata | safe }}
 {% include "sections/notifications.html" %}
 <h3>Create New Report</h3>
-<form action="{{ url_for('forms.create_report') }}" method="post" id="report-form" onSubmit="return validateReport();">
+<form action="{{ url_for('forms.create_report') }}" method="post" id="report-form" onSubmit="validateReport();">
   <div class="form-group">
       {% if form_data is not defined %} {% set form_data = {} %}{% endif %}
      <div class="form-element full-width">

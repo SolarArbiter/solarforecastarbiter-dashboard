@@ -179,6 +179,7 @@ div.object-pair {
   position: relative;
   border: 1px solid #333;
   border-radius: 5px;
+  margin-bottom: .5em;
 }
 div.object-pair-label{
     font-size: 16px;
