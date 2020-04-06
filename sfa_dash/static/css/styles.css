@@ -558,3 +558,7 @@ th.selection-column{
 #form-errors .alert{
     list-style: none;
 }
+.warning-message{
+    font-weight: bold;
+    color: #A11;
+}
