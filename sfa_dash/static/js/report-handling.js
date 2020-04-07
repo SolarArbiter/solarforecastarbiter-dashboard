@@ -324,6 +324,7 @@ $(document).ready(function() {
                 $('#aggregate-select').val('');
                 $("#add-obs-object-pair").removeAttr('hidden');
                 $("#add-agg-object-pair").attr('hidden', true);
+                $('.deadband-select-wrapper').removeAttr('hidden');
                 filterForecasts();
             } else {
                 // hide sites & observations
@@ -334,6 +335,7 @@ $(document).ready(function() {
                 $('#site-select').val('');
                 $("#add-agg-object-pair").removeAttr('hidden');
                 $("#add-obs-object-pair").attr('hidden', true);
+                $('.deadband-select-wrapper').attr('hidden', true);
 
                 filterForecasts();
             }
@@ -703,12 +705,12 @@ $(document).ready(function() {
                     ref_text = selected_reference_forecast.text;
                     ref_id = selected_reference_forecast.value;
                 }
-                // try to parse deadband values
-                try{
-                    deadband_values = parseDeadband();
-                }catch(error){
-                    return;
-                }
+                // try to parse deadband values TODO
+                // try{
+                //     deadband_values = parseDeadband();
+                // }catch(error){
+                //     return;
+                // }
                 pair = addPair('aggregate',
                                selected_aggregate.text,
                                selected_aggregate.value,
@@ -716,8 +718,8 @@ $(document).ready(function() {
                                selected_forecast.value,
                                ref_text,
                                ref_id,
-                               deadband_values[0],
-                               deadband_values[1],
+                               "Unset",
+                               null,
                 );
                 pair_container.append(pair);
                 pair_index++;
