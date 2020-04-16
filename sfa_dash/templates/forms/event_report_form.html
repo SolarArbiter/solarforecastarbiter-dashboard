@@ -1,12 +1,13 @@
 {% import "forms/form_macros.jinja" as form %}
 {% extends "dash/data.html" %}
 {% block content %}
-<script src="/static/js/report-handling.js"></script>
+<script src="/static/js/event-report-handling.js"></script>
 {{ metadata | safe }}
 {% include "sections/notifications.html" %}
 <h3>Create New Report</h3>
 {% include "forms/report_menu.html" %}
-<form action="{{ url_for('forms.create_report') }}" method="post" id="report-form" onSubmit="validateReport();">
+<p>This is the event report mockup page.</p>
+<form action="{{ url_for('forms.create_report') }}" method="post" id="report-form">
   <div class="form-group">
       {% if form_data is not defined %} {% set form_data = {} %}{% endif %}
      <div class="form-element full-width">
@@ -38,6 +39,7 @@
 
      <h5>Observation, Forecast pairs</h5>
 	 <div class="form-element full-width border" style="border-radius:10px;margin:.5em 1em;">
+       <div class="form-element">Forecasts</div><div class="form-element">Observations/Aggregates</div>
        <div class="object-pair-list">
          <div class="empty-reports-list alert alert-warning">No Pairs Selected</div>
        </div>
@@ -47,9 +49,11 @@
      
      <div class="form-element">
      <label>Metrics</label><br>
-       {% for metric, label in deterministic_metrics.items() %}
+       {% for metric, label in event_metrics.items() %}
+       {% if metric != 's' %}
        <input type="checkbox" name="metrics" value="{{ metric }}" {% if form_data %}{% if metric in form_data['report_parameters']['metrics'] %}checked{% endif %}{% elif metric in default_metrics  %}checked{% endif %}>
        <a href="https://solarforecastarbiter.org/metrics/#{{ metric |replace('^', '') }}" target="_blank"> {{ label }}</a><br/>
+       {% endif %}
        {% endfor %}
      </div>
      <div class="form-element">
@@ -68,7 +72,5 @@
     {{ form.token() }}
   </div>
 </form>
-<ul id="form-errors">
-</ul>
-<button type="submit" form="report-form" value="Submit" class="btn btn-primary" >Submit</button>
+<button type="submit" form="report-form" value="Submit" class="btn btn-primary">Submit</button>
 {% endblock %}

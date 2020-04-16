@@ -3,12 +3,16 @@
 # the template_variables function.
 
 import pytz
-from flask import g
+from flask import g, request
 
 import sfa_dash
 from sfa_dash import filters
 from solarforecastarbiter.datamodel import (
-    ALLOWED_CATEGORIES, ALLOWED_DETERMINISTIC_METRICS)
+    ALLOWED_CATEGORIES,
+    ALLOWED_DETERMINISTIC_METRICS,
+    ALLOWED_EVENT_METRICS,
+    ALLOWED_PROBABILISTIC_METRICS,
+)
 
 
 TIMEZONES = pytz.country_timezones('US') + list(
@@ -58,7 +62,10 @@ def template_variables():
         'timezone_options': TIMEZONE_OPTIONS,
         'metric_categories': ALLOWED_CATEGORIES,
         'deterministic_metrics': ALLOWED_DETERMINISTIC_METRICS,
-        'default_metrics': DEFAULT_METRICS,
+        'default_deterministic_metrics': DEFAULT_METRICS,
+        'event_metrics': ALLOWED_EVENT_METRICS,
+        'probabilistic_metrics': ALLOWED_PROBABILISTIC_METRICS,
         'quality_flags': ALLOWED_QUALITY_FLAGS,
-        'is_allowed': is_allowed
+        'is_allowed': is_allowed,
+        'current_path': request.path,
     }
