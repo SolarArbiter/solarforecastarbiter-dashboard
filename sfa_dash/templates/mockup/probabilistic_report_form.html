@@ -36,8 +36,10 @@
      </div>
      {# The following empty list is a target for the javascript found in report-handling.js
         list items are added dynamically on page load #}
-
-     <h5>Observation, Forecast pairs</h5>
+     <h5>Observation, Probabilistic Forecast Pairs</h5>
+     <p>For each Observation, Probabilistic forecast pair selected
+        <a href="https://solarforecastarbiter.org/metrics/#crps">CRPS</a> will
+        be calculated.</p>
 	 <div class="form-element full-width border" style="border-radius:10px;margin:.5em 1em;">
        <div class="form-element">Forecasts</div><div class="form-element">Observations/Aggregates</div>
        <div class="object-pair-list">
@@ -46,10 +48,12 @@
        <div class="object-pair-control">
        </div>
 	 </div>
-     
-     <h5>Observation, Forecast pairs</h5>
+     <br>    
+     <h5>Observation, Probabilistic Constant Value pairs</h5>
+     <p>For each Observation, Probabilistic Constant Value pair, the metrics
+        selected below will be computed.</p>
 	 <div class="form-element full-width border" style="border-radius:10px;margin:.5em 1em;">
-       <div class="form-element">Forecasts</div><div class="form-element">Observations/Aggregates</div>
+       <div class="form-element">Constant Values</div><div class="form-element">Observations/Aggregates</div>
        <div class="object-pair-list">
          <div class="empty-reports-list alert alert-warning">No Pairs Selected</div>
        </div>
@@ -60,7 +64,7 @@
      <div class="form-element">
      <label>Metrics</label><br>
        {% for metric, label in probabilistic_metrics.items() %}
-       {% if metric != 's' %}
+       {% if metric != 'crps' %}
        <input type="checkbox" name="metrics" value="{{ metric }}" {% if form_data %}{% if metric in form_data['report_parameters']['metrics'] %}checked{% endif %}{% elif metric in default_metrics  %}checked{% endif %}>
        <a href="https://solarforecastarbiter.org/metrics/#{{ metric |replace('^', '') }}" target="_blank"> {{ label }}</a><br/>
        {% endif %}
