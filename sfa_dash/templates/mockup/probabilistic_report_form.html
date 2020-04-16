@@ -47,9 +47,19 @@
        </div>
 	 </div>
      
+     <h5>Observation, Forecast pairs</h5>
+	 <div class="form-element full-width border" style="border-radius:10px;margin:.5em 1em;">
+       <div class="form-element">Forecasts</div><div class="form-element">Observations/Aggregates</div>
+       <div class="object-pair-list">
+         <div class="empty-reports-list alert alert-warning">No Pairs Selected</div>
+       </div>
+       <div class="object-pair-control">
+       </div>
+	 </div>
+
      <div class="form-element">
      <label>Metrics</label><br>
-       {% for metric, label in deterministic_metrics.items() %}
+       {% for metric, label in probabilistic_metrics.items() %}
        {% if metric != 's' %}
        <input type="checkbox" name="metrics" value="{{ metric }}" {% if form_data %}{% if metric in form_data['report_parameters']['metrics'] %}checked{% endif %}{% elif metric in default_metrics  %}checked{% endif %}>
        <a href="https://solarforecastarbiter.org/metrics/#{{ metric |replace('^', '') }}" target="_blank"> {{ label }}</a><br/>
