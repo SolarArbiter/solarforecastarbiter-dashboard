@@ -35,6 +35,8 @@ class ReportForm(BaseView):
     def set_template(self):
         if self.report_type == 'event':
             self.template = 'forms/event_report_form.html'
+        elif self.report_type == 'probabilistic':
+            self.template = 'mockup/probabilistic_report_form.html'
         else:
             self.template = 'forms/report_form.html'
 
