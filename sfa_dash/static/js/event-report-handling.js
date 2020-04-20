@@ -83,6 +83,7 @@ $(document).ready(function() {
                     <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truthType}"/>
                     <div class="object-pair-label deadband-label"><b>Uncertainty: </b> ${db_label}</div>
                     <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="${db_value}"/>
+                    <input type="hidden" class="form-control reference-forecast-value" name="reference-forecast-${pair_index}" required value="null"/>
                   </div>
                  </div>
                  <a role="button" class="object-pair-delete-button">remove</a>
