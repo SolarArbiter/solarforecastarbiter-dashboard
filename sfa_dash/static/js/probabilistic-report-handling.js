@@ -2,7 +2,7 @@
  *  Creates inputs for defining observation, forecast pairs for a report.
  */
 
-var previous_constant = null;
+var previous_constants = [];
 $(document).ready(function() {
     function toggle_reference_dependent_metrics(){
         /*
@@ -10,7 +10,7 @@ $(document).ready(function() {
          * object pairs have reference foreasts.
          */
         var nulls_exist = $('.reference-forecast-value').map(function(){return $(this).val()}).get().some(x=>x=='null');
-        var skill = $('[name=metrics][value=s]'); 
+        var skill = $('[name=metrics][value=s]');
         if(nulls_exist){
             // hide skill, insert warning
             skill.attr('disabled', true);
@@ -47,9 +47,9 @@ $(document).ready(function() {
         }
         return metadata;
     }
-    
+
     var current_units = null;
-    
+
     function unset_units(){
         /* Set units to null when the last pair is removed */
         current_units = null;
@@ -137,7 +137,6 @@ $(document).ready(function() {
         return $(selectSelector + " option").slice(offset).not(":containsi('" + searchSplit + "')");
     }
 
-    
 
     function pairWrapper(truthType, truthId, truthName, fxId, fxName,
                          ref_fxName, db_label, db_value, distribution_id){
@@ -315,7 +314,7 @@ $(document).ready(function() {
             };
             ref_fx = page_data['forecasts'].filter(cv_filter);
         }
-        
+
         if (ref_fx.length != 0){
             reference_selector = $('#reference-forecast-select');
             ref_fx.forEach(function(fx){
@@ -338,6 +337,17 @@ $(document).ready(function() {
             $('#no-reference-forecast-forecast-selection').attr('hidden', true);
         }
     }
+    function determine_forecast_units(forecast){
+        /*
+         * Determine the proper units for the cdf forecast's associated data.
+         */
+        var units = '%';
+        if (forecast['axis'] == 'y'){
+            units = variable_unit_map[forecast['variable']];
+        }
+        return units
+    }
+
 
     function populateConstantValues(){
         var selected_forecast_id = $('#distribution-select').val();
@@ -358,10 +368,10 @@ $(document).ready(function() {
             constant_values = forecast['constant_values'];
             constant_values.forEach(function(constant_value){
                 let option = $('<option></option')
-                    .attr('value', constant_value['forecast_id'])
+                    .attr('value', forecast['forecast_id'])
                     .attr('data-measurement', constant_value['constant_value'])
-                    .html(cv_label(constant_value['constant_value']));
-                if (previous_constant == constant_value['constant_value'].toString()){
+                    .html(`${constant_value['constant_value']} ${units}`);
+                if (previous_constants.includes(constant_value['constant_value'].toString())){
                     option.attr('selected', 'selected');
                 }
                 $('#full-cdf-group').removeAttr('hidden');
@@ -370,10 +380,8 @@ $(document).ready(function() {
             });
 
         } else {
-            let selected = constant_value_select.find(':selected')[0];
-            if (selected){
-                previous_constant = selected.dataset['measurement'];
-            }
+            let selected = constant_value_select.find(':selected');
+            previous_constants = selected.toArray().map(o=>o.dataset['measurement']);
             non_static_constants.remove();
             $("#no-constant-value-distribution-selection").removeAttr('hidden');
             $('#full-cdf-group').attr('hidden', 'hidden');
@@ -585,6 +593,7 @@ $(document).ready(function() {
             } else {
                 $('#no-distributions').attr('hidden', true);
             }
+            filterReferenceForecasts(variable);
             if (compareTo == 'observation'){
                 filterObservations();
             } else {
@@ -593,6 +602,71 @@ $(document).ready(function() {
         }
         
         
+
+        function filterReferenceForecasts(variable){
+            /* Filter the list of reference forecasts based on the current
+             * forecast.
+             */
+            forecast = forecast_select.find(':selected').first();
+            reference_forecasts = $('#reference-forecast-select option').slice(2);
+            reference_forecasts.removeAttr('hidden');
+            if (forecast[0]){
+                if(forecast.data.hasOwnProperty('siteId')){
+                    site_id = forecast.data().siteId;
+                }else{
+                    aggregate_id = forecast.data().aggregateId;
+                }
+                variable = forecast.data().variable;
+                interval_length = forecast.data().intervalLength;
+
+                // hide the "please select forecast" prompt"
+                $('#no-reference-forecast-forecast-selection').attr('hidden', true);
+                toHide = searchSelect('#reference-forecast-option-search',
+                                  '#reference-forecast-select', 2);
+                if (variable){
+                toHide = toHide.add(reference_forecasts.not(
+                    `[data-variable=${variable}]`));
+                }
+
+                // Determine if we need to filter by site or aggregate
+                if (site_id){
+                    // create a set of elements to hide from selected site, variable and search
+                    toHide = toHide.add(reference_forecasts.not(
+                        `[data-site-id=${site_id}]`));
+                } else {
+                    toHide = toHide.add(
+                        reference_forecasts.not(
+                            `[data-aggregate-id=${aggregate_id}]`));
+                }
+
+                // Filter out reference forecasts that don't have the same
+                // interval length
+                things = reference_forecasts.filter(function(){
+                    return $(this).data().intervalLength != interval_length ||
+                        $(this).attr('value') == forecast_select.val();
+                });
+                toHide = toHide.add(things);
+            }else{
+                toHide = reference_forecasts;
+                $('#no-reference-forecast-forecast-selection').removeAttr('hidden');
+            }
+            
+            // if current forecast selection is invalid, deselect
+            if (toHide.filter(':selected').length){
+                ref_forecast_select.val('');
+            }
+            toHide.attr('hidden', 'true');
+
+            // if all options are hidden, show "no matching forecasts"
+            if (toHide.length == reference_forecasts.length){
+                ref_forecast_select.val('');
+                if ($('#no-reference-forecast-forecast-selection').attr('hidden') || compareTo == 'aggregate'){
+                    $('#no-reference-forecasts').removeAttr('hidden');
+                }
+            } else {
+                $('#no-reference-forecasts').attr('hidden', true);
+            }
+        }
 
         function filterAggregates(){
             /*
@@ -698,19 +772,19 @@ $(document).ready(function() {
           `<div><b>Compare Forecast to&colon;</b>
              <input type="radio" name="observation-aggregate-radio" value="observation" checked> Observation
              <input type="radio" name="observation-aggregate-radio" value="aggregate">Aggregate<br/></div>`);
-        
+
         // Create two buttons that act on the set of observation or aggregate
         // fields independently, these should be shown/hidden when the obs
         var addObsButton = $('<a role="button" class="btn btn-primary" id="add-obs-object-pair" style="padding-left: 1em">Add a Forecast, Observation pair</a>');
-        
+
         var addAggButton = $('<a role="button" class="btn btn-primary" id="add-agg-object-pair" style="padding-left: 1em">Add a Forecast, Aggregate pair</a>');
-        
+
 
         /**********************************************************************
          *
          * Create a container for the html inputs, widgetContainer, and append
          * all of the inputs needed.
-         * 
+         *
          *********************************************************************/
         var widgetContainer = $('<div class="pair-selector-wrapper collapse"></div>');
         widgetContainer.append(obsAggRadio);
@@ -737,7 +811,7 @@ $(document).ready(function() {
 
 
         /**********************************************************************
-         * 
+         *
          * Register call backs for searching and filtering on user input. These
          * correspond with the "Search by <field>" input, and the variable
          * selector.
@@ -763,7 +837,7 @@ $(document).ready(function() {
         var aggregate_select = aggregateSelector.find('#aggregate-select');
 
         var radio_inputs = obsAggRadio.find('input[type=radio]');
-        
+
         /**********************************************************************
          *
          * Register onchange callbacks for the pair selection widgets.
@@ -774,7 +848,8 @@ $(document).ready(function() {
         variable_select.change(filterForecasts);
         forecast_select.change(applyFxDependentFilters);
         forecast_select.change(applyFxDependentFilters);
-        // TODO: puplate reference on cv select forecast_select.change(filterReferenceForecasts);
+        forecast_select.change(filterReferenceForecasts);
+
         forecast_select.change(populateConstantValues);
         constant_value_select.change(populateReferenceForecasts);
 
@@ -812,7 +887,17 @@ $(document).ready(function() {
                     .attr('data-interval-length', this.interval_length)
                     .attr('data-variable', this.variable));
         });
-            
+        $.each(nonevent_forecasts, function(){
+            ref_forecast_select.append($('<option></option>')
+                    .html(this.name)
+                    .val(this.forecast_id)
+                    .attr('hidden', true)
+                    .attr('data-site-id', this.site_id)
+                    .attr('data-aggregate-id', this.aggregate_id)
+                    .attr('data-interval-length', this.interval_length)
+                    .attr('data-variable', this.variable));
+        });
+
         $.each(page_data['aggregates'], function(){
             aggregate_select.append(
                 $('<option></option>')
@@ -823,7 +908,7 @@ $(document).ready(function() {
                     .attr('data-interval-length', this.interval_length)
                     .attr('data-variable', this.variable));
         });
-        
+
         addObsButton.click(function(){
             /*
              * 'Add a Forecast, Observation pair button on button click
@@ -885,7 +970,7 @@ $(document).ready(function() {
                         forecast_type,
                     )
                 });
-                
+
                 var variable = selected_forecast.dataset.variable;
                 set_units(variable);
                 $(".empty-reports-list").attr('hidden', 'hidden');
@@ -1018,6 +1103,7 @@ function validateReport(){
         insertErrorMessage(
             "Analysis Pairs",
             "Must specify at least one Observation, Forecast pair.");
+        errors++;
     }
     if (errors){
        return false;
