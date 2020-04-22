@@ -80,8 +80,7 @@ $(document).ready(function() {
                     <div class="object-pair-label truth-name-${pair_index}"><b>Observation: </b> ${truthName}</div>
                     <input type="hidden" class="form-control truth-value" name="truth-id-${pair_index}" required value="${truthId}"/>
                     <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truthType}"/>
-                    <div class="object-pair-label deadband-label"><b>Uncertainty: </b> ${db_label}</div>
-                    <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="${db_value}"/>
+                    <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="null"/>
                     <input type="hidden" class="form-control reference-forecast-value" name="reference-forecast-${pair_index}" required value="null"/>
                   </div>
                  </div>
@@ -116,51 +115,6 @@ $(document).ready(function() {
                     </select>
                     </div>
                   </div>`);
-    }
-
-
-    function deadbandSelector(){
-        /*
-         * Create a radio button and text input for selecting an uncertainty
-         * deadband
-         */
-        var deadbandSelect= $(
-            `<div><b>Uncertainty:</b><br>
-             <input type="radio" name="deadband-select" value="null" checked> Ignore Uncertainty.<br>
-             <input type="radio" name="deadband-select" value="observation_uncertainty"> Set deadband to observation uncertainty.<br>
-             <input type="radio" name="deadband-select" value="user_supplied"> Set deadband to:
-             <input type="number" step="any" min=0.0 max=100.0 name="deadband-value"> &percnt;<br></div>`);
-        // deadbandSelect.find('[name="deadband-value"]')[0].setCustomValidity(
-        //     "Must be a value from 0.0 to 100.0");
-        var db_wrapper = $('<div class="form-element full-width deadband-select-wrapper"></div>')
-        db_wrapper.append(deadbandSelect);
-        return db_wrapper;
-    }
-
-
-    function parseDeadband(){
-        /*
-         * Parses the deadband widgets into a readable display value, and a
-         * valid string value.
-         */
-        var source = $('[name="deadband-select"]:checked').val();
-        if(source == "user_supplied"){
-            var val = $('[name="deadband-value"]').val();
-            if(!$('[name="deadband-value"]')[0].reportValidity()){
-                throw 'Deadband out of range';
-            }
-            return [val, val];
-
-        }else if(source == "null"){
-            return ["Ignore uncertainty.", "null"]
-        }else if(source == "observation_uncertainty"){
-            var obs_id = $('#observation-select').val();
-            var obs = searchObjects("observations", obs_id);
-            if(obs){
-                obs_uncertainty = obs['uncertainty'].toString();
-                return [obs_uncertainty, obs_uncertainty];
-            }
-        }
     }
 
 
@@ -274,7 +228,6 @@ $(document).ready(function() {
         var siteSelector = newSelector("site");
         var obsSelector = newSelector("observation", "forecast");
         var fxSelector = newSelector("forecast", "site");
-        var dbSelector = deadbandSelector();
 
         // Buttons for adding an obs/fx pair for observations
         var addObsButton = $('<a role="button" class="btn btn-primary" id="add-obs-object-pair" style="padding-left: 1em">Add a Forecast, Observation pair</a>');
@@ -287,7 +240,6 @@ $(document).ready(function() {
         widgetContainer.append(siteSelector);
         widgetContainer.append(fxSelector);
         widgetContainer.append(obsSelector);
-        widgetContainer.append(dbSelector);
         widgetContainer.append(addObsButton);
 
 
@@ -345,19 +297,11 @@ $(document).ready(function() {
                 // If both inputs contain valid data, create a pair and add it to the DOM
                 var selected_observation = observation_select.find('option:selected')[0];
                 var selected_forecast = forecast_select.find('option:selected')[0];
-                // try to parse deadband values
-                try{
-                    deadband_values = parseDeadband();
-                }catch(error){
-                    return;
-                }
                 pair = addPair('observation',
                                selected_observation.text,
                                selected_observation.value,
                                selected_forecast.text,
                                selected_forecast.value,
-                               deadband_values[0],
-                               deadband_values[1],
                 );
                 pair_container.append(pair);
                 pair_index++;
