@@ -49,7 +49,7 @@
      <label>Metrics</label><br>
        {% for metric, label in event_metrics.items() %}
        {% if metric != 's' %}
-       <input type="checkbox" name="metrics" value="{{ metric }}" {% if form_data %}{% if metric in form_data['report_parameters']['metrics'] %}checked{% endif %}{% elif metric in default_metrics  %}checked{% endif %}>
+       <input type="checkbox" name="metrics" value="{{ metric }}" {% if form_data %}{% if metric in form_data['report_parameters']['metrics'] %}checked{% else %}{% endif %}{% else %}checked{% endif %}>
        <a href="https://solarforecastarbiter.org/metrics/#{{ metric |replace('^', '') }}" target="_blank"> {{ label }}</a><br/>
        {% endif %}
        {% endfor %}
