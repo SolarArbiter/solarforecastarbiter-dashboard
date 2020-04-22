@@ -7,7 +7,7 @@ $(document).ready(function() {
         /* Get a json object from the page_data object.
          *
          * @param {string} object_type - The type of the object to search for.
-         *     One of 'forecasts', 'sites', 'observations', 'aggregates'.
+         *     One of 'forecasts', 'sites', 'observations' 
          *
          * @param {string} object_id - UUID of the object to search for
          *
@@ -54,7 +54,6 @@ $(document).ready(function() {
 
     function applyFxDependentFilters(){
         filterObservations();
-        filterAggregates();
     }
 
     function addPair(truthType, truthName, truthId, fxName, fxId,
@@ -191,41 +190,6 @@ $(document).ready(function() {
             toHide.attr('hidden', true);
         }
 
-        function determineWidgets(){
-            /*
-             * Based on the value of the observation-aggregate-radio button,
-             * display the correct select lists and set up the correct
-             * parsing of values into object-pairs.
-             */
-            compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
-            if (compareTo == 'observation'){
-                // hide aggregates
-                // show sites & observations
-                $('.aggregate-select-wrapper').attr('hidden', true);
-                $('.site-select-wrapper').removeAttr('hidden');
-                $('.observation-select-wrapper').removeAttr('hidden');
-                $('#aggregate-select').val('');
-                $("#add-obs-object-pair").removeAttr('hidden');
-                $("#add-agg-object-pair").attr('hidden', true);
-                $('.deadband-select-wrapper').removeAttr('hidden');
-                filterForecasts();
-            } else {
-                // hide sites & observations
-                // show aggregates
-                $('.site-select-wrapper').attr('hidden', true);
-                $('.observation-select-wrapper').attr('hidden', true);
-                $('.aggregate-select-wrapper').removeAttr('hidden');
-                $('#site-select').val('');
-                $("#add-agg-object-pair").removeAttr('hidden');
-                $("#add-obs-object-pair").attr('hidden', true);
-                $('.deadband-select-wrapper').attr('hidden', true);
-
-                filterForecasts();
-            }
-            return compareTo
-
-        }
-
         function filterForecasts(){
             /*
              * Hide options in the forecast selector based on the currently selected
@@ -238,23 +202,16 @@ $(document).ready(function() {
             toHide = searchSelect('#forecast-option-search', '#forecast-select', 2);
             variable = "event";
             toHide = toHide.add(forecasts.not(`[data-variable=${variable}]`));
-            // Determine if we need to filter by site or aggregate
-            compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
-            if (compareTo == 'observation'){
-                selectedSite = $('#site-select :selected');
-                site_id = selectedSite.data('site-id');
-                if (site_id){
-                    $('#no-forecast-site-selection').attr('hidden', true);
-                } else {
-                    $('#no-forecast-site-selection').removeAttr('hidden');
-                }
-                // create a set of elements to hide from selected site, variable and search
-                toHide = toHide.add(forecasts.not(`[data-site-id=${site_id}]`));
-            } else {
-
-                toHide = toHide.add(forecasts.not('[data-aggregate-id]'));
+            selectedSite = $('#site-select :selected');
+            site_id = selectedSite.data('site-id');
+            if (site_id){
                 $('#no-forecast-site-selection').attr('hidden', true);
+            } else {
+                $('#no-forecast-site-selection').removeAttr('hidden');
             }
+            // create a set of elements to hide from selected site, variable and search
+            toHide = toHide.add(forecasts.not(`[data-site-id=${site_id}]`));
+            
             // if current forecast selection is invalid, deselect
             if (toHide.filter(':selected').length){
                 forecast_select.val('');
@@ -263,45 +220,13 @@ $(document).ready(function() {
             // if all options are hidden, show "no matching forecasts"
             if (toHide.length == forecasts.length){
                 forecast_select.val('');
-                if ($('#no-forecast-site-selection').attr('hidden') || compareTo == 'aggregate'){
+                if ($('#no-forecast-site-selection').attr('hidden')){
                     $('#no-forecasts').removeAttr('hidden');
                 }
             } else {
                 $('#no-forecasts').attr('hidden', true);
             }
-            if (compareTo == 'observation'){
-                filterObservations();
-            } else {
-                filterAggregates();
-            }
-        }
-
-        function filterAggregates(){
-            /*
-             * Filter aggregate options based on radio buttons
-             */
-            aggregates = aggregateSelector.find('option').slice(2);
-            aggregates.removeAttr('hidden');
-            selectedForecast = $('#forecast-select :selected');
-            if (selectedForecast.length){
-                aggregate_id = selectedForecast.data('aggregate-id');
-                toHide = searchSelect('#aggregate-option-search', '#aggregate-select', 1);
-                toHide = toHide.add(aggregates.not(`[data-aggregate-id=${aggregate_id}]`));
-                current_interval = selectedForecast.data('interval-length');
-                toHide = toHide.add(aggregates.filter(function(){
-                    return parseInt(this.dataset['intervalLength']) > current_interval;
-                }));
-                if ((toHide.length == aggregates.length) && aggregate_id){
-                    $('#no-aggregates').removeAttr('hidden');
-                } else {
-                    $('#no-aggregates').attr('hidden', true);
-                }
-                $('#no-aggregate-forecast-selection').attr('hidden', true);
-            } else {
-                toHide = aggregates;
-                $('#no-aggregate-forecast-selection').removeAttr('hidden');
-            }
-            toHide.attr('hidden', true);
+            filterObservations();
         }
 
         function filterObservations(){
@@ -346,57 +271,39 @@ $(document).ready(function() {
         /*
          * Create select widgets for creating an observatio/forecast pair, 
          */
-        var aggregateSelector = newSelector("aggregate", "forecast");
         var siteSelector = newSelector("site");
         var obsSelector = newSelector("observation", "forecast");
         var fxSelector = newSelector("forecast", "site");
         var dbSelector = deadbandSelector();
 
-        // Buttons for adding an obs/fx pair for observations or aggregates
+        // Buttons for adding an obs/fx pair for observations
         var addObsButton = $('<a role="button" class="btn btn-primary" id="add-obs-object-pair" style="padding-left: 1em">Add a Forecast, Observation pair</a>');
-        var addAggButton = $('<a role="button" class="btn btn-primary" id="add-agg-object-pair" style="padding-left: 1em">Add a Forecast, Aggregate pair</a>');
 
-
-        // Create a radio button for selecting between aggregate or observation
-        var obsAggRadio = $(`<div><b>Compare Forecast to&colon;</b>
-                             <input type="radio" name="observation-aggregate-radio" value="observation" checked> Observation
-                             <input type="radio" name="observation-aggregate-radio" value="aggregate">Aggregate<br/></div>`);
-        radio_inputs = obsAggRadio.find('input[type=radio]');
-        radio_inputs.change(determineWidgets);
 
         /*
          * Add all of the input elements to the widget container.
          */
         var widgetContainer = $('<div class="pair-selector-wrapper collapse"></div>');
-        widgetContainer.append(obsAggRadio);
         widgetContainer.append(siteSelector);
         widgetContainer.append(fxSelector);
         widgetContainer.append(obsSelector);
-        widgetContainer.append(aggregateSelector);
         widgetContainer.append(dbSelector);
         widgetContainer.append(addObsButton);
-        widgetContainer.append(addAggButton);
 
-        // hide aggregate controls by default
-        addAggButton.attr('hidden', true);
-        aggregateSelector.attr('hidden', true);
 
         // Register callback functions
         siteSelector.find('#site-option-search').keyup(filterSites);
         obsSelector.find('#observation-option-search').keyup(filterObservations);
         fxSelector.find('#forecast-option-search').keyup(filterForecasts);
-        aggregateSelector.find('#aggregate-option-search').keyup(filterAggregates);
 
         // create variables pointing to the specific select elements
         var observation_select = obsSelector.find('#observation-select');
         var forecast_select = fxSelector.find('#forecast-select');
         var site_select = siteSelector.find('#site-select');
-        var aggregate_select = aggregateSelector.find('#aggregate-select');
         
         // set callbacks for select inputs
         site_select.change(filterForecasts);
         forecast_select.change(filterObservations);
-        forecast_select.change(filterAggregates);
 
         // insert options from page_data into the select elements
         $.each(page_data['sites'], function(){
@@ -422,16 +329,6 @@ $(document).ready(function() {
                     .val(this.forecast_id)
                     .attr('hidden', true)
                     .attr('data-site-id', this.site_id)
-                    .attr('data-aggregate-id', this.aggregate_id)
-                    .attr('data-interval-length', this.interval_length)
-                    .attr('data-variable', this.variable));
-        });
-        $.each(page_data['aggregates'], function(){
-            aggregate_select.append(
-                $('<option></option>')
-                    .html(this.name)
-                    .val(this.aggregate_id)
-                    .attr('hidden', true)
                     .attr('data-aggregate-id', this.aggregate_id)
                     .attr('data-interval-length', this.interval_length)
                     .attr('data-variable', this.variable));
@@ -477,39 +374,6 @@ $(document).ready(function() {
                     observation_select.css('border', '2px solid #F99');
                 }
             }
-        });
-        addAggButton.click(function(){
-            /*
-             * Add a forecast, aggregate pair
-             */
-            if (aggregate_select.val() && forecast_select.val()){
-                var selected_aggregate = aggregate_select.find('option:selected')[0];
-                var selected_forecast = forecast_select.find('option:selected')[0];
-                pair = addPair('aggregate',
-                               selected_aggregate.text,
-                               selected_aggregate.value,
-                               selected_forecast.text,
-                               selected_forecast.value,
-                               "Unset",
-                               null,
-                );
-                pair_container.append(pair);
-                pair_index++;
-                var variable = "event";
-
-                $(".empty-reports-list")[0].hidden = true;
-                forecast_select.css('border', '');
-                observation_select.css('border', '');
-            } else {
-                // Otherwise apply a red border to alert the user to need of input
-                if (forecast_select.val() == null){
-                    forecast_select.css('border', '2px solid #F99');
-                }
-                if (observation_select.val() == null){
-                    observation_select.css('border', '2px solid #F99');
-                }
-            }
-
         });
         return widgetContainer;
     }
