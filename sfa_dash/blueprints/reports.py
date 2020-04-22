@@ -7,7 +7,7 @@ from solarforecastarbiter.reports.template import (
     get_template_and_kwargs, render_html, render_pdf)
 
 from sfa_dash.api_interface import (observations, forecasts, sites, reports,
-                                    aggregates)
+                                    aggregates, cdf_forecast_groups)
 from sfa_dash.utils import check_sign_zip
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.util import filter_form_fields
@@ -36,7 +36,7 @@ class ReportForm(BaseView):
         if self.report_type == 'event':
             self.template = 'forms/event_report_form.html'
         elif self.report_type == 'probabilistic':
-            self.template = 'mockup/probabilistic_report_form.html'
+            self.template = 'forms/probabilistic_report_form.html'
         else:
             self.template = 'forms/report_form.html'
 
@@ -52,7 +52,10 @@ class ReportForm(BaseView):
         the api for injecting into the dom as a js variable
         """
         observation_list = observations.list_metadata()
-        forecast_list = forecasts.list_metadata()
+        if self.report_type == 'probabilistic':
+            forecast_list = cdf_forecast_groups.list_metadata()
+        else:
+            forecast_list = forecasts.list_metadata()
         site_list = sites.list_metadata()
         aggregate_list = aggregates.list_metadata()
         for obs in observation_list:

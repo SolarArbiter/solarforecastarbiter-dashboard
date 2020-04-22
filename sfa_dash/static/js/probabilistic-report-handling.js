@@ -1,7 +1,105 @@
 /*
  *  Creates inputs for defining observation, forecast pairs for a report.
  */
+
+var previous_constants = [];
 $(document).ready(function() {
+    function toggle_reference_dependent_metrics(){
+        /*
+         * Disables and de-selects the forecast skill metric if not all of the
+         * object pairs have reference foreasts.
+         */
+        var nulls_exist = $('.reference-forecast-value').map(function(){return $(this).val()}).get().some(x=>x=='null');
+        var skill = $('[name=metrics][value=s]'); 
+        if(nulls_exist){
+            // hide skill, insert warning
+            skill.attr('disabled', true);
+            if($('#reference-warning').length == 0){
+                $(`<span id="reference-warning" class="warning-message">
+                   (Requires reference forecast selection)</span>`
+                 ).insertAfter(skill.next());
+            }
+            if(skill.is(':checked')){
+                skill.removeAttr('checked');
+            }
+        }else{
+            // show skill remove warning
+            skill.removeAttr('disabled');
+            $('#reference-warning').remove();
+        }
+    }
+    function searchObjects(object_type, object_id){
+        /* Get a json object from the page_data object.
+         *
+         * @param {string} object_type - The type of the object to search for.
+         *     One of 'forecasts', 'sites', 'observations', 'aggregates'.
+         *
+         * @param {string} object_id - UUID of the object to search for
+         *
+         * @returns {Object} An object containing the SFA object's metadata.
+         */
+        try{
+            var objects = page_data[object_type];
+            var id_prop = object_type.slice(0, -1) + '_id';
+            var metadata = objects.find(e => e[id_prop] == object_id);
+        }catch(error){
+            return null;
+        }
+        return metadata;
+    }
+    
+
+    var variable_unit_map = {
+        'air_temperature': 'degC',
+        'wind_speed': 'm/s',
+        'ghi': 'W/m^2',
+        'dni': 'W/m^2',
+        'dhi': 'W/m^2',
+        'poa_global': 'W/m^2',
+        'relative_humidity': '%',
+        'ac_power': 'MW',
+        'dc_power': 'MW',
+        'availability': '%',
+        'curtailment': 'MW',
+    }
+
+    var current_units = null;
+    
+    function unset_units(){
+        /* Set units to null when the last pair is removed */
+        current_units = null;
+        setVariables()
+    }
+
+    function set_units(variable){
+        units = variable_unit_map[variable];
+        if(units){
+            current_units = units;
+        }
+        setVariables();
+    }
+
+
+    function setVariables(){
+        variable_options = $('#variable-select option');
+        variable_options.removeAttr('hidden');
+        variable_options.removeAttr('disabled');
+        if (current_units){
+            variable_options.each(function(){
+                units = variable_unit_map[$(this).attr('value')]
+                if(units != current_units){
+                    $(this).attr('hidden', true);
+                    $(this).attr('disabled', true);
+                }
+            });
+        }
+        $('#variable-select').val(variable_options.filter(":not([hidden])").val());
+    }
+    function changeVariable(){
+        setVariables(); 
+        filterForecasts();
+    }
+
     function registerDatetimeValidator(input_name){
         /*
          * Applies a regex validator to ensure ISO8601 compliance. This is however, very strict. We
@@ -38,7 +136,12 @@ $(document).ready(function() {
         }
         variables = new Set();
         for (fx in page_data['forecasts']){
-            variables.add(page_data['forecasts'][fx].variable);
+            var new_var = page_data['forecasts'][fx].variable;
+            if (!current_units ||
+                variable_unit_map[new_var] == current_units ||
+                !variable_unit_map[new_var]){
+                variables.add(page_data['forecasts'][fx].variable);
+            }
         }
         variable_select = $('<select id="variable-select" class="form-control half-width"><option selected value>All Variables</option></select>');
         variables.forEach(function(variable){
@@ -62,7 +165,14 @@ $(document).ready(function() {
         return $(selectSelector + " option").slice(offset).not(":containsi('" + searchSplit + "')");
     }
 
-    function addPair(truthType, truthName, truthId, fxName, fxId){
+    function applyFxDependentFilters(){
+        filterObservations();
+        filterAggregates();
+        filterReferenceForecasts();
+    }
+
+    function addPair(truthType, truthName, truthId, fxName, fxId,
+                     ref_fxName, ref_fxId, db_label, db_value){
         /*
          * Returns a Jquery object containing 5 input elements representing a forecast,
          * observation pair:
@@ -71,51 +181,168 @@ $(document).ready(function() {
          *  truth-name-<indeX>
          *  truth-id-<indeX>
          *  truth-type-<index>
+         *  ref_fxName,
+         *  ref_fxId,
+         *  db_label,
+         *  db_value,
          *  where index associates the pairs with eachother for easier parsing when the form
          *  is submitted.
          */
+
         var new_object_pair = $(`<div class="object-pair object-pair-${pair_index}">
                 <div class="input-wrapper">
-                  <div class="col-md-6">
-                    <input type="text" class="form-control forecast-field" name="forecast-name-${pair_index}" required disabled value="${fxName}"/>
-                    <input type="hidden" class="form-control forecast-field" name="forecast-id-${pair_index}" required value="${fxId}"/>
-                  </div>
-                  <div class="col-md-6">
-                    <input type="text" class="form-control truth-field" name="truth-name-${pair_index}"  required disabled value="${truthName}"/>
-                    <input type="hidden" class="form-control truth-field" name="truth-id-${pair_index}" required value="${truthId}"/>
-                    <input type="hidden" class="form-control truth-field" name="truth-type-${pair_index}" required value="${truthType}"/>
+                  <div class="col-md-12">
+                    <div class="object-pair-label forecast-name-${pair_index}"><b>Forecast: </b>${fxName}</div>
+                    <input type="hidden" class="form-control forecast-value" name="forecast-id-${pair_index}" required value="${fxId}"/>
+                    <div class="object-pair-label truth-name-${pair_index}"><b>Observation: </b> ${truthName}</div>
+                    <input type="hidden" class="form-control truth-value" name="truth-id-${pair_index}" required value="${truthId}"/>
+                    <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truthType}"/>
+                    <div class="object-pair-label reference-forecast-name"><b>Reference Forecast: </b> ${ref_fxName}</div>
+                    <input type="hidden" class="form-control reference-forecast-value" name="reference-forecast-${pair_index}" required value="${ref_fxId}"/>
+                    <div class="object-pair-label deadband-label"><b>Uncertainty: </b> ${db_label}</div>
+                    <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="${db_value}"/>
                   </div>
                  </div>
-                 <a role="button" class="object-pair-delete-button">x</a>
+                 <a role="button" class="object-pair-delete-button">remove</a>
                </div>`);
         var remove_button = new_object_pair.find(".object-pair-delete-button");
         remove_button.click(function(){
             new_object_pair.remove();
             if ($('.object-pair-list .object-pair').length == 0){
                 $('.empty-reports-list')[0].hidden = false;
+                unset_units();
             }
+            toggle_reference_dependent_metrics();
         });
         return new_object_pair;
     }
+    function determine_forecast_units(forecast){
+        /*
+         * Determine the proper units for the cdf forecast's associated data.
+         */
+        var units = '%';
+        if (forecast['axis'] == 'y'){
+            units = variable_unit_map[forecast['variable']];
+        }
+        return units
+    }
 
 
-    function newSelector(field_type, depends_on=null){
+    function populateConstantValues(){
+        var selected_forecast_id = $('#forecast-select').val();
+        var constant_value_select = $('#constant-value-select');
+
+        var non_static_constants = constant_value_select.find('option').slice(3);
+        if (selected_forecast_id){
+            $("#no-constant-value-forecast-selection").attr('hidden', 'hidden');
+            non_static_constants.remove();
+
+            var forecast = searchObjects('forecasts', selected_forecast_id);
+            var units = determine_forecast_units(forecast);
+             
+            constant_values = forecast['constant_values'];
+            constant_values.forEach(function(constant_value){
+                let option = $('<option></option')
+                    .attr('value', forecast['forecast_id'])
+                    .attr('data-measurement', constant_value['constant_value'])
+                    .html(`${constant_value['constant_value']} ${units}`);
+                if (previous_constants.includes(constant_value['constant_value'].toString())){
+                    option.attr('selected', 'selected');
+                }
+                $('#full-cdf-group').removeAttr('hidden');
+                $('#full-cdf-group').attr('selected', 'selected');
+                constant_value_select.append(option);
+            });
+
+        } else {
+            let selected = constant_value_select.find(':selected');
+            previous_constants = selected.toArray().map(o=>o.dataset['measurement']);
+            non_static_constants.remove();
+            $("#no-constant-value-forecast-selection").removeAttr('hidden');
+            $('#full-cdf-group').attr('hidden', 'hidden');
+            $('#full-cdf-group').removeAttr('selected');
+        }
+    }
+
+    function newConstantValueSelector(){
+        /* Builds the constant value selector */
+        return $(`<div class="form-element full-width constant-value-select-wrapper">
+                    <label>Select Constant Values: </label>
+                    <p>You may select multiple constant values (using ctrl+click
+                       for Windows or command+click for Mac). Select <b> Full
+                       Probabilistic Forecast Group</b> to calculate the CRPS
+                       metric for this forecast. A Forecast, Observation pair
+                       will be created for each value you select.</p>
+                    <div class="input-wrapper">
+                      <select id="constant-value-select" class="form-control contant-value-field name="constant-value-select" multiple size="5">
+                      <option id="no-constant-value-forecast-selection" disabled> Please select a Probabilistic Forecast Group.</option>
+                      <option id="no-constant-values" disabled hidden>No Constant Values</option>
+                      <option id="full-cdf-group" value ='full-cdf-group' data-measurement="full"hidden>Full Probabilistic Forecast Group(CRPS metric only)</option>
+                    </select>
+                    </div>
+                  </div>`);
+    }
+    function newSelector(field_name, depends_on=null, required=true, classes=[]){
         /*
          * Returns a JQuery object containing labels and select elements for appending options to.
          * Initializes with one default and one optional select option:
          *     Always adds an option containing "No matching <field_Type>s
          *     If depends_on is provided, inserts a "Please select a <depends_on> option>
          */
+        var field_type = field_name.toLowerCase().replace(' ', '-');
         return $(`<div class="form-element full-width ${field_type}-select-wrapper">
-                    <label>Select a ${field_type}</label>
-                      <div class="report-field-filters"><input id="${field_type}-option-search" class="form-control half-width" placeholder="Search by ${field_type} name"/></div><br>
+                    <label>Select a ${field_name} ${required ? "" : "(Optional)"}</label>
+                      <div class="report-field-filters"><input id="${field_type}-option-search" class="form-control half-width" placeholder="Search by ${field_name} name"/></div><br>
                     <div class="input-wrapper">
-                      <select id="${field_type}-select" class="form-control ${field_type}-field" name="${field_type}-select" size="5">
+                      <select id="${field_type}-select" class="form-control ${field_type}-field ${classes.join(" ")}" name="${field_type}-select" size="5">
                       ${depends_on ? `<option id="no-${field_type}-${depends_on}-selection" disabled> Please select a ${depends_on}.</option>` : ""}
-                      <option id="no-${field_type}s" disabled hidden>No matching ${field_type}s</option>
+                      <option id="no-${field_type}s" disabled hidden>No matching ${field_name}s</option>
                     </select>
                     </div>
                   </div>`);
+    }
+
+
+    function deadbandSelector(){
+        /*
+         * Create a radio button and text input for selecting an uncertainty
+         * deadband
+         */
+        var deadbandSelect= $(
+            `<div><b>Uncertainty:</b><br>
+             <input type="radio" name="deadband-select" value="null" checked> Ignore Uncertainty.<br>
+             <input type="radio" name="deadband-select" value="observation_uncertainty"> Set deadband to observation uncertainty.<br>
+             <input type="radio" name="deadband-select" value="user_supplied"> Set deadband to:
+             <input type="number" step="any" min=0.0 max=100.0 name="deadband-value"> &percnt;<br></div>`);
+        var db_wrapper = $('<div class="form-element full-width deadband-select-wrapper"></div>')
+        db_wrapper.append(deadbandSelect);
+        return db_wrapper;
+    }
+
+
+    function parseDeadband(){
+        /*
+         * Parses the deadband widgets into a readable display value, and a
+         * valid string value.
+         */
+        var source = $('[name="deadband-select"]:checked').val();
+        if(source == "user_supplied"){
+            var val = $('[name="deadband-value"]').val();
+            if(!$('[name="deadband-value"]')[0].reportValidity()){
+                throw 'Deadband out of range';
+            }
+            return [val, val];
+
+        }else if(source == "null"){
+            return ["Ignore uncertainty.", "null"]
+        }else if(source == "observation_uncertainty"){
+            var obs_id = $('#observation-select').val();
+            var obs = searchObjects("observations", obs_id);
+            if(obs){
+                obs_uncertainty = obs['uncertainty'].toString();
+                return [obs_uncertainty, obs_uncertainty];
+            }
+        }
     }
 
 
@@ -124,14 +351,18 @@ $(document).ready(function() {
          * Returns a JQuery object containing Forecast, Observation pair widgets to insert into the DOM
          */
         
-        /*
+        /**********************************************************************
+         *  
          *  Filtering Functions
-         *      Callbacks for hidding/showing select list options based on the searchbars
-         *      for each field and previously made selections
-         */
+         *      Callbacks for hidding/showing select list options based on the
+         *      searchbars for each field and previously made selections
+         *
+         *********************************************************************/
+
         function filterSites(){
             /*
-             * Filter the Site Options Via the text found in the #site-option-search input
+             * Filter the Site Options Via the text found in the
+             * #site-option-search input.
              */
             sites = siteSelector.find('option').slice(1);
             sites.removeAttr('hidden');
@@ -161,6 +392,7 @@ $(document).ready(function() {
                 $('#aggregate-select').val('');
                 $("#add-obs-object-pair").removeAttr('hidden');
                 $("#add-agg-object-pair").attr('hidden', true);
+                $('.deadband-select-wrapper').removeAttr('hidden');
                 filterForecasts();
             } else {
                 // hide sites & observations
@@ -171,6 +403,7 @@ $(document).ready(function() {
                 $('#site-select').val('');
                 $("#add-agg-object-pair").removeAttr('hidden');
                 $("#add-obs-object-pair").attr('hidden', true);
+                $('.deadband-select-wrapper').attr('hidden', true);
 
                 filterForecasts();
             }
@@ -190,9 +423,11 @@ $(document).ready(function() {
             toHide = searchSelect('#forecast-option-search', '#forecast-select', 2);
             variable_select = $('#variable-select');
             variable = variable_select.val();
+
             if (variable){
                 toHide = toHide.add(forecasts.not(`[data-variable=${variable}]`));
             }
+
             // Determine if we need to filter by site or aggregate
             compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
             if (compareTo == 'observation'){
@@ -203,6 +438,7 @@ $(document).ready(function() {
                 } else {
                     $('#no-forecast-site-selection').removeAttr('hidden');
                 }
+
                 // create a set of elements to hide from selected site, variable and search
                 toHide = toHide.add(forecasts.not(`[data-site-id=${site_id}]`));
             } else {
@@ -210,25 +446,93 @@ $(document).ready(function() {
                 toHide = toHide.add(forecasts.not('[data-aggregate-id]'));
                 $('#no-forecast-site-selection').attr('hidden', true);
             }
+
             // if current forecast selection is invalid, deselect
             if (toHide.filter(':selected').length){
                 forecast_select.val('');
+                populateConstantValues();
             }
             toHide.attr('hidden', 'true');
+
             // if all options are hidden, show "no matching forecasts"
             if (toHide.length == forecasts.length){
                 forecast_select.val('');
-                //
                 if ($('#no-forecast-site-selection').attr('hidden') || compareTo == 'aggregate'){
                     $('#no-forecasts').removeAttr('hidden');
                 }
             } else {
                 $('#no-forecasts').attr('hidden', true);
             }
+            filterReferenceForecasts(variable);
             if (compareTo == 'observation'){
                 filterObservations();
             } else {
                 filterAggregates();
+            }
+        }
+
+        function filterReferenceForecasts(variable){
+            /* Filter the list of reference forecasts based on the current
+             * forecast.
+             */
+            forecast = forecast_select.find(':selected').first();
+            reference_forecasts = $('#reference-forecast-select option').slice(2);
+            reference_forecasts.removeAttr('hidden');
+            if (forecast[0]){
+                if(forecast.data.hasOwnProperty('siteId')){
+                    site_id = forecast.data().siteId;
+                }else{
+                    aggregate_id = forecast.data().aggregateId;
+                }
+                variable = forecast.data().variable;
+                interval_length = forecast.data().intervalLength;
+
+                // hide the "please select forecast" prompt"
+                $('#no-reference-forecast-forecast-selection').attr('hidden', true);
+                toHide = searchSelect('#reference-forecast-option-search',
+                                  '#reference-forecast-select', 2);
+                if (variable){
+                toHide = toHide.add(reference_forecasts.not(
+                    `[data-variable=${variable}]`));
+                }
+
+                // Determine if we need to filter by site or aggregate
+                if (site_id){
+                    // create a set of elements to hide from selected site, variable and search
+                    toHide = toHide.add(reference_forecasts.not(
+                        `[data-site-id=${site_id}]`));
+                } else {
+                    toHide = toHide.add(
+                        reference_forecasts.not(
+                            `[data-aggregate-id=${aggregate_id}]`));
+                }
+
+                // Filter out reference forecasts that don't have the same
+                // interval length
+                things = reference_forecasts.filter(function(){
+                    return $(this).data().intervalLength != interval_length ||
+                        $(this).attr('value') == forecast_select.val();
+                });
+                toHide = toHide.add(things);
+            }else{
+                toHide = reference_forecasts;
+                $('#no-reference-forecast-forecast-selection').removeAttr('hidden');
+            }
+            
+            // if current forecast selection is invalid, deselect
+            if (toHide.filter(':selected').length){
+                ref_forecast_select.val('');
+            }
+            toHide.attr('hidden', 'true');
+
+            // if all options are hidden, show "no matching forecasts"
+            if (toHide.length == reference_forecasts.length){
+                ref_forecast_select.val('');
+                if ($('#no-reference-forecast-forecast-selection').attr('hidden') || compareTo == 'aggregate'){
+                    $('#no-reference-forecasts').removeAttr('hidden');
+                }
+            } else {
+                $('#no-reference-forecasts').attr('hidden', true);
             }
         }
 
@@ -241,7 +545,9 @@ $(document).ready(function() {
             selectedForecast = $('#forecast-select :selected');
             if (selectedForecast.length){
                 aggregate_id = selectedForecast.data('aggregate-id');
+                // hide aggregates based on search field
                 toHide = searchSelect('#aggregate-option-search', '#aggregate-select', 1);
+
                 toHide = toHide.add(aggregates.not(`[data-aggregate-id=${aggregate_id}]`));
                 current_interval = selectedForecast.data('interval-length');
                 toHide = toHide.add(aggregates.filter(function(){
@@ -261,6 +567,8 @@ $(document).ready(function() {
         }
 
         function filterObservations(){
+            /* Filter list of observations based on current site and variable.
+             */
             observations = $('#observation-select option').slice(2);
             // get the attributes of the currently selected forecast
             selectedForecast = $('#forecast-select :selected');
@@ -297,58 +605,112 @@ $(document).ready(function() {
             }
         }
 
-        // Declare handles to each field's input widgets, and insert a variable select
-        // widget for Forecast filtering.
-        var widgetContainer = $('<div class="pair-selector-wrapper collapse"></div>');
-        var aggregateSelector = newSelector("aggregate", "forecast");
+        /**********************************************************************
+         *
+         * Create the control elements for creating observation, forecast pairs
+         *
+         *********************************************************************/
         var siteSelector = newSelector("site");
+        var aggregateSelector = newSelector("aggregate", "forecast",);
         var obsSelector = newSelector("observation", "forecast");
-        var fxSelector = newSelector("forecast", "site");
+        var fxSelector = newSelector("forecast", "site",);
+
+        var refFxSelector = newSelector(
+            "reference forecast", "forecast", required=false);
+
+        var dbSelector = deadbandSelector();
+        var constantValueSelector = newConstantValueSelector();
         var fxVariableSelector = createVariableSelect();
-        fxSelector.find('.report-field-filters').append(fxVariableSelector);
+
+        // Create a radio button for selecting between aggregate or observation
+        var obsAggRadio = $(
+          `<div><b>Compare Forecast to&colon;</b>
+             <input type="radio" name="observation-aggregate-radio" value="observation" checked> Observation
+             <input type="radio" name="observation-aggregate-radio" value="aggregate">Aggregate<br/></div>`);
+        
+        // Create two buttons that act on the set of observation or aggregate
+        // fields independently, these should be shown/hidden when the obs
         var addObsButton = $('<a role="button" class="btn btn-primary" id="add-obs-object-pair" style="padding-left: 1em">Add a Forecast, Observation pair</a>');
+        
         var addAggButton = $('<a role="button" class="btn btn-primary" id="add-agg-object-pair" style="padding-left: 1em">Add a Forecast, Aggregate pair</a>');
+        
 
-
-        // Radio button for selecting between an aggregate or site
-        var obsAggRadio = $(`<div><b>Compare Forecast to&colon;</b>
-                             <input type="radio" name="observation-aggregate-radio" value="observation" checked> Observation
-                             <input type="radio" name="observation-aggregate-radio" value="aggregate">Aggregate<br/></div>`);
+        /**********************************************************************
+         *
+         * Create a container for the html inputs, widgetContainer, and append
+         * all of the inputs needed.
+         * 
+         *********************************************************************/
+        var widgetContainer = $('<div class="pair-selector-wrapper collapse"></div>');
         widgetContainer.append(obsAggRadio);
-        radio_inputs = obsAggRadio.find('input[type=radio]');
-        radio_inputs.change(determineWidgets);
-
-        // Add the elements to the widget Container, so that the single container may
-        // be inserted into the DOM
         widgetContainer.append(siteSelector);
         widgetContainer.append(fxSelector);
+        widgetContainer.append(constantValueSelector);
+        widgetContainer.append(refFxSelector);
         widgetContainer.append(obsSelector);
         widgetContainer.append(aggregateSelector);
+        widgetContainer.append(dbSelector);
         widgetContainer.append(addObsButton);
         widgetContainer.append(addAggButton);
 
-        // hide aggregate controls by default
+        fxSelector.find('.report-field-filters').append(fxVariableSelector);
+
+        /**********************************************************************
+         *
+         * Hide all of the Aggregate controls by default because we default to
+         * compare to: observation.
+         *
+         *********************************************************************/
         addAggButton.attr('hidden', true);
         aggregateSelector.attr('hidden', true);
 
-        // Register callback functions
+
+        /**********************************************************************
+         * 
+         * Register call backs for searching and filtering on user input. These
+         * correspond with the "Search by <field>" input, and the variable
+         * selector.
+         *
+         *********************************************************************/
         siteSelector.find('#site-option-search').keyup(filterSites);
         obsSelector.find('#observation-option-search').keyup(filterObservations);
         fxSelector.find('#forecast-option-search').keyup(filterForecasts);
+        fxSelector.find('#reference-forecast-option-search').keyup(filterForecasts);
         aggregateSelector.find('#aggregate-option-search').keyup(filterAggregates);
 
-        // create variables pointing to the specific select elements
+        /**********************************************************************
+         *
+         * Create jquery handles to all of the inputs we've created pertaining
+         * to observation, forecast pair creation.
+         *
+         *********************************************************************/
         var observation_select = obsSelector.find('#observation-select');
         var forecast_select = fxSelector.find('#forecast-select');
+        var constant_value_select = constantValueSelector.find('#constant-value-select')
+        var ref_forecast_select = refFxSelector.find('#reference-forecast-select');
         var site_select = siteSelector.find('#site-select');
         var aggregate_select = aggregateSelector.find('#aggregate-select');
+
+        var radio_inputs = obsAggRadio.find('input[type=radio]');
         
+        /**********************************************************************
+         *
+         * Register onchange callbacks for the pair selection widgets.
+         *
+         *********************************************************************/
+        radio_inputs.change(determineWidgets);
         site_select.change(filterForecasts);
         variable_select.change(filterForecasts);
         forecast_select.change(filterObservations);
         forecast_select.change(filterAggregates);
+        forecast_select.change(filterReferenceForecasts);
+        forecast_select.change(populateConstantValues);
 
-        // insert options from page_data into the select elements
+        /**********************************************************************
+         *
+         * Populate options from the page_data variable
+         *
+         *********************************************************************/
         $.each(page_data['sites'], function(){
             site_select.append(
                 $('<option></option>')
@@ -366,9 +728,20 @@ $(document).ready(function() {
                     .attr('data-interval-length', this.interval_length)
                     .attr('data-variable', this.variable));
         });
-        $.each(page_data['forecasts'], function(){
-            forecast_select.append(
-                $('<option></option>')
+        var nonevent_forecasts = page_data['forecasts'].filter(
+            f => f.variable != 'event');
+        $.each(nonevent_forecasts, function(){
+            forecast_select.append($('<option></option>')
+                    .html(this.name)
+                    .val(this.forecast_id)
+                    .attr('hidden', true)
+                    .attr('data-site-id', this.site_id)
+                    .attr('data-aggregate-id', this.aggregate_id)
+                    .attr('data-interval-length', this.interval_length)
+                    .attr('data-variable', this.variable));
+        });
+        $.each(nonevent_forecasts, function(){
+            ref_forecast_select.append($('<option></option>')
                     .html(this.name)
                     .val(this.forecast_id)
                     .attr('hidden', true)
@@ -397,19 +770,64 @@ $(document).ready(function() {
              */
             if (observation_select.val() && forecast_select.val()){
                 // If both inputs contain valid data, create a pair and add it to the DOM
-                var selected_observation = observation_select.find('option:selected')[0];
-                var selected_forecast = forecast_select.find('option:selected')[0];
-                pair = addPair('observation',
-                               selected_observation.text,
-                               selected_observation.value,
-                               selected_forecast.text,
-                               selected_forecast.value);
-
-                pair_container.append(pair);
-                pair_index++;
-                $(".empty-reports-list")[0].hidden = true;
+                var selected_observation = observation_select.find(':selected')[0];
+                var selected_forecast = forecast_select.find(':selected')[0];
+                var selected_reference_forecast = ref_forecast_select.find(':selected')[0];
+                if(!selected_reference_forecast){
+                    ref_text = "Unset";
+                    ref_id = null;
+                }else{
+                    ref_text = selected_reference_forecast.text;
+                    ref_id = selected_reference_forecast.value;
+                }
+                // try to parse deadband values
+                try{
+                    deadband_values = parseDeadband();
+                }catch(error){
+                    return;
+                }
+                constant_value_select.find('option:selected').each(function(){
+                    let forecast_id = $(this).val();
+                    let forecast = searchObjects('forecasts', selected_forecast.value);
+                    let forecast_name = forecast['name'];
+                    
+                    if (forecast_id == 'full-cdf-group'){
+                        forecast_id = selected_forecast;
+                        console.log('full group')
+                        console.log('fxid ', forecast_id);
+                        console.log('forecast ', forecast);
+                        console.log('name ', forecast_name);
+                    } else {
+                        let units = determine_forecast_units(forecast);
+                        let constant_value = $(this).data('measurement');
+                        forecast_name = `${forecast_name}: ${constant_value} ${units}`;
+                        forecast_id = selected_forecast;
+                        console.log('constant value');
+                        console.log('fxid ', forecast_id);
+                        console.log('forecast ', forecast);
+                        console.log('name ', forecast_name);
+                    }
+                    pair = addPair(
+                        'observation',
+                        selected_observation.text,
+                        selected_observation.value,
+                        forecast_name,
+                        forecast_id,
+                        ref_text,
+                        ref_id,
+                        deadband_values[0],
+                        deadband_values[1],
+                    )
+                    pair_container.append(pair);
+                    pair_index++;
+                });
+                
+                var variable = selected_forecast.dataset.variable;
+                set_units(variable);
+                $(".empty-reports-list").attr('hidden', 'hidden');
                 forecast_select.css('border', '');
                 observation_select.css('border', '');
+                toggle_reference_dependent_metrics();
             } else {
                 // Otherwise apply a red border to alert the user to need of input
                 if (forecast_select.val() == null){
@@ -427,23 +845,65 @@ $(document).ready(function() {
             if (aggregate_select.val() && forecast_select.val()){
                 var selected_aggregate = aggregate_select.find('option:selected')[0];
                 var selected_forecast = forecast_select.find('option:selected')[0];
-                pair = addPair('aggregate',
-                               selected_aggregate.text,
-                               selected_aggregate.value,
-                               selected_forecast.text,
-                               selected_forecast.value);
+                var selected_reference_forecast = ref_forecast_select.find('option:selected')[0];
+                if(!selected_reference_forecast){
+                    ref_text = "Unset";
+                    ref_id = null;
+                }else{
+                    ref_text = selected_reference_forecast.text;
+                    ref_id = selected_reference_forecast.value;
+                }
+                constant_value_select.find('option:selected').each(function(){
+                    let forecast_id = $(this).val();
+                    let forecast = searchObjects('forecasts', selected_forecast.value);
+                    let forecast_name = forecast['name'];
+                    
+                    if (forecast_id == 'full-cdf-group'){
+                        forecast_id = selected_forecast;
+                        console.log('full group')
+                        console.log('fxid ', forecast_id);
+                        console.log('forecast ', forecast);
+                        console.log('name ', forecast_name);
+                    } else {
+                        let units = determine_forecast_units(forecast);
+                        let constant_value = $(this).data('measurement');
+                        forecast_name = `${forecast_name}: ${constant_value} ${units}`;
+                        forecast_id = selected_forecast;
+                        console.log('constant value');
+                        console.log('fxid ', forecast_id);
+                        console.log('forecast ', forecast);
+                        console.log('name ', forecast_name);
+                    }
+                    pair = addPair(
+                        'aggregate',
+                        selected_aggregate.text,
+                        selected_aggregate.value,
+                        forecast_name,
+                        forecast_id,
+                        ref_text,
+                        ref_id,
+                        "Unset",
+                        null,
+                    );
+                    pair_container.append(pair);
+                    pair_index++;
+                });
                 pair_container.append(pair);
                 pair_index++;
+                var variable = selected_forecast.dataset.variable;
+                set_units(variable);
+
                 $(".empty-reports-list")[0].hidden = true;
                 forecast_select.css('border', '');
-                observation_select.css('border', '');
+                aggregate_select.css('border', '');
+                toggle_reference_dependent_metrics();
             } else {
                 // Otherwise apply a red border to alert the user to need of input
                 if (forecast_select.val() == null){
                     forecast_select.css('border', '2px solid #F99');
                 }
-                if (observation_select.val() == null){
-                    observation_select.css('border', '2px solid #F99');
+                if (aggregate_select.val() == null){
+                    aggregate_select.css('border', '2px solid #F99');
                 }
             }
 
@@ -467,3 +927,24 @@ $(document).ready(function() {
     registerDatetimeValidator('period-start');
     registerDatetimeValidator('period-end')
 });
+
+
+function insertErrorMessage(title, msg){
+    $('#form-errors').append(`<li class="alert alert-danger"><p><b>${title}: </b>${msg}</p></li>`);
+}
+function validateReport(){
+    /*
+     * Callback before the report form is submitted. Any js validation should
+     * occur here.
+     */
+    // remove any existing errors
+    $('#form-errors').empty();
+
+    // assert at least one pair was selected.
+    if($('.object-pair').length == 0){
+        insertErrorMessage(
+            "Analysis Pairs",
+            "Must specify at least one Observation, Forecast pair.");
+    }
+    return false;
+}
