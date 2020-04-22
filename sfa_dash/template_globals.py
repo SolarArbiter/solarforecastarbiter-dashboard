@@ -30,6 +30,10 @@ TIMEZONE_OPTIONS = {tz: tz.replace('_', ' ') for tz in TIMEZONES}
 
 DEFAULT_METRICS = ['mae', 'mbe', 'rmse']
 
+ALL_METRICS = {}
+ALL_METRICS.update(ALLOWED_DETERMINISTIC_METRICS)
+ALL_METRICS.update(ALLOWED_EVENT_METRICS)
+ALL_METRICS.update(ALLOWED_PROBABILISTIC_METRICS)
 
 ALLOWED_QUALITY_FLAGS = {
     'USER FLAGGED': 1,
@@ -65,6 +69,7 @@ def template_variables():
         'default_deterministic_metrics': DEFAULT_METRICS,
         'event_metrics': ALLOWED_EVENT_METRICS,
         'probabilistic_metrics': ALLOWED_PROBABILISTIC_METRICS,
+        'all_metrics': ALL_METRICS,
         'quality_flags': ALLOWED_QUALITY_FLAGS,
         'is_allowed': is_allowed,
         'current_path': request.path,
