@@ -141,7 +141,7 @@ class ReportForm(BaseView):
             if e.status_code == 404:
                 errors = {
                     '404': [('You do not have permission to create '
-                            f'reports. You may need to request '
+                             'reports. You may need to request '
                              'permissions from your organization '
                              'administrator.')]
                 }
