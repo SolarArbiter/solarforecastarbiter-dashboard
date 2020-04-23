@@ -249,7 +249,7 @@ $(document).ready(function() {
              <input type="radio" name="deadband-select" value="null" checked> Ignore uncertainty<br>
              <input type="radio" name="deadband-select" value="observation_uncertainty"> Set deadband to observation uncertainty: <span id="selected-obs-uncertainty">No observation selected</span><br>
              <input type="radio" name="deadband-select" value="user_supplied"> Set deadband to:
-             <input type="number" step="any" min=0.0 max=100.0 name="deadband-value"> &percnt;<br></div>`);
+             <input id="custom-deadband" type="number" step="any" min=0.0 max=100.0 name="deadband-value"> &percnt;<br></div>`);
         // deadbandSelect.find('[name="deadband-value"]')[0].setCustomValidity(
         //     "Must be a value from 0.0 to 100.0");
         var db_wrapper = $('<div class="form-element full-width deadband-select-wrapper"></div>')
