@@ -593,11 +593,11 @@ $(document).ready(function() {
         forecast_select.change(filterReferenceForecasts);
         observation_select.change(function(){
             obs_id = $(this).val();
-            if(obs_id){
+            if (obs_id){
                 observation = searchObjects('observations', obs_id);
                 uncertainty = observation['uncertainty'];
                 $('#selected-obs-uncertainty').html(`${uncertainty}&percnt;`);
-            }else{
+            } else {
                 $('#selected-obs-uncertainty').html("No observation selected");
             }
         });
