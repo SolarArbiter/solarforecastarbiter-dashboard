@@ -30,6 +30,8 @@ TIMEZONE_OPTIONS = {tz: tz.replace('_', ' ') for tz in TIMEZONES}
 
 DEFAULT_METRICS = ['mae', 'mbe', 'rmse']
 
+DEFAULT_CATEGORIES = ['total', 'year', 'month', 'hour', 'date']
+
 ALL_METRICS = {}
 ALL_METRICS.update(ALLOWED_DETERMINISTIC_METRICS)
 ALL_METRICS.update(ALLOWED_EVENT_METRICS)
@@ -66,6 +68,7 @@ def template_variables():
         'default_variable': DEFAULT_VARIABLE,
         'timezone_options': TIMEZONE_OPTIONS,
         'metric_categories': ALLOWED_CATEGORIES,
+        'default_categories': DEFAULT_CATEGORIES,
         'deterministic_metrics': ALLOWED_DETERMINISTIC_METRICS,
         'default_deterministic_metrics': DEFAULT_METRICS,
         'event_metrics': ALLOWED_EVENT_METRICS,

@@ -57,7 +57,7 @@
      <div class="form-element">
      <label>Categories</label></br>
      {% for category, label in metric_categories.items() %}
-     <input type="checkbox" name="categories" value="{{ category }}" {% if form_data %}{% if category in form_data['report_parameters']['categories'] %}checked{% endif %}{% else %}checked{% endif %}> {{ label }}<br/>
+     <input type="checkbox" name="categories" value="{{ category }}" {% if form_data %}{% if category in form_data['report_parameters']['categories'] %}checked{% else %}{% endif %}{% else %}{% if category in default_categories %}checked{% endif %}{% endif %}> {{ label }}<br/>
      {% endfor %}
      </div>
      <div class="form-element">
