@@ -323,3 +323,13 @@ class DeleteReportView(BaseView):
         return redirect(url_for(
             f'data_dashboard.reports',
             messages={'delete': ['Success']}))
+
+
+
+class RecomputeReportView(BaseView):
+    """View to recompute a report. Requests a recompute and redirects the user
+    to the reports listing view.
+    """
+    def get(self, uuid):
+        recompute_request = reports.recompute(uuid)
+        return ReportsView.get(messages={'report': 'recomputed successfully'})
