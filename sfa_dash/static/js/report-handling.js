@@ -264,23 +264,23 @@ $(document).ready(function() {
          * valid string value.
          */
         var source = $('[name="deadband-select"]:checked').val();
-        if(source == "user_supplied"){
+        if (source == "null"){
+            return ["Ignore uncertainty", "null"]
+        } else if (source == "user_supplied"){
             var val = $('[name="deadband-value"]').val();
             if(!$('[name="deadband-value"]')[0].reportValidity()){
                 throw 'Deadband out of range';
             }
-            return [val, val];
-
-        }else if(source == "null"){
-            return ["Ignore uncertainty", "null"]
-        }else if(source == "observation_uncertainty"){
+            
+        } else if (source == "observation_uncertainty"){
             var obs_id = $('#observation-select').val();
             var obs = searchObjects("observations", obs_id);
             if(obs){
-                obs_uncertainty = `${obs['uncertainty'].toString()}&percnt;`;
-                return [obs_uncertainty, obs_uncertainty];
+                var val = obs['uncertainty']
             }
         }
+        var str_val = `${val}&percnt;`
+        return [str_val, val];
     }
 
 
