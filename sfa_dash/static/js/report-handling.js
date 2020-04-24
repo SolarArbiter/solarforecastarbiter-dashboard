@@ -7,20 +7,22 @@ $(document).ready(function() {
          * Disables and de-selects the forecast skill metric if not all of the
          * object pairs have reference foreasts.
          */
-        var nulls_exist = $('.reference-forecast-value').map(function(){return $(this).val()}).get().some(x=>x=='null');
+        var reference_exist = $('.reference-forecast-value').map(function(){
+            return $(this).val();
+        }).get().some(x=>x!='null');
         var skill = $('[name=metrics][value=s]'); 
-        if(nulls_exist){
+        if (!reference_exist){
             // hide skill, insert warning
             skill.attr('disabled', true);
-            if($('#reference-warning').length == 0){
+            if ($('#reference-warning').length == 0){
                 $(`<span id="reference-warning" class="warning-message">
                    (Requires reference forecast selection)</span>`
                  ).insertAfter(skill.next());
             }
-            if(skill.is(':checked')){
+            if (skill.is(':checked')){
                 skill.removeAttr('checked');
             }
-        }else{
+        } else {
             // show skill remove warning
             skill.removeAttr('disabled');
             $('#reference-warning').remove();
