@@ -11,21 +11,16 @@ $(document).ready(function() {
             return $(this).val();
         }).get().some(x=>x!='null');
         var skill = $('[name=metrics][value=s]'); 
-        if (!reference_exist){
+        if (reference_exist){
+            // show skill remove warning
+            $('#reference-warning').remove();
+        } else {
             // hide skill, insert warning
-            skill.attr('disabled', true);
             if ($('#reference-warning').length == 0){
                 $(`<span id="reference-warning" class="warning-message">
                    (Requires reference forecast selection)</span>`
                  ).insertAfter(skill.next());
             }
-            if (skill.is(':checked')){
-                skill.removeAttr('checked');
-            }
-        } else {
-            // show skill remove warning
-            skill.removeAttr('disabled');
-            $('#reference-warning').remove();
         }
     }
     function searchObjects(object_type, object_id){
