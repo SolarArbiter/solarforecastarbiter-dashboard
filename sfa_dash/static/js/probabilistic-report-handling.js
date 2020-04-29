@@ -202,7 +202,7 @@ $(document).ready(function() {
                     <input type="hidden" class="form-control reference-forecast-value" name="reference-forecast-${pair_index}" required value="${ref_fxId}"/>
                     <div class="object-pair-label deadband-label"><b>Uncertainty: </b> ${db_label}</div>
                     <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="${db_value}"/>
-                    <input type="hidden" class="forecast-type-value" name="forecast-type" value="${forecast_type}"/>
+                    <input type="hidden" class="forecast-type-value" name="forecast-type-${pair_index}" required value="${forecast_type}"/>
                   </div>
                  </div>
                  <a role="button" class="object-pair-delete-button">remove</a>
