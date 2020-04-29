@@ -7,7 +7,7 @@
 {% include "sections/notifications.html" %}
 <h3>Create New Report</h3>
 {% include "forms/report_menu.html" %}
-<form action="{{ url_for('forms.create_'+report_type+'_report', report_type="{{report_type}}") }}" method="post" id="report-form" onSubmit="return validateReport();">
+<form action="{{ url_for('forms.create_'+report_type+'_report') }}" method="post" id="report-form" onSubmit="return validateReport();">
   <div class="form-group">
      <div class="form-element full-width">
        <div class="input-wrapper">

@@ -245,7 +245,7 @@ $(document).ready(function() {
             constant_values = forecast['constant_values'];
             constant_values.forEach(function(constant_value){
                 let option = $('<option></option')
-                    .attr('value', forecast['forecast_id'])
+                    .attr('value', constant_value['forecast_id'])
                     .attr('data-measurement', constant_value['constant_value'])
                     .html(`${constant_value['constant_value']} ${units}`);
                 if (previous_constants.includes(constant_value['constant_value'].toString())){
@@ -794,21 +794,15 @@ $(document).ready(function() {
                     let forecast_name = forecast['name'];
                     
                     if (forecast_id == 'full-cdf-group'){
-                        forecast_id = selected_forecast;
-                        console.log('full group')
-                        console.log('fxid ', forecast_id);
-                        console.log('forecast ', forecast);
-                        console.log('name ', forecast_name);
+                        forecast_id = selected_forecast.value;
                     } else {
                         let units = determine_forecast_units(forecast);
                         let constant_value = $(this).data('measurement');
                         forecast_name = `${forecast_name}: ${constant_value} ${units}`;
-                        forecast_id = selected_forecast;
-                        console.log('constant value');
-                        console.log('fxid ', forecast_id);
-                        console.log('forecast ', forecast);
-                        console.log('name ', forecast_name);
                     }
+                    console.log('forecast: ', forecast);
+                    console.log('this : ', this);
+                    console.log('forecast id: ',forecast_id);
                     pair = addPair(
                         'observation',
                         selected_observation.text,
@@ -862,19 +856,11 @@ $(document).ready(function() {
                     
                     if (forecast_id == 'full-cdf-group'){
                         forecast_id = selected_forecast;
-                        console.log('full group')
-                        console.log('fxid ', forecast_id);
-                        console.log('forecast ', forecast);
-                        console.log('name ', forecast_name);
                     } else {
                         let units = determine_forecast_units(forecast);
                         let constant_value = $(this).data('measurement');
                         forecast_name = `${forecast_name}: ${constant_value} ${units}`;
-                        forecast_id = selected_forecast;
-                        console.log('constant value');
-                        console.log('fxid ', forecast_id);
-                        console.log('forecast ', forecast);
-                        console.log('name ', forecast_name);
+                        forecast_id = selected_forecast['forecast_id'];
                     }
                     pair = addPair(
                         'aggregate',
