@@ -91,7 +91,6 @@ $(document).ready(function() {
             if ($('.object-pair-list .object-pair').length == 0){
                 $('.empty-reports-list')[0].hidden = false;
             }
-            toggle_reference_dependent_metrics();
         });
         return new_object_pair;
     }
@@ -239,7 +238,6 @@ $(document).ready(function() {
         var widgetContainer = $('<div class="pair-selector-wrapper collapse"></div>');
         widgetContainer.append(siteSelector);
         widgetContainer.append(fxSelector);
-        widgetContainer.append(refFxSelector);
         widgetContainer.append(obsSelector);
         widgetContainer.append(addObsButton);
 
@@ -252,7 +250,6 @@ $(document).ready(function() {
         // create variables pointing to the specific select elements
         var observation_select = obsSelector.find('#observation-select');
         var forecast_select = fxSelector.find('#forecast-select');
-        var ref_forecast_select = refFxSelector.find('#reference-forecast-select');
         var site_select = siteSelector.find('#site-select');
         
         // set callbacks for select inputs
@@ -311,7 +308,6 @@ $(document).ready(function() {
                 $(".empty-reports-list").attr('hidden', 'hidden');
                 forecast_select.css('border', '');
                 observation_select.css('border', '');
-                toggle_reference_dependent_metrics();
             } else {
                 // Otherwise apply a red border to alert the user to need of input
                 if (forecast_select.val() == null){
