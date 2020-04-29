@@ -11,7 +11,7 @@
   <div class="form-group">
      <div class="form-element full-width">
        <div class="input-wrapper">
-         <input type="text" class="form-control  name-field" required="" name="name" {{ form.name_pattern() }} value="{% if form_data %}{{form_data['report_parameters']['name']}}{% else %}{%endif%}"/>
+         <input type="text" class="form-control  name-field" required="" name="name" {{ form.name_validation() }} value="{% if form_data %}{{form_data['report_parameters']['name']}}{% else %}{%endif%}"/>
        </div>
      </div>
 	 <div class="form-element">

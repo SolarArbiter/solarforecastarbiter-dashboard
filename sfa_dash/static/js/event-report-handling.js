@@ -55,8 +55,9 @@ $(document).ready(function() {
         filterObservations();
     }
 
-    function addPair(truthType, truthName, truthId, fxName, fxId,
-                     db_label, db_value){
+    function addPair(
+        truthType, truthName, truthId, fxName, fxId, db_label, db_value,
+        forecast_type='event'){
         /*
          * Returns a Jquery object containing 5 input elements representing a forecast,
          * observation pair:
@@ -81,6 +82,7 @@ $(document).ready(function() {
                     <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truthType}"/>
                     <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="null"/>
                     <input type="hidden" class="form-control reference-forecast-value" name="reference-forecast-${pair_index}" required value="null"/>
+                    <input type="hidden" class="forecast-type-value" name="forecast-type" value="${forecast_type}"/>
                   </div>
                  </div>
                  <a role="button" class="object-pair-delete-button">remove</a>
