@@ -1,5 +1,7 @@
 {% import "forms/form_macros.jinja" as form %}
 
+{% set report_type = 'event' %}
+{% set post_path = '/reports/event/create' %}
 {% set report_script = '/static/js/event-report-handling.js' %}
 {% set metric_options = event_metrics %}
 {% set default_metrics = [] %}
