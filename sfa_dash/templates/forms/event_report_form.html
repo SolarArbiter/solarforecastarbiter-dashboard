@@ -7,12 +7,11 @@
 {% include "sections/notifications.html" %}
 <h3>Create New Report</h3>
 {% include "forms/report_menu.html" %}
-<form action="{{ url_for('forms.create_event_report') }}" method="post" id="report-form" onSubmit="validateReport();">
+<form action="{{ url_for('forms.create_event_report') }}" method="post" id="report-form" onSubmit="return validateReport();">
   <div class="form-group">
       {% if form_data is not defined %} {% set form_data = {} %}{% endif %}
      <div class="form-element full-width">
-       {{ form.input('Name', 'text', 'name', 'Name of the Report.',
-                     required=True, form_data=form_data) }}
+       <input type="text" class="form-control  name-field" required="" name="name" {{ form.name_pattern() }} value="{% if form_data %}{{form_data['report_parameters']['name']}}{% else %}{%endif%}"/>
      </div>
 	 <div class="form-element">
        <label for="start">Start (UTC):</label><br/>

@@ -67,6 +67,34 @@ def is_allowed(action):
     return action in allowed
 
 
+def parse_quality_flags(form_dict):
+    """Parses quality flag filter values out of a parsed form_data
+    dictionary. This is necessary because filters are presented as a list
+    of dicts where a key designates filter type.
+
+    Parameters
+    ----------
+    form_dict: dict
+        The api payload parsed from form data in the form of a dictionary.
+
+    Returns
+    -------
+    list
+        List of quality flags.
+    """
+    filters = form_dict.get('report_parameters', {}).get('filters', {})
+    if filters:
+        quality_flag_filters = filter(
+            lambda x: 'quality_flags' in x,
+            filters,
+        )
+        quality_flags = [flag for filt in quality_flag_filters
+                         for flag in filt['quality_flags']]
+    else:
+        quality_flags = []
+    return quality_flags
+
+
 def template_variables():
     return {
         'dashboard_version': sfa_dash.__version__,

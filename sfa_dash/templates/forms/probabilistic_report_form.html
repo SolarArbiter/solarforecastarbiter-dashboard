@@ -6,12 +6,11 @@
 {% include "sections/notifications.html" %}
 <h3>Create New Report</h3>
 {% include "forms/report_menu.html" %}
-<form action="{{ url_for('forms.create_report') }}" method="post" id="report-form">
+<form action="{{ url_for('forms.create_report') }}" method="post" id="report-form" onSubmit="return validateReport();">
   <div class="form-group">
       {% if form_data is not defined %} {% set form_data = {} %}{% endif %}
      <div class="form-element full-width">
-       {{ form.input('Name', 'text', 'name', 'Name of the Report.',
-                     required=True, form_data=form_data) }}
+       <input type="text" class="form-control  name-field" required="" name="name" {{ form.name_pattern() }} value="{% if form_data %}{{form_data['report_parameters']['name']}}{% else %}{%endif%}"/>
      </div>
 	 <div class="form-element">
        <label for="start">Start (UTC):</label><br/>
@@ -64,8 +63,9 @@
      <div class="form-element">
        <label>Quality Flag Filters</label><br>
        <p>Data flagged with any checked quality flags is excluded from analysis. </p>
+       {% set checked_flags = parse_quality_flags(form_data) %}
        {% for flag in quality_flags.keys() %}
-       <input type="checkbox" name="quality_flags" value="{{ flag }}" {% if form_data %}{% if flag in form_data['report_parameters']['filters']['quality_flags'] %}checked{% endif %}{%endif %}> {{ flag }}<br/>
+       <input type="checkbox" name="quality_flags" value="{{ flag }}" {% if form_data %}{% if flag in checked_flags %}checked{% endif %}{%endif %}> {{ flag }}<br/>
        {% endfor %}
      </div>
     {{ form.token() }}

@@ -353,12 +353,15 @@ function validateReport(){
      */
     // remove any existing errors
     $('#form-errors').empty();
-
+    var errors = 0;
     // assert at least one pair was selected.
     if($('.object-pair').length == 0){
         insertErrorMessage(
             "Analysis Pairs",
             "Must specify at least one Observation, Forecast pair.");
+        errors++;
     }
-    return false;
+    if (errors){
+       return false;
+    }
 }

@@ -115,3 +115,5 @@
     <textarea cols="40" rows="5" name="extra_parameters" class="form-control extra-parameters-field" placeholder="This field will store any ASCII text. We recommend using it to store other parameters you have collected in a format such as YAML or JSON."></textarea>
   </div>
 {% endmacro %}
+
+{% macro name_pattern() %}pattern="[A-Za-z0-9(), \-_']+"{% endmacro %}
