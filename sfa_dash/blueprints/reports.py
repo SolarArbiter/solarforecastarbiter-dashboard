@@ -95,10 +95,12 @@ class ReportForm(BaseView):
                                                  form_data)
 
         uncertainty_values = filter_form_fields('deadband-value-', form_data)
+        forecast_types = filter_form_fields('forecast-type-', form_data)
         pairs = [{'forecast': f,
                   truth_types[i]: truth_ids[i],
                   'reference_forecast': reference_forecasts[i],
-                  'uncertainty': uncertainty_values[i]}
+                  'uncertainty': uncertainty_values[i],
+                  'forecast_type': forecast_types[i]}
                  for i, f in enumerate(fx)]
         return pairs
 
@@ -138,7 +140,7 @@ class ReportForm(BaseView):
                 'error': [('Must include at least 1 Forecast, Observation '
                            'pair.')],
             }
-            return super().get(form_data=api_payload, errors=errors)
+            return self.get(form_data=api_payload, errors=errors)
         try:
             report_id = reports.post_metadata(api_payload)
         except DataRequestException as e:
@@ -151,7 +153,7 @@ class ReportForm(BaseView):
                 }
             else:
                 errors = e.errors
-            return super().get(form_data=api_payload, errors=errors)
+            return self.get(form_data=api_payload, errors=errors)
         return redirect(url_for(
             'data_dashboard.report_view',
             uuid=report_id,

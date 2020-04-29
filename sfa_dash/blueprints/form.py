@@ -362,7 +362,7 @@ forms_blp.add_url_rule('/forecasts/cdf/single/<uuid>/upload',
                                                     data_type='cdf_forecast'))
 forms_blp.add_url_rule('/reports/deterministic/create',
                        view_func=ReportForm.as_view(
-                           'create_report',
+                           'create_deterministic_report',
                            report_type='deterministic'))
 forms_blp.add_url_rule('/reports/event/create',
                        view_func=ReportForm.as_view(
