@@ -117,4 +117,5 @@ def template_variables():
         'parse_quality_flags': parse_quality_flags,
         'variable_names': COMMON_NAMES,
         'variable_unit_map': ALLOWED_VARIABLES,
+        'parse_quality_flags': parse_quality_flags,
     }
