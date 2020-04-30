@@ -173,7 +173,8 @@ $(document).ready(function() {
 
     function addPair(
         truthType, truthName, truthId, fxName, fxId, ref_fxName, ref_fxId,
-        db_label, db_value, forecast_type='probabilistic_forecast'){
+        db_label, db_value, constant_value,
+        forecast_type='probabilistic_forecast'){
         /*
          * Returns a Jquery object containing 5 input elements representing a forecast,
          * observation pair:
@@ -189,12 +190,15 @@ $(document).ready(function() {
          *  where index associates the pairs with eachother for easier parsing when the form
          *  is submitted.
          */
-
+        if (forecast_type='probabilistic_forecast'){
+            $('[name="metrics"][value="crps"]').prop('checked');
+        }
         var new_object_pair = $(`<div class="object-pair object-pair-${pair_index}">
                 <div class="input-wrapper">
                   <div class="col-md-12">
                     <div class="object-pair-label forecast-name-${pair_index}"><b>Forecast: </b>${fxName}</div>
                     <input type="hidden" class="form-control forecast-value" name="forecast-id-${pair_index}" required value="${fxId}"/>
+                    <div class="object-pair-label constant-value"><b>Constant value: </b> ${constant_value}</div>
                     <div class="object-pair-label truth-name-${pair_index}"><b>Observation: </b> ${truthName}</div>
                     <input type="hidden" class="form-control truth-value" name="truth-id-${pair_index}" required value="${truthId}"/>
                     <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truthType}"/>
@@ -231,12 +235,12 @@ $(document).ready(function() {
 
 
     function populateConstantValues(){
-        var selected_forecast_id = $('#forecast-select').val();
+        var selected_forecast_id = $('#probabilistic-forecast-group-select').val();
         var constant_value_select = $('#constant-value-select');
 
         var non_static_constants = constant_value_select.find('option').slice(3);
         if (selected_forecast_id){
-            $("#no-constant-value-forecast-selection").attr('hidden', 'hidden');
+            $("#no-constant-value-probabilistic-forecast-group-selection").attr('hidden', 'hidden');
             non_static_constants.remove();
 
             var forecast = searchObjects('forecasts', selected_forecast_id);
@@ -247,7 +251,7 @@ $(document).ready(function() {
                 let option = $('<option></option')
                     .attr('value', constant_value['forecast_id'])
                     .attr('data-measurement', constant_value['constant_value'])
-                    .html(`${constant_value['constant_value']} ${units}`);
+                    .html(`constant value: ${constant_value['constant_value']} ${units}`);
                 if (previous_constants.includes(constant_value['constant_value'].toString())){
                     option.attr('selected', 'selected');
                 }
@@ -260,7 +264,7 @@ $(document).ready(function() {
             let selected = constant_value_select.find(':selected');
             previous_constants = selected.toArray().map(o=>o.dataset['measurement']);
             non_static_constants.remove();
-            $("#no-constant-value-forecast-selection").removeAttr('hidden');
+            $("#no-constant-value-probabilistic-forecast-group-selection").removeAttr('hidden');
             $('#full-cdf-group').attr('hidden', 'hidden');
             $('#full-cdf-group').removeAttr('selected');
         }
@@ -268,21 +272,26 @@ $(document).ready(function() {
 
     function newConstantValueSelector(){
         /* Builds the constant value selector */
-        return $(`<div class="form-element full-width constant-value-select-wrapper">
-                    <label>Select Constant Values: </label>
-                    <p>You may select multiple constant values (using ctrl+click
-                       for Windows or command+click for Mac). Select <b> Full
-                       Probabilistic Forecast Group</b> to calculate the CRPS
-                       metric for this forecast. A Forecast, Observation pair
-                       will be created for each value you select.</p>
-                    <div class="input-wrapper">
-                      <select id="constant-value-select" class="form-control contant-value-field name="constant-value-select" multiple size="5">
-                      <option id="no-constant-value-forecast-selection" disabled> Please select a Probabilistic Forecast Group.</option>
-                      <option id="no-constant-values" disabled hidden>No Constant Values</option>
-                      <option id="full-cdf-group" value ='full-cdf-group' data-measurement="full"hidden>Full Probabilistic Forecast Group(CRPS metric only)</option>
-                    </select>
-                    </div>
-                  </div>`);
+        return $(
+            `<div class="form-element full-width constant-value-select-wrapper">
+                <label>Select forecast values to pair </label>
+                <p>Select <b> Full Probabilistic Forecast Group</b> to
+                   calculate the
+                   <a href="https://solarforecastarbiter.org/metrics/#crps">CRPS<a>
+                   metric for this probabilistic forecast group. You may
+                   select multiple constant values (using ctrl+click for
+                   Windows or command+click for Mac). A forecast, observation
+                   pair will be created for each value you select. Each
+                   constant value will be evaluated with the metrics chosen
+                   below.</p>
+                <div class="input-wrapper">
+                  <select id="constant-value-select" class="form-control contant-value-field name="constant-value-select" multiple size="5">
+                  <option id="no-constant-value-probabilistic-forecast-group-selection" disabled> Please select a Probabilistic Forecast Group.</option>
+                  <option id="no-constant-values" disabled hidden>No Constant Values</option>
+                  <option id="full-cdf-group" value ='full-cdf-group' data-measurement="full"hidden>Full Probabilistic Forecast Group(CRPS metric only)</option>
+                </select>
+                </div>
+              </div>`);
     }
     function newSelector(field_name, depends_on=null, required=true, classes=[]){
         /*
@@ -291,7 +300,7 @@ $(document).ready(function() {
          *     Always adds an option containing "No matching <field_Type>s
          *     If depends_on is provided, inserts a "Please select a <depends_on> option>
          */
-        var field_type = field_name.toLowerCase().replace(' ', '-');
+        var field_type = field_name.toLowerCase().replace(/ /g, '-');
         return $(`<div class="form-element full-width ${field_type}-select-wrapper">
                     <label>Select a ${field_name} ${required ? "" : "(Optional)"}</label>
                       <div class="report-field-filters"><input id="${field_type}-option-search" class="form-control half-width" placeholder="Search by ${field_name} name"/></div><br>
@@ -419,10 +428,12 @@ $(document).ready(function() {
              * site and variable.
              */
             // Show all Forecasts
-            forecasts = $('#forecast-select option').slice(2);
+            forecasts = $('#probabilistic-forecast-group-select option').slice(2);
             forecasts.removeAttr('hidden');
 
-            toHide = searchSelect('#forecast-option-search', '#forecast-select', 2);
+            toHide = searchSelect(
+                '#probabilistic-forecast-group-option-search',
+                '#probabilistic-forecast-group-select', 2);
             variable_select = $('#variable-select');
             variable = variable_select.val();
 
@@ -436,9 +447,9 @@ $(document).ready(function() {
                 selectedSite = $('#site-select :selected');
                 site_id = selectedSite.data('site-id');
                 if (site_id){
-                    $('#no-forecast-site-selection').attr('hidden', true);
+                    $('#no-probabilistic-forecast-group-site-selection').attr('hidden', true);
                 } else {
-                    $('#no-forecast-site-selection').removeAttr('hidden');
+                    $('#no-probabilistic-forecast-group-site-selection').removeAttr('hidden');
                 }
 
                 // create a set of elements to hide from selected site, variable and search
@@ -446,7 +457,7 @@ $(document).ready(function() {
             } else {
 
                 toHide = toHide.add(forecasts.not('[data-aggregate-id]'));
-                $('#no-forecast-site-selection').attr('hidden', true);
+                $('#no-probabilistic-forecast-group-site-selection').attr('hidden', true);
             }
 
             // if current forecast selection is invalid, deselect
@@ -460,10 +471,10 @@ $(document).ready(function() {
             if (toHide.length == forecasts.length){
                 forecast_select.val('');
                 if ($('#no-forecast-site-selection').attr('hidden') || compareTo == 'aggregate'){
-                    $('#no-forecasts').removeAttr('hidden');
+                    $('#no-probabilistic-forecast-groups').removeAttr('hidden');
                 }
             } else {
-                $('#no-forecasts').attr('hidden', true);
+                $('#no-probabilistic-forecast-groups').attr('hidden', true);
             }
             filterReferenceForecasts(variable);
             if (compareTo == 'observation'){
@@ -490,9 +501,9 @@ $(document).ready(function() {
                 interval_length = forecast.data().intervalLength;
 
                 // hide the "please select forecast" prompt"
-                $('#no-reference-forecast-forecast-selection').attr('hidden', true);
+                $('#no-reference-forecast-probabilistic-forecast-group-selection').attr('hidden', true);
                 toHide = searchSelect('#reference-forecast-option-search',
-                                  '#reference-forecast-select', 2);
+                                  '#reference-probabilistic-forecast-group-select', 2);
                 if (variable){
                 toHide = toHide.add(reference_forecasts.not(
                     `[data-variable=${variable}]`));
@@ -518,7 +529,7 @@ $(document).ready(function() {
                 toHide = toHide.add(things);
             }else{
                 toHide = reference_forecasts;
-                $('#no-reference-forecast-forecast-selection').removeAttr('hidden');
+                $('#no-reference-forecast-probabilistic-forecast-group-selection').removeAttr('hidden');
             }
             
             // if current forecast selection is invalid, deselect
@@ -530,7 +541,7 @@ $(document).ready(function() {
             // if all options are hidden, show "no matching forecasts"
             if (toHide.length == reference_forecasts.length){
                 ref_forecast_select.val('');
-                if ($('#no-reference-forecast-forecast-selection').attr('hidden') || compareTo == 'aggregate'){
+                if ($('#no-reference-forecast-probabilistic-forecast-group-selection').attr('hidden') || compareTo == 'aggregate'){
                     $('#no-reference-forecasts').removeAttr('hidden');
                 }
             } else {
@@ -544,7 +555,7 @@ $(document).ready(function() {
              */
             aggregates = aggregateSelector.find('option').slice(2);
             aggregates.removeAttr('hidden');
-            selectedForecast = $('#forecast-select :selected');
+            selectedForecast = $('#probabilistic-forecast-group-select :selected');
             if (selectedForecast.length){
                 aggregate_id = selectedForecast.data('aggregate-id');
                 // hide aggregates based on search field
@@ -560,10 +571,10 @@ $(document).ready(function() {
                 } else {
                     $('#no-aggregates').attr('hidden', true);
                 }
-                $('#no-aggregate-forecast-selection').attr('hidden', true);
+                $('#no-aggregate-probabilistic-forecast-group-selection').attr('hidden', true);
             } else {
                 toHide = aggregates;
-                $('#no-aggregate-forecast-selection').removeAttr('hidden');
+                $('#no-aggregate-probabilistic-forecast-group-selection').removeAttr('hidden');
             }
             toHide.attr('hidden', true);
         }
@@ -573,14 +584,14 @@ $(document).ready(function() {
              */
             observations = $('#observation-select option').slice(2);
             // get the attributes of the currently selected forecast
-            selectedForecast = $('#forecast-select :selected');
+            selectedForecast = $('#probabilistic-forecast-group-select :selected');
             if (selectedForecast.length){
                 // Show all of the observations
                 observations.removeAttr('hidden');
                 // retrieve the current site id and variable from the selected forecast
                 site_id = selectedForecast.data('site-id');
                 variable = selectedForecast.data('variable');
-                $('#no-observation-forecast-selection').attr('hidden', true);
+                $('#no-observation-probabilistic-forecast-group-selection').attr('hidden', true);
 
                 // Build the list of optiosn to hide by creating a set from
                 // the lists of elements to hide from search, site id and variable
@@ -603,7 +614,7 @@ $(document).ready(function() {
                 }
             } else {
                 observations.attr('hidden', true);
-                $('#no-observation-forecast-selection').removeAttr('hidden');
+                $('#no-observation-probabilistic-forecast-group-selection').removeAttr('hidden');
             }
         }
 
@@ -613,12 +624,12 @@ $(document).ready(function() {
          *
          *********************************************************************/
         var siteSelector = newSelector("site");
-        var aggregateSelector = newSelector("aggregate", "forecast",);
-        var obsSelector = newSelector("observation", "forecast");
-        var fxSelector = newSelector("forecast", "site",);
+        var aggregateSelector = newSelector("aggregate", "probabilistic-forecast-group",);
+        var obsSelector = newSelector("observation", "probabilistic-forecast-group");
+        var fxSelector = newSelector("probabilistic forecast group", "site",);
 
         var refFxSelector = newSelector(
-            "reference forecast", "forecast", required=false);
+            "reference forecast", "probabilistic-forecast-group", required=false);
 
         var dbSelector = deadbandSelector();
         var constantValueSelector = newConstantValueSelector();
@@ -676,7 +687,7 @@ $(document).ready(function() {
          *********************************************************************/
         siteSelector.find('#site-option-search').keyup(filterSites);
         obsSelector.find('#observation-option-search').keyup(filterObservations);
-        fxSelector.find('#forecast-option-search').keyup(filterForecasts);
+        fxSelector.find('#probabilistic-forecast-group-option-search').keyup(filterForecasts);
         fxSelector.find('#reference-forecast-option-search').keyup(filterForecasts);
         aggregateSelector.find('#aggregate-option-search').keyup(filterAggregates);
 
@@ -687,9 +698,9 @@ $(document).ready(function() {
          *
          *********************************************************************/
         var observation_select = obsSelector.find('#observation-select');
-        var forecast_select = fxSelector.find('#forecast-select');
+        var forecast_select = fxSelector.find('#probabilistic-forecast-group-select');
         var constant_value_select = constantValueSelector.find('#constant-value-select')
-        var ref_forecast_select = refFxSelector.find('#reference-forecast-select');
+        var ref_forecast_select = refFxSelector.find('#reference-probabilistic-forecast-group-select');
         var site_select = siteSelector.find('#site-select');
         var aggregate_select = aggregateSelector.find('#aggregate-select');
 
@@ -793,17 +804,22 @@ $(document).ready(function() {
                     let forecast = searchObjects('forecasts', selected_forecast.value);
                     let forecast_name = forecast['name'];
                     let forecast_type = 'probabilistic_forecast_constant_value'
+                    let constant_value_label = "Full probabilistic forecast group";
                     if (forecast_id == 'full-cdf-group'){
                         forecast_id = selected_forecast.value;
                         forecast_type = 'probabilistic_forecast'
                     } else {
                         let units = determine_forecast_units(forecast);
                         let constant_value = $(this).data('measurement');
-                        forecast_name = `${forecast_name}: ${constant_value} ${units}`;
+                        let axis = forecast['axis'];
+                        console.log(units)
+                        if (units == '%'){
+                            constant_value_label = `Prob(x) = ${constant_value} ${units}`
+                        } else {
+                            constant_value_label = `Prob(x) < ${constant_value} ${units}`
+                        }
+                        forecast_id = $(this).val();
                     }
-                    console.log('forecast: ', forecast);
-                    console.log('this : ', this);
-                    console.log('forecast id: ',forecast_id);
                     pair = addPair(
                         'observation',
                         selected_observation.text,
@@ -814,6 +830,7 @@ $(document).ready(function() {
                         ref_id,
                         deadband_values[0],
                         deadband_values[1],
+                        constant_value_label,
                         forecast_type,
                     )
                     pair_container.append(pair);
@@ -856,14 +873,20 @@ $(document).ready(function() {
                     let forecast = searchObjects('forecasts', selected_forecast.value);
                     let forecast_name = forecast['name'];
                     let forecast_type = 'probabilistic_forecast_constant_value';
-                    
+                    let constant_value_label = "Full probabilistic forecast group";
                     if (forecast_id == 'full-cdf-group'){
                         forecast_id = selected_forecast;
                         forecast_type = 'probabilistic_forecast';
                     } else {
                         let units = determine_forecast_units(forecast);
                         let constant_value = $(this).data('measurement');
-                        forecast_name = `${forecast_name}: ${constant_value} ${units}`;
+                        let axis = forecast['axis'];
+                        console.log(units)
+                        if (units == '%'){
+                            constant_value_label = `Prob(x) = ${constant_value} ${units}`
+                        } else {
+                            constant_value_label = `Prob(x) < ${constant_value} `
+                        }
                         forecast_id = selected_forecast['forecast_id'];
                     }
                     pair = addPair(
@@ -876,6 +899,7 @@ $(document).ready(function() {
                         ref_id,
                         "Unset",
                         null,
+                        constant_value_label,
                         forecast_type,
                     );
                     pair_container.append(pair);
@@ -941,5 +965,7 @@ function validateReport(){
     }
     if (errors){
        return false;
+    } else {
+        $('[name="metrics"]:disabled').removeAttr('disabled');
     }
 }
