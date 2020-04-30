@@ -3,6 +3,6 @@
 {% set report_type = 'probabilistic' %}
 {% set report_script = '/static/js/probabilistic-report-handling.js' %}
 {% set metric_options = probabilistic_metrics %}
-{% set default_metrics = [] %}
+{% set excluded_metrics = ['crps'] %}
 
 {% extends "forms/base_report_form.html" %}

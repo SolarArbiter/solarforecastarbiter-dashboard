@@ -114,6 +114,18 @@ class ReportForm(BaseView):
             filters.append({'quality_flags': quality_flags})
         return filters
 
+    def apply_crps(self, params):
+        """Checks for "probabilistic_forecast' forecast_type in object pairs
+        and if found, appends the CRPS metric to the metrics options.
+        """
+        pair_fx_types = [f['forecast_type'] for f in params['object_pairs']]
+        if'probabilistic_forecast' in pair_fx_types:
+            new_params = params.copy()
+            new_params['metrics'].append('crps')
+            return new_params
+        else:
+            return params
+
     def parse_report_parameters(self, form_data):
         params = {}
         params['name'] = form_data['name']
@@ -124,6 +136,7 @@ class ReportForm(BaseView):
         params['filters'] = self.parse_filters(form_data)
         params['start'] = form_data['period-start']
         params['end'] = form_data['period-end']
+        params = self.apply_crps(params)
         return params
 
     def report_formatter(self, form_data):

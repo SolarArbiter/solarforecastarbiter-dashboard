@@ -49,9 +49,17 @@
      {% block metrics_field %}
      <div class="form-element">
      <label>Metrics</label><br>
+       {% if excluded_metrics is not defined %}
+         {% set excluded_metrics = [] %}
+       {%endif %}
+       {% if default_metrics is not defined %}
+         {% set default_metrics = [] %}
+       {%endif %}
        {% for metric, label in metric_options.items() %}
-       <input type="checkbox" name="metrics" value="{{ metric }}" {% if form_data %}{% if metric in form_data['report_parameters']['metrics'] %}checked{% endif %}{% elif metric in default_metrics  %}checked{% endif %}>
-       <a href="https://solarforecastarbiter.org/metrics/#{{ metric |replace('^', '') }}" target="_blank"> {{ label }}</a><br/>
+         {% if metric not in excluded_metrics %}
+           <input type="checkbox" name="metrics" value="{{ metric }}" {% if form_data %}{% if metric in form_data['report_parameters']['metrics'] %}checked{% endif %}{% elif metric in default_metrics  %}checked{% endif %}>
+           <a href="https://solarforecastarbiter.org/metrics/#{{ metric |replace('^', '') }}" target="_blank"> {{ label }}</a><br/>
+         {% endif %}
        {% endfor %}
      </div>
      {% endblock %}

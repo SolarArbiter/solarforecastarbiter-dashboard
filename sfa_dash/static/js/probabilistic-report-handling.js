@@ -173,7 +173,7 @@ $(document).ready(function() {
 
     function addPair(
         truthType, truthName, truthId, fxName, fxId, ref_fxName, ref_fxId,
-        db_label, db_value, forecast_type='probabilistic_forecast_constant_value'){
+        db_label, db_value, forecast_type='probabilistic_forecast'){
         /*
          * Returns a Jquery object containing 5 input elements representing a forecast,
          * observation pair:
@@ -792,9 +792,10 @@ $(document).ready(function() {
                     let forecast_id = $(this).val();
                     let forecast = searchObjects('forecasts', selected_forecast.value);
                     let forecast_name = forecast['name'];
-                    
+                    let forecast_type = 'probabilistic_forecast_constant_value'
                     if (forecast_id == 'full-cdf-group'){
                         forecast_id = selected_forecast.value;
+                        forecast_type = 'probabilistic_forecast'
                     } else {
                         let units = determine_forecast_units(forecast);
                         let constant_value = $(this).data('measurement');
@@ -813,6 +814,7 @@ $(document).ready(function() {
                         ref_id,
                         deadband_values[0],
                         deadband_values[1],
+                        forecast_type,
                     )
                     pair_container.append(pair);
                     pair_index++;
@@ -853,9 +855,11 @@ $(document).ready(function() {
                     let forecast_id = $(this).val();
                     let forecast = searchObjects('forecasts', selected_forecast.value);
                     let forecast_name = forecast['name'];
+                    let forecast_type = 'probabilistic_forecast_constant_value';
                     
                     if (forecast_id == 'full-cdf-group'){
                         forecast_id = selected_forecast;
+                        forecast_type = 'probabilistic_forecast';
                     } else {
                         let units = determine_forecast_units(forecast);
                         let constant_value = $(this).data('measurement');
@@ -872,6 +876,7 @@ $(document).ready(function() {
                         ref_id,
                         "Unset",
                         null,
+                        forecast_type,
                     );
                     pair_container.append(pair);
                     pair_index++;
