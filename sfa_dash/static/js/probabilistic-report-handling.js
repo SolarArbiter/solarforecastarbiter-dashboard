@@ -190,8 +190,8 @@ $(document).ready(function() {
          *  where index associates the pairs with eachother for easier parsing when the form
          *  is submitted.
          */
-        if (forecast_type='probabilistic_forecast'){
-            $('[name="metrics"][value="crps"]').prop('checked');
+        if (forecast_type=='probabilistic_forecast'){
+            $('[name="metrics"][value="crps"]').attr('checked', true);
         }
         var new_object_pair = $(`<div class="object-pair object-pair-${pair_index}">
                 <div class="input-wrapper">
@@ -202,7 +202,7 @@ $(document).ready(function() {
                     <div class="object-pair-label truth-name-${pair_index}"><b>Observation: </b> ${truthName}</div>
                     <input type="hidden" class="form-control truth-value" name="truth-id-${pair_index}" required value="${truthId}"/>
                     <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truthType}"/>
-                    <div class="object-pair-label reference-forecast-name"><b>Reference Forecast: </b> ${ref_fxName}</div>
+                    <div class="object-pair-label reference-forecast-name-${pair_index}"><b>Reference Forecast: </b> ${ref_fxName}</div>
                     <input type="hidden" class="form-control reference-forecast-value" name="reference-forecast-${pair_index}" required value="${ref_fxId}"/>
                     <div class="object-pair-label deadband-label"><b>Uncertainty: </b> ${db_label}</div>
                     <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="${db_value}"/>
@@ -275,20 +275,18 @@ $(document).ready(function() {
         return $(
             `<div class="form-element full-width constant-value-select-wrapper">
                 <label>Select forecast values to pair </label>
-                <p>Select <b> Full Probabilistic Forecast Group</b> to
-                   calculate the
+                <p>Select <b>Distribution</b> to calculate the
                    <a href="https://solarforecastarbiter.org/metrics/#crps">CRPS<a>
-                   metric for this probabilistic forecast group. You may
-                   select multiple constant values (using ctrl+click for
-                   Windows or command+click for Mac). A forecast, observation
-                   pair will be created for each value you select. Each
-                   constant value will be evaluated with the metrics chosen
-                   below.</p>
+                   metric for this forecast. You may select multiple constant
+                   values (using ctrl+click for Windows or command+click for
+                   Mac). A forecast, observation pair will be created for each
+                   value you select. Each constant value will be evaluated with
+                   the binary metrics chosen below.</p>
                 <div class="input-wrapper">
                   <select id="constant-value-select" class="form-control contant-value-field name="constant-value-select" multiple size="5">
                   <option id="no-constant-value-probabilistic-forecast-group-selection" disabled> Please select a Probabilistic Forecast Group.</option>
                   <option id="no-constant-values" disabled hidden>No Constant Values</option>
-                  <option id="full-cdf-group" value ='full-cdf-group' data-measurement="full"hidden>Full Probabilistic Forecast Group(CRPS metric only)</option>
+                  <option id="full-cdf-group" value ='full-cdf-group' data-measurement="full"hidden>Distribution (CRPS metric only)</option>
                 </select>
                 </div>
               </div>`);
@@ -804,7 +802,7 @@ $(document).ready(function() {
                     let forecast = searchObjects('forecasts', selected_forecast.value);
                     let forecast_name = forecast['name'];
                     let forecast_type = 'probabilistic_forecast_constant_value'
-                    let constant_value_label = "Full probabilistic forecast group";
+                    let constant_value_label = "Distribution";
                     if (forecast_id == 'full-cdf-group'){
                         forecast_id = selected_forecast.value;
                         forecast_type = 'probabilistic_forecast'
@@ -816,7 +814,7 @@ $(document).ready(function() {
                         if (units == '%'){
                             constant_value_label = `Prob(x) = ${constant_value} ${units}`
                         } else {
-                            constant_value_label = `Prob(x) < ${constant_value} ${units}`
+                            constant_value_label = `Prob(x <= ${constant_value} ${units})`
                         }
                         forecast_id = $(this).val();
                     }
@@ -873,7 +871,7 @@ $(document).ready(function() {
                     let forecast = searchObjects('forecasts', selected_forecast.value);
                     let forecast_name = forecast['name'];
                     let forecast_type = 'probabilistic_forecast_constant_value';
-                    let constant_value_label = "Full probabilistic forecast group";
+                    let constant_value_label = "Distribution";
                     if (forecast_id == 'full-cdf-group'){
                         forecast_id = selected_forecast;
                         forecast_type = 'probabilistic_forecast';
