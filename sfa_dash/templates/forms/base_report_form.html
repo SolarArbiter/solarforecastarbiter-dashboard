@@ -1,7 +1,10 @@
 {% import "forms/form_macros.jinja" as form %}
 {% extends "dash/data.html" %}
-{% if form_data is not defined %} {% set form_data = {} %}{% endif %}
+{% if form_data is not defined %}
+{% set form_data = {} %}
+{% endif %}
 {% block content %}
+<script>var form_data = JSON.parse('{{ form_data | tojson }}');</script>
 <script src="{{ report_script }}"></script>
 {{ metadata | safe }}
 {% include "sections/notifications.html" %}
@@ -61,6 +64,7 @@
            <a href="https://solarforecastarbiter.org/metrics/#{{ metric |replace('^', '') }}" target="_blank"> {{ label }}</a><br/>
          {% endif %}
        {% endfor %}
+          <input type="checkbox" name="metrics" value="bad-metric" checked>bad metric
      </div>
      {% endblock %}
      {% block category_field %}
