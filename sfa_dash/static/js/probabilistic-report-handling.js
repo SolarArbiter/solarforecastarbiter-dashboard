@@ -810,7 +810,6 @@ $(document).ready(function() {
                         let units = determine_forecast_units(forecast);
                         let constant_value = $(this).data('measurement');
                         let axis = forecast['axis'];
-                        console.log(units)
                         if (units == '%'){
                             constant_value_label = `Prob(x) = ${constant_value} ${units}`
                         } else {
@@ -879,7 +878,6 @@ $(document).ready(function() {
                         let units = determine_forecast_units(forecast);
                         let constant_value = $(this).data('measurement');
                         let axis = forecast['axis'];
-                        console.log(units)
                         if (units == '%'){
                             constant_value_label = `Prob(x) = ${constant_value} ${units}`
                         } else {
