@@ -2,7 +2,7 @@
  *  Creates inputs for defining observation, forecast pairs for a report.
  */
 
-var previous_constants = [];
+var previous_constant = null;
 $(document).ready(function() {
     function toggle_reference_dependent_metrics(){
         /*
@@ -167,9 +167,54 @@ $(document).ready(function() {
 
     
 
+    function pairWrapper(truthType, truthId, truthName, fxId, fxName,
+                         ref_fxName, db_label, db_value, distribution_id){
+        if (truthType == 'observation'){
+            truth_label = 'Observation';
+        } else {
+            truth_label = 'Aggregate';
+        }
+        // create a container for the pair
+        container = $(`
+          <div class="object-pair pair-container" data-truth-id="${truthId}" data-fx-id="${distribution_id}" data-deadband-value="${db_value}">
+            <div class="col-md-12 pair-metadata">
+            </div>
+            <hr>
+            <ul class="col-md-12 pair-constant-values">
+            </ul>
+          </div>`);
+        // <div class="input-wrapper"></div>?
+        meta_block = container.find('.pair-metadata');
+        meta_block.append($('<div></div>')
+            .addClass('object-pair-label')
+            .addClass('forecast-name')
+            .html(`<b>Forecast: </b>${fxName}`));
+        meta_block.append($('<div></div>')
+            .addClass('object-pair-label')
+            .addClass('truth-name')
+            .html(`<b>${truth_label}: </b> ${truthName}`));
+
+        meta_block.append($('<div></div>')
+            .addClass('object-pair-label')
+            .addClass('deadband-label')
+            .html(`<b>Uncertainty: </b> ${db_label}`));
+
+        container.append('<a role="button" class="object-pair-delete-button">remove</a>')
+        var remove_button = container.find(".object-pair-delete-button");
+        remove_button.click(function(){
+            container.remove();
+            if ($('.object-pair-list .object-pair').length == 0){
+                $('.empty-reports-list')[0].hidden = false;
+                unset_units();
+            }
+            toggle_reference_dependent_metrics();
+        });
+        return container;
+    }
+
     function addPair(
         truthType, truthName, truthId, fxName, fxId, ref_fxName, ref_fxId,
-        db_label, db_value, constant_value,
+        db_label, db_value, constant_value, distribution_id,
         forecast_type='probabilistic_forecast'){
         /*
          * Returns a Jquery object containing 5 input elements representing a forecast,
@@ -186,39 +231,55 @@ $(document).ready(function() {
          *  where index associates the pairs with eachother for easier parsing when the form
          *  is submitted.
          */
+        new_container = false;
+
         if (forecast_type=='probabilistic_forecast'){
             $('[name="metrics"][value="crps"]').attr('checked', true);
         }
+        // Check for the parent pair container that groups object_pairs
+        // with similar observations, forecasts and uncertainties
+        var pair_container = $(`
+            .pair-container[data-truth-id=${truthId}][data-fx-id=${distribution_id}][data-deadband-value="${db_value}"]`);
+        if (pair_container.length == 0){
+            pair_container = pairWrapper(
+                truthType, truthId, truthName, fxId, fxName, ref_fxName,
+                db_label, db_value, distribution_id);
+            new_container = true;
+        }
+        var constant_values = pair_container.find('.pair-constant-values');
         if (constant_value){
             fxName = `${fxName} (${constant_value})`
         }
-        var new_object_pair = $(`<div class="object-pair object-pair-${pair_index}">
-                <div class="input-wrapper">
-                  <div class="col-md-12">
-                    <div class="object-pair-label forecast-name-${pair_index}"><b>Forecast: </b>${fxName}</div>
-                    <input type="hidden" class="form-control forecast-value" name="forecast-id-${pair_index}" required value="${fxId}"/>
-                    <div class="object-pair-label truth-name-${pair_index}"><b>Observation: </b> ${truthName}</div>
-                    <input type="hidden" class="form-control truth-value" name="truth-id-${pair_index}" required value="${truthId}"/>
-                    <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truthType}"/>
-                    <div class="object-pair-label reference-forecast-name-${pair_index}"><b>Reference Forecast: </b> ${ref_fxName}</div>
-                    <input type="hidden" class="form-control reference-forecast-value" name="reference-forecast-${pair_index}" required value="${ref_fxId}"/>
-                    <div class="object-pair-label deadband-label"><b>Uncertainty: </b> ${db_label}</div>
-                    <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="${db_value}"/>
-                    <input type="hidden" class="forecast-type-value" name="forecast-type-${pair_index}" required value="${forecast_type}"/>
-                  </div>
-                 </div>
-                 <a role="button" class="object-pair-delete-button">remove</a>
-               </div>`);
-        var remove_button = new_object_pair.find(".object-pair-delete-button");
+
+        var constant_value_pair = $(`<li class="object-pair object-pair-${pair_index}">
+            <div class="constant-value-label">${constant_value}</div>
+            <div class="object-pair-label reference-forecast-name"><b>Reference Forecast: </b> ${ref_fxName}</div>
+            <input type="hidden" class="forecast-value" name="forecast-id-${pair_index}" required value="${fxId}"/>
+            <input type="hidden" class="truth-value" name="truth-id-${pair_index}" required value="${truthId}"/>
+            <input type="hidden" class="truth-type-value" name="truth-type-${pair_index}" required value="${truthType}"/>
+            <input type="hidden" class="reference-forecast-value" name="reference-forecast-${pair_index}" required value="${ref_fxId}"/>
+            <input type="hidden" class="deadband-value" name="deadband-value-${pair_index}" required value="${db_value}"/>
+            <input type="hidden" class="forecast-type-value" name="forecast-type-${pair_index}" required value="${forecast_type}"/>
+        </li>`);
+
+        constant_value_pair.append('<a role="button" class="object-pair-delete-button">remove</a>')
+        var remove_button = constant_value_pair.find(".object-pair-delete-button");
         remove_button.click(function(){
-            new_object_pair.remove();
+            constant_value_pair.remove();
+            if (constant_values.find('li').length == 0){
+                pair_container.remove();
+            }
             if ($('.object-pair-list .object-pair').length == 0){
                 $('.empty-reports-list')[0].hidden = false;
                 unset_units();
             }
             toggle_reference_dependent_metrics();
         });
-        return new_object_pair;
+        constant_values.append(constant_value_pair);
+        if (new_container){
+            $('.object-pair-list').append(pair_container);
+        }
+        pair_index++;
     }
     function determine_forecast_units(forecast){
         /*
@@ -228,7 +289,7 @@ $(document).ready(function() {
         if (forecast['axis'] == 'y'){
             units = variable_unit_map[forecast['variable']];
         }
-        return units
+        return units;
     }
 
     function populateReferenceForecasts(){
@@ -248,14 +309,13 @@ $(document).ready(function() {
             location_key = 'aggregate_id';
         }
         if (selected_constant_value.length == 0){
-            // TODO display please select a constant value
-            $('#no-reference-forecast-constant-value-selection').removeAttr('hidden');
+            $('#no-reference-forecast-forecast-selection').removeAttr('hidden');
+            $('#no-reference-forecasts').attr('hidden', true);
             return;
         }
         constant_value_forecast_id = selected_constant_value.val();
-        console.log(constant_value_forecast_id);
         if (constant_value_forecast_id == 'full-cdf-group'){
-            $('#no-reference-forecast-constant-value-selection').removeAttr('hidden');
+            $('#no-reference-forecast-forecast-selection').removeAttr('hidden');
             $('#no-reference-forecasts').attr('hidden', true);
             return;
         } else {
@@ -299,11 +359,11 @@ $(document).ready(function() {
                         .attr('data-variable', fx['variable']));
             });
             $('#no-reference-forecasts').attr('hidden', true);
-            $('#no-reference-forecast-constant-value-selection').attr('hidden', true);
+            $('#no-reference-forecast-forecast-selection').attr('hidden', true);
 
         } else {
             $('#no-reference-forecasts').removeAttr('hidden');
-            $('#no-reference-forecast-constant-value-selection').attr('hidden', true);
+            $('#no-reference-forecast-forecast-selection').attr('hidden', true);
         }
     }
 
@@ -329,7 +389,7 @@ $(document).ready(function() {
                     .attr('value', constant_value['forecast_id'])
                     .attr('data-measurement', constant_value['constant_value'])
                     .html(cv_label(constant_value['constant_value']));
-                if (previous_constants.includes(constant_value['constant_value'].toString())){
+                if (previous_constant == constant_value['constant_value'].toString()){
                     option.attr('selected', 'selected');
                 }
                 $('#full-cdf-group').removeAttr('hidden');
@@ -338,8 +398,10 @@ $(document).ready(function() {
             });
 
         } else {
-            let selected = constant_value_select.find(':selected');
-            previous_constants = selected.toArray().map(o=>o.dataset['measurement']);
+            let selected = constant_value_select.find(':selected')[0];
+            if (selected){
+                previous_constant = selected.dataset['measurement'];
+            }
             non_static_constants.remove();
             $("#no-constant-value-distribution-selection").removeAttr('hidden');
             $('#full-cdf-group').attr('hidden', 'hidden');
@@ -352,13 +414,7 @@ $(document).ready(function() {
         /* Builds the constant value selector */
         return $(
             `<div class="form-element full-width constant-value-select-wrapper">
-                 <label>Select forecast values to pair </label>
-                 <p>Select Distribution to calculate the 
-                 <a href="https://solarforecastarbiter.org/metrics/#crps">CRPS<a>
-                 metric for this forecast distribution. Select one or more
-                 forecasts for binary outcomes to calculate binary metrics for
-                 each forecast. Multiple forecasts may be selected using
-                 ctrl+click for Windows or command+click for Mac.</p>
+                 <label>Select a forecast</label>
                 <div class="input-wrapper">
                   <select id="constant-value-select" class="form-control contant-value-field name="constant-value-select" size="5">
                   <option id="no-constant-value-distribution-selection" disabled> Please select a probabilistic forecast distribution.</option>
@@ -368,7 +424,7 @@ $(document).ready(function() {
                 </div>
               </div>`);
     }
-    function newSelector(field_name, depends_on=null, required=true, classes=[]){
+    function newSelector(field_name, depends_on=null, required=true, description="",classes=[]){
         /*
          * Returns a JQuery object containing labels and select elements for appending options to.
          * Initializes with one default and one optional select option:
@@ -379,6 +435,7 @@ $(document).ready(function() {
         return $(`<div class="form-element full-width ${field_type}-select-wrapper">
                     <label>Select a ${field_name} ${required ? "" : "(Optional)"}</label>
                       <div class="report-field-filters"><input id="${field_type}-option-search" class="form-control half-width" placeholder="Search by ${field_name} name"/></div><br>
+                    <div class="selector-description">${description}</div>
                     <div class="input-wrapper">
                       <select id="${field_type}-select" class="form-control ${field_type}-field ${classes.join(" ")}" name="${field_type}-select" size="5">
                       ${depends_on ? `<option id="no-${field_type}-${depends_on}-selection" disabled> Please select a ${depends_on}.</option>` : ""}
@@ -556,7 +613,6 @@ $(document).ready(function() {
             } else {
                 $('#no-distributions').attr('hidden', true);
             }
-            // TODO  maybe remove :filterReferenceForecasts(variable);
             if (compareTo == 'observation'){
                 filterObservations();
             } else {
@@ -643,10 +699,23 @@ $(document).ready(function() {
         var siteSelector = newSelector("site");
         var aggregateSelector = newSelector("aggregate", "distribution",);
         var obsSelector = newSelector("observation", "distribution");
-        var fxSelector = newSelector("distribution", "site",);
+        var fxSelector = newSelector(
+            "distribution", "site", required=true,
+            description=`
+                The Solar Forecast Arbiter supports the specification of
+                probabilistic forecasts in terms of a cumulative distribution
+                function (CDF). First select, the distribution of interest.
+                Second, select the portion of the distribution to be evaluated.
+                Select Distribution to calculate the
+                <a href="https://solarforecastarbiter.org/metrics/#crps">CRPS</a>
+                metric for the entire forecast distribution. Select a forecast
+                for a portion of the distribution to calculate binary metrics
+                for each forecast.`
+        );
 
         var refFxSelector = newSelector(
-            "reference forecast", "constant-value", required=false);
+            "reference forecast", "forecast", required=false,
+            description='Skill metrics will be calculated for any binary forecasts matching the selection above.');
 
         var dbSelector = deadbandSelector();
         var constantValueSelector = newConstantValueSelector();
@@ -674,11 +743,11 @@ $(document).ready(function() {
         var widgetContainer = $('<div class="pair-selector-wrapper collapse"></div>');
         widgetContainer.append(obsAggRadio);
         widgetContainer.append(siteSelector);
+        widgetContainer.append(aggregateSelector);
         widgetContainer.append(fxSelector);
         widgetContainer.append(constantValueSelector);
         widgetContainer.append(refFxSelector);
         widgetContainer.append(obsSelector);
-        widgetContainer.append(aggregateSelector);
         widgetContainer.append(dbSelector);
         widgetContainer.append(addObsButton);
         widgetContainer.append(addAggButton);
@@ -790,7 +859,7 @@ $(document).ready(function() {
              * On click, appends a new pair of inputs inside the 'pair_container' div, initializes
              * their select options and increment the pair_index.
              */
-            if (observation_select.val() && forecast_select.val()){
+            if (observation_select.val() && constant_value_select.val()){
                 // If both inputs contain valid data, create a pair and add it to the DOM
                 var selected_observation = observation_select.find(':selected')[0];
                 var selected_forecast = forecast_select.find(':selected')[0];
@@ -812,15 +881,16 @@ $(document).ready(function() {
                     let forecast_id = $(this).val();
                     let forecast = searchObjects('forecasts', selected_forecast.value);
                     let forecast_name = forecast['name'];
-                    let forecast_type = 'probabilistic_forecast_constant_value'
+                    let forecast_type = 'probabilistic_forecast';
                     let constant_value_label = "Distribution";
+                    let distribution_id = selected_forecast.value;
                     if (forecast_id == 'full-cdf-group'){
                         forecast_id = selected_forecast.value;
-                        forecast_type = 'probabilistic_forecast'
                     } else {
                         let units = determine_forecast_units(forecast);
                         let constant_value = $(this).data('measurement');
                         let axis = forecast['axis'];
+                        forecast_type = 'probabilistic_forecast_constant_value';
                         if (units == '%'){
                             constant_value_label = `Prob(x) = ${constant_value} ${units}`
                         } else {
@@ -828,7 +898,7 @@ $(document).ready(function() {
                         }
                         forecast_id = $(this).val();
                     }
-                    pair = addPair(
+                    addPair(
                         'observation',
                         selected_observation.text,
                         selected_observation.value,
@@ -839,10 +909,9 @@ $(document).ready(function() {
                         deadband_values[0],
                         deadband_values[1],
                         constant_value_label,
+                        distribution_id,
                         forecast_type,
                     )
-                    pair_container.append(pair);
-                    pair_index++;
                 });
                 
                 var variable = selected_forecast.dataset.variable;
@@ -850,11 +919,15 @@ $(document).ready(function() {
                 $(".empty-reports-list").attr('hidden', 'hidden');
                 forecast_select.css('border', '');
                 observation_select.css('border', '');
+                constant_value_select('border', '');
                 toggle_reference_dependent_metrics();
             } else {
                 // Otherwise apply a red border to alert the user to need of input
                 if (forecast_select.val() == null){
                     forecast_select.css('border', '2px solid #F99');
+                }
+                if (constant_value_select.val() == null){
+                    constant_value_select.css('border', '2px solid #F99');
                 }
                 if (observation_select.val() == null){
                     observation_select.css('border', '2px solid #F99');
@@ -865,7 +938,7 @@ $(document).ready(function() {
             /*
              * Add a forecast, aggregate pair
              */
-            if (aggregate_select.val() && forecast_select.val()){
+            if (aggregate_select.val() && constant_value_select.val()){
                 var selected_aggregate = aggregate_select.find('option:selected')[0];
                 var selected_forecast = forecast_select.find('option:selected')[0];
                 var selected_reference_forecast = ref_forecast_select.find('option:selected')[0];
@@ -882,6 +955,7 @@ $(document).ready(function() {
                     let forecast_name = forecast['name'];
                     let forecast_type = 'probabilistic_forecast_constant_value';
                     let constant_value_label = "Distribution";
+                    let distribution_id = selected_forecast.value;
                     if (forecast_id == 'full-cdf-group'){
                         forecast_id = selected_forecast;
                         forecast_type = 'probabilistic_forecast';
@@ -896,7 +970,7 @@ $(document).ready(function() {
                         }
                         forecast_id = selected_forecast['forecast_id'];
                     }
-                    pair = addPair(
+                    addPair(
                         'aggregate',
                         selected_aggregate.text,
                         selected_aggregate.value,
@@ -907,10 +981,9 @@ $(document).ready(function() {
                         "Unset",
                         null,
                         constant_value_label,
+                        distribution_id,
                         forecast_type,
                     );
-                    pair_container.append(pair);
-                    pair_index++;
                 });
                 pair_container.append(pair);
                 pair_index++;
@@ -920,11 +993,15 @@ $(document).ready(function() {
                 $(".empty-reports-list")[0].hidden = true;
                 forecast_select.css('border', '');
                 aggregate_select.css('border', '');
+                constant_value_select.css('border', '');
                 toggle_reference_dependent_metrics();
             } else {
                 // Otherwise apply a red border to alert the user to need of input
                 if (forecast_select.val() == null){
                     forecast_select.css('border', '2px solid #F99');
+                }
+                if (constant_value_select.val() == null){
+                    constant_value_select.css('border', '2px solid #F99');
                 }
                 if (aggregate_select.val() == null){
                     aggregate_select.css('border', '2px solid #F99');
