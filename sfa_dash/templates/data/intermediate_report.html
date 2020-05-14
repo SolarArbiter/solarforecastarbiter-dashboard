@@ -1,14 +1,14 @@
 {% if report_template is defined %}
 {% extends report_template %}
-{% block report_description %}
+{% block report_title %}
+{% if report_name is defined %}
+<div class="report-header">
+<h1 id="report-title">{{ report_name }}</h1>
+{% else %}
+<h1 id="report-title">{{ report['report_parameters']['name'] }}</h1>
+{% endif %}
 {% if is_allowed('update') %}<a class="btn btn-primary btn-sm" href="{{url_for('forms.recompute_report', uuid=report['report_id'])}}">Recompute report</a>{% endif %}
-<p>
-  This report of solar forecast accuracy was automatically generated using the
-  <a href="https://solarforecastarbiter.org">Solar Forecast Arbiter</a>.
-  Please see our GitHub repository for
-  <a href="//github.com/SolarArbiter/solarforecastarbiter-core/issues?q=is%3Aissue+is%3Aopen+label%3Areports">known issues</a>
-  with the reports or to create a new issue.
-</p>
+</div>
 {% endblock %}
 {% block download %}
 {% set report_url = dash_url + '/reports/'+ report['report_id'] %}
