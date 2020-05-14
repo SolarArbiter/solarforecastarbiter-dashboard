@@ -319,6 +319,7 @@ class RecomputeReportView(BaseView):
         try:
             reports.recompute(uuid)
         except DataRequestException as e:
-            return ReportsView().get(errors=e.errors)
-        return ReportsView().get(
+            return ReportView().get(uuid, errors=e.errors)
+        return ReportView().get(
+            uuid,
             messages={'report': ['recomputed successfully']})
