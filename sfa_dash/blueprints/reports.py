@@ -305,21 +305,8 @@ class DeleteReportView(BaseView):
             return redirect(confirmation_url)
         try:
             delete_request = reports.delete(uuid)
-        except HTTPError as e:
-            if e.response.status_code == 400:
-                # Redirect and display errors if the delete request
-                # failed
-                response_json = delete_request.json()
-                errors = response_json['errors']
-            elif e.response.status_code == 404:
-                errors = {
-                    "404": ['The requested object could not be found.']
-                }
-            else:
-                errors = {
-                    "error": ["Could not complete the requested action."]
-                }
-            return self.get(uuid, errors=errors)
+        except DataRequestException as e:
+            return self.get(uuid, errors=e.errors)
         return redirect(url_for(
             f'data_dashboard.reports',
             messages={'delete': ['Success']}))
@@ -331,5 +318,9 @@ class RecomputeReportView(BaseView):
     to the reports listing view.
     """
     def get(self, uuid):
-        recompute_request = reports.recompute(uuid)
-        return ReportsView.get(messages={'report': 'recomputed successfully'})
+        try:
+            recompute_request = reports.recompute(uuid)
+        except DataRequestException as e:
+            return ReportsView().get(errors=e.errors)
+        return ReportsView().get(
+            messages={'report': ['recomputed successfully']})
