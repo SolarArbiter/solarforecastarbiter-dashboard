@@ -1,6 +1,5 @@
 from flask import (request, redirect, url_for, render_template, send_file,
                    current_app)
-from requests.exceptions import HTTPError
 
 from solarforecastarbiter.datamodel import Report, RawReport
 from solarforecastarbiter.io.utils import load_report_values
@@ -304,13 +303,12 @@ class DeleteReportView(BaseView):
             # the confirmation page, redirect to confirm.
             return redirect(confirmation_url)
         try:
-            delete_request = reports.delete(uuid)
+            reports.delete(uuid)
         except DataRequestException as e:
             return self.get(uuid, errors=e.errors)
         return redirect(url_for(
             f'data_dashboard.reports',
             messages={'delete': ['Success']}))
-
 
 
 class RecomputeReportView(BaseView):
@@ -319,7 +317,7 @@ class RecomputeReportView(BaseView):
     """
     def get(self, uuid):
         try:
-            recompute_request = reports.recompute(uuid)
+            reports.recompute(uuid)
         except DataRequestException as e:
             return ReportsView().get(errors=e.errors)
         return ReportsView().get(
