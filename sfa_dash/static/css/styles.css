@@ -378,6 +378,9 @@ a.help-button{
 .empty-reports-list{
     list-style: none;
 }
+table.table.reports-table{
+    table-layout: auto;
+}
 a:not([href]).object-pair-button{
     color: #007bff;
 }
