@@ -1,7 +1,7 @@
 {% if report_template is defined %}
 {% extends report_template %}
 {% block report_description %}
-{% if is_allowed('update') %}<a class="btn btn-primary" href="{{url_for('forms.recompute_report', uuid=report['report_id'])}}">Recompute Report</a>{% endif %}
+{% if is_allowed('update') %}<a class="btn btn-primary btn-sm" href="{{url_for('forms.recompute_report', uuid=report['report_id'])}}">Recompute report</a>{% endif %}
 <p>
   This report of solar forecast accuracy was automatically generated using the
   <a href="https://solarforecastarbiter.org">Solar Forecast Arbiter</a>.
