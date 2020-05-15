@@ -613,6 +613,9 @@ div.report-details-expander{
     width: fit-content;
     text-align: center;
 }
+div.report-details-expander:hover{
+    cursor: pointer;
+}
 a.report-details-closer{
     position: absolute;
     top: .5em;
