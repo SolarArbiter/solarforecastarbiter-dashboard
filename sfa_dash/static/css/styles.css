@@ -599,3 +599,25 @@ li.report-menu-item.active a{
 input#custom-deadband{
     width: 5rem;
 }
+.report-metadata-popup{
+    z-index: 1050;
+    position: absolute;
+    background-color: white;
+    left: 0;
+    border: 1px solid black;
+    width: 100%;
+    border-radius: .5em;
+    padding: .5em;
+}
+a.report-details-expander{
+    color: #007bff!important;
+}
+a.report-details-closer{
+    position: absolute;
+    top: .5em;
+    right: 1em;
+    color: #A00!important;
+}
+.report-metadata-popup ul.data-metadata-fields {
+    padding-left: .5em;
+}
