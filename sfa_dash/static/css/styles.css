@@ -609,8 +609,9 @@ input#custom-deadband{
     border-radius: .5em;
     padding: .5em;
 }
-a.report-details-expander{
-    color: #007bff!important;
+div.report-details-expander{
+    width: fit-content;
+    text-align: center;
 }
 a.report-details-closer{
     position: absolute;
@@ -620,4 +621,7 @@ a.report-details-closer{
 }
 .report-metadata-popup ul.data-metadata-fields {
     padding-left: .5em;
+}
+.reports-table-row:nth-child(n+3) {
+    width: fit-content;
 }
