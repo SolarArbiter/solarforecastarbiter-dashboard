@@ -10,6 +10,7 @@ function fill_existing_pairs(){
     } catch(error) {
         return;
     }
+    pair_container = $('.object-pair-list');
     object_pairs.forEach(function(pair){
         if(pair.hasOwnProperty('observation')){
             var truth_type = 'observation';
@@ -27,16 +28,22 @@ function fill_existing_pairs(){
         } else {
             var reference_forecast_metadata = {'name': 'Unset'};
         }
-        addPair(truth_type,
+        [uncertainty_label, uncertainty_value] = parseDeadband(
+            pair['uncertainty']);
+        pair = addPair(truth_type,
                 truth_metadata['name'],
                 truth_id,
                 forecast_metadata['name'],
                 forecast_id,
                 reference_forecast_metadata['name'],
                 reference_forecast_id,
-                `${pair['uncertainty']} &percnt;`,
-                pair['uncertainty'],
+                uncertainty_label,
+                uncertainty_value,
         );
+        pair_container.append(pair);
+        $(".empty-reports-list").attr('hidden', 'hidden');
+        set_units(forecast_metadata['variable']);
+        pair_index++;
     });
 }
 
@@ -274,26 +281,29 @@ function deadbandSelector(){
 }
 
 
-function parseDeadband(){
+function parseDeadband(value=null){
     /*
      * Parses the deadband widgets into a readable display value, and a
      * valid string value.
      */
-    var source = $('[name="deadband-select"]:checked').val();
-    if (source == "null"){
-        return ["Ignore uncertainty", "null"]
-    } else if (source == "user_supplied"){
-        var val = $('[name="deadband-value"]').val();
-        if(!$('[name="deadband-value"]')[0].reportValidity()){
-            throw 'Deadband out of range';
+    if(!value){
+        var source = $('[name="deadband-select"]:checked').val();
+        if (source == "null"){
+            return ["Ignore uncertainty", "null"]
+        } else if (source == "user_supplied"){
+            var val = $('[name="deadband-value"]').val();
+            if(!$('[name="deadband-value"]')[0].reportValidity()){
+                throw 'Deadband out of range';
+            }
+        } else if (source == "observation_uncertainty"){
+            var obs_id = $('#observation-select').val();
+            var obs = searchObjects("observations", obs_id);
+            if(obs){
+                var val = obs['uncertainty']
+            }
         }
-
-    } else if (source == "observation_uncertainty"){
-        var obs_id = $('#observation-select').val();
-        var obs = searchObjects("observations", obs_id);
-        if(obs){
-            var val = obs['uncertainty']
-        }
+    }else{
+        var val = value;
     }
     var str_val = `${val}&percnt;`
     return [str_val, val];
@@ -304,7 +314,7 @@ function createPairSelector(){
     /*
      * Returns a JQuery object containing Forecast, Observation pair widgets to insert into the DOM
      */
-    
+
     /*
      *  Filtering Functions
      *      Callbacks for hidding/showing select list options based on the searchbars
