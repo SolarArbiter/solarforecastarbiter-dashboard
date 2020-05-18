@@ -28,7 +28,7 @@ services:
   api:
     build: .
     environment:
-      MYSQL_HOST: "solararbitersolarforecastarbiter_dashboard_mysql_1"
+      MYSQL_HOST: "solararbitersolarforecastarbiter-dashboard_mysql_1"
       MYSQL_PORT: 3306
       FLASK_APP: "sfa_api:create_app('DevelopmentConfig')"
       FLASK_ENV: "development"
