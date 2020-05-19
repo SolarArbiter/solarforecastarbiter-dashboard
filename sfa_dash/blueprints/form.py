@@ -12,6 +12,7 @@ from sfa_dash.blueprints.aggregates import (AggregateForm,
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.reports import ReportForm, RecomputeReportView
 from sfa_dash.errors import DataRequestException
+from sfa_dash.form_utils import converters
 
 
 class MetadataForm(BaseView):
@@ -23,196 +24,30 @@ class MetadataForm(BaseView):
             self.template = 'forms/forecast_form.html'
             self.id_key = 'forecast_id'
             self.api_handle = forecasts
-            self.formatter = self.forecast_formatter
+            self.formatter = converters.ForecastConverter
             self.metadata_template = 'data/metadata/site_metadata.html'
         elif data_type == 'cdf_forecast_group':
             self.template = 'forms/cdf_forecast_group_form.html'
             self.id_key = 'forecast_id'
             self.api_handle = cdf_forecast_groups
-            self.formatter = self.cdf_forecast_formatter
+            self.formatter = converters.CDFForecastConverter
             self.metadata_template = 'data/metadata/site_metadata.html'
         elif data_type == 'observation':
             self.template = 'forms/observation_form.html'
             self.id_key = 'observation_id'
             self.api_handle = observations
-            self.formatter = self.observation_formatter
+            self.formatter = converters.ObservationConverter
             self.metadata_template = 'data/metadata/site_metadata.html'
         elif data_type == 'site':
             self.template = 'forms/site_form.html'
             self.id_key = 'site_id'
             self.api_handle = sites
-            self.formatter = self.site_formatter
+            self.formatter = converters.SiteConverter
         else:
             raise ValueError(f'No metadata form defined for {data_type}')
 
-    def flatten_dict(self, to_flatten):
-        """Flattens nested dictionaries, removing keys of the nested elements.
-        Useful for flattening API responses for prefilling forms on the
-        dashboard.
-        """
-        flattened = {}
-        for key, value in to_flatten.items():
-            if isinstance(value, dict):
-                flattened.update(self.flatten_dict(value))
-            else:
-                flattened[key] = value
-        return flattened
-
-    def parse_hhmm_field(self, data_dict, key_root):
-        """ Extracts and parses the hours and minutes inputs to create a
-        parseable time of day string in HH:MM format. These times are
-        displayed as two select fields designated with a name (key_root)
-        and _hours or _minutes suffix.
-
-        Parameters
-        ----------
-        data_dict: dict
-            Dictionary of posted form data
-
-        key_root: string
-            The shared part of the name attribute of the inputs to parse.
-            e.g. 'issue_time' will parse and concatenate 'issue_time_hours'
-            and 'issue_time_minutes'
-
-        Returns
-        -------
-        string
-            The time value in HH:MM format.
-        """
-        hours = int(data_dict[f'{key_root}_hours'])
-        minutes = int(data_dict[f'{key_root}_minutes'])
-        return f'{hours:02d}:{minutes:02d}'
-
-    def parse_timedelta(self, data_dict, key_root):
-        """Parse values from a timedelta form element, and return the value in
-        minutes
-
-        Parameters
-        ----------
-        data_dict: dict
-            Dictionary of posted form data
-
-        key_root: string
-            The shared part of the name attribute of the inputs to parse.
-            e.g. 'lead_time' will parse and concatenate 'lead_time_number'
-            and 'lead_time_units'
-
-        Returns
-        -------
-        int
-            The number of minutes in the Timedelta.
-        """
-        value = int(data_dict[f'{key_root}_number'])
-        units = data_dict[f'{key_root}_units']
-        if units == 'minutes':
-            return value
-        elif units == 'hours':
-            return value * 60
-        elif units == 'days':
-            return value * 1440
-        else:
-            raise ValueError('Invalid selection in time units field.')
-
-    def site_formatter(self, site_dict):
-        """Formats the result of a site webform into an API payload.
-
-        Parameters
-        ----------
-        site_dict:  dict
-            The posted form data parsed into a dict.
-        Returns
-        -------
-        dictionary
-            Form data formatted to the API spec.
-        """
-        tracking_keys = {
-            'fixed': ['surface_tilt', 'surface_azimuth'],
-            'single_axis': ['axis_azimuth', 'backtrack',
-                            'axis_tilt', 'ground_coverage_ratio',
-                            'max_rotation_angle'],
-        }
-        modeling_keys = ['ac_capacity', 'dc_capacity',
-                         'ac_loss_factor', 'dc_loss_factor',
-                         'temperature_coefficient', 'tracking_type']
-
-        top_level_keys = ['name', 'elevation', 'latitude',
-                          'longitude', 'timezone', 'extra_parameters']
-        site_metadata = {key: site_dict[key]
-                         for key in top_level_keys
-                         if site_dict.get(key, "") != ""}
-        if site_dict['site_type'] == 'power-plant':
-            modeling_params = {key: site_dict[key]
-                               for key in modeling_keys
-                               if site_dict.get(key, "") != ""}
-            tracking_type = site_dict['tracking_type']
-            tracking_fields = {key: site_dict[key]
-                               for key in tracking_keys[tracking_type]}
-            modeling_params.update(tracking_fields)
-            site_metadata['modeling_parameters'] = modeling_params
-        return site_metadata
-
-    def observation_formatter(self, observation_dict):
-        """Formats the result of a observation webform into an API payload.
-
-        Parameters
-        ----------
-        site_dict:  dict
-            The posted form data parsed into a dict.
-        Returns
-        -------
-        dictionary
-            Form data formatted to the API spec.
-        """
-        observation_metadata = {}
-        direct_keys = ['name', 'variable', 'interval_value_type',
-                       'uncertainty', 'extra_parameters', 'interval_label',
-                       'site_id']
-        observation_metadata = {key: observation_dict[key]
-                                for key in direct_keys
-                                if observation_dict.get(key, "") != ""}
-        observation_metadata['interval_length'] = self.parse_timedelta(
-            observation_dict,
-            'interval_length')
-        return observation_metadata
-
-    def set_location_id(self, form_data, forecast_metadata):
-        if 'site_id' in form_data:
-            forecast_metadata['site_id'] = form_data.get('site_id')
-        if 'aggregate_id' in form_data:
-            forecast_metadata['aggregate_id'] = form_data.get('aggregate_id')
-
-    def forecast_formatter(self, forecast_dict):
-        forecast_metadata = {}
-        direct_keys = ['name', 'variable', 'interval_value_type',
-                       'extra_parameters', 'interval_length',
-                       'interval_label']
-        forecast_metadata = {key: forecast_dict[key]
-                             for key in direct_keys
-                             if forecast_dict.get(key, '') != ''}
-        self.set_location_id(forecast_dict, forecast_metadata)
-        forecast_metadata['issue_time_of_day'] = self.parse_hhmm_field(
-            forecast_dict,
-            'issue_time')
-        forecast_metadata['lead_time_to_start'] = self.parse_timedelta(
-            forecast_dict,
-            'lead_time')
-        forecast_metadata['run_length'] = self.parse_timedelta(
-            forecast_dict,
-            'run_length')
-        forecast_metadata['interval_length'] = self.parse_timedelta(
-            forecast_dict,
-            'interval_length')
-        return forecast_metadata
-
     def get_site_metadata(self, site_id):
         return sites.get_metadata(site_id)
-
-    def cdf_forecast_formatter(self, forecast_dict):
-        cdf_forecast_metadata = self.forecast_formatter(forecast_dict)
-        constant_values = forecast_dict['constant_values'].split(',')
-        cdf_forecast_metadata['constant_values'] = constant_values
-        cdf_forecast_metadata['axis'] = forecast_dict['axis']
-        return cdf_forecast_metadata
 
     def get(self):
         raise NotImplementedError
@@ -245,7 +80,7 @@ class CreateForm(MetadataForm):
 
     def post(self, uuid=None):
         form_data = request.form
-        formatted_form = self.formatter(form_data)
+        formatted_form = self.formatter.formdata_to_payload(form_data)
         template_args = {}
         try:
             created_uuid = self.api_handle.post_metadata(formatted_form)
@@ -288,13 +123,13 @@ class CreateAggregateForecastForm(MetadataForm):
             self.template = 'forms/aggregate_forecast_form.html'
             self.id_key = 'forecast_id'
             self.api_handle = forecasts
-            self.formatter = self.forecast_formatter
+            self.formatter = converters.ForecastConverter
             self.metadata_template = 'data/metadata/aggregate_metadata.html'
         elif data_type == 'cdf_forecast_group':
             self.template = 'forms/aggregate_cdf_forecast_group_form.html'
             self.id_key = 'forecast_id'
             self.api_handle = cdf_forecast_groups
-            self.formatter = self.cdf_forecast_formatter
+            self.formatter = converters.CDFForecastConverter
             self.metadata_template = 'data/metadata/aggregate_metadata.html'
         else:
             raise ValueError(f'No metadata form defined for {data_type}')
@@ -322,7 +157,7 @@ class CreateAggregateForecastForm(MetadataForm):
 
     def post(self, uuid=None):
         form_data = request.form
-        formatted_form = self.formatter(form_data)
+        formatted_form = self.formatter.formdata_to_payload(form_data)
         template_args = {}
         try:
             created_uuid = self.api_handle.post_metadata(formatted_form)
