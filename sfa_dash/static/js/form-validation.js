@@ -17,10 +17,9 @@ $(document).ready(function(){
             'input',function(){
                 console.log('oninput fire');
                 this.setCustomValidity('');
-                this.checkValidity();    
+                this.checkValidity();
             }
         );
-    
     }
 
     // Validate file uploads are within the required range
