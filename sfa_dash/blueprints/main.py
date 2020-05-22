@@ -98,19 +98,6 @@ class SingleObjectView(DataDashView):
                 uuid=self.metadata[self.id_key])
         return breadcrumb_dict
 
-    def set_timerange(self):
-        """Retrieve the available timerange for an object and set the
-        'min_timestamp' and 'max_timestamp' keys in metdata. If the range
-        cannot be found the keys will not be set.
-        """
-        try:
-            timerange = self.api_handle.valid_times(self.metadata[self.id_key])
-        except DataRequestException:
-            return
-        else:
-            self.metadata['timerange_start'] = timerange['min_timestamp']
-            self.metadata['timerange_end'] = timerange['max_timestamp']
-
     def set_template_args(self, start, end, **kwargs):
         """Insert necessary template arguments. See data/asset.html in the
         template folder for how these are layed out.

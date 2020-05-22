@@ -48,6 +48,19 @@ class BaseView(MethodView):
                     'bokeh_script': script_plot[0]
                 })
 
+    def set_timerange(self):
+        """Retrieve the available timerange for an object and set the
+        'min_timestamp' and 'max_timestamp' keys in metdata. If the range
+        cannot be found the keys will not be set.
+        """
+        try:
+            timerange = self.api_handle.valid_times(self.metadata[self.id_key])
+        except DataRequestException:
+            return
+        else:
+            self.metadata['timerange_start'] = timerange['min_timestamp']
+            self.metadata['timerange_end'] = timerange['max_timestamp']
+
     def parse_start_end_from_querystring(self):
         """Attempts to find the start and end query parameters. If not found,
         returns defaults spanning the last three days. Used for setting
