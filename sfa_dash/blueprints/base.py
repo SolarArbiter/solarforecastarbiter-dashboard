@@ -62,13 +62,17 @@ class BaseView(MethodView):
         start_arg = request.args.get('start', 'x')
         end_arg = request.args.get('end', 'x')
         try:
-            start = pd.Timestamp(start_arg)
-        except ValueError:
-            start = pd.Timestamp.utcnow() - pd.Timedelta('3days')
-        try:
             end = pd.Timestamp(end_arg)
         except ValueError:
-            end = pd.Timestamp.utcnow()
+            meta_end = self.metadata.get('timerange_end')
+            if meta_end is None:
+                end = pd.Timestamp.utcnow()
+            else:
+                end = pd.Timestamp(meta_end)
+        try:
+            start = pd.Timestamp(start_arg)
+        except ValueError:
+            start = end - pd.Timedelta('3days')
         return start, end
 
     def format_download_params(self, form_data):
