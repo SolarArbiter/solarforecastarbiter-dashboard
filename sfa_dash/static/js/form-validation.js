@@ -8,7 +8,7 @@ $(document).ready(function(){
             'invalid', function(){
                 this.setCustomValidity(
                     `Name may only contain characters a-z, A-Z, 0-9,
-                    '(', ')', '-', and '_'.`);
+                    (, ), -, and _.`);
             }
         );
         // clear any invalid state and check for validity to trigger an invalid
