@@ -1,4 +1,4 @@
-MAX_FILESIZE = 16777216;
+MAX_FILESIZE = 16 * 1024 * 1024;
 $(document).ready(function(){
     // Custom validity handlers to supply users with more meaningful messages
     // when they provide invalid input.
@@ -7,15 +7,13 @@ $(document).ready(function(){
         document.getElementsByName('name')[0].addEventListener(
             'invalid', function(){
                 this.setCustomValidity(
-                    `Name may only contain characters a-z, A-Z, 0-9,
-                    (, ), -, and _.`);
+                    `Name may only contain characters a-zA-Z0-9(), -'_.`);
             }
         );
         // clear any invalid state and check for validity to trigger an invalid
         // event
         document.getElementsByName('name')[0].addEventListener(
             'input',function(){
-                console.log('oninput fire');
                 this.setCustomValidity('');
                 this.checkValidity();
             }
