@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 
-from flask import url_for, render_template, request
+from flask import url_for, render_template, request, session
 from flask.views import MethodView
 import pandas as pd
 
@@ -184,6 +184,19 @@ class BaseView(MethodView):
         Where the order of the keys is rendered from left to right.
         """
         return OrderedDict()
+
+    def pop_notifications(self):
+        """Returns a dictionary of any messages, warnings or errors found in
+        the session.
+        """
+        messages = session.pop('messages', {})
+        warnings = session.pop('warnings', {})
+        errors = session.pop('errors', {})
+        return {
+            'messages': messages,
+            'warnings': warnings,
+            'errors': errors,
+        }
 
     def template_args(self):
         return {}
