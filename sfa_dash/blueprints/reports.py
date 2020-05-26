@@ -320,6 +320,5 @@ class RecomputeReportView(BaseView):
             reports.recompute(uuid)
         except DataRequestException as e:
             return ReportView().get(uuid, errors=e.errors)
-        return ReportView().get(
-            uuid,
-            messages={'report': ['recomputed successfully']})
+        return redirect(url_for('data_dashboard.report_view',
+                                uuid=uuid))
