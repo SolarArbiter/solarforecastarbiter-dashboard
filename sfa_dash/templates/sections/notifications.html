@@ -1,3 +1,8 @@
+{% set flashed_messages = get_flashed_messages(category_filter=['message']) %}
+{% set flashed_warnings= get_flashed_messages(category_filter=['warning']) %}
+{% set flashed_errors = get_flashed_messages(category_filter=['error']) %}
+
+{% if messages is defined or (flashed_messages | length) > 0 %}
 <div class="messages">
   <ul class="message-list notification-list">
     {% if messages is defined %}
@@ -5,11 +10,14 @@
       <li class="alert alert-success"><p><b>{{ title }}: </b>{{ message | join(', ') | safe}}</p></li> 
 	{% endfor %}
     {% endif %}
-    {% for message in get_flashed_messages(category_filter=['message']) %}
+    {% for message in flashed_messages %}
     <li class="alert alert-success">{{ message }}</li>
     {% endfor %}
   </ul>
 </div>
+{% endif %}
+
+{% if warnings is defined or (flashed_warnings | length) > 0 %}
 <div class="warnings">
   <ul class="warning-list notification-list">
     {% if warnings is defined %}
@@ -17,12 +25,14 @@
     <li class="alert alert-warning"><p><b>{{ title }}: </b>{{ warning | join(', ') | safe}}</p></li>
     {% endfor %}
     {% endif %}
-    {% for warning in get_flashed_messages(category_filter=['warning']) %}
+    {% for warning in flashed_warnings %}
     <li class="alert alert-warning">{{ warning }}</li>
     {% endfor %}
   </ul>
 </div>
+{% endif %}
 
+{% if errors is defined or (flashed_errors | length) > 0 %}
 <div class="errors">
   <ul class="error-list notification-list">
     {% if errors is defined %}
@@ -30,9 +40,9 @@
     <li class="alert alert-danger"><p><b>{{ title }}: </b>{{ error | join(', ') | safe}}</p></li>
     {% endfor %}
     {% endif %}
-    {% for error in get_flashed_messages(category_filter=['error']) %}
+    {% for error in flashed_errors %}
     <li class="alert alert-danger">{{ error }}</li>
     {% endfor %}
   </ul>
 </div>
-
+{% endif %}
