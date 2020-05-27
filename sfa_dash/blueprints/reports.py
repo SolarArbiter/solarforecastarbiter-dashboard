@@ -1,5 +1,5 @@
 from flask import (request, redirect, url_for, render_template, send_file,
-                   current_app, session)
+                   current_app, flash)
 
 from solarforecastarbiter.datamodel import Report, RawReport
 from solarforecastarbiter.io.utils import load_report_values
@@ -221,12 +221,11 @@ class ReportView(BaseView):
         self.metadata = metadata
 
     def get(self, uuid):
-        notifications = self.pop_notifications()
         try:
             self.set_metadata(uuid)
         except DataRequestException as e:
             return render_template(self.template, uuid=uuid, errors=e.errors)
-        return super().get(**notifications)
+        return super().get()
 
 
 class DownloadReportView(ReportView):
@@ -320,10 +319,8 @@ class RecomputeReportView(BaseView):
         try:
             reports.recompute(uuid)
         except DataRequestException as e:
-            session['errors'] = e.errors
+            self.flash_api_errors(e.errors)
         else:
-            session['messages'] = {
-                'report': ['Report recomputed successfully']
-            }
+            flash('Report recomputed successfully.', 'message')
         return redirect(url_for('data_dashboard.report_view',
                                 uuid=uuid))

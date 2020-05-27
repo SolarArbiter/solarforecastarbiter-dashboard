@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 
-from flask import url_for, render_template, request, session
+from flask import url_for, render_template, request, flash
 from flask.views import MethodView
 import pandas as pd
 
@@ -185,18 +185,18 @@ class BaseView(MethodView):
         """
         return OrderedDict()
 
-    def pop_notifications(self):
-        """Returns a dictionary of any messages, warnings or errors found in
-        the session.
+    def flash_api_errors(self, errors):
+        """Formats a dictionary of api errors and flashes them to the user on
+        the next request.
+
+        Parameters
+        ----------
+        errors: dict
+            Dict of errors returned by the API.
         """
-        messages = session.pop('messages', {})
-        warnings = session.pop('warnings', {})
-        errors = session.pop('errors', {})
-        return {
-            'messages': messages,
-            'warnings': warnings,
-            'errors': errors,
-        }
+        to_flash = [f'({key}) msg.join(", ")' for key, msg in errors]
+        for error in to_flash:
+            flash(error, 'error')
 
     def template_args(self):
         return {}
