@@ -194,7 +194,7 @@ class BaseView(MethodView):
         errors: dict
             Dict of errors returned by the API.
         """
-        to_flash = [f'({key}) msg.join(", ")' for key, msg in errors]
+        to_flash = [f'({key}) {", ".join(msg)}' for key, msg in errors.items()]
         for error in to_flash:
             flash(error, 'error')
 
