@@ -96,7 +96,8 @@ no_arg_routes_list = [
     '/reports/',
     '/aggregates/',
     '/sites/create',
-    '/reports/create',
+    '/reports/deterministic/create',
+    '/reports/event/create',
     '/aggregates/create',
 ]
 
@@ -180,7 +181,7 @@ permission_id_route_list = [
 
 @pytest.fixture(params=permission_id_route_list)
 def permission_id_route(request):
-    def fn(permission_report):
+    def fn(permission_id):
         return request.param.format(permission_id=permission_id)
     return fn
 
