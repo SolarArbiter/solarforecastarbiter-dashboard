@@ -273,6 +273,8 @@ aggregate_id_route_list = [
     '/aggregates/{aggregate_id}',
     '/aggregates/{aggregate_id}/delete',
     '/aggregates/{aggregate_id}/add',
+    '/aggregates/{aggregate_id}/forecasts/single/create',
+    '/aggregates/{aggregate_id}/forecasts/cdf/create',
 ]
 
 
@@ -401,7 +403,6 @@ def permission_id(cursor, role_id):
         '= UUID_TO_BIN(%s, 1) ) LIMIT 1', role_id)
     permission_id = cursor.fetchone()[0]
     return permission_id
-
 
 
 @pytest.fixture()

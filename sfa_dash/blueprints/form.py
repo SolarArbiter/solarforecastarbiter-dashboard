@@ -309,10 +309,15 @@ class CreateAggregateForecastForm(MetadataForm):
     def get(self, uuid=None):
         template_args = {}
         if uuid is not None:
-            aggregate_metadata = self.get_aggregate_metadata(uuid)
-            template_args['aggregate_metadata'] = aggregate_metadata
-            template_args['metadata'] = self.render_metadata_section(
-                aggregate_metadata)
+            try:
+                aggregate_metadata = self.get_aggregate_metadata(uuid)
+            except DataRequestException as e:
+                self.flash_api_errors(e.errors)
+                return redirect(url_for(f'data_dashboard.aggregates'))
+            else:
+                template_args['aggregate_metadata'] = aggregate_metadata
+                template_args['metadata'] = self.render_metadata_section(
+                    aggregate_metadata)
         return render_template(self.template, **template_args)
 
     def post(self, uuid=None):
