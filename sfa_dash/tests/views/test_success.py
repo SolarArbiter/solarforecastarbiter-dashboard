@@ -45,6 +45,19 @@ def test_admin_route_list(client, admin_route):
     assert resp.status_code == 200
 
 
+def test_admin_multiarg_route_list(
+        client, admin_multiarg_route, permission_id, role_id, user_id,
+        valid_permission_object_id):
+    resp = client.get(
+        admin_multiarg_route(
+            valid_permission_object_id,
+            permission_id,
+            user_id,
+            role_id),
+        base_url=BASE_URL)
+    assert resp.status_code == 200
+
+
 def test_user_id_routes(client, user_id_route, user_id):
     resp = client.get(user_id_route(user_id), base_url=BASE_URL)
     assert resp.status_code == 200

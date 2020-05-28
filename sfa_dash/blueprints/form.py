@@ -231,10 +231,16 @@ class CreateForm(MetadataForm):
     def get(self, uuid=None):
         template_args = {}
         if uuid is not None:
-            site_metadata = self.get_site_metadata(uuid)
-            template_args['site_metadata'] = site_metadata
-            template_args['metadata'] = self.render_metadata_section(
-                site_metadata)
+            try:
+                site_metadata = self.get_site_metadata(uuid)
+            except DataRequestException as e:
+                self.flash_api_errors(e.errors)
+                return redirect(url_for(
+                    f'data_dashboard.{self.data_type}s'))
+            else:
+                template_args['site_metadata'] = site_metadata
+                template_args['metadata'] = self.render_metadata_section(
+                    site_metadata)
         return render_template(self.template, **template_args)
 
     def post(self, uuid=None):
