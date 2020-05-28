@@ -44,7 +44,8 @@ ALLOWED_QUALITY_FLAGS = {
     'LIMITS EXCEEDED': 'LIMITS EXCEEDED',
     'STALE VALUES': 'STALE VALUES (catches fixed values at nighttime)',
     'DAYTIME STALE VALUES': 'DAYTIME STALE VALUES',
-    'INTERPOLATED VALUES': 'INTERPOLATED VALUES (catches fixed values at nighttime)'  # noqa: E501
+    'INTERPOLATED VALUES':
+        'INTERPOLATED VALUES (catches fixed values at nighttime)',
     'DAYTIME INTERPOLATED VALUES': 'DAYTIME INTERPOLATED VALUES'
 }
 
