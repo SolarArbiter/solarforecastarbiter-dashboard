@@ -40,6 +40,13 @@ def test_get_cdf_forecast_routes(
     assert resp.status_code == 200
 
 
+def test_get_cdf_forecast_single_routes(
+        client, cdf_forecast_single_id_route, cdf_forecast_id):
+    resp = client.get(cdf_forecast_single_id_route(cdf_forecast_id),
+                      base_url=BASE_URL)
+    assert resp.status_code == 200
+
+
 def test_admin_route_list(client, admin_route):
     resp = client.get(admin_route, base_url=BASE_URL)
     assert resp.status_code == 200
@@ -75,4 +82,9 @@ def test_role_id_routes(client, role_id_route, role_id):
 
 def test_aggregate_id_routes(client, aggregate_id_route, aggregate_id):
     resp = client.get(aggregate_id_route(aggregate_id), base_url=BASE_URL)
+    assert resp.status_code == 200
+
+
+def test_report_id_routes(client, report_id_route, report_id):
+    resp = client.get(report_id_route(report_id), base_url=BASE_URL)
     assert resp.status_code == 200

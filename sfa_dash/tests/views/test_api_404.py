@@ -155,3 +155,8 @@ def test_role_id_routes(client, role_id_route, dne_uuid):
 def test_aggregate_id_routes(client, aggregate_id_route, dne_uuid):
     resp = client.get(aggregate_id_route(dne_uuid), base_url=BASE_URL)
     assert "<b>404: </b>" in resp.data.decode('utf-8')
+
+
+def test_report_id_routes(client, report_id_route, dne_uuid):
+    resp = client.get(report_id_route(dne_uuid), base_url=BASE_URL)
+    assert "<b>404: </b>" in resp.data.decode('utf-8')

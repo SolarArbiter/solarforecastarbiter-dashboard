@@ -95,6 +95,9 @@ no_arg_routes_list = [
     '/forecasts/cdf/',
     '/reports/',
     '/aggregates/',
+    '/sites/create',
+    '/reports/create',
+    '/aggregates/create',
 ]
 
 
@@ -177,22 +180,23 @@ permission_id_route_list = [
 
 @pytest.fixture(params=permission_id_route_list)
 def permission_id_route(request):
-    def fn(permission_id):
+    def fn(permission_report):
         return request.param.format(permission_id=permission_id)
     return fn
 
 
-create_form_routes_list = [
-    '/sites/create',
-    '/reports/create',
-    '/aggregates/create',
-]
-
-
 report_id_route_list = [
-    '/reports/{report_id}'
+    '/reports/{report_id}',
     '/reports/{report_id}/delete',
 ]
+
+
+@pytest.fixture(params=report_id_route_list)
+def report_id_route(request):
+    def fn(report_id):
+        return request.param.format(report_id=report_id)
+    return fn
+
 
 site_id_route_list = [
     '/sites/{site_id}/',
@@ -247,6 +251,19 @@ cdf_forecast_id_route_list = [
 
 @pytest.fixture(params=cdf_forecast_id_route_list)
 def cdf_forecast_id_route(request):
+    def fn(forecast_id):
+        return request.param.format(forecast_id=forecast_id)
+    return fn
+
+
+cdf_forecast_single_id_routes_list = [
+    '/forecasts/cdf/single/{forecast_id}/upload',
+    '/forecasts/cdf/single/{forecast_id}',
+]
+
+
+@pytest.fixture(params=cdf_forecast_single_id_routes_list)
+def cdf_forecast_single_id_route(request):
     def fn(forecast_id):
         return request.param.format(forecast_id=forecast_id)
     return fn
@@ -384,6 +401,7 @@ def permission_id(cursor, role_id):
         '= UUID_TO_BIN(%s, 1) ) LIMIT 1', role_id)
     permission_id = cursor.fetchone()[0]
     return permission_id
+
 
 
 @pytest.fixture()
