@@ -71,9 +71,14 @@ class BaseView(MethodView):
         start,end
             Tuple of ISO 8601 datetime strings representing the start, end.
         """
-        # set default arg to an invalid timestamp, to trigger ValueError
-        start_arg = request.args.get('start', 'x')
-        end_arg = request.args.get('end', 'x')
+        start_arg = request.args.get('start')
+        end_arg = request.args.get('end')
+        # if start and end are not present, set them to an invalid datetime
+        # to trigger value error
+        if not start_arg:
+            start_arg = "x"
+        if not end_arg:
+            end_arg = "x"
         try:
             end = pd.Timestamp(end_arg)
         except ValueError:
