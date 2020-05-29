@@ -1,3 +1,6 @@
+MAX_DOWNLOAD_DAYS = 365;
+MAX_PLOT_MONTHS = 3;
+
 function ParseStartEnd(){
     // Manually parse this string to avoid the implicit tz conversion based on
     // the users browser. We're asking users for UTC so, manually add Z to the end of
@@ -12,3 +15,62 @@ function ParseStartEnd(){
     endDay = $('#end-date').val().slice(-2);
     $('.end').val(endYear+'-'+endMonth+'-'+endDay+'T'+$('#end-time').val()+'Z');
 }
+
+function getDateValues(){
+    /* Returns the current start and end values as Date objects */
+    start_date = document.getElementsByName('period-start-date')[0].value;
+    start_time = document.getElementsByName('period-start-time')[0].value;
+    end_date = document.getElementsByName('period-end-date')[0].value;
+    end_time = document.getElementsByName('period-end-time')[0].value;
+
+    start = new Date(start_date+' '+start_time);
+    end = new Date(end_date+' '+end_time);
+    return [start, end]
+}
+
+function insertWarning(title, msg){
+    $('#form-errors').append(`<li class="alert alert-danger"><p><b>${title}: </b>${msg}</p></li>`);
+}
+
+function toggleDownloadUpdate(){
+    /* Enable or disable download and update graph buttons based on the current
+     * selected timerange.
+     */
+    $('#form-errors').empty()
+    timerange = getDateValues();
+    miliseconds = timerange[1] - timerange[0];
+    days = miliseconds / (1000 * 60 * 60 * 24);
+    if (days > 0){
+        // limit maximum amount of data to download
+        if (days > MAX_DOWNLOAD_DAYS){
+            $('#download-submit').attr('disabled', true);
+            insertWarning(
+                'Download disabled',
+                'Maximum download range exceeded'
+            );
+        } else {
+            console.log("good");
+            $('#download-submit').removeAttr('disabled');
+        }
+
+        // limit maximum amount of data to plot
+        if (days > 120){ // TODO: load metadata and set against max points with timerange and interval length
+            $('#plot-range-adjust-submit').attr('disabled', true);
+            insertWarning('Plotting disabled', 'Maximum plot range exceeded.');
+        } else {
+            $('#plot-range-adjust-submit').removeAttr('disabled');
+        }
+    } else {
+        insertWarning('Time range', 'Start must be before end.');
+        $('#plot-range-adjust-submit').attr('disabled', true);
+        $('#download-submit').attr('disabled', true);
+
+    }
+}
+
+$(document).ready(function(){
+    $('[name=period-start-date]').change(toggleDownloadUpdate);
+    $('[name=period-start-time]').change(toggleDownloadUpdate);
+    $('[name=period-end-date]').change(toggleDownloadUpdate);
+    $('[name=period-end-time]').change(toggleDownloadUpdate);
+});
