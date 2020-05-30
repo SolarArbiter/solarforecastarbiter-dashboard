@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from copy import deepcopy
 
 
 from flask import url_for, render_template, request, flash
@@ -202,6 +203,19 @@ class BaseView(MethodView):
         to_flash = [f'({key}) {", ".join(msg)}' for key, msg in errors.items()]
         for error in to_flash:
             flash(error, 'error')
+
+    def safe_metadata(self):
+        """Creates a copy of the metadata attribute without the
+        `extra_parameters` key. 
+        """
+        safe_metadata = deepcopy(self.metadata)
+        safe_metadata.pop('extra_parameters', None)
+        if 'site' in safe_metadata:
+            safe_metadata['site'].pop('extra_parameters', None)
+        if 'aggregate' in safe_metadata:
+            safe_metadata['aggregate'].pop('extra_parameters', None)
+        safe_metadata.pop('location_link', None)
+        return safe_metadata
 
     def template_args(self):
         return {}
