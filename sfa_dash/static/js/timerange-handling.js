@@ -1,5 +1,5 @@
-MAX_DOWNLOAD_DAYS = 365;
-MAX_PLOT_MONTHS = 3;
+MAX_DOWNLOAD_DAYS = 366;
+MAX_PLOT_POINTS = 1440 * 93; // approximately 3 months of 1 minute data
 
 function ParseStartEnd(){
     // Manually parse this string to avoid the implicit tz conversion based on
@@ -43,22 +43,36 @@ function toggleDownloadUpdate(){
     if (days > 0){
         // limit maximum amount of data to download
         if (days > MAX_DOWNLOAD_DAYS){
+            // disable download and plot update
             $('#download-submit').attr('disabled', true);
+            $('#plot-range-adjust-submit').attr('disabled', true);
+
             insertWarning(
-                'Download disabled',
-                'Maximum download range exceeded'
+                'Maximum timerange exceeded',
+                'Maximum of one year of data may be requested.'
             );
         } else {
-            console.log("good");
+            // enable download
             $('#download-submit').removeAttr('disabled');
-        }
-
-        // limit maximum amount of data to plot
-        if (days > 120){ // TODO: load metadata and set against max points with timerange and interval length
-            $('#plot-range-adjust-submit').attr('disabled', true);
-            insertWarning('Plotting disabled', 'Maximum plot range exceeded.');
-        } else {
             $('#plot-range-adjust-submit').removeAttr('disabled');
+            // check if within limits for plotting
+            if (typeof metadata !== 'undefined' && metadata.hasOwnProperty('interval_length')){
+                var interval_length = parseInt(metadata['interval_length']);
+            } else {
+                var interval_length = 1;
+            }
+            var intervals = miliseconds / (interval_length * 1000 * 60);
+            
+            if (intervals > MAX_PLOT_POINTS){
+                $('#plot-range-adjust-submit').attr('disabled', true);
+                insertWarning(
+                    'Plotting disabled',
+                    `Maximum plottable points exceeded. Timerange includes 
+                    ${intervals} data points and the maximum is 
+                    ${MAX_PLOT_POINTS}.`);
+            } else {
+                $('#plot-range-adjust-submit').removeAttr('disabled');
+            }
         }
     } else {
         insertWarning('Time range', 'Start must be before end.');
@@ -73,4 +87,6 @@ $(document).ready(function(){
     $('[name=period-start-time]').change(toggleDownloadUpdate);
     $('[name=period-end-date]').change(toggleDownloadUpdate);
     $('[name=period-end-time]').change(toggleDownloadUpdate);
+    $('[name=period-start-date]').change();
+    $('[name=period-end-date]').change();
 });

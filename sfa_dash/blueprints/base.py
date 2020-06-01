@@ -236,7 +236,7 @@ class BaseView(MethodView):
 
     def safe_metadata(self):
         """Creates a copy of the metadata attribute without the
-        `extra_parameters` key. 
+        `extra_parameters` key.
         """
         safe_metadata = deepcopy(self.metadata)
         safe_metadata.pop('extra_parameters', None)
