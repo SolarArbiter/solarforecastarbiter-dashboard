@@ -23,7 +23,7 @@ class BaseConfig(object):
     # reports
     REPORT_DATA_LIMIT = 262800
 
-    MAX_PLOT_DATAPOINTS = int(os.getenv('MAX_PLOT_DATAPOINTS', 93 * 60 * 60))
+    MAX_PLOT_DATAPOINTS = int(os.getenv('MAX_PLOT_DATAPOINTS', 93 * 24 * 60))
 
 
 class LocalConfig(BaseConfig):
