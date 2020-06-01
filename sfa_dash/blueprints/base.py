@@ -2,7 +2,7 @@ from collections import OrderedDict
 from copy import deepcopy
 
 
-from flask import url_for, render_template, request, flash
+from flask import url_for, render_template, request, flash, current_app
 from flask.views import MethodView
 import pandas as pd
 
@@ -20,34 +20,59 @@ class BaseView(MethodView):
 
         This inserts the rendered plot html and bokeh script into
         the temp_args keys plot and bokeh_script respectively.
+
+        Parameters
+        ----------
+        uuid: str
+            The UUID of the object to request data for.
+        start: datetime
+        end: datetime
         """
-        try:
-            values = self.api_handle.get_values(
-                uuid, params={'start': start, 'end': end})
-        except DataRequestException as e:
-            if e.status_code == 422:
-                self.temp_args.update({'warnings': e.errors})
+        interval_length = self.metadata['interval_length']
+        timerange_minutes = (end - start).total_seconds() / 60
+        total_points = timerange_minutes / interval_length
+
+        if total_points <= current_app.config['MAX_PLOT_DATAPOINTS']:
+            try:
+                values = self.api_handle.get_values(
+                    uuid, params={'start': start.isoformat(),
+                                  'end': end.isoformat()})
+            except DataRequestException as e:
+                if e.status_code == 422:
+                    self.temp_args.update({'warnings': e.errors})
+                else:
+                    self.temp_args.update({'warnings': {
+                        'Value Access': [
+                            f'{self.human_label} values inaccessible.']},
+                    })
             else:
-                self.temp_args.update({'warnings': {
-                    'Value Access': [
-                        f'{self.human_label} values inaccessible.']},
-                })
+                script_plot = timeseries_adapter(
+                    self.plot_type, self.metadata, values)
+                if script_plot is None:
+                    self.temp_args.update({
+                        'messages': {
+                            'Data': [
+                                ("No data available for this "
+                                 f"{self.human_label} during this period.")]},
+                    })
+                else:
+                    self.temp_args.update({
+                        'plot': script_plot[1],
+                        'includes_bokeh': True,
+                        'bokeh_script': script_plot[0]
+                    })
         else:
-            script_plot = timeseries_adapter(
-                self.plot_type, self.metadata, values)
-            if script_plot is None:
-                self.temp_args.update({
-                    'messages': {
-                        'Data': [
-                            (f"No data available for this {self.human_label} "
-                             "during this period.")]},
-                })
-            else:
-                self.temp_args.update({
-                    'plot': script_plot[1],
-                    'includes_bokeh': True,
-                    'bokeh_script': script_plot[0]
-                })
+            allowable_days = pd.Timedelta(
+                f"{current_app.config['MAX_PLOT_DATAPOINTS']*interval_length}"
+                " minutes")
+            self.temp_args.update({
+                'plot': '<div class="alert alert-warning">Too many datapoints '
+                        'to display. The maximum number of datapoints to plot '
+                        f'is {current_app.config["MAX_PLOT_DATAPOINTS"]}. '
+                        f'This amounts to {allowable_days.days} days and '
+                        f'{allowable_days.components.hours} hours of data. The'
+                        f' the requested data contains {total_points }.</div>'
+            })
 
     def set_timerange(self):
         """Retrieve the available timerange for an object and set the
@@ -206,7 +231,7 @@ class BaseView(MethodView):
 
     def safe_metadata(self):
         """Creates a copy of the metadata attribute without the
-        `extra_parameters` key. 
+        `extra_parameters` key.
         """
         safe_metadata = deepcopy(self.metadata)
         safe_metadata.pop('extra_parameters', None)

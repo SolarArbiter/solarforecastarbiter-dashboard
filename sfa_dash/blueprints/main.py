@@ -146,7 +146,7 @@ class SingleObjectView(DataDashView):
             except DataRequestException:
                 self.temp_args.update({'plot': None})
             else:
-                self.insert_plot(uuid, start.isoformat(), end.isoformat())
+                self.insert_plot(uuid, start, end)
             finally:
                 self.set_site_or_aggregate_link()
                 self.set_template_args(start=start, end=end, **kwargs)

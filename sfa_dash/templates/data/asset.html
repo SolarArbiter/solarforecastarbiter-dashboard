@@ -1,7 +1,9 @@
 {% extends "dash/data.html" %}
 {% import "forms/form_macros.jinja" as form %}
 {% block extra_scripts %}
+{% if metadata is defined %}
   <script>var metadata = JSON.parse('{{ metadata | tojson }}');console.log('extra loaded');</script>
+{% endif %}
 {% endblock %}
 {% block content %}
 {{ metadata_block | safe }}
