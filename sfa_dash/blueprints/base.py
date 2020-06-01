@@ -28,11 +28,18 @@ class BaseView(MethodView):
         start: datetime
         end: datetime
         """
+        # determine limit by number of datapoints in the maximum allowable
+        # time range based on interval length.
+        timerange_limit = current_app.config['MAX_DATA_RANGE_DAYS']
         interval_length = self.metadata['interval_length']
+        max_pts = timerange_limit / pd.Timedelta(f'{interval_length} minutes')
+        if max_pts > current_app.config['MAX_PLOT_DATAPOINTS']:
+            max_pts = current_app.config['MAX_PLOT_DATAPOINTS']
+
         timerange_minutes = (end - start).total_seconds() / 60
         total_points = timerange_minutes / interval_length
 
-        if total_points <= current_app.config['MAX_PLOT_DATAPOINTS']:
+        if total_points <= max_pts:
             try:
                 values = self.api_handle.get_values(
                     uuid, params={'start': start.isoformat(),
@@ -62,16 +69,14 @@ class BaseView(MethodView):
                         'bokeh_script': script_plot[0]
                     })
         else:
-            allowable_days = pd.Timedelta(
-                f"{current_app.config['MAX_PLOT_DATAPOINTS']*interval_length}"
-                " minutes")
+            allowable_days = pd.Timedelta(f"{max_pts*interval_length} minutes")
             self.temp_args.update({
                 'plot': '<div class="alert alert-warning">Too many datapoints '
                         'to display. The maximum number of datapoints to plot '
-                        f'is {current_app.config["MAX_PLOT_DATAPOINTS"]}. '
-                        f'This amounts to {allowable_days.days} days and '
-                        f'{allowable_days.components.hours} hours of data. The'
-                        f' the requested data contains {total_points }.</div>'
+                        f'is {max_pts}. This amounts to {allowable_days.days} '
+                        f'days and {allowable_days.components.hours} hours of '
+                        f'data. The the requested data contains {total_points}'
+                        '.</div>'
             })
 
     def set_timerange(self):
