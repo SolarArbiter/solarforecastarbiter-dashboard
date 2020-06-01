@@ -24,9 +24,6 @@ class BaseConfig(object):
     REPORT_DATA_LIMIT = 262800
     MAX_DATA_RANGE_DAYS = dt.timedelta(days=int(
         os.getenv('MAX_DATA_RANGE_DAYS', '366')))
-
-    MAX_PLOT_DATAPOINTS = int(os.getenv('MAX_PLOT_DATAPOINTS', 93 * 24 * 60))
-
     MAX_PLOT_DATAPOINTS = int(os.getenv('MAX_PLOT_DATAPOINTS', 93 * 24 * 60))
 
 
