@@ -6,7 +6,7 @@ import pandas as pd
 
 from sfa_dash.api_interface import observations, sites, aggregates
 from sfa_dash.blueprints.base import BaseView
-from sfa_dash.blueprints.util import (filter_form_fields, parse_timedelta,
+from sfa_dash.blueprints.util import (filter_form_fields,
                                       flatten_dict, download_timeseries)
 from sfa_dash.errors import DataRequestException
 from sfa_dash.form_utils.converters import AggregateConverter

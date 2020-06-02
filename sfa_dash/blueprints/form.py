@@ -281,6 +281,26 @@ class UploadForm(BaseView):
                                     uuid=uuid))
 
 
+class CloneForm(CreateForm):
+    def __init__(self, data_type):
+        super().__init__(data_type)
+
+    def fill_nested_metadata(self):
+        pass
+
+    def get(self, uuid=None):
+        if uuid is not None:
+            try:
+                self.metadata = self.api_handle.get_metadata(uuid)
+            except DataRequestException as e:
+                self.flash_api_errors(e.errors)
+                return redirect(url_for(
+                    f'data_dashboard.{self.data_type}s'))
+            else:
+                form_data = self.formatter.payload_to_formdata(self.metadata)
+        return render_template(self.template, form_data=form_data)
+
+
 forms_blp = Blueprint('forms', 'forms')
 forms_blp.add_url_rule('/sites/create',
                        view_func=CreateForm.as_view('create_site',
@@ -295,6 +315,9 @@ forms_blp.add_url_rule('/sites/<uuid>/forecasts/cdf/create',
                        view_func=CreateForm.as_view(
                            'create_cdf_forecast_group',
                            data_type='cdf_forecast_group'))
+forms_blp.add_url_rule('/sites/<uuid>/clone',
+                       view_func=CloneForm.as_view('clone_site',
+                                                   data_type='site'))
 forms_blp.add_url_rule('/observations/<uuid>/upload',
                        view_func=UploadForm.as_view('upload_observation_data',
                                                     data_type='observation'))

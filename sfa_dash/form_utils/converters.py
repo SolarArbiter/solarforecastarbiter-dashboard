@@ -6,6 +6,9 @@ interface. The converter's `form` attribute is the path of the form template
 the converter is expected to parse.
 """
 from abc import ABC, abstractmethod
+from functools import reduce
+
+
 from sfa_dash.form_utils import utils
 
 
@@ -42,7 +45,7 @@ class FormConverter(ABC):
         Parameters
         ----------
         form_dict: dict
-            Dictionary of form submission data. Usually just Flask's 
+            Dictionary of form submission data. Usually just Flask's
             request.form dict.
 
         Returns
@@ -55,10 +58,48 @@ class FormConverter(ABC):
 
 class SiteConverter(FormConverter):
     form = 'forms/site_form/html'
+    tracking_keys = {
+        'fixed': ['surface_tilt', 'surface_azimuth'],
+        'single_axis': ['axis_azimuth', 'backtrack', 'axis_tilt',
+                        'ground_coverage_ratio', 'max_rotation_angle'],
+    }
+    modeling_keys = ['ac_capacity', 'dc_capacity', 'ac_loss_factor',
+                     'dc_loss_factor', 'temperature_coefficient',
+                     'tracking_type']
+
+    top_level_keys = ['name', 'elevation', 'latitude', 'longitude', 'timezone',
+                      'extra_parameters']
 
     @classmethod
     def payload_to_formdata(cls, payload_dict):
-        pass
+        """Converts an api response to a form data dictionary for filling a
+        form.
+
+        Parameters
+        ----------
+        payload_dict: dict
+            API json response as a python dict
+
+        Returns
+        -------
+        dict
+            dictionary of form data.
+        """
+        form_dict = {key: payload_dict[key]
+                     for key in cls.top_level_keys
+                     if key != 'extra_parameters'}
+        is_plant = reduce(lambda a, b: a is not None or b is not None,
+                          payload_dict['modeling_parameters'].values())
+        if is_plant:
+            form_dict['site_type'] = 'power-plant'
+            modeling_params = payload_dict['modeling_parameters']
+            for key in cls.modeling_keys:
+                form_dict[key] = modeling_params[key]
+            for key in cls.tracking_keys[modeling_params['tracking_type']]:
+                form_dict[key] = modeling_params[key]
+        else:
+            form_dict['site_type'] = 'weather-station'
+        return form_dict
 
     @classmethod
     def formdata_to_payload(cls, form_dict):
@@ -73,28 +114,16 @@ class SiteConverter(FormConverter):
         dictionary
             Form data formatted to the API spec.
         """
-        tracking_keys = {
-            'fixed': ['surface_tilt', 'surface_azimuth'],
-            'single_axis': ['axis_azimuth', 'backtrack',
-                            'axis_tilt', 'ground_coverage_ratio',
-                            'max_rotation_angle'],
-        }
-        modeling_keys = ['ac_capacity', 'dc_capacity',
-                         'ac_loss_factor', 'dc_loss_factor',
-                         'temperature_coefficient', 'tracking_type']
-
-        top_level_keys = ['name', 'elevation', 'latitude',
-                          'longitude', 'timezone', 'extra_parameters']
         site_metadata = {key: form_dict[key]
-                         for key in top_level_keys
+                         for key in cls.top_level_keys
                          if form_dict.get(key, "") != ""}
         if form_dict['site_type'] == 'power-plant':
             modeling_params = {key: form_dict[key]
-                               for key in modeling_keys
+                               for key in cls.modeling_keys
                                if form_dict.get(key, "") != ""}
             tracking_type = form_dict['tracking_type']
             tracking_fields = {key: form_dict[key]
-                               for key in tracking_keys[tracking_type]}
+                               for key in cls.tracking_keys[tracking_type]}
             modeling_params.update(tracking_fields)
             site_metadata['modeling_parameters'] = modeling_params
         return site_metadata
