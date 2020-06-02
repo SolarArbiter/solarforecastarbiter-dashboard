@@ -1,10 +1,5 @@
 {% extends "dash/data.html" %}
 {% import "forms/form_macros.jinja" as form %}
-{% block extra_scripts %}
-{% if metadata is defined %}
-  <script>var metadata = JSON.parse('{{ metadata | tojson }}');</script>
-{% endif %}
-{% endblock %}
 {% block content %}
 {{ metadata_block | safe }}
 {% if upload_link is defined and is_allowed('write_values') %}

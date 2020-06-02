@@ -2,9 +2,6 @@
 {% block content %}
 {{ metadata_block | safe }}
 {% include "sections/notifications.html" %}
-{% if metadata is defined %}
-<script>var metadata = JSON.parse('{{ metadata | tojson }}');</script>
-
 {% set update_allowed = is_allowed('update') %}
 {% if update_allowed %}
 <a role="button" class="btn btn-primary btn-sm" href="{{ url_for('forms.add_aggregate_observations', uuid=metadata['aggregate_id'] ) }}">Add Observation</a>
@@ -38,7 +35,7 @@
   </thead>
   <tbody>
     <tr class="warning no-result">
-      <td colspan="4"><i class="fa fa-warning"></i>No result</td> 
+      <td colspan="4"><i class="fa fa-warning"></i>No result</td>
     </tr>
     {% for obs in observations %}
     <tr class="aggregate-observation-row">
