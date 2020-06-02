@@ -2,7 +2,7 @@
 {% import "forms/form_macros.jinja" as form %}
 {% block extra_scripts %}
 {% if metadata is defined %}
-  <script>var metadata = JSON.parse('{{ metadata | tojson }}');console.log('extra loaded');</script>
+  <script>var metadata = JSON.parse('{{ metadata | tojson }}');</script>
 {% endif %}
 {% endblock %}
 {% block content %}
