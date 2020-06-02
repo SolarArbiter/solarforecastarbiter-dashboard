@@ -1,6 +1,6 @@
-MAX_DOWNLOAD_DAYS = 366;
-MAX_PLOT_POINTS = 1440 * 93; // approximately 3 months of 1 minute data
-
+/* The MAX_DATA_RANGE_DAYS and MAX_PLOT_DATAPOINTS variables are expected to
+ * exist as global variables injected by flask.
+ */
 function ParseStartEnd(){
     // Manually parse this string to avoid the implicit tz conversion based on
     // the users browser. We're asking users for UTC so, manually add Z to the end of
@@ -42,7 +42,7 @@ function toggleDownloadUpdate(){
     days = miliseconds / (1000 * 60 * 60 * 24);
     if (days > 0){
         // limit maximum amount of data to download
-        if (days > MAX_DOWNLOAD_DAYS){
+        if (days > MAX_DATA_RANGE_DAYS){
             // disable download and plot update
             $('#download-submit').attr('disabled', true);
             $('#plot-range-adjust-submit').attr('disabled', true);
@@ -63,13 +63,13 @@ function toggleDownloadUpdate(){
             }
             var intervals = miliseconds / (interval_length * 1000 * 60);
             
-            if (intervals > MAX_PLOT_POINTS){
+            if (intervals > MAX_PLOT_DATAPOINTS){
                 $('#plot-range-adjust-submit').attr('disabled', true);
                 insertWarning(
                     'Plotting disabled',
                     `Maximum plottable points exceeded. Timerange includes 
                     ${intervals} data points and the maximum is 
-                    ${MAX_PLOT_POINTS}.`);
+                    ${MAX_PLOT_DATAPOINTS}.`);
             } else {
                 $('#plot-range-adjust-submit').removeAttr('disabled');
             }
