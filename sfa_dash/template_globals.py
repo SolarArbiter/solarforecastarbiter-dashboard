@@ -42,10 +42,10 @@ ALLOWED_QUALITY_FLAGS = {
     'NIGHTTIME': 'NIGHTTIME',
     'CLEARSKY': 'CLEARSKY (GHI only)',
     'LIMITS EXCEEDED': 'LIMITS EXCEEDED',
-    'STALE VALUES': 'STALE VALUES (catches fixed values at nighttime)',
+    'STALE VALUES': 'STALE VALUES (includes fixed values at nighttime)',
     'DAYTIME STALE VALUES': 'DAYTIME STALE VALUES',
     'INTERPOLATED VALUES':
-        'INTERPOLATED VALUES (catches fixed values at nighttime)',
+        'INTERPOLATED VALUES (includes fixed values at nighttime)',
     'DAYTIME INTERPOLATED VALUES': 'DAYTIME INTERPOLATED VALUES'
 }
 
