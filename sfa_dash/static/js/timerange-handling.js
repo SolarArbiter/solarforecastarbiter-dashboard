@@ -49,7 +49,7 @@ function toggleDownloadUpdate(){
 
             insertWarning(
                 'Maximum timerange exceeded',
-                'Maximum of one year of data may be requested.'
+                'Maximum of one year of data may be requested at once.'
             );
         } else {
             // enable download
