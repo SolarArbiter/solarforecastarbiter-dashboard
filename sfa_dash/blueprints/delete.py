@@ -27,8 +27,8 @@ class DeleteConfirmation(DataDashView):
 
     def set_template_args(self, **kwargs):
         self.temp_args.update({
-            'metadata': render_template(self.metadata_template,
-                                        **self.metadata),
+            'metadata_block': render_template(self.metadata_template,
+                                              **self.metadata),
             'uuid': self.metadata['uuid'],
             'data_type': self.data_type,
         })

@@ -72,8 +72,9 @@ class CreateForm(MetadataForm):
                     f'data_dashboard.{self.data_type}s'))
             else:
                 template_args['site_metadata'] = site_metadata
-                template_args['metadata'] = self.render_metadata_section(
-                    site_metadata)
+                template_args['metadata_block'] = render_template(
+                    self.metadata_template,
+                    **site_metadata)
         return render_template(self.template, **template_args)
 
     def post(self, uuid=None):
@@ -104,8 +105,9 @@ class CreateForm(MetadataForm):
                     template_args['errors'].update(self.flatten_dict(e.errors))
                 else:
                     template_args['site_metadata'] = site_metadata
-                    template_args['metadata'] = self.render_metadata_section(
-                        site_metadata)
+                    template_args['metadata_block'] = render_template(
+                        self.metadata_template,
+                        **site_metadata)
             return render_template(
                 self.template, form_data=form_data, **template_args)
         return redirect(url_for(f'data_dashboard.{self.data_type}_view',
@@ -135,10 +137,6 @@ class CreateAggregateForecastForm(MetadataForm):
     def get_aggregate_metadata(self, aggregate_id):
         return aggregates.get_metadata(aggregate_id)
 
-    def render_metadata_section(self, metadata):
-        return render_template(
-            self.metadata_template, **metadata)
-
     def get(self, uuid=None):
         template_args = {}
         if uuid is not None:
@@ -149,8 +147,9 @@ class CreateAggregateForecastForm(MetadataForm):
                 return redirect(url_for(f'data_dashboard.aggregates'))
             else:
                 template_args['aggregate_metadata'] = aggregate_metadata
-                template_args['metadata'] = self.render_metadata_section(
-                    aggregate_metadata)
+                template_args['metadata_block'] = render_template(
+                        self.metadata_template,
+                        **aggregate_metadata)
         return render_template(self.template, **template_args)
 
     def post(self, uuid=None):
@@ -181,8 +180,9 @@ class CreateAggregateForecastForm(MetadataForm):
                     template_args['errors'].update(self.flatten_dict(e.errors))
                 else:
                     template_args['aggregate_metadata'] = aggregate_metadata
-                    template_args['metadata'] = self.render_metadata_section(
-                        aggregate_metadata)
+                    template_args['metadata_block'] = render_template(
+                        self.metadata_template,
+                        **aggregate_metadata)
             return render_template(
                 self.template, form_data=form_data, **template_args)
         return redirect(url_for(f'data_dashboard.{self.data_type}_view',
@@ -207,20 +207,19 @@ class UploadForm(BaseView):
         else:
             raise ValueError(f'No upload form defined for {data_type}')
 
-    def render_metadata_section(self, metadata):
-        return render_template(self.metadata_template, **metadata)
-
     def get(self, uuid, **kwargs):
         temp_args = {}
         try:
-            metadata_dict = self.api_handle.get_metadata(uuid)
-            metadata_dict['site_link'] = self.generate_site_link(
-                metadata_dict)
+            self.metadata = self.api_handle.get_metadata(uuid)
+            self.metadata['site_link'] = self.generate_site_link(
+                self.metadata)
         except DataRequestException as e:
             temp_args = {'errors': e.errors}
         else:
             temp_args.update(
-                {'metadata': self.render_metadata_section(metadata_dict)})
+                {'metadata_block': render_template(self.metadata_template,
+                                                   **self.metadata),
+                 'metadata': self.safe_metadata()})
         return render_template(self.template, uuid=uuid, **temp_args, **kwargs)
 
     def post(self, uuid):
