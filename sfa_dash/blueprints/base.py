@@ -237,16 +237,17 @@ class BaseView(MethodView):
 
     def safe_metadata(self):
         """Creates a copy of the metadata attribute without the
-        `extra_parameters` key.
+        `extra_parameters` keys.
         """
-        safe_metadata = deepcopy(self.metadata)
-        safe_metadata.pop('extra_parameters', None)
-        if 'site' in safe_metadata:
-            safe_metadata['site'].pop('extra_parameters', None)
-        if 'aggregate' in safe_metadata:
-            safe_metadata['aggregate'].pop('extra_parameters', None)
-        safe_metadata.pop('location_link', None)
-        return safe_metadata
+        def _pop_nonjson(meta_dict):
+            new_dict = deepcopy(meta_dict)
+            new_dict.pop('extra_parameters', None)
+            new_dict.pop('location_link', None)
+            for key, val in meta_dict.items():
+                if isinstance(val, dict):
+                    new_dict[key] = _pop_nonjson(val)
+            return new_dict
+        return _pop_nonjson(self.metadata)
 
     def template_args(self):
         return {}
