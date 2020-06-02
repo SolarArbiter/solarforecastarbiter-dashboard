@@ -7,10 +7,5 @@
 </h2>
 {% endif %}
 {% include "sections/subnav.html" %}
-{% block extra_scripts %}
-{% if metadata is defined %}
-  <script>var metadata = JSON.parse('{{ metadata | tojson }}');</script>
-{% endif %}
-{% endblock %}
 {% block content %}{% endblock %}
 {% endblock %}
