@@ -2,6 +2,7 @@
 {% set flashed_warnings= get_flashed_messages(category_filter=['warning']) %}
 {% set flashed_errors = get_flashed_messages(category_filter=['error']) %}
 
+<div class="notifications-section">
 {% if messages is defined or (flashed_messages | length) > 0 %}
 <div class="messages">
   <ul class="message-list notification-list">
@@ -46,3 +47,4 @@
   </ul>
 </div>
 {% endif %}
+</div>

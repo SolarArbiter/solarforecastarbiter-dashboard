@@ -1,9 +1,7 @@
 {% extends "dash/data.html" %}
 {% block content %}
-{{ metadata_block | safe }}
-{% include "sections/notifications.html" %}
+
 {% if metadata is defined %}
-<script>var metadata = JSON.parse('{{ metadata | tojson }}');</script>
 
 {% set update_allowed = is_allowed('update') %}
 {% if update_allowed %}
