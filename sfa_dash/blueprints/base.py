@@ -77,7 +77,7 @@ class BaseView(MethodView):
                         f'is {max_pts}. This amounts to {allowable_days.days} '
                         f'days and {allowable_days.components.hours} hours of '
                         f'data. The the requested data contains {total_points}'
-                        '.</div>'
+                        ' datapoints.</div>'
             })
 
     def set_timerange(self):
