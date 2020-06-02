@@ -32,9 +32,10 @@ class BaseView(MethodView):
         # time range based on interval length.
         timerange_limit = current_app.config['MAX_DATA_RANGE_DAYS']
         interval_length = self.metadata['interval_length']
-        max_pts = timerange_limit / pd.Timedelta(f'{interval_length} minutes')
-        if max_pts > current_app.config['MAX_PLOT_DATAPOINTS']:
-            max_pts = current_app.config['MAX_PLOT_DATAPOINTS']
+        max_pts = min(
+            timerange_limit / pd.Timedelta(f'{interval_length} minutes'),
+            current_app.config['MAX_PLOT_DATAPOINTS']
+        )
 
         timerange_minutes = (end - start).total_seconds() / 60
         total_points = timerange_minutes / interval_length
