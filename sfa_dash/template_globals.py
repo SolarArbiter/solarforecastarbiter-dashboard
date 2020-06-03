@@ -12,8 +12,9 @@ from solarforecastarbiter.datamodel import (
     ALLOWED_DETERMINISTIC_METRICS,
     ALLOWED_EVENT_METRICS,
     ALLOWED_PROBABILISTIC_METRICS,
+    ALLOWED_VARIABLES,
+    COMMON_NAMES,
 )
-
 
 TIMEZONES = pytz.country_timezones('US') + list(
     filter(lambda x: 'GMT' in x, pytz.all_timezones))
@@ -114,4 +115,6 @@ def template_variables():
         'MAX_DATA_RANGE_DAYS': current_app.config['MAX_DATA_RANGE_DAYS'].days,
         'MAX_PLOT_DATAPOINTS': current_app.config['MAX_PLOT_DATAPOINTS'],
         'parse_quality_flags': parse_quality_flags,
+        'variable_names': COMMON_NAMES,
+        'variable_unit_map': ALLOWED_VARIABLES,
     }
