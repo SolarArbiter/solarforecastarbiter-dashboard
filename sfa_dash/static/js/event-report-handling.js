@@ -71,8 +71,7 @@ $(document).ready(function() {
          *  where index associates the pairs with eachother for easier parsing when the form
          *  is submitted.
          */
-
-        var new_object_pair = $(`<div class="object-pair object-pair-${pair_index}">
+        var new_object_pair = $(`<div class="object-pair pair-container object-pair-${pair_index}">
                 <div class="input-wrapper">
                   <div class="col-md-12">
                     <div class="object-pair-label forecast-name-${pair_index}"><b>Forecast: </b>${fxName}</div>

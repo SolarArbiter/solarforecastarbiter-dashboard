@@ -891,7 +891,7 @@ $(document).ready(function() {
                 $(".empty-reports-list").attr('hidden', 'hidden');
                 forecast_select.css('border', '');
                 observation_select.css('border', '');
-                constant_value_select('border', '');
+                constant_value_select.css('border', '');
                 toggle_reference_dependent_metrics();
             } else {
                 // Otherwise apply a red border to alert the user to need of input
