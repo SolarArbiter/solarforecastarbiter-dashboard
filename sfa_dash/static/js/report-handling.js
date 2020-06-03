@@ -44,21 +44,6 @@ $(document).ready(function() {
     }
 
 
-    var variable_unit_map = {
-        'air_temperature': 'degC',
-        'wind_speed': 'm/s',
-        'ghi': 'W/m^2',
-        'dni': 'W/m^2',
-        'dhi': 'W/m^2',
-        'poa_global': 'W/m^2',
-        'relative_humidity': '%',
-        'ac_power': 'MW',
-        'dc_power': 'MW',
-        'availability': '%',
-        'curtailment': 'MW',
-    }
-
-
     var current_units = null;
     
     function unset_units(){
@@ -69,7 +54,7 @@ $(document).ready(function() {
 
 
     function set_units(variable){
-        units = variable_unit_map[variable];
+        units = sfa_dash_config.VARIABLE_UNIT_MAP[variable];
         if(units){
             current_units = units;
         }
@@ -83,7 +68,7 @@ $(document).ready(function() {
         variable_options.removeAttr('disabled');
         if (current_units){
             variable_options.each(function(){
-                units = variable_unit_map[$(this).attr('value')]
+                units = sfa_dash_config.VARIABLE_UNIT_MAP[$(this).attr('value')]
                 if(units != current_units){
                     $(this).attr('hidden', true);
                     $(this).attr('disabled', true);
@@ -118,25 +103,12 @@ $(document).ready(function() {
         /*
          * Returns a JQuery object containing a select list of variable options.
          */
-        var_names = {
-            'air_temperature': 'Air Temperature',
-            'wind_speed': 'Wind Speed',
-            'ghi': 'GHI',
-            'dni': 'DNI',
-            'dhi': 'DHI',
-            'poa_global': 'Plane of Array Irradiance',
-            'relative_humidity': 'Relative Humidty',
-            'ac_power': 'AC Power',
-            'dc_power': 'DC Power',
-            'availability': 'Availability',
-            'curtailment': 'Curtailment'
-        }
         variables = new Set();
         for (fx in page_data['forecasts']){
             var new_var = page_data['forecasts'][fx].variable;
             if (!current_units ||
-                variable_unit_map[new_var] == current_units ||
-                !variable_unit_map[new_var]){
+                sfa_dash_config.VARIABLE_UNIT_MAP[new_var] == current_units ||
+                !sfa_dash_config.VARIABLE_UNIT_MAP[new_var]){
                 variables.add(page_data['forecasts'][fx].variable);
             }
         }
@@ -144,7 +116,7 @@ $(document).ready(function() {
         variables.forEach(function(variable){
             variable_select.append(
                 $('<option></option>')
-                    .html(var_names[variable])
+                    .html(sfa_dash_config.VARIABLE_NAMES[variable])
                     .val(variable));
         });
         return variable_select
