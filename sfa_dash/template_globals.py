@@ -113,4 +113,5 @@ def template_variables():
         'current_path': request.path,
         'MAX_DATA_RANGE_DAYS': current_app.config['MAX_DATA_RANGE_DAYS'].days,
         'MAX_PLOT_DATAPOINTS': current_app.config['MAX_PLOT_DATAPOINTS'],
+        'parse_quality_flags': parse_quality_flags,
     }
