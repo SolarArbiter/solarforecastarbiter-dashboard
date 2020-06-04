@@ -132,9 +132,36 @@ class SiteConverter(FormConverter):
 class ObservationConverter(FormConverter):
     form = 'forms/observation_form.html'
 
+    # keys that can be directly read from the form or api response
+    direct_keys = ['name', 'variable', 'interval_value_type',
+                   'uncertainty', 'extra_parameters', 'interval_label',
+                   'site_id']
+
     @classmethod
     def payload_to_formdata(cls, payload_dict):
-        pass
+        """Converts an observation metadata dict into a form_data dict.
+
+        Parameters
+        ----------
+        payload: dict
+            API observation metadata json repsonse as a dict.
+
+        Returns
+        -------
+        dict
+            A dictionary for filling out form fields where keys are input name
+            attributes.
+        """
+        form_dict = {key: payload_dict[key]
+                     for key in cls.direct_keys
+                     if key != 'extra_parameters'}
+        form_dict.update(
+            utils.parse_timedelta_from_api(
+                payload_dict,
+                'interval_length'
+            )
+        )
+        return form_dict
 
     @classmethod
     def formdata_to_payload(cls, form_dict):
@@ -149,25 +176,53 @@ class ObservationConverter(FormConverter):
         dictionary
             Form data formatted to the API spec.
         """
-        observation_metadata = {}
-        direct_keys = ['name', 'variable', 'interval_value_type',
-                       'uncertainty', 'extra_parameters', 'interval_label',
-                       'site_id']
-        observation_metadata = {key: form_dict[key]
-                                for key in direct_keys
-                                if form_dict.get(key, "") != ""}
-        observation_metadata['interval_length'] = utils.parse_timedelta(
+        obs_metadata = {}
+        obs_metadata = {key: form_dict[key]
+                        for key in cls.direct_keys
+                        if form_dict.get(key, "") != ""}
+        obs_metadata['interval_length'] = utils.parse_timedelta_from_form(
             form_dict,
             'interval_length')
-        return observation_metadata
+        return obs_metadata
 
 
 class ForecastConverter(FormConverter):
     form = 'forms/forecast_form.html'
+    direct_keys = ['name', 'variable', 'interval_value_type',
+                   'extra_parameters', 'interval_length', 'interval_label']
 
     @classmethod
     def payload_to_formdata(cls, payload_dict):
-        pass
+        """Converts an forecast metadata dict into a form_data dict.
+
+        Parameters
+        ----------
+        payload: dict
+            API forecast metadata json repsonse as a dict.
+
+        Returns
+        -------
+        dict
+            A dictionary for filling out form fields where keys are input name
+            attributes.
+        """
+        form_dict = {key: payload_dict[key]
+                     for key in cls.direct_keys
+                     if key != 'extra_parameters'}
+        utils.set_location_id(payload_dict, form_dict)
+        form_dict.update(
+            utils.parse_hhmm_field_from_api(payload_dict, 'issue_time_of_day')
+        )
+        form_dict.update(
+            utils.parse_timedelta_from_api(payload_dict, 'lead_time_to_start')
+        )
+        form_dict.update(
+            utils.parse_timedelta_from_api(payload_dict, 'run_length')
+        )
+        form_dict.update(
+            utils.parse_timedelta_from_api(payload_dict, 'interval_length')
+        )
+        return form_dict
 
     @classmethod
     def formdata_to_payload(cls, form_dict):
@@ -182,27 +237,24 @@ class ForecastConverter(FormConverter):
         dictionary
             Form data formatted to the API spec.
         """
-        forecast_metadata = {}
-        direct_keys = ['name', 'variable', 'interval_value_type',
-                       'extra_parameters', 'interval_length',
-                       'interval_label']
-        forecast_metadata = {key: form_dict[key]
-                             for key in direct_keys
-                             if form_dict.get(key, '') != ''}
-        utils.set_location_id(form_dict, forecast_metadata)
-        forecast_metadata['issue_time_of_day'] = utils.parse_hhmm_field(
+        fx_metadata = {}
+        fx_metadata = {key: form_dict[key]
+                       for key in cls.direct_keys
+                       if form_dict.get(key, '') != ''}
+        utils.set_location_id(form_dict, fx_metadata)
+        fx_metadata['issue_time_of_day'] = utils.parse_hhmm_field(
             form_dict,
-            'issue_time')
-        forecast_metadata['lead_time_to_start'] = utils.parse_timedelta(
+            'issue_time_of_day')
+        fx_metadata['lead_time_to_start'] = utils.parse_timedelta_from_form(
             form_dict,
-            'lead_time')
-        forecast_metadata['run_length'] = utils.parse_timedelta(
+            'lead_time_to_start')
+        fx_metadata['run_length'] = utils.parse_timedelta_from_form(
             form_dict,
             'run_length')
-        forecast_metadata['interval_length'] = utils.parse_timedelta(
+        fx_metadata['interval_length'] = utils.parse_timedelta_from_form(
             form_dict,
             'interval_length')
-        return forecast_metadata
+        return fx_metadata
 
 
 class CDFForecastConverter(FormConverter):
@@ -225,11 +277,11 @@ class CDFForecastConverter(FormConverter):
         dictionary
             Form data formatted to the API spec.
         """
-        forecast_metadata = ForecastConverter.formdata_to_payload(form_dict)
+        fx_metadata = ForecastConverter.formdata_to_payload(form_dict)
         constant_values = form_dict['constant_values'].split(',')
-        forecast_metadata['constant_values'] = constant_values
-        forecast_metadata['axis'] = form_dict['axis']
-        return forecast_metadata
+        fx_metadata['constant_values'] = constant_values
+        fx_metadata['axis'] = form_dict['axis']
+        return fx_metadata
 
 
 class AggregateConverter(FormConverter):
@@ -244,7 +296,7 @@ class AggregateConverter(FormConverter):
         formatted = {}
         formatted['name'] = form_dict['name']
         formatted['description'] = form_dict['description']
-        formatted['interval_length'] = utils.parse_timedelta(
+        formatted['interval_length'] = utils.parse_timedelta_from_form(
             form_dict, 'interval_length')
         formatted['interval_label'] = form_dict['interval_label']
         formatted['aggregate_type'] = form_dict['aggregate_type']
