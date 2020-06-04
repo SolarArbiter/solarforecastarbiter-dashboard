@@ -56,10 +56,11 @@
   <label>{{ label }}</label><br/>
   <div class="input-wrapper">
   <input type="number" name="{{ name }}_number" step="1" min="0" {% if name+'_number' in form_data %}value="{{ form_data[name+'_number'] }}"{% endif %} required class="form-control time-field {{name }}-value-field">
+  {% set selected = form_data.get(name+'_units') %}
   <select required name="{{ name }}_units" class="form-control time-field {{ name }}-units-field">
-    <option value="minutes">Minutes</option>
-    <option value="hours">Hours</option>
-    <option value="days">Days</option>
+    <option {% if selected == "minutes" %}selected{% endif %} value="minutes">Minutes</option>
+    <option {% if selected == "hours" %}selected{% endif %} value="hours">Hours</option>
+    <option {% if selected == "days" %}selected{% endif %} value="days">Days</option>
   </select>
   </div>
 {% if help_text is not none %}
