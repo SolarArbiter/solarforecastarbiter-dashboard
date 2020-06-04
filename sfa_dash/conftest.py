@@ -325,7 +325,7 @@ def forecast_id():
 
 @pytest.fixture()
 def site_id():
-    return 'd2018f1d-82b1-422a-8ec4-4e8b3fe92a4a'
+    return '123e4567-e89b-12d3-a456-426655440001'
 
 
 @pytest.fixture()
@@ -438,3 +438,113 @@ def valid_permission_object_id(
         return permission_id
     if ot == 'roles':
         return role_id
+
+
+@pytest.fixture()
+def site():
+    return {
+        'created_at': '2019-03-01T11:44:38+00:00',
+        'elevation': 595.0,
+        'extra_parameters': '{"network_api_abbreviation": "AS","network": "University of Oregon SRML","network_api_id": "94040"}',  # noqa
+        'latitude': 42.19,
+        'longitude': -122.7,
+        'modeling_parameters': {'ac_capacity': None,
+         'ac_loss_factor': None,
+         'axis_azimuth': None,
+         'axis_tilt': None,
+         'backtrack': None,
+         'dc_capacity': None,
+         'dc_loss_factor': None,
+         'ground_coverage_ratio': None,
+         'max_rotation_angle': None,
+         'surface_azimuth': None,
+         'surface_tilt': None,
+         'temperature_coefficient': None,
+         'tracking_type': None},
+        'modified_at': '2019-03-01T11:44:38+00:00',
+        'name': 'Weather Station',
+        'provider': 'Organization 1',
+        'site_id': '123e4567-e89b-12d3-a456-426655440001',
+        'timezone': 'Etc/GMT+8'}
+
+
+@pytest.fixture()
+def observation():
+    return {
+        '_links': {'site': 'http://localhost:5000/sites/123e4567-e89b-12d3-a456-426655440001'},  # noqa
+        'created_at': '2019-03-01T12:01:39+00:00',
+        'extra_parameters': '{"instrument": "Ascension Technology Rotating Shadowband Pyranometer", "network": "UO SRML"}',  # noqa
+        'interval_label': 'beginning',
+        'interval_length': 5,
+        'interval_value_type': 'interval_mean',
+        'modified_at': '2019-03-01T12:01:39+00:00',
+        'name': 'GHI Instrument 1',
+        'observation_id': '123e4567-e89b-12d3-a456-426655440000',
+        'provider': 'Organization 1',
+        'site_id': '123e4567-e89b-12d3-a456-426655440001',
+        'uncertainty': 0.1,
+        'variable': 'ghi'}
+
+
+@pytest.fixture()
+def forecast():
+    return {
+        '_links': {'aggregate': None,
+                   'site': 'http://localhost:5000/sites/123e4567-e89b-12d3-a456-426655440001'},  # noqa
+        'aggregate_id': None,
+        'created_at': '2019-03-01T11:55:37+00:00',
+        'extra_parameters': '',
+        'forecast_id': '11c20780-76ae-4b11-bef1-7a75bdc784e3',
+        'interval_label': 'beginning',
+        'interval_length': 5,
+        'interval_value_type': 'interval_mean',
+        'issue_time_of_day': '06:00',
+        'lead_time_to_start': 60,
+        'modified_at': '2019-03-01T11:55:37+00:00',
+        'name': 'DA GHI',
+        'provider': 'Organization 1',
+        'run_length': 1440,
+        'site_id': '123e4567-e89b-12d3-a456-426655440001',
+        'variable': 'ghi'}
+
+
+@pytest.fixture()
+def cdf_forecast():
+    return {
+        '_links': {'site': 'http://localhost:5000/sites/123e4567-e89b-12d3-a456-426655440001'},  # noqa
+        'aggregate_id': None,
+        'axis': 'y',
+        'constant_values': [{'_links': {'timerange': 'http://localhost:5000/forecasts/cdf/single/633f9396-50bb-11e9-8647-d663bd873d93/values/timerange',  # noqa
+           'values': 'http://localhost:5000/forecasts/cdf/single/633f9396-50bb-11e9-8647-d663bd873d93/values'},  # noqa
+          'constant_value': 5.0,
+          'forecast_id': '633f9396-50bb-11e9-8647-d663bd873d93'},
+         {'_links': {'timerange': 'http://localhost:5000/forecasts/cdf/single/633f9864-50bb-11e9-8647-d663bd873d93/values/timerange',  # noqa
+           'values': 'http://localhost:5000/forecasts/cdf/single/633f9864-50bb-11e9-8647-d663bd873d93/values'},  # noqa
+          'constant_value': 20.0,
+          'forecast_id': '633f9864-50bb-11e9-8647-d663bd873d93'},
+         {'_links': {'timerange': 'http://localhost:5000/forecasts/cdf/single/633f9b2a-50bb-11e9-8647-d663bd873d93/values/timerange',  # noqa
+           'values': 'http://localhost:5000/forecasts/cdf/single/633f9b2a-50bb-11e9-8647-d663bd873d93/values'},  # noqa
+          'constant_value': 50.0,
+          'forecast_id': '633f9b2a-50bb-11e9-8647-d663bd873d93'},
+         {'_links': {'timerange': 'http://localhost:5000/forecasts/cdf/single/633f9d96-50bb-11e9-8647-d663bd873d93/values/timerange',  # noqa
+           'values': 'http://localhost:5000/forecasts/cdf/single/633f9d96-50bb-11e9-8647-d663bd873d93/values'},  # noqa
+          'constant_value': 80.0,
+          'forecast_id': '633f9d96-50bb-11e9-8647-d663bd873d93'},
+         {'_links': {'timerange': 'http://localhost:5000/forecasts/cdf/single/633fa548-50bb-11e9-8647-d663bd873d93/values/timerange',  # noqa
+           'values': 'http://localhost:5000/forecasts/cdf/single/633fa548-50bb-11e9-8647-d663bd873d93/values'},  # noqa
+          'constant_value': 95.0,
+          'forecast_id': '633fa548-50bb-11e9-8647-d663bd873d93'}],
+        'created_at': '2019-03-02T14:55:37+00:00',
+        'extra_parameters': '',
+        'forecast_id': 'ef51e87c-50b9-11e9-8647-d663bd873d93',
+        'interval_label': 'beginning',
+        'interval_length': 5,
+        'interval_value_type': 'interval_mean',
+        'issue_time_of_day': '06:00',
+        'lead_time_to_start': 60,
+        'modified_at': '2019-03-02T14:55:37+00:00',
+        'name': 'DA GHI',
+        'provider': 'Organization 1',
+        'run_length': 1440,
+        'site_id': '123e4567-e89b-12d3-a456-426655440001',
+        'variable': 'ghi'}
