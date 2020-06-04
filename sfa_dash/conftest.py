@@ -469,6 +469,35 @@ def site():
 
 
 @pytest.fixture()
+def site_with_modeling_params():
+    return {
+        'created_at': '2019-03-01T11:44:46+00:00',
+        'elevation': 786.0,
+        'extra_parameters': '',
+        'latitude': 43.73403,
+        'longitude': -96.62328,
+        'modeling_parameters': {
+            'ac_capacity': 0.015,
+            'ac_loss_factor': 0.0,
+            'axis_azimuth': None,
+            'axis_tilt': None,
+            'backtrack': None,
+            'dc_capacity': 0.015,
+            'dc_loss_factor': 0.0,
+            'ground_coverage_ratio': None,
+            'max_rotation_angle': None,
+            'surface_azimuth': 180.0,
+            'surface_tilt': 45.0,
+            'temperature_coefficient': -0.2,
+            'tracking_type': 'fixed'},
+        'modified_at': '2019-03-01T11:44:46+00:00',
+        'name': 'Power Plant 1',
+        'provider': 'Organization 1',
+        'site_id': '123e4567-e89b-12d3-a456-426655440002',
+        'timezone': 'Etc/GMT+6'}
+
+
+@pytest.fixture()
 def observation():
     return {
         '_links': {'site': 'http://localhost:5000/sites/123e4567-e89b-12d3-a456-426655440001'},  # noqa
