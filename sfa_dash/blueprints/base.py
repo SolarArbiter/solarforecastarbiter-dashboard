@@ -105,6 +105,7 @@ class BaseView(MethodView):
         """
         start_arg = request.args.get('start')
         end_arg = request.args.get('end')
+        utc_now = pd.Timestamp.utcnow()
         try:
             end = pd.Timestamp(end_arg)
         except ValueError:
@@ -112,7 +113,7 @@ class BaseView(MethodView):
         if pd.isnull(end):
             meta_end = self.metadata.get('timerange_end')
             if meta_end is None:
-                end = pd.Timestamp.utcnow()
+                end = utc_now
             else:
                 end = pd.Timestamp(meta_end)
         try:
@@ -120,8 +121,8 @@ class BaseView(MethodView):
         except ValueError:
             start = None
         if pd.isnull(start):
-            if end > pd.Timestamp.utcnow():
-                start = pd.Timestamp.utcnow() - pd.Timedelta('1day')
+            if end > utc_now:
+                start = utc_now - pd.Timedelta('1day')
             else:
                 start = end - pd.Timedelta('3days')
         return start, end
