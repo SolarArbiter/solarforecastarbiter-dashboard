@@ -88,8 +88,9 @@ class SiteConverter(FormConverter):
         form_dict = {key: payload_dict[key]
                      for key in cls.top_level_keys
                      if key != 'extra_parameters'}
-        is_plant = reduce(lambda a, b: a is not None or b is not None,
-                          payload_dict['modeling_parameters'].values())
+        is_plant = reduce(lambda a, b: a or b,
+                          [x is not None for x in
+                           payload_dict['modeling_parameters'].values()])
         if is_plant:
             form_dict['site_type'] = 'power-plant'
             modeling_params = payload_dict['modeling_parameters']
@@ -242,7 +243,7 @@ class ForecastConverter(FormConverter):
                        for key in cls.direct_keys
                        if form_dict.get(key, '') != ''}
         utils.set_location_id(form_dict, fx_metadata)
-        fx_metadata['issue_time_of_day'] = utils.parse_hhmm_field(
+        fx_metadata['issue_time_of_day'] = utils.parse_hhmm_field_from_form(
             form_dict,
             'issue_time_of_day')
         fx_metadata['lead_time_to_start'] = utils.parse_timedelta_from_form(

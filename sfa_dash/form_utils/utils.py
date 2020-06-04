@@ -68,7 +68,7 @@ def parse_timedelta_from_api(data_dict, key_root):
     }
 
 
-def parse_hhmm_field(data_dict, key_root):
+def parse_hhmm_field_from_form(data_dict, key_root):
     """ Extracts and parses the hours and minutes inputs to create a
     parseable time of day string in HH:MM format. These times are
     displayed as two select fields designated with a name (key_root)
