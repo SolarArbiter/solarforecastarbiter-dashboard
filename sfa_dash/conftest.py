@@ -286,16 +286,19 @@ def aggregate_id_route(request):
     return fn
 
 
-test_metadata_dict = {
-    'aggregate': {},
-    'observation': {},
-    'forecast': {},
-    'cdf_forecast': {},
-    'report': {},
-    'user': {},
-    'permission': {},
-    'role': {},
-}
+clone_route_list = [
+    '/sites/{site_id}/clone',
+    '/observations/{observation_id}/clone',
+    '/forecasts/single/{forecast_id}/clone',
+]
+
+
+@pytest.fixture(params=clone_route_list)
+def clone_route(request):
+    def fn(uuids):
+        # NOTE: expects a dict of all possible ids to use for formatting
+        return request.param.format(**uuids)
+    return fn
 
 
 @pytest.fixture()
@@ -351,6 +354,22 @@ def aggregate_id():
 @pytest.fixture()
 def report_id():
     return '9f290dd4-42b8-11ea-abdf-f4939feddd82'
+
+
+@pytest.fixture
+def all_metadata_ids(
+       observation_id, forecast_id, cdf_forecast_group_id, cdf_forecast_id,
+       site_id, site_id_plant, aggregate_id, report_id):
+    return {
+        'observation_id': observation_id,
+        'forecast_id': forecast_id,
+        'cdf_forecast_group_id': cdf_forecast_group_id,
+        'cdf_forecast_id': cdf_forecast_id,
+        'site_id': site_id,
+        'site_id_plant': site_id_plant,
+        'aggregate_id': aggregate_id,
+        'report_id': report_id,
+    }
 
 
 @pytest.fixture()
