@@ -2,7 +2,7 @@ import json
 from json.decoder import JSONDecodeError
 
 from flask import (Blueprint, render_template, request,
-                   abort, redirect, url_for)
+                   abort, redirect, url_for, flash)
 from sfa_dash.api_interface import (sites, observations, forecasts,
                                     cdf_forecasts, cdf_forecast_groups,
                                     aggregates)
@@ -46,9 +46,6 @@ class MetadataForm(BaseView):
         else:
             raise ValueError(f'No metadata form defined for {data_type}')
 
-    def get_site_metadata(self, site_id):
-        return sites.get_metadata(site_id)
-
     def get(self):
         raise NotImplementedError
 
@@ -67,7 +64,7 @@ class CreateForm(MetadataForm):
         template_args = {}
         if uuid is not None:
             try:
-                site_metadata = self.get_site_metadata(uuid)
+                site_metadata = sites.get_metadata(uuid)
             except DataRequestException as e:
                 self.flash_api_errors(e.errors)
                 return redirect(url_for(
@@ -101,7 +98,7 @@ class CreateForm(MetadataForm):
                 template_args['errors'] = self.flatten_dict(errors)
             if uuid is not None:
                 try:
-                    site_metadata = self.get_site_metadata(uuid)
+                    site_metadata = sites.get_metadata(uuid)
                 except DataRequestException as e:
                     template_args['errors'].update(self.flatten_dict(e.errors))
                 else:
@@ -289,6 +286,7 @@ class CloneForm(CreateForm):
         pass
 
     def get(self, uuid=None):
+        template_args = {}
         if uuid is not None:
             try:
                 self.metadata = self.api_handle.get_metadata(uuid)
@@ -297,8 +295,31 @@ class CloneForm(CreateForm):
                 return redirect(url_for(
                     f'data_dashboard.{self.data_type}s'))
             else:
+                if(
+                    self.data_type != 'site'
+                    and self.data_type != 'aggregate'
+                ):
+                    try:
+                        self.set_site_or_aggregate_metadata()
+                    except DataRequestException:
+                        flash('Could not read site metadata. Cloning failed.',
+                              'error')
+                        return redirect(f'data_dashboard.{self.data_type}',
+                                        uuid=uuid)
+                    self.set_site_or_aggregate_link()
+
+                if 'site' in self.metadata:
+                    template_args['site_metadata'] = self.metadata['site']
+                    template_args['metadata'] = self.render_metadata_section(
+                        template_args['site_metadata'])
+                elif 'aggregate' in self.metadata:
+                    # maybe won't work.
+                    template_args['aggregate_metadata'] = self.metadata['aggregate']  # noqa
+                    template_args['metadata'] = self.render_metadata_section(
+                        template_args['aggregate_metadata'])
                 form_data = self.formatter.payload_to_formdata(self.metadata)
-        return render_template(self.template, form_data=form_data)
+        return render_template(self.template, form_data=form_data,
+                               **template_args)
 
 
 forms_blp = Blueprint('forms', 'forms')
@@ -318,6 +339,13 @@ forms_blp.add_url_rule('/sites/<uuid>/forecasts/cdf/create',
 forms_blp.add_url_rule('/sites/<uuid>/clone',
                        view_func=CloneForm.as_view('clone_site',
                                                    data_type='site'))
+forms_blp.add_url_rule('/observations/<uuid>/clone',
+                       view_func=CloneForm.as_view('clone_observation',
+                                                   data_type='observation'))
+forms_blp.add_url_rule('/forecasts/single/<uuid>/clone',
+                       view_func=CloneForm.as_view('clone_forecast',
+                                                   data_type='forecast'))
+
 forms_blp.add_url_rule('/observations/<uuid>/upload',
                        view_func=UploadForm.as_view('upload_observation_data',
                                                     data_type='observation'))
