@@ -88,13 +88,13 @@
   <div class="input-wrapper">
     <select {% if required %}required{% endif %} name="{{ name }}_hours" class="form-control time-field {{ name }}_hours-field">
       {% for i in range(0,24) %}
-      <option {% if i == form_data.get(name+'_hours-field') %}selected{% endif %} value="{{ i }}">{{ '%02d' % i }}</option>
+      <option {% if i == form_data.get(name+'_hours') %}selected{% endif %} value="{{ i }}">{{ '%02d' % i }}</option>
       {% endfor %}
     </select>
     :
     <select {% if required %}required{% endif %} name="{{ name }}_minutes" class="form-control time-field {{ name }}_minutes-field">
       {% for i in range(0,60) %}
-      <option {% if i == form_data.get(name+'_minutes-field') %}selected{% endif %} value="{{ i }}">{{ '%02d' % i }}</option>
+      <option {% if i == form_data.get(name+'_minutes') %}selected{% endif %} value="{{ i }}">{{ '%02d' % i }}</option>
       {% endfor %}
     </select>
   UTC
