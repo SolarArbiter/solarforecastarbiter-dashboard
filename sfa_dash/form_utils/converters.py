@@ -321,6 +321,6 @@ class ReportConverter(FormConverter):
     @classmethod
     def payload_to_formdata(cls, payload_dict):
         pass
-
+    @classmethod
     def formdata_to_payload(cls, form_dict):
         pass
