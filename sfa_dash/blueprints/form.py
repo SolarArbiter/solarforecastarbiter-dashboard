@@ -345,6 +345,10 @@ forms_blp.add_url_rule('/observations/<uuid>/clone',
 forms_blp.add_url_rule('/forecasts/single/<uuid>/clone',
                        view_func=CloneForm.as_view('clone_forecast',
                                                    data_type='forecast'))
+forms_blp.add_url_rule('/forecasts/cdf/<uuid>/clone',
+                       view_func=CloneForm.as_view(
+                           'clone_cdf_forecast_group',
+                           data_type='cdf_forecast_group'))
 
 forms_blp.add_url_rule('/observations/<uuid>/upload',
                        view_func=UploadForm.as_view('upload_observation_data',
