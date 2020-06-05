@@ -263,7 +263,12 @@ class CDFForecastConverter(FormConverter):
 
     @classmethod
     def payload_to_formdata(cls, payload_dict):
-        pass
+        form_data = ForecastConverter.payload_to_formdata(payload_dict)
+        constant_values = [str(cv['constant_value'])
+                           for cv in payload_dict['constant_values']]
+        form_data['constant_values'] = ','.join(constant_values)
+        form_data['axis'] = payload_dict['axis']
+        return form_data
 
     @classmethod
     def formdata_to_payload(cls, form_dict):
@@ -279,7 +284,8 @@ class CDFForecastConverter(FormConverter):
             Form data formatted to the API spec.
         """
         fx_metadata = ForecastConverter.formdata_to_payload(form_dict)
-        constant_values = form_dict['constant_values'].split(',')
+        constant_values = [float(x)
+                           for x in form_dict['constant_values'].split(',')]
         fx_metadata['constant_values'] = constant_values
         fx_metadata['axis'] = form_dict['axis']
         return fx_metadata
@@ -287,21 +293,34 @@ class CDFForecastConverter(FormConverter):
 
 class AggregateConverter(FormConverter):
     form = 'forms/aggregate_form.html'
+    direct_keys = ['name', 'description', 'interval_label', 'aggregate_type',
+                   'variable', 'timezone', 'extra_parameters']
 
+    @classmethod
+    def payload_to_formdata(cls, payload_dict):
+        # cloning aggregates is complicated due to the creation, then add obs
+        # workflow, but this will still be useful for testing.
+        form_dict = {key: payload_dict[key]
+                     for key in cls.direct_keys
+                     if key != 'extra_parameters'}
+        form_dict.update(utils.parse_timedelta_from_api(
+            payload_dict, 'interval_length'))
+        return form_dict
+
+    @classmethod
+    def formdata_to_payload(cls, form_dict):
+        formatted = {key: form_dict[key]
+                     for key in cls.direct_keys
+                     if form_dict.get(key, '') != ''}
+        formatted['interval_length'] = utils.parse_timedelta_from_form(
+            form_dict, 'interval_length')
+        return formatted
+
+
+class ReportConverter(FormConverter):
     @classmethod
     def payload_to_formdata(cls, payload_dict):
         pass
 
-    @classmethod
     def formdata_to_payload(cls, form_dict):
-        formatted = {}
-        formatted['name'] = form_dict['name']
-        formatted['description'] = form_dict['description']
-        formatted['interval_length'] = utils.parse_timedelta_from_form(
-            form_dict, 'interval_length')
-        formatted['interval_label'] = form_dict['interval_label']
-        formatted['aggregate_type'] = form_dict['aggregate_type']
-        formatted['timezone'] = form_dict['timezone']
-        formatted['variable'] = form_dict['variable']
-        formatted['extra_parameters'] = form_dict['extra_parameters']
-        return formatted
+        pass

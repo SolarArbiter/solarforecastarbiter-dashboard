@@ -207,3 +207,109 @@ def test_forecast_converter_formdata_to_payload(forecast):
         'aggregate_id': None,
         'site_id': forecast['site_id'],
     }
+
+
+def test_cdfforecast_converter_roundtrip(cdf_forecast):
+    form_data = converters.CDFForecastConverter.payload_to_formdata(
+        cdf_forecast)
+    api_data = converters.CDFForecastConverter.formdata_to_payload(form_data)
+    extra_removed = without_extra(cdf_forecast)
+    constant_values = [cv['constant_value']
+                       for cv in cdf_forecast['constant_values']]
+    extra_removed['constant_values'] = constant_values
+    assert api_data == extra_removed
+
+
+def test_cdfforecast_converter_payload_to_formdata(cdf_forecast):
+    form_data = converters.CDFForecastConverter.payload_to_formdata(
+        cdf_forecast)
+    assert form_data == {
+        'aggregate_id': None,
+        'axis': 'y',
+        'constant_values': "5.0,20.0,50.0,80.0,95.0",
+        'interval_label': 'beginning',
+        'interval_length_number': 5,
+        'interval_length_units': 'minutes',
+        'interval_value_type': 'interval_mean',
+        'issue_time_of_day_hours': 6,
+        'issue_time_of_day_minutes': 0,
+        'lead_time_to_start_number': 1.0,
+        'lead_time_to_start_units': 'hours',
+        'name': 'DA GHI',
+        'run_length_number': 1.0,
+        'run_length_units': 'days',
+        'site_id': '123e4567-e89b-12d3-a456-426655440001',
+        'variable': 'ghi'
+    }
+
+
+def test_cdfforecast_converter_formdata_to_payload(forecast):
+    form_data = {
+        'aggregate_id': None,
+        'axis': 'y',
+        'constant_values': "5.0,20.0,50.0,80.0,95.0",
+        'interval_label': 'beginning',
+        'interval_length_number': 5,
+        'interval_length_units': 'minutes',
+        'interval_value_type': 'interval_mean',
+        'issue_time_of_day_hours': 6,
+        'issue_time_of_day_minutes': 0,
+        'lead_time_to_start_number': 1.0,
+        'lead_time_to_start_units': 'hours',
+        'name': 'DA GHI',
+        'run_length_number': 1.0,
+        'run_length_units': 'days',
+        'site_id': '123e4567-e89b-12d3-a456-426655440001',
+        'variable': 'ghi'
+    }
+    api_data = converters.CDFForecastConverter.formdata_to_payload(form_data)
+    assert api_data == {
+        'aggregate_id': None,
+        'axis': 'y',
+        'constant_values': [5.0, 20.0, 50.0, 80.0, 95.0],
+        'interval_label': 'beginning',
+        'interval_length': 5,
+        'interval_value_type': 'interval_mean',
+        'issue_time_of_day': "06:00",
+        'lead_time_to_start': 60,
+        'name': 'DA GHI',
+        'run_length': 1440,
+        'site_id': '123e4567-e89b-12d3-a456-426655440001',
+        'variable': 'ghi'
+    }
+
+
+def test_aggregate_converter_payload_to_formdata(aggregate):
+    form_data = converters.AggregateConverter.payload_to_formdata(aggregate)
+    assert form_data == {
+        'aggregate_type': 'mean',
+        'description': 'ghi agg',
+        'interval_label': 'ending',
+        'interval_length_number': 1,
+        'interval_length_units': 'hours',
+        'name': 'Test Aggregate ghi',
+        'timezone': 'America/Denver',
+        'variable': 'ghi'}
+
+
+def test_aggregate_converter_formdata_to_payload():
+    form_data = {
+        'aggregate_type': 'mean',
+        'description': 'ghi agg',
+        'extra_parameters': 'extra',
+        'interval_label': 'ending',
+        'interval_length_number': 60,
+        'interval_length_units': 'minutes',
+        'name': 'Test Aggregate ghi',
+        'timezone': 'America/Denver',
+        'variable': 'ghi'}
+    api_data = converters.AggregateConverter.formdata_to_payload(form_data)
+    assert api_data == {
+        'aggregate_type': 'mean',
+        'description': 'ghi agg',
+        'extra_parameters': 'extra',
+        'interval_label': 'ending',
+        'interval_length': 60,
+        'name': 'Test Aggregate ghi',
+        'timezone': 'America/Denver',
+        'variable': 'ghi'}
