@@ -207,4 +207,3 @@ def test_forecast_converter_formdata_to_payload(forecast):
         'aggregate_id': None,
         'site_id': forecast['site_id'],
     }
-
