@@ -105,7 +105,6 @@ def test_site_converter_formdata_to_payload(site_with_modeling_params):
     }
 
 
-
 def test_site_observation_converter_roundtrip(observation):
     form_data = converters.ObservationConverter.payload_to_formdata(
         observation)
