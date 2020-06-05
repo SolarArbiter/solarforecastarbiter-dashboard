@@ -190,7 +190,7 @@ class ObservationConverter(FormConverter):
 class ForecastConverter(FormConverter):
     form = 'forms/forecast_form.html'
     direct_keys = ['name', 'variable', 'interval_value_type',
-                   'extra_parameters', 'interval_length', 'interval_label']
+                   'extra_parameters', 'interval_label']
 
     @classmethod
     def payload_to_formdata(cls, payload_dict):

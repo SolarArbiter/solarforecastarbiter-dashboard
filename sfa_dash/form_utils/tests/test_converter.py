@@ -105,30 +105,106 @@ def test_site_converter_formdata_to_payload(site_with_modeling_params):
     }
 
 
-def test_site_observation_converter_roundtrip(observation):
+def test_observation_converter_roundtrip(observation):
     form_data = converters.ObservationConverter.payload_to_formdata(
         observation)
     api_data = converters.ObservationConverter.formdata_to_payload(form_data)
     assert api_data == without_extra(observation)
 
 
-def test_observation_converter_payload_to_formdata():
-    pass
+def test_observation_converter_payload_to_formdata(observation):
+    form_data = converters.ObservationConverter.payload_to_formdata(
+        observation)
+    assert form_data == {
+        'name': 'GHI Instrument 1',
+        'variable': 'ghi',
+        'interval_label': 'beginning',
+        'interval_value_type': 'interval_mean',
+        'interval_length_number': 5,
+        'interval_length_units': 'minutes',
+        'uncertainty': 0.1,
+        'site_id': observation['site_id'],
+    }
 
 
-def test_observation_converter_formdata_to_payload():
-    pass
+def test_observation_converter_formdata_to_payload(observation):
+    form_data = {
+        'name': 'GHI Instrument 1',
+        'variable': 'ghi',
+        'interval_label': 'beginning',
+        'interval_value_type': 'interval_mean',
+        'interval_length_number': 5,
+        'interval_length_units': 'minutes',
+        'uncertainty': 0.1,
+        'site_id': observation['site_id']
+    }
+    api_data = converters.ObservationConverter.formdata_to_payload(
+        form_data)
+    assert api_data == {
+        'name': 'GHI Instrument 1',
+        'variable': 'ghi',
+        'interval_label': 'beginning',
+        'interval_value_type': 'interval_mean',
+        'interval_length': 5,
+        'uncertainty': 0.1,
+        'site_id': observation['site_id']
+    }
 
 
-def test_site_forecast_converter_roundtrip(forecast):
+def test_forecast_converter_roundtrip(forecast):
     form_data = converters.ForecastConverter.payload_to_formdata(forecast)
     api_data = converters.ForecastConverter.formdata_to_payload(form_data)
     assert api_data == without_extra(forecast)
 
 
-def test_forecast_converter_payload_to_formdata():
-    pass
+def test_forecast_converter_payload_to_formdata(forecast):
+    form_data = converters.ForecastConverter.payload_to_formdata(forecast)
+    assert form_data == {
+        'interval_label': 'beginning',
+        'interval_length_number': 5,
+        'interval_length_units': 'minutes',
+        'interval_value_type': 'interval_mean',
+        'issue_time_of_day_hours': 6,
+        'issue_time_of_day_minutes': 0,
+        'lead_time_to_start_number': 1.0,
+        'lead_time_to_start_units': 'hours',
+        'name': 'DA GHI',
+        'run_length_number': 1.0,
+        'run_length_units': 'days',
+        'variable': 'ghi',
+        'aggregate_id': None,
+        'site_id': forecast['site_id'],
+    }
 
 
-def test_forecast_converter_formdata_to_payload():
-    pass
+def test_forecast_converter_formdata_to_payload(forecast):
+    form_data = {
+        'interval_label': 'beginning',
+        'interval_length_number': 5,
+        'interval_length_units': 'minutes',
+        'interval_value_type': 'interval_mean',
+        'issue_time_of_day_hours': 6,
+        'issue_time_of_day_minutes': 0,
+        'lead_time_to_start_number': 1.0,
+        'lead_time_to_start_units': 'hours',
+        'name': 'DA GHI',
+        'run_length_number': 1.0,
+        'run_length_units': 'days',
+        'variable': 'ghi',
+        'aggregate_id': None,
+        'site_id': forecast['site_id'],
+    }
+    api_data = converters.ForecastConverter.formdata_to_payload(form_data)
+    assert api_data == {
+        'interval_label': 'beginning',
+        'interval_length': 5,
+        'interval_value_type': 'interval_mean',
+        'issue_time_of_day': '06:00',
+        'lead_time_to_start': 60,
+        'name': 'DA GHI',
+        'run_length': 1440,
+        'variable': 'ghi',
+        'aggregate_id': None,
+        'site_id': forecast['site_id'],
+    }
+
