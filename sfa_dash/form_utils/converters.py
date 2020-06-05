@@ -57,7 +57,7 @@ class FormConverter(ABC):
 
 
 class SiteConverter(FormConverter):
-    form = 'forms/site_form/html'
+    form = 'forms/site_form.html'
     tracking_keys = {
         'fixed': ['surface_tilt', 'surface_azimuth'],
         'single_axis': ['axis_azimuth', 'backtrack', 'axis_tilt',
@@ -263,6 +263,19 @@ class CDFForecastConverter(FormConverter):
 
     @classmethod
     def payload_to_formdata(cls, payload_dict):
+        """Converts a CDF forecast metadata dict into a form_data dict.
+
+        Parameters
+        ----------
+        payload: dict
+            API CDFforecast metadata json repsonse as a dict.
+
+        Returns
+        -------
+        dict
+            A dictionary for filling out form fields where keys are input name
+            attributes.
+        """
         form_data = ForecastConverter.payload_to_formdata(payload_dict)
         constant_values = [str(cv['constant_value'])
                            for cv in payload_dict['constant_values']]
@@ -278,6 +291,7 @@ class CDFForecastConverter(FormConverter):
         ----------
         form_dict:  dict
             The posted form data parsed into a dict.
+
         Returns
         -------
         dictionary
@@ -298,8 +312,24 @@ class AggregateConverter(FormConverter):
 
     @classmethod
     def payload_to_formdata(cls, payload_dict):
-        # cloning aggregates is complicated due to the creation, then add obs
-        # workflow, but this will still be useful for testing.
+        """Converts an aggregate metadata dict into a form_data dict.
+
+        Parameters
+        ----------
+        payload: dict
+            API forecast metadata json repsonse as a dict.
+
+        Returns
+        -------
+        dict
+            A dictionary for filling out form fields where keys are input name
+            attributes.
+
+        Notes
+        -----
+            This function fills the aggregate ceation form and does not copy
+            its corresponding observation.
+        """
         form_dict = {key: payload_dict[key]
                      for key in cls.direct_keys
                      if key != 'extra_parameters'}
@@ -309,6 +339,18 @@ class AggregateConverter(FormConverter):
 
     @classmethod
     def formdata_to_payload(cls, form_dict):
+        """Converts an aggregate form submission dict to an api post payload.
+
+        Parameters
+        ----------
+        form_dict: dict
+            The posted form data parsed into a dict.
+
+        Returns
+        -------
+        dict
+            Form data formatted to API spec.
+        """
         formatted = {key: form_dict[key]
                      for key in cls.direct_keys
                      if form_dict.get(key, '') != ''}
@@ -321,6 +363,7 @@ class ReportConverter(FormConverter):
     @classmethod
     def payload_to_formdata(cls, payload_dict):
         pass
+
     @classmethod
     def formdata_to_payload(cls, form_dict):
         pass
