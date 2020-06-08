@@ -314,7 +314,6 @@ class CloneForm(CreateForm):
                     template_args['metadata'] = self.render_metadata_section(
                         template_args['site_metadata'])
                 elif 'aggregate' in self.metadata:
-                    # maybe won't work.
                     template_args['aggregate_metadata'] = self.metadata['aggregate']  # noqa
                     template_args['metadata'] = self.render_metadata_section(
                         template_args['aggregate_metadata'],
