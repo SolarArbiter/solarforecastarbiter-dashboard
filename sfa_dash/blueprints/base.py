@@ -254,8 +254,7 @@ class BaseView(MethodView):
         """Searches for a site_id or aggregate_id  in self.metadata
         and loads the expected metadata object from the api in either
         the 'site' or 'aggregate' key. If the object could not be retrieved,
-        sets a warning, sets the 'plot' template argument to None and
-        reraises the DataRequestError.
+        sets a warning and reraises the DataRequestError.
         """
         if self.metadata.get('site_id') is not None:
             try:
