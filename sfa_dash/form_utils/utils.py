@@ -142,11 +142,13 @@ def flatten_dict(to_flatten):
     return flattened
 
 
-def set_location_id(from_dict, to_dict):
+def get_location_id(from_dict):
     """Searched from_dict for a site_id or aggregate_id and sets the value of
     in to_dict.
     """
+    location_dict = {}
     if 'site_id' in from_dict:
-        to_dict['site_id'] = from_dict.get('site_id')
+        location_dict['site_id'] = from_dict.get('site_id')
     if 'aggregate_id' in from_dict:
-        to_dict['aggregate_id'] = from_dict.get('aggregate_id')
+        location_dict['aggregate_id'] = from_dict.get('aggregate_id')
+    return location_dict

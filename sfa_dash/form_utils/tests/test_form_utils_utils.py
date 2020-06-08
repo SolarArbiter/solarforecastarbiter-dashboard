@@ -71,15 +71,18 @@ def test_parse_timedelta_from_api(data, root, expected):
     {'aggregate_id': 'someaggregateid', 'site_id': None},
     {'aggregate_id': None, 'site_id': 'somesiteid'},
 ])
-def test_set_location_id(from_dict):
-    response_dict = {}
-    utils.set_location_id(from_dict, response_dict)
-    for key in list(from_dict.keys()):
-        assert from_dict[key] == response_dict[key]
+def test_get_location_id(from_dict):
+    assert utils.get_location_id(from_dict) == from_dict
+
+
+@pytest.mark.parametrize('from_dict', [
+    {'aggregate_id': 'someaggregateid', 'other_key': 1},
+    {'site_id': 'somesiteid', 'name': 'hello'},
+])
+def test_get_location_id_only_location_keys(from_dict):
+    for key in list(utils.get_location_id(from_dict).keys()):
+        assert key in ['aggregate_id', 'site_id']
 
 
 def test_set_location_id_no_location_key():
-    original_dict = {'key': 'not_to_mangle'}
-    response_dict = original_dict.copy()
-    utils.set_location_id({}, response_dict)
-    assert original_dict == response_dict
+    assert utils.get_location_id({}) == {}

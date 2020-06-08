@@ -210,7 +210,7 @@ class ForecastConverter(FormConverter):
         form_dict = {key: payload_dict[key]
                      for key in cls.direct_keys
                      if key != 'extra_parameters'}
-        utils.set_location_id(payload_dict, form_dict)
+        form_dict.update(utils.get_location_id(payload_dict))
         form_dict.update(
             utils.parse_hhmm_field_from_api(payload_dict, 'issue_time_of_day')
         )
@@ -242,7 +242,7 @@ class ForecastConverter(FormConverter):
         fx_metadata = {key: form_dict[key]
                        for key in cls.direct_keys
                        if form_dict.get(key, '') != ''}
-        utils.set_location_id(form_dict, fx_metadata)
+        fx_metadata.update(utils.get_location_id(form_dict))
         fx_metadata['issue_time_of_day'] = utils.parse_hhmm_field_from_form(
             form_dict,
             'issue_time_of_day')
