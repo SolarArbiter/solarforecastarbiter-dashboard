@@ -49,7 +49,7 @@ def test_site_converter_payload_to_formdata(site):
     assert form_data['site_type'] == 'weather-station'
 
 
-def test_site_converter_payload_to_formdata_plant(site_with_modeling_params):
+def test_site_converter_payload_to_formdata_fixed(site_with_modeling_params):
     form_data = converters.SiteConverter.payload_to_formdata(
         site_with_modeling_params)
     assert form_data['name'] == 'Power Plant 1'
@@ -66,6 +66,36 @@ def test_site_converter_payload_to_formdata_plant(site_with_modeling_params):
     assert form_data['surface_tilt'] == 45.0
     assert form_data['temperature_coefficient'] == -0.2
     assert form_data['tracking_type'] == 'fixed'
+
+
+def test_site_converter_payload_to_formdata_single_axis(
+        site_with_modeling_params):
+    single_axis = deepcopy(site_with_modeling_params)
+    single_axis['modeling_parameters'].pop('surface_tilt')
+    single_axis['modeling_parameters'].pop('surface_azimuth')
+    single_axis['modeling_parameters']['tracking_type'] = 'single_axis'
+    single_axis['modeling_parameters']['axis_tilt'] = 45.0
+    single_axis['modeling_parameters']['axis_azimuth'] = 180.0
+    single_axis['modeling_parameters']['max_rotation_angle'] = 180.0
+    single_axis['modeling_parameters']['ground_coverage_ratio'] = 0.7
+    form_data = converters.SiteConverter.payload_to_formdata(
+        single_axis)
+    assert form_data['name'] == 'Power Plant 1'
+    assert form_data['elevation'] == 786.0
+    assert form_data['latitude'] == 43.73403
+    assert form_data['longitude'] == -96.62328
+    assert form_data['timezone'] == 'Etc/GMT+6'
+    assert form_data['site_type'] == 'power-plant'
+    assert form_data['ac_capacity'] == 0.015
+    assert form_data['ac_loss_factor'] == 0.0
+    assert form_data['dc_capacity'] == 0.015
+    assert form_data['dc_loss_factor'] == 0.0
+    assert form_data['axis_azimuth'] == 180.0
+    assert form_data['axis_tilt'] == 45.0
+    assert form_data['temperature_coefficient'] == -0.2
+    assert form_data['tracking_type'] == 'single_axis'
+    assert form_data['ground_coverage_ratio'] == 0.7
+    assert form_data['max_rotation_angle'] == 180.0
 
 
 def test_site_converter_formdata_to_payload(site_with_modeling_params):
