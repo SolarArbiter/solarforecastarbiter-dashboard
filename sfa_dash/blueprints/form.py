@@ -57,8 +57,9 @@ class CreateForm(MetadataForm):
     def __init__(self, data_type):
         super().__init__(data_type)
 
-    def render_metadata_section(self, metadata):
-        return render_template(self.metadata_template, **metadata)
+    def render_metadata_section(self, metadata, template=None):
+        metadata_template = template or self.metadata_template
+        return render_template(metadata_template, **metadata)
 
     def get(self, uuid=None):
         template_args = {}
@@ -316,7 +317,8 @@ class CloneForm(CreateForm):
                     # maybe won't work.
                     template_args['aggregate_metadata'] = self.metadata['aggregate']  # noqa
                     template_args['metadata'] = self.render_metadata_section(
-                        template_args['aggregate_metadata'])
+                        template_args['aggregate_metadata'],
+                        'data/metadata/aggregate_metadata.html')
                 form_data = self.formatter.payload_to_formdata(self.metadata)
         return render_template(self.template, form_data=form_data,
                                **template_args)
