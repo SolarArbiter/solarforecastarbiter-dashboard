@@ -88,6 +88,7 @@ class SiteConverter(FormConverter):
         form_dict = {key: payload_dict[key]
                      for key in cls.top_level_keys
                      if key != 'extra_parameters'}
+        # test if any 'modeling_parameter' items are not None
         is_plant = reduce(lambda a, b: a or b,
                           [x is not None for x in
                            payload_dict['modeling_parameters'].values()])
