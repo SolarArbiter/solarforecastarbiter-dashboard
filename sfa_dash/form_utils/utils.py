@@ -25,6 +25,8 @@ def parse_timedelta_from_form(data_dict, key_root):
         return value * 60
     elif units == 'days':
         return value * 1440
+    else:
+        raise ValueError(f'Invalid units in {key_root} field.')
 
 
 def parse_timedelta_from_api(data_dict, key_root):
