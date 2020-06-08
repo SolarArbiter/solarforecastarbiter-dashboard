@@ -4,7 +4,7 @@
 <script src="/static/js/form-validation.js"></script>
 {% endblock %}
 {% block content %}
-{{ metadata_block | safe }}
+{{ metadata | safe }}
 {% include "sections/notifications.html" %}
 {% if form_title %}<h3>{{ form_title }}</h3> {% endif %}
 <form action="{% if data_type == 'site' %} {{ url_for('forms.create_' + data_type) }}{% else %}{{ url_for('forms.create_' + data_type, uuid=site_metadata['site_id']) }} {% endif %}" method="post" enctype='{{ form_enc }}' id="{{ data_type }}-form">
