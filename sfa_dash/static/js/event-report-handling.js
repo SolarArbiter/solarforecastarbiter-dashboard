@@ -6,7 +6,7 @@ $(document).ready(function() {
         /* Get a json object from the page_data object.
          *
          * @param {string} object_type - The type of the object to search for.
-         *     One of 'forecasts', 'sites', 'observations' 
+         *     One of 'forecasts', 'sites', 'observations'
          *
          * @param {string} object_id - UUID of the object to search for
          *
@@ -122,7 +122,7 @@ $(document).ready(function() {
         /*
          * Returns a JQuery object containing Forecast, Observation pair widgets to insert into the DOM
          */
-        
+
         /*
          *  Filtering Functions
          *      Callbacks for hidding/showing select list options based on the searchbars
@@ -165,7 +165,7 @@ $(document).ready(function() {
             }
             // create a set of elements to hide from selected site, variable and search
             toHide = toHide.add(forecasts.not(`[data-site-id=${site_id}]`));
-            
+
             // if current forecast selection is invalid, deselect
             if (toHide.filter(':selected').length){
                 forecast_select.val('');
@@ -223,7 +223,7 @@ $(document).ready(function() {
         }
 
         /*
-         * Create select widgets for creating an observatio/forecast pair, 
+         * Create select widgets for creating an observatio/forecast pair,
          */
         var siteSelector = newSelector("site");
         var obsSelector = newSelector("observation", "forecast");
@@ -252,7 +252,7 @@ $(document).ready(function() {
         var observation_select = obsSelector.find('#observation-select');
         var forecast_select = fxSelector.find('#forecast-select');
         var site_select = siteSelector.find('#site-select');
-        
+
         // set callbacks for select inputs
         site_select.change(filterForecasts);
         forecast_select.change(filterObservations);
@@ -285,7 +285,7 @@ $(document).ready(function() {
                     .attr('data-interval-length', this.interval_length)
                     .attr('data-variable', this.variable));
         });
-        
+
         addObsButton.click(function(){
             /*
              * 'Add a Forecast, Observation pair button on button click
