@@ -196,3 +196,10 @@ $(document).ready(function() {
         applyTableFilters();
     }
 });
+$(document).click(function(event){
+    target = $(event.target);
+    filter_divs = $('div.table-filters.show');
+    if(!target.closest('div.table-filters.show').length){
+        filter_divs.collapse('hide');
+    }
+});
