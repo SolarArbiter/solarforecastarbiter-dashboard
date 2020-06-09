@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from requests.exceptions import HTTPError
 
 from flask import render_template, url_for, request, redirect
 import pandas as pd
@@ -13,10 +13,10 @@ from sfa_dash.form_utils.utils import filter_form_fields, flatten_dict
 class AggregatesView(BaseView):
     template = 'data/aggregates.html'
 
-    def get_breadcrumb_dict(self):
-        breadcrumb_dict = OrderedDict()
-        breadcrumb_dict['Aggregates'] = url_for('data_dashboard.aggregates')
-        return breadcrumb_dict
+    def get_breadcrumb(self):
+        breadcrumb = []
+        breadcrumb.append(('Aggregates', url_for('data_dashboard.aggregates')))
+        return breadcrumb
 
     def set_template_args(self):
         aggregates_list = aggregates.list_metadata()
@@ -32,14 +32,16 @@ class AggregateObservationAdditionForm(BaseView):
     template = 'forms/aggregate_observations_addition_form.html'
     metadata_template = 'data/metadata/aggregate_metadata.html'
 
-    def get_breadcrumb_dict(self):
-        breadcrumb_dict = OrderedDict()
-        breadcrumb_dict['Aggregates'] = url_for('data_dashboard.aggregates')
-        breadcrumb_dict[self.metadata['name']] = url_for(
-            'data_dashboard.aggregate_view',
-            uuid=self.metadata['aggregate_id'])
-        breadcrumb_dict['Add Observations'] = ''
-        return breadcrumb_dict
+    def get_breadcrumb(self):
+        breadcrumb = []
+        breadcrumb.append(('Aggregates', url_for('data_dashboard.aggregates')))
+        breadcrumb.append(
+            (self.metadata['name'],
+             url_for('data_dashboard.aggregate_view',
+                     uuid=self.metadata['aggregate_id']))
+        )
+        breadcrumb.append(('Add Observations', ''))
+        return breadcrumb
 
     def get_sites_and_observations(self):
         """Returns a dict of observations mapping uuid to an observation
@@ -95,7 +97,7 @@ class AggregateObservationAdditionForm(BaseView):
             "aggregate": aggregate,
             "metadata": metadata,
             "breadcrumb": self.breadcrumb_html(
-                self.get_breadcrumb_dict()),
+                self.get_breadcrumb()),
         }
         template_arguments.update(kwargs)
         self.template_args = template_arguments
@@ -157,14 +159,16 @@ class AggregateObservationRemovalForm(BaseView):
     template = 'forms/aggregate_observations_removal_form.html'
     metadata_template = 'data/metadata/aggregate_metadata.html'
 
-    def get_breadcrumb_dict(self):
-        breadcrumb_dict = OrderedDict()
-        breadcrumb_dict['Aggregates'] = url_for('data_dashboard.aggregates')
-        breadcrumb_dict[self.metadata['name']] = url_for(
-            'data_dashboard.aggregate_view',
-            uuid=self.metadata['aggregate_id'])
-        breadcrumb_dict['Remove Observation'] = ''
-        return breadcrumb_dict
+    def get_breadcrumb(self):
+        breadcrumb = []
+        breadcrumb.append(('Aggregates', url_for('data_dashboard.aggregates')))
+        breadcrumb.append(
+            (self.metadata['name'],
+             url_for('data_dashboard.aggregate_view',
+                     uuid=self.metadata['aggregate_id']))
+        )
+        breadcrumb.append(('Remove Observation', ''))
+        return breadcrumb
 
     def aggregate_observation_formatter(self, form_data, observation_id):
         formatted = {}
@@ -189,7 +193,7 @@ class AggregateObservationRemovalForm(BaseView):
             "aggregate": aggregate,
             "metadata": metadata,
             "breadcrumb": self.breadcrumb_html(
-                self.get_breadcrumb_dict()),
+                self.get_breadcrumb()),
         }
         try:
             observation = observations.get_metadata(observation_id)
@@ -243,13 +247,17 @@ class AggregateView(BaseView):
         '{cdf_forecasts_url}': 'Probabilistic Forecasts',
     }
 
-    def get_breadcrumb_dict(self):
-        breadcrumb_dict = OrderedDict()
-        breadcrumb_dict['Aggregates'] = url_for('data_dashboard.aggregates')
-        breadcrumb_dict[self.metadata['name']] = url_for(
-            'data_dashboard.aggregate_view',
-            uuid=self.metadata['aggregate_id'])
-        return breadcrumb_dict
+    def get_breadcrumb(self):
+        breadcrumb = []
+        breadcrumb.append(
+            ('Aggregates', url_for('data_dashboard.aggregates')))
+        breadcrumb.append(
+            (self.metadata['name'],
+             url_for(
+                'data_dashboard.aggregate_view',
+                uuid=self.metadata['aggregate_id']))
+        )
+        return breadcrumb
 
     def set_template_args(self, start, end, **kwargs):
         self.template_args.update({
@@ -257,7 +265,7 @@ class AggregateView(BaseView):
                 self.metadata_template, **self.metadata),
             'observations': self.observation_list,
             'breadcrumb': self.breadcrumb_html(
-                self.get_breadcrumb_dict()),
+                self.get_breadcrumb()),
             'metadata': self.safe_metadata(),
             'subnav': self.format_subnav(
                 observations_url=url_for(
