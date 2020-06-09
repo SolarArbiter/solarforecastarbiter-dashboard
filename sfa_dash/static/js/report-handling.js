@@ -22,6 +22,7 @@ function fill_existing_pairs(){
         let reference_forecast_id = pair['reference_forecast'];
         let truth_metadata = searchObjects(truth_type+'s', truth_id);
         let forecast_metadata = searchObjects('forecasts', forecast_id);
+        let forecast_type = pair['forecast_type'];
         if(reference_forecast_id){
             var reference_forecast_metadata = searchObjects('forecasts',
                                                         reference_forecast_id);
@@ -39,6 +40,7 @@ function fill_existing_pairs(){
                 reference_forecast_id,
                 uncertainty_label,
                 uncertainty_value,
+                forecast_type,
         );
         pair_container.append(pair);
         $(".empty-reports-list").attr('hidden', 'hidden');
@@ -677,7 +679,7 @@ function createPairSelector(){
                 .attr('data-interval-length', this.interval_length)
                 .attr('data-variable', this.variable));
     });
-    
+
     addObsButton.click(function(){
         /*
          * 'Add a Forecast, Observation pair button on button click
@@ -824,6 +826,3 @@ $(document).ready(function() {
     registerDatetimeValidator('period-end')
     fill_existing_pairs();
 });
-
-
-
