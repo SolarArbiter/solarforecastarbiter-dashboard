@@ -16,6 +16,12 @@ def parse_timedelta_from_form(data_dict, key_root):
     -------
     int
         The number of minutes in the Timedelta.
+
+    Raises
+    ------
+    ValueError
+        If the units field is not one of 'minutes', 'hours' or 'days', or if
+        the number field is not a valid integer.
     """
     value = int(data_dict[f'{key_root}_number'])
     units = data_dict[f'{key_root}_units']
