@@ -137,25 +137,27 @@ $(document).ready(function() {
             // target of the button that the table header was wrapped in.
             var filter_div = $(`
                 <div id='${columnName}-filters' class='collapse table-filters'>
-                    Filter by ${columnTitle}
-                    <a role="button" class="btn-sm btn-primary select-filter-options">Select all</a>
-                    <a role="button" class="btn-sm btn-primary deselect-filter-options">Select none</a>
+                    Filter by ${columnTitle}<br/>
+                    <a role="button" class="btn-sm btn-primary select-filter-options">Select all</a><br/>
+                    <a role="button" class="btn-sm btn-primary deselect-filter-options">Select none</a><br/>
 
                     <a href='#' role='button' id='${columnName}-filter-collapse' class="table-option-collapse">x</a>
-                    <br/><hr>
+                    <hr>
                     <ul class='${columnName}-filter-options table-filter-options'></ul>
                 </div>`);
             filter_div.appendTo(`#${columnName}-header`);
             filter_div.find('.select-filter-options').click(function(){
                 $(`.${columnName}-filter-option`).attr('checked', true);
+                applyTableFilters();
             });
             filter_div.find('.deselect-filter-options').click(function(){
                 $(`.${columnName}-filter-option`).removeAttr('checked');
+                applyTableFilters();
             });
             // Create a checkbox input for each option in the set.
             availableOptions.forEach(function (e) {
                 $(`.${columnName}-filter-options`).append(`
-                    <li><input class="${columnName}-filter-option" value="${e}" type="checkbox" checked>${e}</li>`)});
+                    <li><input class="${columnName}-filter-option" value="${e}" type="checkbox" checked> ${e}</li>`)});
             $(`#${columnName}-filter-collapse`).click(function() {
                 $(`#${columnName}-filters`).collapse('toggle');
             });
