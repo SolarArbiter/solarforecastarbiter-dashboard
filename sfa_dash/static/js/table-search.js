@@ -196,6 +196,8 @@ $(document).ready(function() {
         applyTableFilters();
     }
 });
+// Handle a global click event, and collapse any table filters if they are not
+// an ancestor of the target of the click.
 $(document).click(function(event){
     target = $(event.target);
     filter_divs = $('div.table-filters.show');
