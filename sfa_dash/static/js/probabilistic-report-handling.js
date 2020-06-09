@@ -2,7 +2,7 @@
  *  Creates inputs for defining observation, forecast pairs for a report.
  */
 
-var previous_constants = [];
+var previous_constant = null;
 $(document).ready(function() {
     function toggle_reference_dependent_metrics(){
         /*
@@ -343,7 +343,7 @@ $(document).ready(function() {
          */
         var units = '%';
         if (forecast['axis'] == 'y'){
-            units = variable_unit_map[forecast['variable']];
+            units = sfa_dash_config.VARIABLE_UNIT_MAP[variable];
         }
         return units
     }
@@ -370,8 +370,8 @@ $(document).ready(function() {
                 let option = $('<option></option')
                     .attr('value', forecast['forecast_id'])
                     .attr('data-measurement', constant_value['constant_value'])
-                    .html(`${constant_value['constant_value']} ${units}`);
-                if (previous_constants.includes(constant_value['constant_value'].toString())){
+                    .html(cv_label(constant_value['constant_value']));
+                if (previous_constant == constant_value['constant_value'].toString()){
                     option.attr('selected', 'selected');
                 }
                 $('#full-cdf-group').removeAttr('hidden');
@@ -380,8 +380,10 @@ $(document).ready(function() {
             });
 
         } else {
-            let selected = constant_value_select.find(':selected');
-            previous_constants = selected.toArray().map(o=>o.dataset['measurement']);
+            let selected = constant_value_select.find(':selected')[0];
+            if (selected){
+                previous_constant = selected.dataset['measurement'];
+            }
             non_static_constants.remove();
             $("#no-constant-value-distribution-selection").removeAttr('hidden');
             $('#full-cdf-group').attr('hidden', 'hidden');
@@ -473,9 +475,9 @@ $(document).ready(function() {
         /*
          * Returns a JQuery object containing Forecast, Observation pair widgets to insert into the DOM
          */
-        
+
         /**********************************************************************
-         *  
+         *
          *  Filtering Functions
          *      Callbacks for hidding/showing select list options based on the
          *      searchbars for each field and previously made selections
