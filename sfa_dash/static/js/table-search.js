@@ -183,8 +183,6 @@ $(document).ready(function() {
     // become automagically filterable.
     createFilterOptions('provider');
     createFilterOptions('variable');
-    createFilterOptions('site');
-    createFilterOptions('site-or-aggregate');
     createFilterOptions('action');
     createFilterOptions('object-type');
     createFilterOptions('applies-to-all');
