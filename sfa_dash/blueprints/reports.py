@@ -18,7 +18,7 @@ ALLOWED_REPORT_TYPES = ['deterministic', 'probabilistic', 'event']
 
 
 class ReportsView(BaseView):
-    template = 'dash/reports.html'
+    template = 'data/reports.html'
 
     def template_args(self):
         try:

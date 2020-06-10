@@ -11,7 +11,7 @@ from sfa_dash.errors import DataRequestException
 
 
 class AggregatesView(BaseView):
-    template = 'dash/aggregates.html'
+    template = 'data/aggregates.html'
 
     def get_breadcrumb_dict(self):
         breadcrumb_dict = OrderedDict()

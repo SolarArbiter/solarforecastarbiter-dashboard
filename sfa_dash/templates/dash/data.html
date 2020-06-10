@@ -1,4 +1,31 @@
+{#
+    Provides extra sections for use when displaying data across the dashboard.
+    Child templates will mostly make use of this template by extending it and
+    adding their contents to the 'content' block.
+
+    - Loads a metadata dict so it is accessible from js (if present) in the
+      'extra_scripts' block. This block may be overriden by child templates.
+    - Sets an h2 page title or breadcrumb
+    - Includes the subnav section below the page title
+    - Displays a metadata block if provided. This is usually a rendered
+      template
+    - Includes the notifications section
+    - Print the 'content block' last
+#}
 {% extends "base.html" %}
+
+{#
+    Provide metadata as a global js variable if it's passed. For safety, don't
+    include extra_parameters here.
+    See sfa_dash.blueprints.base.BaseView.safe_metadata for removing
+    extra_parameters
+#}
+{% block extra_scripts %}
+{% if metadata is defined %}
+  <script>var metadata = JSON.parse('{{ metadata | tojson }}');</script>
+{% endif %}
+{% endblock %}
+
 {% block dash %}
 
 {% if page_title is defined or breadcrumb is defined %}
@@ -11,13 +38,6 @@
 
 {% if metadata_block is defined %}
 {{ metadata_block | safe }}
-{% endif %}
-
-{% if upload_link is defined and is_allowed('write_values') %}
-<a role="button" class="btn btn-primary btn-sm" href="{{upload_link}}">Upload data</a>
-{% endif %}
-{% if delete_link is defined and is_allowed('delete') %}
-<a role="button" class="btn btn-danger btn-sm" href="{{ delete_link }}">Delete</a>
 {% endif %}
 
 {% include "sections/notifications.html" %}
