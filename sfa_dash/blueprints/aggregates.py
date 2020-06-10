@@ -327,6 +327,7 @@ class AggregateView(BaseView):
 
 
 class DeleteAggregateView(BaseView):
+    data_type = 'aggregate'
     template = 'forms/deletion_form.html'
     metadata_template = 'data/metadata/aggregate_metadata.html'
 
@@ -345,7 +346,8 @@ class DeleteAggregateView(BaseView):
         try:
             self.metadata = aggregates.get_metadata(uuid)
         except DataRequestException as e:
-            return render_template(self.template, errors=e.errors)
+            return render_template(self.template, data_type=self.data_type,
+                                   errors=e.errors)
         return super().get(**kwargs)
 
     def post(self, uuid):
