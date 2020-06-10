@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from requests.exceptions import HTTPError
 
 from flask import render_template, url_for, request, redirect
 import pandas as pd
@@ -9,7 +8,6 @@ from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.util import (filter_form_fields,
                                       flatten_dict, download_timeseries)
 from sfa_dash.errors import DataRequestException
-from sfa_dash.form_utils.converters import AggregateConverter
 
 
 class AggregatesView(BaseView):
@@ -26,23 +24,6 @@ class AggregatesView(BaseView):
             "breadcrumb": self.breadcrumb_html(self.get_breadcrumb_dict()),
             "aggregates": aggregates_list,
         }
-
-
-class AggregateForm(BaseView):
-    """Form for creating a new aggregate.
-    """
-    template = 'forms/aggregate_form.html'
-
-    def post(self):
-        form_data = request.form
-        api_payload = AggregateConverter.formdata_to_payload(form_data)
-        try:
-            aggregate_id = aggregates.post_metadata(api_payload)
-        except DataRequestException as e:
-            return render_template(
-                self.template, errors=e.errors, form_data=form_data)
-        return redirect(url_for(f'data_dashboard.aggregate_view',
-                                uuid=aggregate_id))
 
 
 class AggregateObservationAdditionForm(BaseView):
@@ -324,57 +305,3 @@ class AggregateView(BaseView):
         """Download endpoint.
         """
         return download_timeseries(self, uuid)
-
-
-class DeleteAggregateView(BaseView):
-    data_type = 'aggregate'
-    template = 'forms/deletion_form.html'
-    metadata_template = 'data/metadata/aggregate_metadata.html'
-
-    def template_args(self):
-        return {
-            'data_type': 'aggregate',
-            'uuid': self.metadata['aggregate_id'],
-            'metadata': render_template(
-                self.metadata_template,
-                data_type='Aggregate',
-                **self.metadata
-            ),
-        }
-
-    def get(self, uuid, **kwargs):
-        try:
-            self.metadata = aggregates.get_metadata(uuid)
-        except DataRequestException as e:
-            return render_template(self.template, data_type=self.data_type,
-                                   errors=e.errors)
-        return super().get(**kwargs)
-
-    def post(self, uuid):
-        confirmation_url = url_for(f'data_dashboard.delete_aggregate',
-                                   _external=True,
-                                   uuid=uuid)
-        if request.headers['Referer'] != confirmation_url:
-            # If the user was directed from anywhere other than
-            # the confirmation page, redirect to confirm.
-            return redirect(confirmation_url)
-        try:
-            delete_request = aggregates.delete(uuid)
-        except HTTPError as e:
-            if e.response.status_code == 400:
-                # Redirect and display errors if the delete request
-                # failed
-                response_json = delete_request.json()
-                errors = response_json['errors']
-            elif e.response.status_code == 404:
-                errors = {
-                    "404": ['The requested object could not be found.']
-                }
-            else:
-                errors = {
-                    "error": ["Could not complete the requested action."]
-                }
-            return self.get(uuid, errors=errors)
-        return redirect(url_for(
-            f'data_dashboard.aggregates',
-            messages={'delete': ['Success']}))

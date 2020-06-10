@@ -6,8 +6,7 @@ from flask import Blueprint, render_template, url_for, request, g
 
 from sfa_dash.api_interface import (users, observations, forecasts,
                                     cdf_forecasts, cdf_forecast_groups)
-from sfa_dash.blueprints.aggregates import (AggregatesView, AggregateView,
-                                            DeleteAggregateView)
+from sfa_dash.blueprints.aggregates import AggregatesView, AggregateView
 from sfa_dash.blueprints.dash import DataDashView
 from sfa_dash.blueprints.data_listing import DataListingView
 from sfa_dash.blueprints.delete import DeleteConfirmation
@@ -27,13 +26,45 @@ class SingleObjectView(DataDashView):
     template = 'data/asset.html'
 
     def __init__(self, data_type):
-        """Configures attributes of the view that vary between data type.
-        The `data_type` can be configured when registering a url rule,
-            e.g.
-            <blueprint>.add_url_rule(
-                SingleObjectView.as_view('observations',
-                                         data_type='observation'))
-        Examples can be found at the bottom of this file.
+        """Configures instance variables of the view based on data type. See
+        the Notes section for a description of instance variables.
+
+        Parameters
+        ----------
+        data_type: str
+            The singular name of the type of data to be displayed.
+            e.g. 'observation'.
+            The `data_type` can be configured when registering a url rule,
+                e.g.
+                <blueprint>.add_url_rule(
+                    SingleObjectView.as_view('observations',
+                                             data_type='observation'))
+                Examples can be found at the bottom of this file.
+
+        Raises
+        ------
+        ValueError
+            If an unconfigured data_type is passed.
+
+        Notes
+        -----
+        instance variables
+            data_type: str
+                The type of data to be displayed by the view.
+
+            metadata_template: str
+                The path to the template in `sfa_dash/templates/data/metadata`
+                used for rendering the object's metadata.
+            id_key: str
+                The key used to reference the object's uuid. For example,
+                observations have an id_key of 'observation_id'.
+            plot_type: str
+                The type of plot to insert. This is passed as the `type_` param
+                to the `sfa_dash.blueprints.utils.timeseries_adapter` function.
+                See also `sfa_dash.blueprints.base.insert_plot`.
+            human_label: str
+                The common name of the solar forecast arbiter name. See
+                `sfa_dash.filters.data_type_mapping`.
         """
         self.data_type = data_type
         if data_type == 'forecast':
@@ -331,4 +362,5 @@ data_dash_blp.add_url_rule(
     view_func=DeleteReportView.as_view('delete_report'))
 data_dash_blp.add_url_rule(
     '/aggregates/<uuid>/delete',
-    view_func=DeleteAggregateView.as_view('delete_aggregate'))
+    view_func=DeleteConfirmation.as_view(
+        'delete_aggregate', data_type='aggregate'))

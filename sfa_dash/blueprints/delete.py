@@ -1,7 +1,7 @@
 from flask import url_for, request, render_template, redirect
 
 from sfa_dash.api_interface import (sites, observations, forecasts,
-                                    cdf_forecast_groups)
+                                    cdf_forecast_groups, aggregates)
 from sfa_dash.blueprints.dash import DataDashView
 from sfa_dash.errors import DataRequestException
 
@@ -20,6 +20,9 @@ class DeleteConfirmation(DataDashView):
         elif data_type == 'site':
             self.api_handle = sites
             self.metadata_template = 'data/metadata/site_metadata.html'
+        elif data_type == 'aggregate':
+            self.api_handle = aggregates
+            self.metadata_template = 'data/metadata/aggregate_metadata.html'
         else:
             raise ValueError(f'No Deletetion Form defined for {data_type}.')
         self.data_type = data_type
