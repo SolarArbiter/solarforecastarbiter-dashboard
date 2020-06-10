@@ -41,7 +41,8 @@ class SiteDashView(BaseView):
         }
         temp_args['subnav'] = self.format_subnav(**subnav_kwargs)
         temp_args['breadcrumb'] = self.breadcrumb_html()
-        temp_args['metadata'] = render_template(
+        temp_args['metadata'] = self.safe_metadata()
+        temp_args['metadata_block'] = render_template(
             'data/metadata/site_metadata.html',
             **self.metadata)
         temp_args['site_id'] = self.metadata['site_id']
