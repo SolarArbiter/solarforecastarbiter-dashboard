@@ -166,20 +166,24 @@ class UploadForm(BaseView):
         else:
             raise ValueError(f'No upload form defined for {data_type}')
 
+    def set_template_args(self):
+        self.template_args = {}
+        self.template_args['metadata_block'] = render_template(
+            self.metadata_template,
+            **self.metadata),
+        self.template_args['metadata'] = self.safe_metadata()
+
     def get(self, uuid, **kwargs):
-        temp_args = {}
         try:
             self.metadata = self.api_handle.get_metadata(uuid)
             self.metadata['site_link'] = self.generate_site_link(
                 self.metadata)
         except DataRequestException as e:
-            temp_args = {'errors': e.errors}
+            return render_template(self.template, errors=e.errors)
         else:
-            temp_args.update(
-                {'metadata_block': render_template(self.metadata_template,
-                                                   **self.metadata),
-                 'metadata': self.safe_metadata()})
-        return render_template(self.template, uuid=uuid, **temp_args, **kwargs)
+            self.set_template_args()
+        return render_template(self.template, uuid=uuid, **self.template_args,
+                               **kwargs)
 
     def post(self, uuid):
         errors = {}

@@ -129,10 +129,21 @@ class SingleObjectView(DataDashView):
                 uuid=self.metadata[self.id_key])
         return breadcrumb_dict
 
-    def set_template_args(self, start, end, **kwargs):
+    def set_template_args(self, uuid, **kwargs):
         """Insert necessary template arguments. See data/asset.html in the
         template folder for how these are layed out.
         """
+        self.template_args = {}
+        self.set_timerange()
+        start, end = self.parse_start_end_from_querystring()
+        try:
+            self.set_site_or_aggregate_metadata()
+        except DataRequestException:
+            self.template_args.update({'plot': None})
+        else:
+            self.insert_plot(uuid, start, end)
+        finally:
+            self.set_site_or_aggregate_link()
         self.template_args['current_path'] = request.path
         self.template_args['subnav'] = self.format_subnav(**kwargs)
         self.template_args['breadcrumb'] = self.breadcrumb_html(
@@ -164,23 +175,12 @@ class SingleObjectView(DataDashView):
         # Attempt a request for the object's metadata. On an error,
         # inject the errors into the template arguments and skip
         # any further processing.
-        self.template_args = {}
         try:
             self.metadata = self.api_handle.get_metadata(uuid)
         except DataRequestException as e:
-            self.template_args.update({'errors': e.errors})
+            return render_template(self.template, errors=e.errors)
         else:
-            self.set_timerange()
-            start, end = self.parse_start_end_from_querystring()
-            try:
-                self.set_site_or_aggregate_metadata()
-            except DataRequestException:
-                self.template_args.update({'plot': None})
-            else:
-                self.insert_plot(uuid, start, end)
-            finally:
-                self.set_site_or_aggregate_link()
-                self.set_template_args(start=start, end=end, **kwargs)
+            self.set_template_args(uuid, **kwargs)
         return render_template(self.template, **self.template_args)
 
     def post(self, uuid):
@@ -232,6 +232,13 @@ class SingleCDFForecastGroupView(SingleObjectView):
         """Insert necessary template arguments. See data/asset.html in the
         template folder for how these are layed out.
         """
+        self.template_args = {}
+        try:
+            self.set_site_or_aggregate_metadata()
+        except DataRequestException:
+            pass
+        finally:
+            self.set_site_or_aggregate_link()
         self.template_args['current_path'] = request.path
         self.template_args['subnav'] = self.format_subnav(**kwargs)
         self.template_args['breadcrumb'] = self.breadcrumb_html(
@@ -247,19 +254,12 @@ class SingleCDFForecastGroupView(SingleObjectView):
             uuid=self.metadata['forecast_id'])
 
     def get(self, uuid, **kwargs):
-        self.template_args = {}
         try:
             self.metadata = cdf_forecast_groups.get_metadata(uuid)
         except DataRequestException as e:
-            self.template_args.update({'errors': e.errors})
+            return render_template(self.template, errors=e.errors)
         else:
-            try:
-                self.set_site_or_aggregate_metadata()
-            except DataRequestException:
-                pass
-            finally:
-                self.set_site_or_aggregate_link()
-                self.set_template_args()
+            self.set_template_args()
         return render_template(self.template, **self.template_args)
 
 

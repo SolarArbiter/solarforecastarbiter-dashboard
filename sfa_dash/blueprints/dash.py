@@ -28,8 +28,6 @@ class SiteDashView(BaseView):
     }
 
     def set_template_args(self, **kwargs):
-        """
-        """
         self.template_args = {}
         subnav_kwargs = {
             'forecasts_url': url_for('data_dashboard.forecasts',
