@@ -133,20 +133,20 @@ class SingleObjectView(DataDashView):
         """Insert necessary template arguments. See data/asset.html in the
         template folder for how these are layed out.
         """
-        self.temp_args['current_path'] = request.path
-        self.temp_args['subnav'] = self.format_subnav(**kwargs)
-        self.temp_args['breadcrumb'] = self.breadcrumb_html(
+        self.template_args['current_path'] = request.path
+        self.template_args['subnav'] = self.format_subnav(**kwargs)
+        self.template_args['breadcrumb'] = self.breadcrumb_html(
             self.get_breadcrumb_dict())
-        self.temp_args['metadata_block'] = render_template(
+        self.template_args['metadata_block'] = render_template(
             self.metadata_template,
             **self.metadata)
-        self.temp_args['metadata'] = self.safe_metadata()
-        self.temp_args['upload_link'] = url_for(
+        self.template_args['metadata'] = self.safe_metadata()
+        self.template_args['upload_link'] = url_for(
             f'forms.upload_{self.data_type}_data',
             uuid=self.metadata[self.id_key])
 
         if self.data_type != 'cdf_forecast':
-            self.temp_args['delete_link'] = url_for(
+            self.template_args['delete_link'] = url_for(
                 f'data_dashboard.delete_{self.data_type}',
                 uuid=self.metadata[self.id_key])
         else:
@@ -154,34 +154,34 @@ class SingleObjectView(DataDashView):
             allowed = users.actions_on(self.metadata['parent'])
             g.allowed_actions = allowed['actions']
 
-        self.temp_args['period_start_date'] = start.strftime('%Y-%m-%d')
-        self.temp_args['period_start_time'] = start.strftime('%H:%M')
-        self.temp_args['period_end_date'] = end.strftime('%Y-%m-%d')
-        self.temp_args['period_end_time'] = end.strftime('%H:%M')
-        self.temp_args.update(kwargs)
+        self.template_args['period_start_date'] = start.strftime('%Y-%m-%d')
+        self.template_args['period_start_time'] = start.strftime('%H:%M')
+        self.template_args['period_end_date'] = end.strftime('%Y-%m-%d')
+        self.template_args['period_end_time'] = end.strftime('%H:%M')
+        self.template_args.update(kwargs)
 
     def get(self, uuid, **kwargs):
-        self.temp_args = {}
         # Attempt a request for the object's metadata. On an error,
         # inject the errors into the template arguments and skip
         # any further processing.
+        self.template_args = {}
         try:
             self.metadata = self.api_handle.get_metadata(uuid)
         except DataRequestException as e:
-            self.temp_args.update({'errors': e.errors})
+            self.template_args.update({'errors': e.errors})
         else:
             self.set_timerange()
             start, end = self.parse_start_end_from_querystring()
             try:
                 self.set_site_or_aggregate_metadata()
             except DataRequestException:
-                self.temp_args.update({'plot': None})
+                self.template_args.update({'plot': None})
             else:
                 self.insert_plot(uuid, start, end)
             finally:
                 self.set_site_or_aggregate_link()
                 self.set_template_args(start=start, end=end, **kwargs)
-        return render_template(self.template, **self.temp_args)
+        return render_template(self.template, **self.template_args)
 
     def post(self, uuid):
         """Data download endpoint.
@@ -232,25 +232,26 @@ class SingleCDFForecastGroupView(SingleObjectView):
         """Insert necessary template arguments. See data/asset.html in the
         template folder for how these are layed out.
         """
-        self.temp_args['current_path'] = request.path
-        self.temp_args['subnav'] = self.format_subnav(**kwargs)
-        self.temp_args['breadcrumb'] = self.breadcrumb_html(
+        self.template_args['current_path'] = request.path
+        self.template_args['subnav'] = self.format_subnav(**kwargs)
+        self.template_args['breadcrumb'] = self.breadcrumb_html(
             self.get_breadcrumb_dict())
-        self.temp_args['metadata_block'] = render_template(
+        self.template_args['metadata_block'] = render_template(
             self.metadata_template,
             **self.metadata)
-        self.temp_args['metadata'] = self.safe_metadata()
-        self.temp_args['constant_values'] = self.metadata['constant_values']
-        self.temp_args['delete_link'] = url_for(
+        self.template_args['metadata'] = self.safe_metadata()
+        constant_values = self.metadata['constant_values']
+        self.template_args['constant_values'] = constant_values
+        self.template_args['delete_link'] = url_for(
             f'data_dashboard.delete_cdf_forecast_group',
             uuid=self.metadata['forecast_id'])
 
     def get(self, uuid, **kwargs):
-        self.temp_args = {}
+        self.template_args = {}
         try:
             self.metadata = cdf_forecast_groups.get_metadata(uuid)
         except DataRequestException as e:
-            self.temp_args.update({'errors': e.errors})
+            self.template_args.update({'errors': e.errors})
         else:
             try:
                 self.set_site_or_aggregate_metadata()
@@ -259,7 +260,7 @@ class SingleCDFForecastGroupView(SingleObjectView):
             finally:
                 self.set_site_or_aggregate_link()
                 self.set_template_args()
-        return render_template(self.template, **self.temp_args)
+        return render_template(self.template, **self.template_args)
 
 
 class AccessView(DataDashView):

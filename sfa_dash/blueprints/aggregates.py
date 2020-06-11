@@ -18,9 +18,9 @@ class AggregatesView(BaseView):
         breadcrumb_dict['Aggregates'] = url_for('data_dashboard.aggregates')
         return breadcrumb_dict
 
-    def template_args(self):
+    def set_template_args(self):
         aggregates_list = aggregates.list_metadata()
-        return {
+        self.template_args = {
             "breadcrumb": self.breadcrumb_html(self.get_breadcrumb_dict()),
             "aggregates": aggregates_list,
         }
@@ -85,7 +85,7 @@ class AggregateObservationAdditionForm(BaseView):
             obs['site'] = site_dict.get(obs['site_id'], None)
         return observations_list
 
-    def template_args(self, **kwargs):
+    def set_template_args(self, **kwargs):
         observations = self.get_sites_and_observations()
         metadata = render_template(
             self.metadata_template, **self.metadata)
@@ -98,7 +98,7 @@ class AggregateObservationAdditionForm(BaseView):
                 self.get_breadcrumb_dict()),
         }
         template_arguments.update(kwargs)
-        return template_arguments
+        self.template_args = template_arguments
 
     def parse_observations(self, form_data):
         observation_ids = filter_form_fields('observation-', form_data)
@@ -131,8 +131,8 @@ class AggregateObservationAdditionForm(BaseView):
         except DataRequestException as e:
             return render_template(
                 self.template, errors=e.errors)
-        template_args = self.template_args(**kwargs)
-        return render_template(self.template, **template_args)
+        self.set_template_args(**kwargs)
+        return render_template(self.template, **self.template_args)
 
     def post(self, uuid):
         form_data = request.form
@@ -180,7 +180,7 @@ class AggregateObservationRemovalForm(BaseView):
         formatted['observations'] = observation_json
         return formatted
 
-    def template_args(self, observation_id, **kwargs):
+    def set_template_args(self, observation_id, **kwargs):
         metadata = render_template(
             self.metadata_template, **self.metadata)
         aggregate = self.metadata.copy()
@@ -200,7 +200,7 @@ class AggregateObservationRemovalForm(BaseView):
         else:
             template_arguments['observation'] = observation
         template_arguments.update(kwargs)
-        return template_arguments
+        self.template_args = template_arguments
 
     def get(self, uuid, observation_id, **kwargs):
         try:
@@ -208,8 +208,8 @@ class AggregateObservationRemovalForm(BaseView):
         except DataRequestException as e:
             return render_template(
                 self.template, errors=e.errors)
-        template_args = self.template_args(observation_id, **kwargs)
-        return render_template(self.template, **template_args)
+        self.set_template_args(observation_id, **kwargs)
+        return render_template(self.template, **self.template_args)
 
     def post(self, uuid, observation_id):
         form_data = request.form
@@ -252,7 +252,7 @@ class AggregateView(BaseView):
         return breadcrumb_dict
 
     def set_template_args(self, start, end, **kwargs):
-        self.temp_args.update({
+        self.template_args.update({
             'metadata_block': render_template(
                 self.metadata_template, **self.metadata),
             'observations': self.observation_list,
@@ -274,17 +274,14 @@ class AggregateView(BaseView):
             'period_end_date': end.strftime('%Y-%m-%d'),
             'period_end_time': end.strftime('%H:%M'),
         })
-        self.temp_args.update(kwargs)
-
-    def template_args(self):
-        return self.temp_args
+        self.template_args.update(kwargs)
 
     def get(self, uuid, **kwargs):
-        self.temp_args = {}
+        self.template_args = {}
         try:
             self.metadata = self.api_handle.get_metadata(uuid)
         except DataRequestException as e:
-            self.temp_args.update({'errors': e.errors})
+            self.template_args.update({'errors': e.errors})
         else:
             start, end = self.parse_start_end_from_querystring()
             self.observation_list = []
@@ -299,7 +296,7 @@ class AggregateView(BaseView):
                     self.observation_list.append(observation)
             self.insert_plot(uuid, start, end)
             self.set_template_args(start, end, **kwargs)
-        return render_template(self.template, **self.temp_args)
+        return render_template(self.template, **self.template_args)
 
     def post(self, uuid):
         """Download endpoint.

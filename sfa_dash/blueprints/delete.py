@@ -29,14 +29,15 @@ class DeleteConfirmation(DataDashView):
         self.template = 'forms/deletion_form.html'
 
     def set_template_args(self, **kwargs):
-        self.temp_args.update({
+        self.template_args = {}
+        self.template_args.update({
             'metadata_block': render_template(self.metadata_template,
                                               **self.metadata),
             'uuid': self.metadata['uuid'],
             'data_type': self.data_type,
         })
         if 'errors' in kwargs:
-            self.temp_args.update({'errors': kwargs['errors']})
+            self.template_args.update({'errors': kwargs['errors']})
 
     def get(self, uuid, **kwargs):
         """Presents a deletion confirmation form that makes a post
@@ -48,7 +49,6 @@ class DeleteConfirmation(DataDashView):
             return render_template(self.template, uuid=uuid,
                                    data_type=self.data_type, errors=e.errors)
         else:
-            self.temp_args = {}
             try:
                 self.set_site_or_aggregate_metadata()
             except DataRequestException:
@@ -56,7 +56,7 @@ class DeleteConfirmation(DataDashView):
             self.metadata['uuid'] = uuid
             self.set_site_or_aggregate_link()
             self.set_template_args(**kwargs)
-        return render_template(self.template, **self.temp_args)
+        return render_template(self.template, **self.template_args)
 
     def post(self, uuid):
         """Carries out the delete request to the API"""

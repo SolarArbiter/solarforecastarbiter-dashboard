@@ -56,4 +56,5 @@ class SingleSiteView(SiteDashView):
             self.metadata = sites.get_metadata(uuid)
         except DataRequestException as e:
             return render_template(self.template, errors=e.errors)
-        return render_template(self.template, **self.template_args(**kwargs))
+        self.set_template_args(**kwargs)
+        return render_template(self.template, **self.template_args)

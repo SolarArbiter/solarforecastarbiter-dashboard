@@ -244,8 +244,40 @@ class CloneForm(CreateForm):
     def fill_nested_metadata(self):
         pass
 
+    def set_template_args(self):
+        """Attempts to fetch and render the site or aggregate metadata if
+        needed, then converts metadata into form data for prefilling a form.
+
+        Raises
+        ------
+        DataRequestException
+            If the site or aggregate metadata could not be read.
+        """
+        self.template_args = {}
+        if(
+            self.data_type != 'site'
+            and self.data_type != 'aggregate'
+        ):
+            self.set_site_or_aggregate_metadata()
+            self.set_site_or_aggregate_link()
+
+        # We must pass a metadata template path here, because we must
+        # parse a site or aggregate from the object being cloned,
+        # instead of relying on metadata_template being set by init.
+        if 'site' in self.metadata:
+            self.template_args['site_metadata'] = self.metadata['site']
+            self.template_args['metadata'] = self.render_metadata_section(
+                self.template_args['site_metadata'],
+                'data/metadata/site_metadata.html')
+        elif 'aggregate' in self.metadata:
+            self.template_args['aggregate_metadata'] = self.metadata['aggregate']  # noqa
+            self.template_args['metadata'] = self.render_metadata_section(
+                self.template_args['aggregate_metadata'],
+                'data/metadata/aggregate_metadata.html')
+            form_data = self.formatter.payload_to_formdata(self.metadata)
+            self.template_args['form_data'] = form_data
+
     def get(self, uuid=None):
-        template_args = {}
         if uuid is not None:
             try:
                 self.metadata = self.api_handle.get_metadata(uuid)
@@ -254,35 +286,14 @@ class CloneForm(CreateForm):
                 return redirect(url_for(
                     f'data_dashboard.{self.data_type}s'))
             else:
-                if(
-                    self.data_type != 'site'
-                    and self.data_type != 'aggregate'
-                ):
-                    try:
-                        self.set_site_or_aggregate_metadata()
-                    except DataRequestException:
-                        flash('Could not read site metadata. Cloning failed.',
-                              'error')
-                        return redirect(f'data_dashboard.{self.data_type}',
-                                        uuid=uuid)
-                    self.set_site_or_aggregate_link()
-
-                # We must pass a metadata template path here, because we must
-                # parse a site or aggregate from the object being cloned,
-                # instead of relying on metadata_template being set by init.
-                if 'site' in self.metadata:
-                    template_args['site_metadata'] = self.metadata['site']
-                    template_args['metadata'] = self.render_metadata_section(
-                        template_args['site_metadata'],
-                        'data/metadata/site_metadata.html')
-                elif 'aggregate' in self.metadata:
-                    template_args['aggregate_metadata'] = self.metadata['aggregate']  # noqa
-                    template_args['metadata'] = self.render_metadata_section(
-                        template_args['aggregate_metadata'],
-                        'data/metadata/aggregate_metadata.html')
-                form_data = self.formatter.payload_to_formdata(self.metadata)
-        return render_template(self.template, form_data=form_data,
-                               **template_args)
+                try:
+                    self.set_template_args()
+                except DataRequestException:
+                    flash('Could not read site metadata. Cloning failed.',
+                          'error')
+                    return redirect(
+                        url_for(f'data_dashboard.{self.data_type}', uuid=uuid))
+        return render_template(self.template, **self.template_args)
 
 
 forms_blp = Blueprint('forms', 'forms')
