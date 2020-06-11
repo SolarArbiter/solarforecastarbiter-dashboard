@@ -283,6 +283,13 @@ class BaseView(MethodView):
                     },
                 })
                 raise
+        self.temp_args.update({
+            'warnings': {
+                'Warning': [
+                    'Site or aggregate has been deleted.'],
+            }
+        })
+        raise DataRequestException(404)
 
     def set_site_or_aggregate_link(self):
         """Creates a url to the forecast's site or aggregate. For injection
