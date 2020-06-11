@@ -1,5 +1,10 @@
 {% extends "data/asset.html" %}
 {% block content %}
+
+{% if delete_link is defined and is_allowed('delete') %}
+  <a role="button" class="btn btn-danger btn-sm" href="{{ delete_link }}">Delete</a>
+{% endif %}
+
 {% if constant_values is defined %}
 <div class="bin-list">
   <table>
