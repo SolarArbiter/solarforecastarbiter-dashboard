@@ -5,11 +5,14 @@
 {% endif %}
 {% block content %}
 {# include common report form parsing utilities #}
-<script src="/static/js/report-utilities.js"></script>
+<script src="/static/js/report-form-utilities.js"></script>
+
+{# load form_data for prefilling if it exists #}
 <script>var form_data = JSON.parse('{{ form_data | tojson }}');</script>
+
+{# load the report script for handling the specific report type #}
 <script src="{{ report_script }}"></script>
-{{ metadata | safe }}
-{% include "sections/notifications.html" %}
+
 <h3>Create New Report</h3>
 {% include "forms/report_menu.html" %}
 <form action="{{ url_for('forms.create_'+report_type+'_report') }}" method="post" id="report-form" onSubmit="return report_utils.validateReport();">
