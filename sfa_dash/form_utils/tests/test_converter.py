@@ -395,10 +395,9 @@ def test_report_converter_payload_to_formdata(report):
     assert form_data['categories'] == ['total', 'date']
     assert form_data['quality_flags'] == ['USER FLAGGED']
     assert form_data['object_pairs'] == [{
-        'forecast-id-0': '11c20780-76ae-4b11-bef1-7a75bdc784e3',
-        'truth-id-0': '123e4567-e89b-12d3-a456-426655440000',
-        'truth-type-0': 'observation',
-        'reference-forecast-0': None,
-        'deadband-value-0': None,
-        'forecast-type-0': 'forecast',
+        'forecast': '11c20780-76ae-4b11-bef1-7a75bdc784e3',
+        'observation': '123e4567-e89b-12d3-a456-426655440000',
+        'reference_forecast': None,
+        'uncertainty': None,
+        'forecast_type': 'forecast',
     }]

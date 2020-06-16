@@ -447,6 +447,9 @@ class ReportConverter(FormConverter):
         form_params['metrics'] = report_parameters['metrics']
         form_params['period-start'] = report_parameters['start']
         form_params['period-end'] = report_parameters['end']
+
+        # Objects pairs are left in the api format for parsing in javascript
+        # see sfa_dash/static/js/report-utilities.js fill_object_pairs function
         form_params['object_pairs'] = report_parameters['object_pairs']
         form_params.update(cls.parse_api_filters(report_parameters))
         return {'report_parameters': form_params}
