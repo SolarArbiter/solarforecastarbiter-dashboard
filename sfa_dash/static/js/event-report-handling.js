@@ -2,8 +2,8 @@
  *  Creates inputs for defining observation, forecast pairs for a report.
  */
 function addPair(
-    truthType, truthName, truthId, fxName, fxId, db_label, db_value,
-    forecast_type='event_forecast'){
+    truthType, truthName, truthId, fxName, fxId, ref_fxName, ref_fxId,
+    db_label, db_value, forecast_type='event_forecast'){
     /*
      * Returns a Jquery object containing 5 input elements representing a forecast,
      * observation pair:
@@ -39,7 +39,7 @@ function addPair(
             $('.empty-reports-list')[0].hidden = false;
         }
     });
-    pair_container.append(pair);
+    pair_container.append(new_object_pair);
     pair_index++;
 }
 
@@ -265,4 +265,5 @@ $(document).ready(function() {
     pair_control_container.append(pair_selector);
     report_utils.registerDatetimeValidator('period-start');
     report_utils.registerDatetimeValidator('period-end')
+    report_utils.fill_existing_pairs();
 });
