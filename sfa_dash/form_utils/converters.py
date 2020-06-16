@@ -391,26 +391,6 @@ class ReportConverter(FormConverter):
         return pairs
 
     @classmethod
-    def unzip_object_pairs(cls, report_parameters):
-        form_pairs = []
-        for idx, pair in enumerate(report_parameters['object_pairs']):
-            if pair['observation'] is not None:
-                truth_type = 'observation'
-                truth_id = pair['observation']
-            else:
-                truth_type = 'aggregate'
-                truth_id = pair['aggregate']
-            form_pairs.append({
-                f'forecast-type-{idx}': pair['forecast_type'],
-                f'forecast-id-{idx}': pair['forecast'],
-                f'truth-type-{idx}': truth_type,
-                f'truth-id-{idx}': truth_id,
-                f'deadband-value-{idx}': pair['uncertainty'],
-                f'reference-forecast-{idx}': pair['reference_forecast'],
-            })
-        return form_pairs
-
-    @classmethod
     def parse_api_filters(cls, report_parameters):
         quality_flags = []
         for f in report_parameters['filters']:
@@ -467,9 +447,6 @@ class ReportConverter(FormConverter):
         form_params['metrics'] = report_parameters['metrics']
         form_params['period-start'] = report_parameters['start']
         form_params['period-end'] = report_parameters['end']
-        form_params['object_pairs'] = cls.unzip_object_pairs(
-            report_parameters)
+        form_params['object_pairs'] = report_parameters['object_pairs']
         form_params.update(cls.parse_api_filters(report_parameters))
         return {'report_parameters': form_params}
-
-

@@ -47,7 +47,7 @@ function addPair(
         }
         report_utils.toggle_reference_dependent_metrics();
     });
-    pair_container.append(pair);
+    pair_container.append(new_object_pair);
     pair_index++;
 }
 
@@ -357,16 +357,6 @@ function createPairSelector(){
     forecast_select.change(filterObservations);
     forecast_select.change(filterAggregates);
     forecast_select.change(filterReferenceForecasts);
-    observation_select.change(function(){
-        obs_id = $(this).val();
-        if (obs_id){
-            observation = report_utils.searchObjects('observations', obs_id);
-            uncertainty = observation['uncertainty'];
-            $('#selected-obs-uncertainty').html(`${uncertainty}&percnt;`);
-        } else {
-            $('#selected-obs-uncertainty').html("No observation selected");
-        }
-    });
 
     // insert options from page_data into the select elements
     $.each(page_data['sites'], function(){
@@ -495,8 +485,6 @@ function createPairSelector(){
                            "Unset",
                            null,
             );
-            pair_container.append(pair);
-            pair_index++;
             var variable = selected_forecast.dataset.variable;
             report_utils.set_units(variable);
 
@@ -535,4 +523,5 @@ $(document).ready(function() {
     report_utils.registerDatetimeValidator('period-start');
     report_utils.registerDatetimeValidator('period-end')
     report_utils.fill_existing_pairs();
+    report_utils.register_uncertainty_handler('#observation-select');
 });

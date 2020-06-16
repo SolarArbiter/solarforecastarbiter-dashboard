@@ -9,7 +9,8 @@ from sfa_dash.api_interface import (sites, observations, forecasts,
 from sfa_dash.blueprints.aggregates import (AggregateObservationAdditionForm,
                                             AggregateObservationRemovalForm)
 from sfa_dash.blueprints.base import BaseView
-from sfa_dash.blueprints.reports import ReportForm, RecomputeReportView
+from sfa_dash.blueprints.reports import (ReportForm, RecomputeReportView,
+                                         ReportCloneView)
 from sfa_dash.errors import DataRequestException
 from sfa_dash.form_utils import converters
 
@@ -348,6 +349,8 @@ forms_blp.add_url_rule('/forecasts/cdf/<uuid>/clone',
                        view_func=CloneForm.as_view(
                            'clone_cdf_forecast_group',
                            data_type='cdf_forecast_group'))
+forms_blp.add_url_rule('/reports/<uuid>/clone',
+                       view_func=ReportCloneView.as_view('clone_report'))
 # upload endpoints
 forms_blp.add_url_rule('/observations/<uuid>/upload',
                        view_func=UploadForm.as_view('upload_observation_data',

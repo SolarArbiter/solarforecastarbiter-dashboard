@@ -22,7 +22,7 @@
 	 <div class="form-element">
        <label for="start">Start (UTC):</label><br/>
        <div class="input-wrapper">
-         <input type="text" name="period-start" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data %}value="{{form_data['report_parameters']['start']}}"{% endif %}></input>
+         <input type="text" name="period-start" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data %}value="{{form_data['report_parameters']['period-start']}}"{% endif %}></input>
        </div>
        {{ form.help_button('period-start') }}
        <span class="period-start-help-text form-text text-muted help-text collapse" aria-hidden>
@@ -32,7 +32,7 @@
      <div class="form-element">
        <label for="end">End (UTC)</label><br/>
        <div class="input-wrapper">
-         <input type="text" name="period-end" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data %}value="{{form_data['report_parameters']['end']}}"{% endif %}></input>
+         <input type="text" name="period-end" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data %}value="{{form_data['report_parameters']['period-end']}}"{% endif %}></input>
        </div>
        {{ form.help_button('period-end') }}
        <span class="period-end-help-text form-text text-muted help-text collapse" aria-hidden>
@@ -68,7 +68,6 @@
        {% endfor %}
      </div>
      {% endblock %}
-<input type="checkbox" checked name="metrics" value="bad">bad test metric</input>
      {% block category_field %}
      <div class="form-element">
      <label>Categories</label></br>
@@ -78,7 +77,7 @@
      </div>
      {% endblock %}
      {% block quality_flag_field %}
-     <div class="form-element">
+     <div class="form-element full-width">
        <label>Quality Flag Filters</label><br>
        <p>Observation data flagged with any of the checked quality flags is excluded from analysis. The corresponding forecast data is also excluded.</p>
        {% set checked_flags = parse_quality_flags(form_data) %}

@@ -13,8 +13,6 @@ from solarforecastarbiter.reports.template import (
     get_template_and_kwargs, render_html, render_pdf)
 
 
-
-
 ALLOWED_REPORT_TYPES = ['deterministic', 'probabilistic', 'event']
 
 
@@ -88,7 +86,9 @@ class ReportForm(BaseView):
                 'error': [('Must include at least 1 Forecast, Observation '
                            'pair.')],
             }
-            return self.get(form_data=api_payload, errors=errors)
+            return self.get(
+                form_data=self.converter.payload_to_formdata(api_payload),
+                errors=errors)
         try:
             report_id = reports.post_metadata(api_payload)
         except DataRequestException as e:
@@ -101,7 +101,9 @@ class ReportForm(BaseView):
                 }
             else:
                 errors = e.errors
-            return self.get(form_data=api_payload, errors=errors)
+            return self.get(
+                form_data=self.converter.payload_to_formdata(api_payload),
+                errors=errors)
         return redirect(url_for(
             'data_dashboard.report_view',
             uuid=report_id,
@@ -279,3 +281,45 @@ class RecomputeReportView(BaseView):
             flash('Report recomputed successfully.', 'message')
         return redirect(url_for('data_dashboard.report_view',
                                 uuid=uuid))
+
+
+class ReportCloneView(ReportForm):
+    def __init__(self):
+        # skip ReportForm init process to determine the applicable form based
+        # on metadata
+        pass
+
+    def set_report_type(self):
+        """Set the `report_type` instance variable based on the forecast types
+        included in its `object_pairs`. Defaults to 'deterministic'.
+        """
+        object_pairs = self.metadata['report_parameters']['object_pairs']
+        forecast_types = [pair['forecast_type'] for pair in object_pairs]
+        if 'event_forecast' in forecast_types:
+            self.report_type = 'event'
+        elif ('probabilistic_forecast' in forecast_types
+              or 'probabilistic_forecast_constant_value' in forecast_types):
+            self.report_type = 'probabilistic'
+        else:
+            self.report_type = 'deterministic'
+
+    def set_template_args(self):
+        super().set_template_args()
+        form_data = self.converter.payload_to_formdata(self.metadata)
+        self.template_args.update({
+            'form_data': form_data,
+        })
+
+    def get(self, uuid):
+        try:
+            self.metadata = reports.get_metadata(uuid)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+            return redirect(url_for('data_dashboard.report_view',
+                                    uuid=uuid))
+
+        else:
+            self.set_report_type()
+            self.set_template()
+            self.set_template_args()
+            return render_template(self.template, **self.template_args)

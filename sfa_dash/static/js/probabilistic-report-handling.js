@@ -313,47 +313,6 @@ function newSelector(field_name, depends_on=null, required=true, description="",
               </div>`);
 }
 
-function deadbandSelector(){
-    /*
-     * Create a radio button and text input for selecting an uncertainty
-     * deadband
-     */
-    var deadbandSelect= $(
-        `<div><b>Uncertainty:</b><br>
-         <input type="radio" name="deadband-select" value="null" checked> Ignore Uncertainty.<br>
-         <input type="radio" name="deadband-select" value="observation_uncertainty"> Set deadband to observation uncertainty.<br>
-         <input type="radio" name="deadband-select" value="user_supplied"> Set deadband to:
-         <input type="number" step="any" min=0.0 max=100.0 name="deadband-value"> &percnt;<br></div>`);
-    var db_wrapper = $('<div class="form-element full-width deadband-select-wrapper"></div>')
-    db_wrapper.append(deadbandSelect);
-    return db_wrapper;
-}
-
-function parseDeadband(){
-    /*
-     * Parses the deadband widgets into a readable display value, and a
-     * valid string value.
-     */
-    var source = $('[name="deadband-select"]:checked').val();
-    if(source == "user_supplied"){
-        var val = $('[name="deadband-value"]').val();
-        if(!$('[name="deadband-value"]')[0].reportValidity()){
-            throw 'Deadband out of range';
-        }
-        return [val, val];
-
-    }else if(source == "null"){
-        return ["Ignore uncertainty.", "null"]
-    }else if(source == "observation_uncertainty"){
-        var obs_id = $('#observation-select').val();
-        var obs = report_utils.searchObjects("observations", obs_id);
-        if(obs){
-            obs_uncertainty = obs['uncertainty'].toString();
-            return [obs_uncertainty, obs_uncertainty];
-        }
-    }
-}
-
 function createPairSelector(){
     /*
      * Returns a JQuery object containing Forecast, Observation pair widgets to insert into the DOM
@@ -649,7 +608,7 @@ function createPairSelector(){
         "reference forecast", "forecast", required=false,
         description='Skill metrics will be calculated for any binary forecasts matching the selection above.');
 
-    var dbSelector = deadbandSelector();
+    var dbSelector = report_utils.deadbandSelector();
     var constantValueSelector = newConstantValueSelector();
     var fxVariableSelector = report_utils.createVariableSelect();
 
@@ -816,7 +775,7 @@ function createPairSelector(){
             }
             // try to parse deadband values
             try{
-                deadband_values = parseDeadband();
+                deadband_values = report_utils.parseDeadband();
             }catch(error){
                 return;
             }
@@ -978,4 +937,5 @@ $(document).ready(function() {
     report_utils.registerDatetimeValidator('period-end');
     unpack_constant_values();
     report_utils.fill_existing_pairs();
+    report_utils.register_uncertainty_handler('#observation-select');
 });

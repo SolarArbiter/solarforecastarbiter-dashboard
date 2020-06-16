@@ -27,6 +27,7 @@ report_utils.fill_existing_pairs = function(){
 
         let truth_id = pair[truth_type];
         let truth_metadata = report_utils.searchObjects(truth_type+'s', truth_id);
+        console.log(truth_id, truth_type);
         pair_args.push(truth_metadata['name']);
         pair_args.push(truth_id);
 
@@ -320,14 +321,15 @@ report_utils.parseDeadband = function(value=null){
             var obs_id = $('#observation-select').val();
             var obs = report_utils.searchObjects("observations", obs_id);
             if(obs){
-                var val = obs['uncertainty']
+                var obs_val = obs['uncertainty'];
             }
+            return [`${obs_val}&percnt;`, 'observation_uncertainty'];
         }
     }else{
         var val = value;
+        var str_val = `${val}&percnt;`
+        return [str_val, val];
     }
-    var str_val = `${val}&percnt;`
-    return [str_val, val];
 }
 
 
@@ -346,4 +348,17 @@ report_utils.determine_forecast_units = function(forecast){
         units = sfa_dash_config.VARIABLE_UNIT_MAP[forecast['variable']];
     }
     return units;
+}
+
+report_utils.register_uncertainty_handler = function(obs_option_selector){
+    $(obs_option_selector).change(function(){
+        obs_id = $(this).val();
+        if (obs_id){
+            observation = report_utils.searchObjects('observations', obs_id);
+            uncertainty = observation['uncertainty'];
+            $('#selected-obs-uncertainty').html(`${uncertainty}&percnt;`);
+        } else {
+            $('#selected-obs-uncertainty').html("No observation selected");
+        }
+    });
 }
