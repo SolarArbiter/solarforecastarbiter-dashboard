@@ -55,7 +55,6 @@ report_utils.fill_existing_pairs = function(){
         pair_args.push(forecast_type);
 
         if (forecast_type.startsWith('probabilistic_')){
-            console.log(forecast_type);
             if (forecast_type == 'probabilistic_forecast'){
                 var distribution_id = forecast_metadata['forecast_id'];
                 var constant_value_label = 'Distribution';
@@ -136,7 +135,6 @@ report_utils.searchObjects = function(object_type, object_id){
             // If constant values are present, and we're searching for a
             // forecast, merge the constant values.
             objects = objects.concat(page_data['constant_values']);
-            console.log('added constant values');
         }
         var id_prop = object_type.slice(0, -1) + '_id';
         var metadata = objects.find(e => e[id_prop] == object_id);

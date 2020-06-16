@@ -460,7 +460,6 @@ function createPairSelector(){
             forecast_select.css('border', '');
             observation_select.css('border', '');
             report_utils.toggle_reference_dependent_metrics();
-            console.log('add pair was clicked?');
         } else {
             // Otherwise apply a red border to alert the user to need of input
             if (forecast_select.val() == null){
