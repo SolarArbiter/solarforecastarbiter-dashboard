@@ -9,7 +9,7 @@
     <tr>
       <th class="name-column" scope="col">Name</th>
       <th scope="col" id="provider-header" class="filterable-header">Provider</th>
-      <th scope="col" id="climate-zones" class="filterable-header">Climate Zones</th>
+      <th scope="col" id="climate-zones-header" class="filterable-header">Climate Zones</th>
     </tr>
   </thead>
   <tbody>
@@ -20,8 +20,7 @@
     <tr>
       <td class="name-column"><a href="{{ row['link'] }}">{{ row['name'] }}</a></td>
       <td class="provider-column">{{ row['provider'] }}</td>
-      <td class="latitude-column">{{ row['latitude'] }}</td>
-      <td class="longitude-column">{{ row['longitude'] }}</td>
+      <td class="climate-zones-column">{{ row['climate_zones'] | join(', ') }}</td>
     </tr>
 	{% endfor %}
   </tbody>
