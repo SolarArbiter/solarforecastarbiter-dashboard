@@ -16,6 +16,10 @@ from sfa_dash.errors import DataRequestException
 
 
 class DataTables(object):
+    """Class used to render out listing (table) templates when there are
+    intermediate requests to be made or the data must be massaged into
+    something suitable for display.
+    """
     observation_template = 'data/table/observation_table.html'
     forecast_template = 'data/table/forecast_table.html'
     site_template = 'data/table/site_table.html'
@@ -36,7 +40,35 @@ class DataTables(object):
 
     @classmethod
     def create_table_elements(cls, data_list, id_key, view_name):
-        """Creates a list of objects to be rendered as table by jinja template
+        """Creates a list of objects to be rendered as table by jinja template.
+        This method handles types with a reference to a site or aggregate.
+        Types are Observation, Forecast, and CDF Forecast Group.
+
+        Parameters
+        ----------
+        data_list: list of dicts
+            List of metadata dictionaries as returned from the API.
+        id_key: str
+            The name of the UUID of the metadata. e.g. `observation_id`
+        view_name: str
+            The dashboard view that handles displaying a single object of the
+            given type. e.g. `data_dashboard.observation_view`.
+
+        Returns
+        -------
+        list of dict
+            A list of dictionaries with the following keys for displaying as a
+            table.
+
+            name:     Name of the forecast/observation.
+            variable: Variable recorded by this object.
+            provider: Name of the organization tha created the object
+            location: A link displaying the site or aggregate name and linking
+                      to its page on the dashboard. If the site or aggregate
+                      cannot be read, this is set to Site/Aggregate
+                      unavailable.
+            link:     The URL for viewing the full metadata and timeseries of
+                      the object.
         """
         sites_list = sites.list_metadata()
         location_dict = {site['site_id']: site for site in sites_list}
@@ -97,8 +129,7 @@ class DataTables(object):
             table_row = {}
             table_row['name'] = data['name']
             table_row['provider'] = data.get('provider', '')
-            table_row['latitude'] = data['latitude']
-            table_row['longitude'] = data['longitude']
+            table_row['climate_zones'] = data.get('climate_zones', [])
             table_row['link'] = url_for('data_dashboard.site_view',
                                         uuid=data['site_id'])
             table_rows.append(table_row)
@@ -106,7 +137,8 @@ class DataTables(object):
 
     @classmethod
     def get_observation_table(cls, site_id=None, aggregate_id=None):
-        """Generates an html element containing a table of Observations
+        """Generates an html element containing a table of Observations. Uses
+        :py:func:`create_table_elements` to format data for templating.
 
         Parameters
         ----------
@@ -132,7 +164,9 @@ class DataTables(object):
 
     @classmethod
     def get_forecast_table(cls, site_id=None, aggregate_id=None):
-        """Generates an html element containing a table of Forecasts
+        """Generates an html element containing a table of Forecasts. Uses
+        :py:func:`create_table_elements` to format data for templating.
+
 
         Parameters
         ----------
@@ -170,7 +204,9 @@ class DataTables(object):
 
     @classmethod
     def get_cdf_forecast_table(cls, site_id=None, aggregate_id=None):
-        """Generates an html element containing a table of CDF Forecasts.
+        """Generates an html element containing a table of CDF Forecasts. Uses
+        :py:func:`create_table_elements` to format data for templating.
+
 
         Parameters
         ----------
