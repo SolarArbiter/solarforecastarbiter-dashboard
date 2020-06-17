@@ -129,6 +129,8 @@ class DataTables(object):
             table_row = {}
             table_row['name'] = data['name']
             table_row['provider'] = data.get('provider', '')
+            table_row['latitude'] = data.get('latitude', '')
+            table_row['longitude'] = data.get('longitude', '')
             table_row['climate_zones'] = data.get('climate_zones', [])
             table_row['link'] = url_for('data_dashboard.site_view',
                                         uuid=data['site_id'])
@@ -145,6 +147,9 @@ class DataTables(object):
         site_id: string
             The UUID of a site to filter for.
 
+        obs_data: list of dict
+          The observation metadata list as returned by the api.
+
         Returns
         -------
         string
@@ -160,7 +165,7 @@ class DataTables(object):
         rendered_table = render_template(cls.observation_template,
                                          table_rows=rows,
                                          creation_link=creation_link)
-        return rendered_table
+        return rendered_table, obs_data
 
     @classmethod
     def get_forecast_table(cls, site_id=None, aggregate_id=None):
@@ -172,12 +177,15 @@ class DataTables(object):
         ----------
         site_id: string
             The UUID of a site to filter for.
+        forecast_data: list of dict
+          The forecast metadata list as returned by the api.
 
         Returns
         -------
-        string
+        rendered_table: string
             Rendered HTML table with search bar and a 'Create
             new Forecast' button.
+        forecast_data: list of dict
 
         Raises
         ------
@@ -200,7 +208,7 @@ class DataTables(object):
         rendered_table = render_template(cls.forecast_template,
                                          table_rows=rows,
                                          creation_link=creation_link)
-        return rendered_table
+        return rendered_table, forecast_data
 
     @classmethod
     def get_cdf_forecast_table(cls, site_id=None, aggregate_id=None):
@@ -218,7 +226,8 @@ class DataTables(object):
         string
             Rendered HTML table with search bar and a 'Create
             new Probabilistic Forecast' button.
-
+        cdf_forecast_data: list of dict
+          The cdf forecast metadata list as returned by the api.
         Raises
         ------
         DataRequestException
@@ -242,7 +251,7 @@ class DataTables(object):
         rendered_table = render_template(cls.cdf_forecast_template,
                                          table_rows=rows,
                                          creation_link=creation_link)
-        return rendered_table
+        return rendered_table, cdf_forecast_data
 
     @classmethod
     def get_site_table(cls):
@@ -250,9 +259,12 @@ class DataTables(object):
 
         Returns
         -------
-        string
+        rendered_table: string
             The rendered html template, including a table of sites, with search
             bar and 'Create new Site' button.
+
+        site_data: list of dict
+            The site metadata list as returned by the api.
 
         Raises
         ------
@@ -266,7 +278,7 @@ class DataTables(object):
         rendered_table = render_template(cls.site_template,
                                          creation_link=creation_link,
                                          table_rows=rows)
-        return rendered_table
+        return rendered_table, site_data
 
 
 def timeseries_adapter(type_, metadata, json_value_response):
