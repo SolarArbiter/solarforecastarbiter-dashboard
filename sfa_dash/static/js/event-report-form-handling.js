@@ -2,29 +2,36 @@
  *  Creates inputs for defining observation, forecast pairs for a report.
  */
 function addPair(
-    truthType, truthName, truthId, fxName, fxId, ref_fxName, ref_fxId,
+    truth_type, truth_name, truth_id, fx_name, fx_id, ref_fx_name, ref_fx_id,
     db_label, db_value, forecast_type='event_forecast'){
-    /*
-     * Returns a Jquery object containing 5 input elements representing a forecast,
-     * observation pair:
-     *  forecast-name-<index>
-     *  forecast-id-<index>
-     *  truth-name-<indeX>
-     *  truth-id-<indeX>
-     *  truth-type-<index>
-     *  db_label,
-     *  db_value,
-     *  where index associates the pairs with eachother for easier parsing when the form
-     *  is submitted.
+	/*  Inserts a new event forecast object pair.
+     *
+     *  @param {string} truth_type
+     *      The type of object to compare the forecast against. Either
+     *      'aggregate' or 'observation'.
+     *  @param {string} truth_name
+     *      Name of the observation or aggregate in the pair.
+     *  @param {string} truth_id
+     *      UUID of the observation or aggregate in the pair.
+     *  @param {string} fx_name
+     *      Name of the forecast in the pair.
+     *  @param {string} fx_id
+     *      UUID of the forecast in the pair
+     *  @param {string} ref_fx_name - Ignored.
+     *  @param {string} ref_fx_id - Ignored.
+     *  @param {string} db_label - Ignored.
+     *  @param {float} db_value - Ignored.
+     *  @param {string} forecast_type
+     *      The type of forecast in the pair. Defaults to 'event_forecast'.
      */
     var new_object_pair = $(`<div class="object-pair pair-container object-pair-${pair_index}">
             <div class="input-wrapper">
               <div class="col-md-12">
-                <div class="object-pair-label forecast-name-${pair_index}"><b>Forecast: </b>${fxName}</div>
-                <input type="hidden" class="form-control forecast-value" name="forecast-id-${pair_index}" required value="${fxId}"/>
-                <div class="object-pair-label truth-name-${pair_index}"><b>Observation: </b> ${truthName}</div>
-                <input type="hidden" class="form-control truth-value" name="truth-id-${pair_index}" required value="${truthId}"/>
-                <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truthType}"/>
+                <div class="object-pair-label forecast-name-${pair_index}"><b>Forecast: </b>${fx_name}</div>
+                <input type="hidden" class="form-control forecast-value" name="forecast-id-${pair_index}" required value="${fx_id}"/>
+                <div class="object-pair-label truth-name-${pair_index}"><b>Observation: </b> ${truth_name}</div>
+                <input type="hidden" class="form-control truth-value" name="truth-id-${pair_index}" required value="${truth_id}"/>
+                <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truth_type}"/>
                 <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="null"/>
                 <input type="hidden" class="form-control reference-forecast-value" name="reference-forecast-${pair_index}" required value="null"/>
                 <input type="hidden" class="forecast-type-value" name="forecast-type-${pair_index}" required value="${forecast_type}"/>

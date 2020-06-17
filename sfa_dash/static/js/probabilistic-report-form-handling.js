@@ -5,41 +5,27 @@
 var previous_constant = null;
 var previous_units = null;
 
-function toggle_reference_dependent_metrics(){
-    /*
-     * Disables and de-selects the forecast skill metric if not all of the
-     * object pairs have reference foreasts.
-     */
-    var nulls_exist = $('.reference-forecast-value').map(function(){return $(this).val()}).get().some(x=>x=='null');
-    var skill = $('[name=metrics][value=s]');
-    if(nulls_exist){
-        // hide skill, insert warning
-        skill.attr('disabled', true);
-        if($('#reference-warning').length == 0){
-            $(`<span id="reference-warning" class="warning-message">
-               (Requires reference forecast selection)</span>`
-             ).insertAfter(skill.next());
-        }
-        if(skill.is(':checked')){
-            skill.removeAttr('checked');
-        }
-    }else{
-        // show skill remove warning
-        skill.removeAttr('disabled');
-        $('#reference-warning').remove();
-    }
-}
 
-function pairWrapper(truthType, truthId, truthName, fxId, fxName,
-                     ref_fxName, db_label, db_value, distribution_id){
-    if (truthType == 'observation'){
+function pairWrapper(truth_type, truth_id, truth_name, fx_id, fx_name,
+                     ref_fx_name, db_label, db_value, distribution_id){
+    /*  Creates a wrapper container that groups forecast, observation pairs by
+     *  observation and probabilistic forecast group as well as uncertainty.
+     *  The wrapper will have the data attributes:
+     *      truth-id - The observation or aggregate's UUID.
+     *      fx-id    - The probabilistic forecast group's forecast id.
+     *      deadband-value - The uncertainty value.
+     *  The container will also have a "remove button" that removes it and all
+     *  nested object pairs.
+     *
+     */
+    if (truth_type == 'observation'){
         truth_label = 'Observation';
     } else {
         truth_label = 'Aggregate';
     }
     // create a container for the pair
-    container = $(`
-      <div class="object-pair pair-container" data-truth-id="${truthId}" data-fx-id="${distribution_id}" data-deadband-value="${db_value}">
+    var container = $(`
+      <div class="object-pair pair-container" data-truth-id="${truth_id}" data-fx-id="${distribution_id}" data-deadband-value="${db_value}">
         <div class="col-md-12 pair-metadata">
         </div>
         <hr>
@@ -51,11 +37,11 @@ function pairWrapper(truthType, truthId, truthName, fxId, fxName,
     meta_block.append($('<div></div>')
         .addClass('object-pair-label')
         .addClass('forecast-name')
-        .html(`<b>Forecast: </b>${fxName}`));
+        .html(`<b>Forecast: </b>${fx_name}`));
     meta_block.append($('<div></div>')
         .addClass('object-pair-label')
         .addClass('truth-name')
-        .html(`<b>${truth_label}: </b> ${truthName}`));
+        .html(`<b>${truth_label}: </b> ${truth_name}`));
 
     meta_block.append($('<div></div>')
         .addClass('object-pair-label')
@@ -70,30 +56,46 @@ function pairWrapper(truthType, truthId, truthName, fxId, fxName,
             $('.empty-reports-list')[0].hidden = false;
             report_utils.unset_units();
         }
-        toggle_reference_dependent_metrics();
+        report_utils.toggle_reference_dependent_metrics();
     });
     return container;
 }
 
 
 function addPair(
-    truthType, truthName, truthId, fxName, fxId, ref_fxName, ref_fxId,
+    truth_type, truth_name, truth_id, fx_name, fx_id, ref_fx_name, ref_fx_id,
     db_label, db_value, forecast_type='probabilistic_forecast',
     constant_value, distribution_id){
-    /*
-     * Returns a Jquery object containing 5 input elements representing a forecast,
-     * observation pair:
-     *  forecast-name-<index>
-     *  forecast-id-<index>
-     *  truth-name-<indeX>
-     *  truth-id-<indeX>
-     *  truth-type-<index>
-     *  ref_fxName,
-     *  ref_fxId,
-     *  db_label,
-     *  db_value,
-     *  where index associates the pairs with eachother for easier parsing when the form
-     *  is submitted.
+	/*  Inserts a new probabilistic forecast object pair.
+     *
+     *  @param {string} truth_type
+     *      The type of object to compare the forecast against. Either
+     *      'aggregate' or 'observation'.
+     *  @param {string} truth_name
+     *      Name of the observation or aggregate in the pair.
+     *  @param {string} truth_id
+     *      UUID of the observation or aggregate in the pair.
+     *  @param {string} fx_name
+     *      Name of the forecast in the pair.
+     *  @param {string} fx_id
+     *      UUID of the forecast in the pair
+     *  @param {string} ref_fx_name
+     *      Name of the reference forecast in the pair.
+     *  @param {string} ref_fx_id
+     *      UUID of the reference forecast in the pair
+     *  @param {string} db_label
+     *      The uncertainty (deadband) label to display.
+     *  @param {float} db_value
+     *      The uncertainty (deadband) value to forward to the API.
+     *  @param {string} forecast_type
+     *      The type of forecast in the pair.
+	 *  @param {string} constant_value
+     *      The constant value of the forecast. Pass "Distribution" For
+     *      probabilistic forecast groups.
+     *  @param {string} distribution_id
+     *      The UUID of the probabilistic forecast group of the forecast. For
+     *      probabilistic forecast groups, this is just the forecast_id. For
+     *      probabilistic forecast constant values, this is the parent field.
      */
     new_container = false;
 
@@ -103,25 +105,25 @@ function addPair(
     // Check for the parent pair container that groups object_pairs
     // with similar observations, forecasts and uncertainties
     var pair_container = $(`
-        .pair-container[data-truth-id=${truthId}][data-fx-id=${distribution_id}][data-deadband-value="${db_value}"]`);
+        .pair-container[data-truth-id=${truth_id}][data-fx-id=${distribution_id}][data-deadband-value="${db_value}"]`);
     if (pair_container.length == 0){
         pair_container = pairWrapper(
-            truthType, truthId, truthName, fxId, fxName, ref_fxName,
+            truth_type, truth_id, truth_name, fx_id, fx_name, ref_fx_name,
             db_label, db_value, distribution_id);
         new_container = true;
     }
     var constant_values = pair_container.find('.pair-constant-values');
     if (constant_value){
-        fxName = `${fxName} (${constant_value})`
+        fx_name = `${fx_name} (${constant_value})`
     }
 
     var constant_value_pair = $(`<li class="object-pair object-pair-${pair_index}">
         <div class="constant-value-label">${constant_value}</div>
-        <div class="object-pair-label reference-forecast-name"><b>Reference Forecast: </b> ${ref_fxName}</div>
-        <input type="hidden" class="forecast-value" name="forecast-id-${pair_index}" required value="${fxId}"/>
-        <input type="hidden" class="truth-value" name="truth-id-${pair_index}" required value="${truthId}"/>
-        <input type="hidden" class="truth-type-value" name="truth-type-${pair_index}" required value="${truthType}"/>
-        <input type="hidden" class="reference-forecast-value" name="reference-forecast-${pair_index}" required value="${ref_fxId}"/>
+        <div class="object-pair-label reference-forecast-name"><b>Reference Forecast: </b> ${ref_fx_name}</div>
+        <input type="hidden" class="forecast-value" name="forecast-id-${pair_index}" required value="${fx_id}"/>
+        <input type="hidden" class="truth-value" name="truth-id-${pair_index}" required value="${truth_id}"/>
+        <input type="hidden" class="truth-type-value" name="truth-type-${pair_index}" required value="${truth_type}"/>
+        <input type="hidden" class="reference-forecast-value" name="reference-forecast-${pair_index}" required value="${ref_fx_id}"/>
         <input type="hidden" class="deadband-value" name="deadband-value-${pair_index}" required value="${db_value}"/>
         <input type="hidden" class="forecast-type-value" name="forecast-type-${pair_index}" required value="${forecast_type}"/>
     </li>`);
@@ -137,7 +139,7 @@ function addPair(
             $('.empty-reports-list')[0].hidden = false;
             report_utils.unset_units();
         }
-        toggle_reference_dependent_metrics();
+        report_utils.toggle_reference_dependent_metrics();
     });
     constant_values.append(constant_value_pair);
     if (new_container){
@@ -146,16 +148,6 @@ function addPair(
     pair_index++;
 }
 
-function determine_forecast_units(forecast){
-    /*
-     * Determine the proper units for the cdf forecast's associated data.
-     */
-    var units = '%';
-    if (forecast['axis'] == 'y'){
-        units = sfa_dash_config.VARIABLE_UNIT_MAP[forecast['variable']];
-    }
-    return units;
-}
 
 function populateReferenceForecasts(){
     /* Filter the list of reference forecasts based on the current
@@ -233,6 +225,9 @@ function populateReferenceForecasts(){
 }
 
 function populateConstantValues(){
+    /*  Fills the constant value select element with the currently selected
+     *  probabilistic forecast group (distribution).
+     */
     var selected_forecast_id = $('#distribution-select').val();
     var constant_value_select = $('#constant-value-select');
 
@@ -242,12 +237,7 @@ function populateConstantValues(){
         non_static_constants.remove();
 
         var forecast = report_utils.searchObjects('forecasts', selected_forecast_id);
-        var units = determine_forecast_units(forecast);
-        if(units == '%'){
-            var cv_label = function(val){return `Prob( x ) = ${val} ${units}`};
-        } else {
-            var cv_label = function(val){return `Prob( x <= ${val} ${units} )`};
-        }
+        var cv_label = x => report_utils.constant_value_label(forecast, x)
         constant_values = forecast['constant_values'];
         constant_values.forEach(function(constant_value){
             let option = $('<option></option')
@@ -278,7 +268,8 @@ function populateConstantValues(){
 }
 
 function newConstantValueSelector(){
-    /* Builds the constant value selector */
+    /* Creates a Constant Value selector.
+     */
     return $(
         `<div class="form-element full-width constant-value-select-wrapper">
              <label>Select a forecast</label>
@@ -818,7 +809,7 @@ function createPairSelector(){
             forecast_select.css('border', '');
             observation_select.css('border', '');
             constant_value_select.css('border', '');
-            toggle_reference_dependent_metrics();
+            report_utils.toggle_reference_dependent_metrics();
         } else {
             // Otherwise apply a red border to alert the user to need of input
             if (forecast_select.val() == null){
@@ -886,7 +877,7 @@ function createPairSelector(){
             forecast_select.css('border', '');
             aggregate_select.css('border', '');
             constant_value_select.css('border', '');
-            toggle_reference_dependent_metrics();
+            report_utils.toggle_reference_dependent_metrics();
         } else {
             // Otherwise apply a red border to alert the user to need of input
             if (forecast_select.val() == null){
