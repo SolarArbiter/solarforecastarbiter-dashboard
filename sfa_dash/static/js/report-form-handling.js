@@ -74,13 +74,15 @@ function createPairSelector(){
         /*
          * Filter the Site Options Via the text found in the #site-option-search input
          */
-        sites = siteSelector.find('option').slice(1);
+        var sites = siteSelector.find('option').slice(1);
         sites.removeAttr('hidden');
 
-        toHide = report_utils.searchSelect('#site-option-search', '#site-select', 1);
+        var toHide = report_utils.searchSelect('#site-option-search', '#site-select', 1);
         if (toHide.length == sites.length){
+            // No sites matched search query, display "no matching sites"
             $('#no-sites').removeAttr('hidden');
         } else {
+            // Some sites matched, hide "no matching sites" message.
             $('#no-sites').attr('hidden', true);
         }
         toHide.attr('hidden', true);
@@ -92,7 +94,7 @@ function createPairSelector(){
          * display the correct select lists and set up the correct
          * parsing of values into object-pairs.
          */
-        compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
+        var compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
         if (compareTo == 'observation'){
             // hide aggregates
             // show sites & observations
@@ -114,7 +116,6 @@ function createPairSelector(){
             $("#add-agg-object-pair").removeAttr('hidden');
             $("#add-obs-object-pair").attr('hidden', true);
             $('.deadband-select-wrapper').attr('hidden', true);
-
             filterForecasts();
         }
         return compareTo
@@ -127,20 +128,20 @@ function createPairSelector(){
          * site and variable.
          */
         // Show all Forecasts
-        forecasts = $('#forecast-select option').slice(2);
+        var forecasts = $('#forecast-select option').slice(2);
         forecasts.removeAttr('hidden');
 
-        toHide = report_utils.searchSelect('#forecast-option-search', '#forecast-select', 2);
-        variable_select = $('#variable-select');
-        variable = variable_select.val();
+        var toHide = report_utils.searchSelect('#forecast-option-search', '#forecast-select', 2);
+        var variable_select = $('#variable-select');
+        var variable = variable_select.val();
         if (variable){
             toHide = toHide.add(forecasts.not(`[data-variable=${variable}]`));
         }
         // Determine if we need to filter by site or aggregate
-        compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
+        var compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
         if (compareTo == 'observation'){
-            selectedSite = $('#site-select :selected');
-            site_id = selectedSite.data('site-id');
+            var selectedSite = $('#site-select :selected');
+            var site_id = selectedSite.data('site-id');
             if (site_id){
                 $('#no-forecast-site-selection').attr('hidden', true);
             } else {
@@ -179,25 +180,32 @@ function createPairSelector(){
         /* Filter the list of reference forecasts based on the current
          * forecast.
          */
-        forecast = forecast_select.find(':selected').first();
-        reference_forecasts = $('#reference-forecast-select option').slice(2);
+        var forecast = forecast_select.find(':selected').first();
+        var reference_forecasts = $('#reference-forecast-select option').slice(2);
         reference_forecasts.removeAttr('hidden');
         if (forecast[0]){
+            // collect the site or aggregate id, variable and interval_length
+            // of the currently selected forecast.
             if(forecast.data.hasOwnProperty('siteId')){
-                site_id = forecast.data().siteId;
+                var site_id = forecast.data().siteId;
             }else{
-                aggregate_id = forecast.data().aggregateId;
+                var aggregate_id = forecast.data().aggregateId;
             }
-            variable = forecast.data().variable;
-            interval_length = forecast.data().intervalLength;
+            var variable = forecast.data().variable;
+            var interval_length = forecast.data().intervalLength;
+
             // hide the "please select forecast" prompt"
             $('#no-reference-forecast-forecast-selection').attr('hidden', true);
-            toHide = report_utils.searchSelect('#reference-forecast-option-search',
+            var toHide = report_utils.searchSelect('#reference-forecast-option-search',
                               '#reference-forecast-select', 2);
+
+            // if a variable is selected, hide all reference forecasts for
+            // other variables.
             if (variable){
-            toHide = toHide.add(reference_forecasts.not(
-                `[data-variable=${variable}]`));
+                toHide = toHide.add(reference_forecasts.not(
+                    `[data-variable=${variable}]`));
             }
+
             // Determine if we need to filter by site or aggregate
             if (site_id){
                 // create a set of elements to hide from selected site, variable and search
@@ -208,15 +216,18 @@ function createPairSelector(){
                     reference_forecasts.not(
                         `[data-aggregate-id=${aggregate_id}]`));
             }
+
             // Filter out reference forecasts that don't have the same
             // interval length
-            things = reference_forecasts.filter(function(){
+            mismatched_intervals = reference_forecasts.filter(function(){
                 return $(this).data().intervalLength != interval_length ||
                     $(this).attr('value') == forecast_select.val();
             });
-            toHide = toHide.add(things);
+            toHide = toHide.add(mismatched_intervals);
         }else{
-            toHide = reference_forecasts;
+            // No forecast was selected, hide all reference forecasts
+            // and display a message.
+            var toHide = reference_forecasts;
             $('#no-reference-forecast-forecast-selection').removeAttr('hidden');
         }
 
@@ -241,25 +252,37 @@ function createPairSelector(){
         /*
          * Filter aggregate options based on radio buttons
          */
-        aggregates = aggregateSelector.find('option').slice(2);
+        var aggregates = aggregateSelector.find('option').slice(2);
         aggregates.removeAttr('hidden');
-        selectedForecast = $('#forecast-select :selected');
+        var selectedForecast = $('#forecast-select :selected');
         if (selectedForecast.length){
-            aggregate_id = selectedForecast.data('aggregate-id');
-            toHide = report_utils.searchSelect('#aggregate-option-search', '#aggregate-select', 1);
+            var aggregate_id = selectedForecast.data('aggregate-id');
+            var toHide = report_utils.searchSelect('#aggregate-option-search', '#aggregate-select', 1);
+            // Hide aggregates that don't match the forecasts aggregate id
             toHide = toHide.add(aggregates.not(`[data-aggregate-id=${aggregate_id}]`));
-            current_interval = selectedForecast.data('interval-length');
+
+            // Hide all aggregates with greater interval length than the
+            // forecast.
+            var current_interval = selectedForecast.data('interval-length');
             toHide = toHide.add(aggregates.filter(function(){
                 return parseInt(this.dataset['intervalLength']) > current_interval;
             }));
+
             if ((toHide.length == aggregates.length) && aggregate_id){
+                // No aggregates match, hide all and display a message.
                 $('#no-aggregates').removeAttr('hidden');
             } else {
+                // Some aggregates matched, hide the "no matching aggregates"
+                // message
                 $('#no-aggregates').attr('hidden', true);
             }
+
+            // Hide the "please select a forecast" message.
             $('#no-aggregate-forecast-selection').attr('hidden', true);
         } else {
-            toHide = aggregates;
+            // No forecast was selected, hide all aggregates and display a
+            // message.
+            var toHide = aggregates;
             $('#no-aggregate-forecast-selection').removeAttr('hidden');
         }
         toHide.attr('hidden', true);
@@ -268,39 +291,51 @@ function createPairSelector(){
     function filterObservations(){
         /* Filter list of observations based on current site and variable.
          */
-        observations = $('#observation-select option').slice(2);
+        var observations = $('#observation-select option').slice(2);
         // get the attributes of the currently selected forecast
-        selectedForecast = $('#forecast-select :selected');
+        var selectedForecast = $('#forecast-select :selected');
         if (selectedForecast.length){
             // Show all of the observations
             observations.removeAttr('hidden');
+
             // retrieve the current site id and variable from the selected forecast
-            site_id = selectedForecast.data('site-id');
-            variable = selectedForecast.data('variable');
+            var site_id = selectedForecast.data('site-id');
+            var variable = selectedForecast.data('variable');
             $('#no-observation-forecast-selection').attr('hidden', true);
 
-            // Build the list of optiosn to hide by creating a set from
+            // Build the list of options to hide by creating a set from
             // the lists of elements to hide from search, site id and variable
             var toHide = report_utils.searchSelect('#observation-option-search', '#observation-select', 2);
+            // Hide observations that don't match the forecasts site id or
+            // variable
             toHide = toHide.add(observations.not(`[data-site-id=${site_id}]`));
             toHide = toHide.add(observations.not(`[data-variable=${variable}]`));
-            current_interval = selectedForecast.data('interval-length');
+
+            // Hide all observations with interval lengths greater than the
+            // forecast
+            var current_interval = selectedForecast.data('interval-length');
             toHide = toHide.add(observations.filter(function(){
                 return parseInt(this.dataset['intervalLength']) > current_interval
             }));
+
             toHide.attr('hidden', true);
+
             // if the current selection is hidden, deselect it
             if (toHide.filter(':selected').length){
                 observation_select.val('').change();
             }
-            // if all observations are hidden, display "no observations"
+
             if (toHide.length == observations.length){
+                // all observations are hidden, display "no observations"
                 $('#no-observations').removeAttr('hidden');
             } else {
+                // some observations matched, hide "no observations" message
                 $('#no-observations').attr('hidden', true);
                 report_utils.restore_prev_value(previous_observation);
             }
         } else {
+            // No forecast selected, hide all observations and display
+            // forecast selection message.
             observations.attr('hidden', true);
             $('#no-observation-forecast-selection').removeAttr('hidden');
             observation_select.val('').change();
@@ -438,15 +473,15 @@ function createPairSelector(){
             var selected_forecast = forecast_select.find('option:selected')[0];
             var selected_reference_forecast = ref_forecast_select.find('option:selected')[0];
             if(!selected_reference_forecast){
-                ref_text = "Unset";
-                ref_id = null;
+                var ref_text = "Unset";
+                var ref_id = null;
             }else{
-                ref_text = selected_reference_forecast.text;
-                ref_id = selected_reference_forecast.value;
+                var ref_text = selected_reference_forecast.text;
+                var ref_id = selected_reference_forecast.value;
             }
             // try to parse deadband values
             try{
-                deadband_values = report_utils.parseDeadband();
+                var deadband_values = report_utils.parseDeadband();
             }catch(error){
                 return;
             }
@@ -485,13 +520,13 @@ function createPairSelector(){
             var selected_forecast = forecast_select.find('option:selected')[0];
             var selected_reference_forecast = ref_forecast_select.find('option:selected')[0];
             if(!selected_reference_forecast){
-                ref_text = "Unset";
-                ref_id = null;
+                var ref_text = "Unset";
+                var ref_id = null;
             }else{
-                ref_text = selected_reference_forecast.text;
-                ref_id = selected_reference_forecast.value;
+                var ref_text = selected_reference_forecast.text;
+                var ref_id = selected_reference_forecast.value;
             }
-            pair = addPair('aggregate',
+             addPair('aggregate',
                            selected_aggregate.text,
                            selected_aggregate.value,
                            selected_forecast.text,

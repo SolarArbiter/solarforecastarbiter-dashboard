@@ -21,9 +21,9 @@ function pairWrapper(truth_type, truth_id, truth_name, fx_id, fx_name,
      *
      */
     if (truth_type == 'observation'){
-        truth_label = 'Observation';
+        var truth_label = 'Observation';
     } else {
-        truth_label = 'Aggregate';
+        var truth_label = 'Aggregate';
     }
     // create a container for the pair
     var container = $(`
@@ -34,8 +34,10 @@ function pairWrapper(truth_type, truth_id, truth_name, fx_id, fx_name,
         <ul class="col-md-12 pair-constant-values">
         </ul>
       </div>`);
-    // <div class="input-wrapper"></div>?
-    meta_block = container.find('.pair-metadata');
+
+    // Insert the forecast, observation or aggregate name and the uncertainty
+    // into the container
+    var meta_block = container.find('.pair-metadata');
     meta_block.append($('<div></div>')
         .addClass('object-pair-label')
         .addClass('forecast-name')
@@ -50,11 +52,15 @@ function pairWrapper(truth_type, truth_id, truth_name, fx_id, fx_name,
         .addClass('deadband-label')
         .html(`<b>Uncertainty: </b> ${db_label}`));
 
+    // Add a 'remove' button that removes the container and all of its
+    // children. Children are made up of constant value, reference forecast
+    // pairs.
     container.append('<a role="button" class="object-pair-delete-button">remove</a>')
     var remove_button = container.find(".object-pair-delete-button");
     remove_button.click(function(){
         container.remove();
         if ($('.object-pair-list .object-pair').length == 0){
+            // If the last pairs were removed, unset the unit constraint
             $('.empty-reports-list')[0].hidden = false;
             report_utils.unset_units();
         }
@@ -99,11 +105,12 @@ function addPair(
      *      probabilistic forecast groups, this is just the forecast_id. For
      *      probabilistic forecast constant values, this is the parent field.
      */
-    new_container = false;
+    var new_container = false;
 
     if (forecast_type=='probabilistic_forecast'){
         $('[name="metrics"][value="crps"]').attr('checked', true);
     }
+
     // Check for the parent pair container that groups object_pairs
     // with similar observations, forecasts and uncertainties
     var pair_container = $(`
@@ -114,10 +121,9 @@ function addPair(
             db_label, db_value, distribution_id);
         new_container = true;
     }
+
+    // Get a handle to the list where we will append constant value pairs
     var constant_values = pair_container.find('.pair-constant-values');
-    if (constant_value){
-        fx_name = `${fx_name} (${constant_value})`
-    }
 
     var constant_value_pair = $(`<li class="object-pair object-pair-${pair_index}">
         <div class="constant-value-label">${constant_value}</div>
@@ -130,20 +136,27 @@ function addPair(
         <input type="hidden" class="forecast-type-value" name="forecast-type-${pair_index}" required value="${forecast_type}"/>
     </li>`);
 
+    // Add a 'remove' button for the constant value pair
     constant_value_pair.append('<a role="button" class="object-pair-delete-button">remove</a>')
     var remove_button = constant_value_pair.find(".object-pair-delete-button");
     remove_button.click(function(){
         constant_value_pair.remove();
         if (constant_values.find('li').length == 0){
+            // removing the last pair, remove the parent container
             pair_container.remove();
         }
         if ($('.object-pair-list .object-pair').length == 0){
+            // if the last pairs were removed, remove the units constraint
             $('.empty-reports-list')[0].hidden = false;
             report_utils.unset_units();
         }
         report_utils.toggle_reference_dependent_metrics();
     });
+
+    // add the constant value pair to the parent container
     constant_values.append(constant_value_pair);
+
+    // If the parent container was just created, add it to the dom.
     if (new_container){
         $('.object-pair-list').append(pair_container);
     }
@@ -156,36 +169,50 @@ function populateReferenceForecasts(){
      * forecast.
      */
     // Remove all the reference forecasts.
-    reference_forecasts = $('#reference-forecast-select option').slice(2);
+    var reference_forecasts = $('#reference-forecast-select option').slice(2);
     reference_forecasts.remove();
 
-    forecast = $('#distribution-select').val();
-    selected_constant_value = $('#constant-value-select').find(":selected").first();
-    compareTo = $('[name=observation-aggregate-radio]:checked').val();
+    // get the current distribution's forecast id
+    var forecast = $('#distribution-select').val();
+    var selected_constant_value = $('#constant-value-select').find(":selected").first();
+    var compareTo = $('[name=observation-aggregate-radio]:checked').val();
+
+    // Determine the attribute to use when comparing locations
     if (compareTo == 'observation'){
-        location_key = 'site_id';
+        var location_key = 'site_id';
     } else {
-        location_key = 'aggregate_id';
+        var location_key = 'aggregate_id';
     }
+
+    // If no constant value was selected, hide all reference forecasts,
+    // display a message and return.
     if (selected_constant_value.length == 0){
         $('#no-reference-forecast-forecast-selection').removeAttr('hidden');
         $('#no-reference-forecasts').attr('hidden', true);
         return;
     }
-    constant_value_forecast_id = selected_constant_value.val();
+
+    var constant_value_forecast_id = selected_constant_value.val();
     if (constant_value_forecast_id == 'full-cdf-group'){
+        // No support for reference forecasts for full distributions
         $('#no-reference-forecast-forecast-selection').removeAttr('hidden');
         $('#no-reference-forecasts').attr('hidden', true);
         return;
     } else {
-        constant_value_metadata = report_utils.searchObjects('forecasts', forecast);
-        constant_value = selected_constant_value.data().measurement;
-        axis = constant_value_metadata['axis'];
-        variable = constant_value_metadata['variable'];
-        interval_length = constant_value_metadata['interval_length'];
-        loc = constant_value_metadata[location_key];
+        // Get the metadata of the selected constant value. Metadata fields
+        // will be used for filtering reference forecasts.
+        var constant_value_metadata = report_utils.searchObjects(
+            'forecasts', forecast);
+        var constant_value = selected_constant_value.data().measurement;
+        var axis = constant_value_metadata['axis'];
+        var variable = constant_value_metadata['variable'];
+        var interval_length = constant_value_metadata['interval_length'];
+        var loc = constant_value_metadata[location_key];
 
-        cv_filter = function(e){
+        // Create a filter function for removing reference forecasts that
+        // dont share constant value, axis, variable, site or agg, and
+        // interval length.
+        var cv_filter = function(e){
             constant_values = e['constant_values'].map(function(c){
                 if(c['forecast_id'] == constant_value_forecast_id){
                     return [];
@@ -193,20 +220,22 @@ function populateReferenceForecasts(){
                     return c['constant_value'];
                 }
             });
-            return e['forecast_id'] != selected_constant_value.val() &&
-            e['axis'] == axis &&
-            e['variable'] == variable &&
-            e[location_key] == loc &&
-            e['interval_length'] == interval_length &&
-            constant_values.includes(constant_value);
+            return e['forecast_id'] != selected_constant_value.val()
+                && e['axis'] == axis
+                && e['variable'] == variable
+                && e[location_key] == loc
+                && e['interval_length'] == interval_length
+                && constant_values.includes(constant_value);
         };
-        ref_fx = page_data['forecasts'].filter(cv_filter);
+        var ref_fx = page_data['forecasts'].filter(cv_filter);
     }
 
     if (ref_fx.length != 0){
+        // If there are matching reference forecast, insert them into the
+        // reference forecast <select> element.
         reference_selector = $('#reference-forecast-select');
         ref_fx.forEach(function(fx){
-            forecast_id = fx['constant_values'].find(
+            var forecast_id = fx['constant_values'].find(
                 x => x['constant_value'] == constant_value);
             reference_selector.append(
                 $('<option></option>')
@@ -240,7 +269,7 @@ function populateConstantValues(){
 
         var forecast = report_utils.searchObjects('forecasts', selected_forecast_id);
         var cv_label = x => report_utils.constant_value_label(forecast, x)
-        constant_values = forecast['constant_values'];
+        var constant_values = forecast['constant_values'];
         constant_values.forEach(function(constant_value){
             let option = $('<option></option')
                 .attr('value', constant_value['forecast_id'])
@@ -324,13 +353,15 @@ function createPairSelector(){
          * Filter the Site Options Via the text found in the
          * #site-option-search input.
          */
-        sites = siteSelector.find('option').slice(1);
+        var sites = siteSelector.find('option').slice(1);
         sites.removeAttr('hidden');
 
-        toHide = report_utils.searchSelect('#site-option-search', '#site-select', 1);
+        var toHide = report_utils.searchSelect('#site-option-search', '#site-select', 1);
         if (toHide.length == sites.length){
+            // No sites matched, display "no matching sites"
             $('#no-sites').removeAttr('hidden');
         } else {
+            // some sites matched, hide "no matching sites" message
             $('#no-sites').attr('hidden', true);
         }
         toHide.attr('hidden', true);
@@ -342,7 +373,7 @@ function createPairSelector(){
          * display the correct select lists and set up the correct
          * parsing of values into object-pairs.
          */
-        compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
+        var compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
         if (compareTo == 'observation'){
             // hide aggregates
             // show sites & observations
@@ -364,7 +395,6 @@ function createPairSelector(){
             $("#add-agg-object-pair").removeAttr('hidden');
             $("#add-obs-object-pair").attr('hidden', true);
             $('.deadband-select-wrapper').attr('hidden', true);
-
             filterForecasts();
         }
         return compareTo
@@ -382,36 +412,35 @@ function createPairSelector(){
          * site and variable.
          */
         // Show all Forecasts
-        forecasts = $('#distribution-select option').slice(2);
+        var forecasts = $('#distribution-select option').slice(2);
         forecasts.removeAttr('hidden');
 
-        toHide = report_utils.searchSelect(
+        var toHide = report_utils.searchSelect(
             '#distribution-option-search',
             '#distribution-select', 2);
         variable_select = $('#variable-select');
-        variable = variable_select.val();
+        var variable = variable_select.val();
 
         if (variable){
             toHide = toHide.add(forecasts.not(`[data-variable=${variable}]`));
         }
 
         // Determine if we need to filter by site or aggregate
-        compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
+        var compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
         if (compareTo == 'observation'){
-            selectedSite = $('#site-select :selected');
-            site_id = selectedSite.data('site-id');
+            var selectedSite = $('#site-select :selected');
+            var site_id = selectedSite.data('site-id');
             if (site_id){
                 $('#no-distribution-site-selection').attr('hidden', true);
             } else {
                 $('#no-distribution-site-selection').removeAttr('hidden');
             }
-
-            // create a set of elements to hide from selected site, variable and search
             toHide = toHide.add(forecasts.not(`[data-site-id=${site_id}]`));
         } else {
-
+            // Forecasts are made for an aggregate directly, so we will use
+            // the forecast to filter aggregates, instead of vice versa
             toHide = toHide.add(forecasts.not('[data-aggregate-id]'));
-            $('#no-distribution-selection').attr('hidden', true);
+            $('#no-distribution-site-selection').attr('hidden', true);
         }
 
         // if current forecast selection is invalid, deselect
@@ -443,20 +472,28 @@ function createPairSelector(){
         /*
          * Filter aggregate options based on radio buttons
          */
-        aggregates = aggregateSelector.find('option').slice(2);
+        var aggregates = aggregateSelector.find('option').slice(2);
         aggregates.removeAttr('hidden');
-        selectedForecast = $('#distribution-select :selected');
+        var selectedForecast = $('#distribution-select :selected');
+
         if (selectedForecast.length){
-            aggregate_id = selectedForecast.data('aggregate-id');
+            var aggregate_id = selectedForecast.data('aggregate-id');
+            //
             // hide aggregates based on search field
-            toHide = report_utils.searchSelect(
+            var toHide = report_utils.searchSelect(
                 '#aggregate-option-search', '#aggregate-select', 1);
 
+            // hide aggregates that are not referenced by the forecast
             toHide = toHide.add(aggregates.not(`[data-aggregate-id=${aggregate_id}]`));
-            current_interval = selectedForecast.data('interval-length');
+
+            // hide aggregates with longer interval_lengeth
+            var current_interval = selectedForecast.data('interval-length');
             toHide = toHide.add(aggregates.filter(function(){
                 return parseInt(this.dataset['intervalLength']) > current_interval;
             }));
+
+            // if all aggregates are hidden, display "no matching aggregates,
+            // else ensure the message is hidden
             if ((toHide.length == aggregates.length) && aggregate_id){
                 $('#no-aggregates').removeAttr('hidden');
             } else {
@@ -464,7 +501,8 @@ function createPairSelector(){
             }
             $('#no-aggregate-distribution-selection').attr('hidden', true);
         } else {
-            toHide = aggregates;
+            // If no forecast is selected, hide all aggregates.
+            var toHide = aggregates;
             $('#no-aggregate-distribution-selection').removeAttr('hidden');
         }
         toHide.attr('hidden', true);
@@ -473,15 +511,16 @@ function createPairSelector(){
     function filterObservations(){
         /* Filter list of observations based on current site and variable.
          */
-        observations = $('#observation-select option').slice(2);
+        var observations = $('#observation-select option').slice(2);
         // get the attributes of the currently selected forecast
-        selectedForecast = $('#distribution-select :selected');
+        var selectedForecast = $('#distribution-select :selected');
         if (selectedForecast.length){
             // Show all of the observations
             observations.removeAttr('hidden');
+            //
             // retrieve the current site id and variable from the selected forecast
-            site_id = selectedForecast.data('site-id');
-            variable = selectedForecast.data('variable');
+            var site_id = selectedForecast.data('site-id');
+            var variable = selectedForecast.data('variable');
             $('#no-observation-distribution-selection').attr('hidden', true);
 
             // Build the list of optiosn to hide by creating a set from
@@ -490,15 +529,22 @@ function createPairSelector(){
                 '#observation-option-search', '#observation-select', 2);
             toHide = toHide.add(observations.not(`[data-site-id=${site_id}]`));
             toHide = toHide.add(observations.not(`[data-variable=${variable}]`));
-            current_interval = selectedForecast.data('interval-length');
+
+            // Hide Observations with longer interval lengths
+            var current_interval = selectedForecast.data('interval-length');
             toHide = toHide.add(observations.filter(function(){
                 return parseInt(this.dataset['intervalLength']) > current_interval
             }));
+
             toHide.attr('hidden', true);
+
             // if the current selection is hidden, deselect it
             if (toHide.filter(':selected').length){
                 observation_select.val('');
             }
+
+            // if all observations are hidden, display a "no matching obs"
+            // message, else ensure it is hidden.
             if (toHide.length == observations.length){
                 $('#no-observations').removeAttr('hidden');
             } else {
@@ -563,11 +609,11 @@ function createPairSelector(){
     var widgetContainer = $('<div class="pair-selector-wrapper collapse"></div>');
     widgetContainer.append(obsAggRadio);
     widgetContainer.append(siteSelector);
-    widgetContainer.append(aggregateSelector);
     widgetContainer.append(fxSelector);
     widgetContainer.append(constantValueSelector);
     widgetContainer.append(refFxSelector);
     widgetContainer.append(obsSelector);
+    widgetContainer.append(aggregateSelector);
     widgetContainer.append(dbSelector);
     widgetContainer.append(addObsButton);
     widgetContainer.append(addAggButton);

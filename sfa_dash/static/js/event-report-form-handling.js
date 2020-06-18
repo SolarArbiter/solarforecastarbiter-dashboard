@@ -64,11 +64,12 @@ function createPairSelector(){
         /*
          * Filter the Site Options Via the text found in the #site-option-search input
          */
-        sites = siteSelector.find('option').slice(1);
+        var sites = siteSelector.find('option').slice(1);
         sites.removeAttr('hidden');
 
-        toHide = report_utils.searchSelect(
+        var toHide = report_utils.searchSelect(
             '#site-option-search', '#site-select', 1);
+
         if (toHide.length == sites.length){
             $('#no-sites').removeAttr('hidden');
         } else {
@@ -83,20 +84,22 @@ function createPairSelector(){
          * site and variable.
          */
         // Show all Forecasts
-        forecasts = $('#forecast-select option').slice(2);
+        var forecasts = $('#forecast-select option').slice(2);
         forecasts.removeAttr('hidden');
 
-        toHide = report_utils.searchSelect(
+        var toHide = report_utils.searchSelect(
             '#forecast-option-search', '#forecast-select', 2);
-        variable = "event";
+
+        var variable = "event";
         toHide = toHide.add(forecasts.not(`[data-variable=${variable}]`));
-        selectedSite = $('#site-select :selected');
-        site_id = selectedSite.data('site-id');
+        var selectedSite = $('#site-select :selected');
+        var site_id = selectedSite.data('site-id');
         if (site_id){
             $('#no-forecast-site-selection').attr('hidden', true);
         } else {
             $('#no-forecast-site-selection').removeAttr('hidden');
         }
+
         // create a set of elements to hide from selected site, variable and search
         toHide = toHide.add(forecasts.not(`[data-site-id=${site_id}]`));
 
@@ -105,6 +108,7 @@ function createPairSelector(){
             forecast_select.val('');
         }
         toHide.attr('hidden', 'true');
+
         // if all options are hidden, show "no matching forecasts"
         if (toHide.length == forecasts.length){
             forecast_select.val('');
@@ -120,32 +124,39 @@ function createPairSelector(){
     function filterObservations(){
         /* Filter list of observations based on current site and variable.
          */
-        observations = $('#observation-select option').slice(2);
-        // get the attributes of the currently selected forecast
-        selectedForecast = $('#forecast-select :selected');
+        var observations = $('#observation-select option').slice(2);
+        var selectedForecast = $('#forecast-select :selected');
+
         if (selectedForecast.length){
             // Show all of the observations
             observations.removeAttr('hidden');
-            // retrieve the current site id and variable from the selected forecast
-            site_id = selectedForecast.data('site-id');
-            variable = "event";
+
+            // retrieve the current site id
+            var site_id = selectedForecast.data('site-id');
+            var variable = "event";
             $('#no-observation-forecast-selection').attr('hidden', true);
 
             // Build the list of optiosn to hide by creating a set from
             // the lists of elements to hide from search, site id and variable
             var toHide = report_utils.searchSelect(
                 '#observation-option-search', '#observation-select', 2);
+
+            // Hise any observations that don't match the forecasts site_id
+            // or variable
             toHide = toHide.add(observations.not(`[data-site-id=${site_id}]`));
             toHide = toHide.add(observations.not(`[data-variable=${variable}]`));
-            current_interval = selectedForecast.data('interval-length');
+
+            var current_interval = selectedForecast.data('interval-length');
             toHide = toHide.add(observations.filter(function(){
                 return parseInt(this.dataset['intervalLength']) > current_interval
             }));
             toHide.attr('hidden', true);
+
             // if the current selection is hidden, deselect it
             if (toHide.filter(':selected').length){
                 observation_select.val('');
             }
+
             if (toHide.length == observations.length){
                 $('#no-observations').removeAttr('hidden');
             } else {
