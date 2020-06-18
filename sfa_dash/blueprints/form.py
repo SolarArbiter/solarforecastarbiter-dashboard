@@ -279,8 +279,8 @@ class CloneForm(CreateForm):
             self.template_args['metadata'] = self.render_metadata_section(
                 self.template_args['aggregate_metadata'],
                 'data/metadata/aggregate_metadata.html')
-            form_data = self.formatter.payload_to_formdata(self.metadata)
-            self.template_args['form_data'] = form_data
+        form_data = self.formatter.payload_to_formdata(self.metadata)
+        self.template_args['form_data'] = form_data
 
     def get(self, uuid=None):
         if uuid is not None:
