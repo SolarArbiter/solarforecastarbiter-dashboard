@@ -76,6 +76,7 @@ class ReportForm(BaseView):
     def set_template_args(self):
         self.template_args = {
             "page_data": self.get_pairable_objects(),
+            "report_type": self.report_type,
         }
 
     def post(self):
@@ -308,6 +309,7 @@ class ReportCloneView(ReportForm):
         form_data = self.converter.payload_to_formdata(self.metadata)
         self.template_args.update({
             'form_data': form_data,
+            'report_type': self.report_type,
         })
 
     def get(self, uuid):
