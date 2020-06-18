@@ -150,6 +150,7 @@ function createPairSelector(){
                 $('#no-observations').removeAttr('hidden');
             } else {
                 $('#no-observations').attr('hidden', true);
+                report_utils.restore_prev_value(previous_observation);
             }
         } else {
             observations.attr('hidden', true);
@@ -191,6 +192,10 @@ function createPairSelector(){
     // set callbacks for select inputs
     site_select.change(filterForecasts);
     forecast_select.change(filterObservations);
+
+    // Store selected observation when the value changs for persistence.
+    observation_select.change(
+        report_utils.store_prev_value(previous_observation));
 
     // insert options from page_data into the select elements
     $.each(page_data['sites'], function(){

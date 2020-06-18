@@ -233,6 +233,7 @@ function createPairSelector(){
             }
         } else {
             $('#no-reference-forecasts').attr('hidden', true);
+            report_utils.restore_prev_value(previous_reference_forecast);
         }
     }
 
@@ -292,11 +293,12 @@ function createPairSelector(){
             if (toHide.filter(':selected').length){
                 observation_select.val('').change();
             }
+            // if all observations are hidden, display "no observations"
             if (toHide.length == observations.length){
                 $('#no-observations').removeAttr('hidden');
             } else {
                 $('#no-observations').attr('hidden', true);
-                observation_select.val('').change();
+                report_utils.restore_prev_value(previous_observation);
             }
         } else {
             observations.attr('hidden', true);
@@ -366,6 +368,13 @@ function createPairSelector(){
     forecast_select.change(filterObservations);
     forecast_select.change(filterAggregates);
     forecast_select.change(filterReferenceForecasts);
+
+    // Store the selected observation or reference forecast when the value
+    // changes for persisting across different forecasts/sites etc.
+    observation_select.change(
+        report_utils.store_prev_value(previous_observation));
+    ref_forecast_select.change(
+        report_utils.store_prev_value(previous_reference_forecast));
 
     // insert options from page_data into the select elements
     $.each(page_data['sites'], function(){

@@ -4,6 +4,11 @@
  *****************************************************************************/
 report_utils = new Object();
 
+// Globals for keeping track of previous obs/ref fx selections between changing
+// forecasts.
+previous_observation = null;
+previous_reference_forecast = null;
+
 report_utils.fill_existing_pairs = function(){
     /*
      * Fill object pairs found in the form_data global var.
@@ -468,4 +473,28 @@ report_utils.register_uncertainty_handler = function(obs_option_selector){
             $('#selected-obs-uncertainty').html("No observation selected");
         }
     });
+}
+
+report_utils.store_prev_value = function(storage_variable){
+    /* Returns an Onchange callback that checks the value of the current select
+     * input and stores the selected node in `storage_variable` if there is a
+     * selection, and that selection does not match the stored value.
+     */
+    return function(){
+        if ($(this).val()){
+            var selected = $(this).children('option:selected')[0];
+            if (!selected.isSameNode(storage_variable)){
+                storage_variable = selected;
+            }
+        }
+    }
+}
+
+report_utils.restore_prev_value = function(the_node){
+    /* Sets the previous observation as selected if it is no longer hidden.
+     *
+     */
+    if (the_node && !$(the_node).prop('hidden')){
+         $(the_node).prop('selected', true);
+    }
 }

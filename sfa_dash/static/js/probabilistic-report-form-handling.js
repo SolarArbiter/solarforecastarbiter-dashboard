@@ -2,6 +2,8 @@
  *  Creates inputs for defining observation, forecast pairs for a report.
  */
 
+// globals for tracking the previous constant value and units. Need to keep
+// track of both to ensure we're not persisting values across different units.
 var previous_constant = null;
 var previous_units = null;
 
@@ -427,6 +429,7 @@ function createPairSelector(){
             }
         } else {
             $('#no-distributions').attr('hidden', true);
+            report_utils.restore_prev_value(previous_reference_forecast);
         }
         filterReferenceForecasts(variable);
         if (compareTo == 'observation'){
@@ -566,6 +569,7 @@ function createPairSelector(){
                 $('#no-observations').removeAttr('hidden');
             } else {
                 $('#no-observations').attr('hidden', true);
+                report_utils.restore_prev_value(previous_observation);
             }
         } else {
             observations.attr('hidden', true);
@@ -688,6 +692,11 @@ function createPairSelector(){
 
     forecast_select.change(populateConstantValues);
     constant_value_select.change(populateReferenceForecasts);
+
+    observation_select.change(
+        report_utils.store_prev_value(previous_observation));
+    ref_forecast_select.change(
+        report_utils.store_prev_value(previous_reference_forecast));
 
     /**********************************************************************
      *
