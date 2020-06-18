@@ -431,77 +431,11 @@ function createPairSelector(){
             $('#no-distributions').attr('hidden', true);
             report_utils.restore_prev_value(previous_reference_forecast);
         }
-        filterReferenceForecasts(variable);
+        populateReferenceForecasts();
         if (compareTo == 'observation'){
             filterObservations();
         } else {
             filterAggregates();
-        }
-    }
-
-    function filterReferenceForecasts(variable){
-        /* Filter the list of reference forecasts based on the current
-         * forecast.
-         */
-        forecast = forecast_select.find(':selected').first();
-        reference_forecasts = $('#reference-forecast-select option').slice(2);
-        reference_forecasts.removeAttr('hidden');
-        if (forecast[0]){
-            if(forecast.data.hasOwnProperty('siteId')){
-                site_id = forecast.data().siteId;
-            }else{
-                aggregate_id = forecast.data().aggregateId;
-            }
-            variable = forecast.data().variable;
-            interval_length = forecast.data().intervalLength;
-
-            // hide the "please select forecast" prompt"
-            $('#no-reference-forecast-forecast-selection').attr('hidden', true);
-            toHide = report_utils.searchSelect(
-                '#reference-forecast-option-search',
-                '#reference-forecast-select', 2);
-            if (variable){
-            toHide = toHide.add(reference_forecasts.not(
-                `[data-variable=${variable}]`));
-            }
-
-            // Determine if we need to filter by site or aggregate
-            if (site_id){
-                // create a set of elements to hide from selected site, variable and search
-                toHide = toHide.add(reference_forecasts.not(
-                    `[data-site-id=${site_id}]`));
-            } else {
-                toHide = toHide.add(
-                    reference_forecasts.not(
-                        `[data-aggregate-id=${aggregate_id}]`));
-            }
-
-            // Filter out reference forecasts that don't have the same
-            // interval length
-            things = reference_forecasts.filter(function(){
-                return $(this).data().intervalLength != interval_length ||
-                    $(this).attr('value') == forecast_select.val();
-            });
-            toHide = toHide.add(things);
-        }else{
-            toHide = reference_forecasts;
-            $('#no-reference-forecast-forecast-selection').removeAttr('hidden');
-        }
-
-        // if current forecast selection is invalid, deselect
-        if (toHide.filter(':selected').length){
-            ref_forecast_select.val('');
-        }
-        toHide.attr('hidden', 'true');
-
-        // if all options are hidden, show "no matching forecasts"
-        if (toHide.length == reference_forecasts.length){
-            ref_forecast_select.val('');
-            if ($('#no-reference-forecast-forecast-selection').attr('hidden') || compareTo == 'aggregate'){
-                $('#no-reference-forecasts').removeAttr('hidden');
-            }
-        } else {
-            $('#no-reference-forecasts').attr('hidden', true);
         }
     }
 
@@ -687,8 +621,6 @@ function createPairSelector(){
     site_select.change(filterForecasts);
     variable_select.change(filterForecasts);
     forecast_select.change(applyFxDependentFilters);
-    forecast_select.change(applyFxDependentFilters);
-    forecast_select.change(filterReferenceForecasts);
 
     forecast_select.change(populateConstantValues);
     constant_value_select.change(populateReferenceForecasts);

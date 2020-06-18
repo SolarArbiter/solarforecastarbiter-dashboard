@@ -242,7 +242,6 @@ function createPairSelector(){
                     selected_forecast.text,
                     selected_forecast.value,
             );
-            var variable = "event";
             $(".empty-reports-list").attr('hidden', 'hidden');
             forecast_select.css('border', '');
             observation_select.css('border', '');
