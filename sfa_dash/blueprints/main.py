@@ -170,7 +170,7 @@ class SingleObjectView(DataDashView):
         self.template_args['current_path'] = request.path
         self.template_args['subnav'] = self.format_subnav(**kwargs)
         self.template_args['breadcrumb'] = self.breadcrumb_html(
-            self.get_breadcrumb_dict())
+            self.get_breadcrumb())
         self.template_args['metadata_block'] = render_template(
             self.metadata_template,
             **self.metadata)
@@ -283,7 +283,7 @@ class SingleCDFForecastGroupView(SingleObjectView):
         self.template_args['current_path'] = request.path
         self.template_args['subnav'] = self.format_subnav(**kwargs)
         self.template_args['breadcrumb'] = self.breadcrumb_html(
-            self.get_breadcrumb_dict())
+            self.get_breadcrumb())
         self.template_args['metadata_block'] = render_template(
             self.metadata_template,
             **self.metadata)

@@ -21,7 +21,7 @@ class AggregatesView(BaseView):
     def set_template_args(self):
         aggregates_list = aggregates.list_metadata()
         self.template_args = {
-            "breadcrumb": self.breadcrumb_html(self.get_breadcrumb_dict()),
+            "breadcrumb": self.breadcrumb_html(self.get_breadcrumb()),
             "aggregates": aggregates_list,
         }
 
