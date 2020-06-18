@@ -476,9 +476,12 @@ report_utils.register_uncertainty_handler = function(obs_option_selector){
 }
 
 report_utils.store_prev_value = function(storage_variable){
-    /* Returns an Onchange callback that checks the value of the current select
-     * input and stores the selected node in `storage_variable` if there is a
-     * selection, and that selection does not match the stored value.
+    /*  Returns an Onchange callback that checks the value of the current select
+     *  input and stores the selected node in `storage_variable` if there is a
+     *  selection, and that selection does not match the stored value.
+     *
+     *  @param storage_variable
+     *      The variable to store the selected option in.
      */
     return function(){
         if ($(this).val()){
@@ -491,8 +494,11 @@ report_utils.store_prev_value = function(storage_variable){
 }
 
 report_utils.restore_prev_value = function(the_node){
-    /* Sets the previous observation as selected if it is no longer hidden.
+    /*  Sets the previous value as selected if it is no longer hidden.
      *
+     *  @param {node} the_node
+     *      Variable that stores the dom node that was previously selected. See
+     *      `previous_observation` at the top of this file.
      */
     if (the_node && !$(the_node).prop('hidden')){
          $(the_node).prop('selected', true);
