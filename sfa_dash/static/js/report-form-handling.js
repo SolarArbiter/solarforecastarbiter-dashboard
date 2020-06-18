@@ -371,10 +371,8 @@ function createPairSelector(){
 
     // Store the selected observation or reference forecast when the value
     // changes for persisting across different forecasts/sites etc.
-    observation_select.change(
-        report_utils.store_prev_value(previous_observation));
-    ref_forecast_select.change(
-        report_utils.store_prev_value(previous_reference_forecast));
+    observation_select.change(report_utils.store_prev_observation);
+    ref_forecast_select.change(report_utils.store_prev_reference_forecast);
 
     // insert options from page_data into the select elements
     $.each(page_data['sites'], function(){

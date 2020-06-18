@@ -194,8 +194,7 @@ function createPairSelector(){
     forecast_select.change(filterObservations);
 
     // Store selected observation when the value changs for persistence.
-    observation_select.change(
-        report_utils.store_prev_value(previous_observation));
+    observation_select.change(report_utils.store_prev_observation);
 
     // insert options from page_data into the select elements
     $.each(page_data['sites'], function(){

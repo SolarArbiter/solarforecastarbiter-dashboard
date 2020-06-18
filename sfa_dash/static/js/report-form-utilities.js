@@ -475,20 +475,26 @@ report_utils.register_uncertainty_handler = function(obs_option_selector){
     });
 }
 
-report_utils.store_prev_value = function(storage_variable){
-    /*  Returns an Onchange callback that checks the value of the current select
-     *  input and stores the selected node in `storage_variable` if there is a
-     *  selection, and that selection does not match the stored value.
-     *
-     *  @param storage_variable
-     *      The variable to store the selected option in.
+report_utils.store_prev_observation = function(){
+    /* Ochange callback that stores the currently selected node into the
+     * `previous_observation` global if it has changed.
      */
-    return function(){
-        if ($(this).val()){
-            var selected = $(this).children('option:selected')[0];
-            if (!selected.isSameNode(storage_variable)){
-                storage_variable = selected;
-            }
+    if ($(this).val()){
+        var selected = $(this).children('option:selected')[0];
+        if (!selected.isSameNode(previous_observation)){
+            previous_observation = selected;
+        }
+    }
+}
+
+report_utils.store_prev_reference_forecast = function(){
+    /* Ochange callback that stores the currently selected node into the
+     * `previous_reference_forecast` global if it has changed.
+     */
+    if ($(this).val()){
+        var selected = $(this).children('option:selected')[0];
+        if (!selected.isSameNode(previous_reference_forecast)){
+            previous_reference_forecast = selected;
         }
     }
 }

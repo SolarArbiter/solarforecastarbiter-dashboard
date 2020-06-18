@@ -693,10 +693,8 @@ function createPairSelector(){
     forecast_select.change(populateConstantValues);
     constant_value_select.change(populateReferenceForecasts);
 
-    observation_select.change(
-        report_utils.store_prev_value(previous_observation));
-    ref_forecast_select.change(
-        report_utils.store_prev_value(previous_reference_forecast));
+    observation_select.change(report_utils.store_prev_observation);
+    ref_forecast_select.change(report_utils.store_prev_reference_forecast);
 
     /**********************************************************************
      *
