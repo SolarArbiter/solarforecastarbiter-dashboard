@@ -182,6 +182,7 @@ function createPairSelector(){
          */
         var forecast = forecast_select.find(':selected').first();
         var reference_forecasts = $('#reference-forecast-select option').slice(2);
+        var compareTo = $(`[name=observation-aggregate-radio]:checked`).val();
         reference_forecasts.removeAttr('hidden');
         if (forecast[0]){
             // collect the site or aggregate id, variable and interval_length
