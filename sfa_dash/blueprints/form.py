@@ -171,12 +171,13 @@ class UploadForm(BaseView):
         self.template_args = {}
         self.template_args['metadata_block'] = render_template(
             self.metadata_template,
-            **self.metadata),
+            **self.metadata)
         self.template_args['metadata'] = self.safe_metadata()
 
     def get(self, uuid, **kwargs):
         try:
             self.metadata = self.api_handle.get_metadata(uuid)
+            self.set_site_or_aggregate_metadata()
             self.metadata['site_link'] = self.generate_site_link(
                 self.metadata)
         except DataRequestException as e:
