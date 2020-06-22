@@ -137,7 +137,8 @@ class CreateForm(BaseView):
                 try:
                     loc_metadata = self.metadata_handler.get_metadata(uuid)
                 except DataRequestException as e:
-                    template_args['errors'].update(utils.flatten_dict(e.errors))
+                    template_args['errors'].update(
+                        utils.flatten_dict(e.errors))
                 else:
                     template_args[f'{self.location_type}_metadata'] = loc_metadata  # noqa
                     template_args['metadata_block'] = render_template(
