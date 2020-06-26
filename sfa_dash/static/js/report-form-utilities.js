@@ -510,3 +510,322 @@ report_utils.restore_prev_value = function(the_node){
          $(the_node).prop('selected', true);
     }
 }
+
+/*
+ * Cost parameter functions
+ */
+class Cost{
+    constructor(name=null, type='timeofday', parameters=null){
+        this.name = name;
+        this.type = type;
+        this.parameters = parameters;
+    }
+}
+class TimeOfDayCost{
+    // times (array)
+    // cost (aray len(cost))
+    // aggregation {'sum', 'mean'}
+    // fill {'forward', 'backward'}
+    // net (bool)
+
+}
+class DatetimeCost{
+    // datetimes (array)
+    // cost (array len(datetimes)
+    // aggregation {'sum', 'mean'}
+    // net (bool)
+    // fill {'foreward', 'backward'}
+    // timezone
+    constructor(datetimes=[], costs=[], aggregation='sum', net=false, fill='forward',
+                timezone=null){
+        this.datetimes = datetimes;
+        this.costs = costs;
+        this.aggregation = aggregation;
+        this.net = net;
+        this.fill = fill;
+        if (!timezone){
+            this.timezone = Object.keys(sfa_dash_config['TIMEZONES'])[0];
+        } else {
+            this.timezone = timezone;
+        }
+    }
+
+}
+class ConstantCost{
+    constructor(cost_val=0.0, aggregation='sum', net=false){
+        this.cost = cost_val;
+        this.aggregation = aggregation;
+        this.net = net;
+    }
+}
+class ErrorBandCost{
+}
+class CostBand{
+    constructor(
+        error_range=[-Infinity, Infinity],
+        cost_function='timeofday',
+        parameters=null
+    ){
+    }
+
+}
+
+report_utils.timeofday_cost = function(cost_obj, index=null){
+    // TODO: fix these widgets
+    function name_func(the_name){
+        return (index ? the_name + `-{index}` : the_name);
+    }
+    var the_div = $('<div>');
+    var datetimes_field = $('<input>')
+        .attr('name', name_func('cost-datetimes'))
+        .attr('type', 'text')
+        .attr('value', cost_obj.datetimes.join(', '));
+    the_div.append(datetimes_field);
+    var costs_field = $('<input>')
+        .attr('name', name_func('cost-costs'))
+        .attr('type', 'text')
+        .attr('value', cost_obj.costs.map(x => x.toFixed(2).join(', ')));
+    the_div.append(costs_field);
+    var agg_field_sum = $(`<input
+            type="radio"
+            id="${name_func('cost-aggregation')}"
+            name="${name_func('cost-aggregation')}"
+            value="sum"
+            ${cost_obj.aggregation == 'sum' ? 'checked' : ''}>
+           <label for="${name_func('cost-aggregation')}">sum</label>`)
+    the_div.append(agg_field_sum);
+    var agg_field_mean = $(`<input
+            type="radio"
+            id="${name_func('cost-aggregation')}"
+            name="${name_func('cost-aggregation')}"
+            value="mean"
+            ${cost_obj.aggregation == 'mean' ? 'checked' : ''}>
+           <label for="${name_func('cost-aggregation')}">mean</label>`)
+    the_div.append(agg_field_mean);
+    // net (bool)
+    var net_field = $(`<input type="checkbox"
+            id="${name_func('net')}"
+            name="${name_func('net')}"
+            ${cost_obj.net ? 'checked' : ''}>`);
+    the_div.append(net_field);
+    var fill_field_forward = $(`<input
+            type="radio"
+            id="${name_func('cost-fill')}"
+            name="${name_func('cost-fill')}"
+            value="sum"
+            ${cost_obj.aggregation == 'sum' ? 'checked' : ''}>
+           <label for="${name_func('cost-fill')}">forward</label>`)
+    the_div.append(fill_field_forward);
+    var fill_field_backward = $(`<input
+            type="radio"
+            id="${name_func('cost-fill')}"
+            name="${name_func('cost-fill')}"
+            value="mean"
+            ${cost_obj.aggregation == 'mean' ? 'checked' : ''}>
+           <label for="${name_func('cost-fill')}">backward</label>`)
+     the_div.append(fill_field_backward);
+    return the_div
+}
+report_utils.datetime_cost = function(cost_obj, index=null){
+    // TODO add labels and callbacks
+    function name_func(the_name){
+        return (index ? the_name + `-{index}` : the_name);
+    }
+    var the_div = $('<div>');
+    var datetimes_field = $('<input>')
+        .attr('name', name_func('cost-datetimes'))
+        .attr('type', 'text')
+        .attr('value', cost_obj.datetimes.join(', '));
+    the_div.append(datetimes_field);
+    var costs_field = $('<input>')
+        .attr('name', name_func('cost-costs'))
+        .attr('type', 'text')
+        .attr('value', cost_obj.costs.map(x => x.toFixed(2).join(', ')));
+    the_div.append(costs_field);
+    var agg_field_sum = $(`<input
+            type="radio"
+            id="${name_func('cost-aggregation')}"
+            name="${name_func('cost-aggregation')}"
+            value="sum"
+            ${cost_obj.aggregation == 'sum' ? 'checked' : ''}>
+           <label for="${name_func('cost-aggregation')}">sum</label>`)
+    the_div.append(agg_field_sum);
+    var agg_field_mean = $(`<input
+            type="radio"
+            id="${name_func('cost-aggregation')}"
+            name="${name_func('cost-aggregation')}"
+            value="mean"
+            ${cost_obj.aggregation == 'mean' ? 'checked' : ''}>
+           <label for="${name_func('cost-aggregation')}">mean</label>`)
+    the_div.append(agg_field_mean);
+    // net (bool)
+    var net_field = $(`<input type="checkbox"
+            id="${name_func('net')}"
+            name="${name_func('net')}"
+            ${cost_obj.net ? 'checked' : ''}>`);
+    the_div.append(net_field);
+    var fill_field_forward = $(`<input
+            type="radio"
+            id="${name_func('cost-fill')}"
+            name="${name_func('cost-fill')}"
+            value="sum"
+            ${cost_obj.aggregation == 'sum' ? 'checked' : ''}>
+           <label for="${name_func('cost-fill')}">forward</label>`)
+    the_div.append(fill_field_forward);
+    var fill_field_backward = $(`<input
+            type="radio"
+            id="${name_func('cost-fill')}"
+            name="${name_func('cost-fill')}"
+            value="mean"
+            ${cost_obj.aggregation == 'mean' ? 'checked' : ''}>
+           <label for="${name_func('cost-fill')}">backward</label>`)
+     the_div.append(fill_field_backward);
+    //var timezone_field = $('<select>')
+    return the_div
+}
+report_utils.constant_cost = function(cost_obj, index=null){
+    /* Returns inputs for defining a constant cost.
+     *
+     * @param {int} index
+     *     If passed, suffixes the name of inputs with an integer
+     *
+     */
+    function name_func(the_name){
+        return (index ? the_name + `-{index}` : the_name);
+    }
+    var the_div = $('<div>');
+
+    var cost_field = $('<input>')
+        .attr('name', name_func('cost-value'))
+        .attr('type', 'number')
+        .attr('step', 'any')
+        .attr('value', cost_obj.cost.toFixed(2))
+
+    var agg_field_sum = $(`<input
+            type="radio"
+            id="${name_func('cost-aggregation')}"
+            name="${name_func('cost-aggregation')}"
+            value="sum"
+            ${cost_obj.aggregation == 'sum' ? 'checked' : ''}>
+           <label for="${name_func('cost-aggregation')}">sum</label>`)
+    var agg_field_mean = $(`<input
+            type="radio"
+            id="${name_func('cost-aggregation')}"
+            name="${name_func('cost-aggregation')}"
+            value="mean"
+            ${cost_obj.aggregation == 'mean' ? 'checked' : ''}>
+           <label for="${name_func('cost-aggregation')}">mean</label>`)
+
+    // net (bool)
+    var net_field = $(`<input type="checkbox"
+            id="${name_func('net')}"
+            name="${name_func('net')}"
+            ${cost_obj.net ? 'checked' : ''}>`);
+
+    the_div.append($('<label>Cost: $</label>'));
+    the_div.append(cost_field);
+    the_div.append($('<br/><label>Aggregation: </label>'));
+    the_div.append(agg_field_sum);
+    the_div.append(agg_field_mean);
+    the_div.append($('<br/><label>Net: </label>'));
+    the_div.append(net_field);
+    return the_div;
+}
+
+report_utils.errorband_cost = function(){
+    // TODO: add error bands and junk
+    // error range
+    // cost_function
+    // get inputs for cost parameters
+    return $('<p>errorband</p>');
+
+}
+
+report_utils.init_previous_cost_options = function(existing_cost){
+    console.log('todo');
+}
+
+report_utils.insert_cost_widget = function(){
+    /* Creates a widget for defining cost metrics. Contains nested functions
+     * for defining each type of cost model, for nesting within error band.
+     */
+    if (typeof cost === 'undefined'){
+        // initialize global cost variable if not already defined.
+        cost = new Cost();
+    }
+    var widget_div = $('<div>')
+        .addClass('cost-definition');
+
+    var timeofday = $('<input id="master-cost-timeofday"type="radio" name="master-cost-type" value="timeofday"><label for="master-cost-timeofday">Time of Day</label>');
+    timeofday.change(function(){
+        if (cost.type != this.value){
+            cost.parameters = new TimeOfDayCost();
+        }
+        cost.type = this.value;
+        $('#primary-cost-fields').html(
+            report_utils.timeofday_cost(cost.parameters)
+        );
+    });
+
+    var datetime = $('<input  id="master-cost-datetime"type="radio" name="master-cost-type" value="datetime"><label for="master-cost-datetime">Datetime</label>');
+    datetime.change(function(){
+        if (cost.type != this.value){
+           cost.parameters = new DatetimeCost();
+        }
+        cost.type = this.value;
+        $('#primary-cost-fields').html(
+            report_utils.datetime_cost(cost.parameters)
+        );
+    });
+
+    var constant = $('<input  id="master-cost-constant"type="radio" name="master-cost-type" value="constant"><label for="master-cost-constant">Constant</label>');
+    constant.change(function(){
+     if (cost.type != this.value){
+            cost.parameters = new ConstantCost();
+        }
+        cost.type = this.value;
+        $('#primary-cost-fields').html(
+            report_utils.constant_cost(cost.parameters)
+        );
+    });
+
+    var errorband = $('<input id="master-cost-errorband"type="radio" name="master-cost-type" value="errorband"><label for="master-cost-errorband">Error Band</label>');
+    errorband.change(function(){
+        if (cost.type != this.value){
+            cost.parameters = new ErrorBandCost();
+        }
+        cost.type = this.value;
+        $('#primary-cost-fields').html(
+            report_utils.errorband_cost(cost.parameters)
+        );
+    });
+
+    /*
+     * Container to hold top-level cost options. This allows the user to select
+     * the primary cost type. Adds a '#primary-cost-fields' div for holding the
+     * inputs used for setting the appropriate attributes.
+     */
+    var cost_name = $('<input><br/>')
+        .attr('name', 'master-cost-name')
+        .addClass('form-control name-field')
+        .change(function(){
+            cost.name = this.value;
+        });
+    var primary_cost = $('<div>')
+        .addClass('primary-cost-container')
+        .append($('<label>Name</label><br/>'))
+        .append(cost_name)
+        .append(timeofday)
+        .append(datetime)
+        .append(constant)
+        .append(errorband)
+        .append($('<div>')
+            .attr('id','primary-cost-fields'));
+    widget_div.append(primary_cost)
+
+    $('#cost-container').append(widget_div);
+    // if cost has a type value, select it.
+    primary_cost.find(`[name=master-cost-type][value=${cost.type}]`)
+        .prop('checked', true);
+    primary_cost.find(`[name=master-cost-type]:checked`).trigger('change');
+}
