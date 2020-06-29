@@ -40,4 +40,33 @@ $(document).ready(function(){
             }
         }
     });
+    // Ensure interval_label of 'Event'  when event variable is selected.
+    $('[name="variable"]').change(function(){
+        if (typeof previous_interval_label === 'undefined'){
+            // Set a global variable for remembering the previously selected
+            // value.
+            previous_interval_label = 'beginning';
+        }
+        var interval_label_input = $('[name="interval_label"]');
+        interval_label_input.find('option').prop('hidden', false);
+        if(this.value == 'event'){
+            interval_label_input.val('event');
+            interval_label_input.find('option').not('[value="event"]').prop(
+                'hidden', true);
+        } else {
+            if (interval_label_input.val() != 'event'){
+                // Store a previous non-event value
+                previous_interval_label = interval_label_input.val();
+            } else {
+                // if variable was changed from event, restore the previous
+                // non-event interval label
+                interval_label_input.val(previous_interval_label);
+            }
+            interval_label_input.find('option[value="event"]').prop(
+                'hidden', true);
+        }
+    });
+    // hide interval_label = 'event' by default.
+    $('[name="interval_label"] option[value="event"]').prop(
+                'hidden', true);
 });
