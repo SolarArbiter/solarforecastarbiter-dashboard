@@ -111,7 +111,7 @@ class DataListingView(BaseView):
             else:
                 location_metadata = aggregates.get_metadata(aggregate_id)
             self.template_args['breadcrumb'] = self.breadcrumb_html(
-                self.get_breadcrumb_dict(location_metadata))
+                self.get_breadcrumb(location_metadata))
 
         else:
             self.template_args['page_title'] = 'Forecasts and Observations'
