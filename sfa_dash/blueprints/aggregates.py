@@ -1,5 +1,3 @@
-from requests.exceptions import HTTPError
-
 from flask import render_template, url_for, request, redirect
 import pandas as pd
 
