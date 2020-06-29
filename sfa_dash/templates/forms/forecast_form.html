@@ -44,9 +44,7 @@
 </div>
 <div class="form-element">
   {{ form.select('Interval label', 'interval_label',
-                 {'beginning': 'Beginning',
-                  'ending': 'Ending',
-                  'instant': 'Instant'},
+                 interval_label_options,
                   'Indicates if a time labels the start or the end of an interval.',
                   form_data=form_data) }}
 </div>
