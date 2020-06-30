@@ -862,7 +862,7 @@ report_utils.timeofday_cost = function(cost_obj, index=null){
         cost_obj.cost = [];
 
         costs.forEach(function(cost, idx){
-            if (!parseFloat(cost)){
+            if (isNan(parseFloat(cost))){
                 invalid_indices.push(idx+1);
             } else {
                 cost_obj.cost[idx] = parseFloat(cost);
@@ -964,7 +964,7 @@ report_utils.datetime_cost = function(cost_obj, index=null){
         cost_obj.cost = [];
 
         costs.forEach(function(cost, idx){
-            if (!parseFloat(cost)){
+            if (isNaN(parseFloat(cost))){
                 invalid_indices.push(idx+1);
             } else {
                 cost_obj.cost[idx] = parseFloat(cost);
@@ -1025,7 +1025,7 @@ report_utils.constant_cost = function(cost_obj, index=null){
         .attr('value', cost_obj.cost.toFixed(2))
         .addClass('form-control unset-width');
     cost_field.change(function(){
-        if (parseFloat(this.value)){
+        if (!isNaN(parseFloat(this.value))){
             cost_obj.value = parseFloat(this.value);
             this.setCustomValidity('');
         } else {
@@ -1102,7 +1102,7 @@ report_utils.cost_band = function(cost_obj, index=null){
         value="${cost_obj.error_range[0]}">`)
         .addClass('form-control unset-width');
     error_range_start.change(function(){
-        if (parseFloat(this.value)){
+        if (!isNaN(parseFloat(this.value))){
             var value = parseFloat(this.value);
             var end_input = $(
                 `[name="${report_utils.suffix_name('cost-band-error-end', index)}"]`);
@@ -1126,7 +1126,7 @@ report_utils.cost_band = function(cost_obj, index=null){
         value="${cost_obj.error_range[1]}">`)
         .addClass('form-control unset-width');
     error_range_end.change(function(){
-        if (parseFloat(this.value)){
+        if (!isNaN(parseFloat(this.value))){
             var value = parseFloat(this.value);
             var start_input = $(
                 `[name="${report_utils.suffix_name('cost-band-error-start', index)}"]`);
