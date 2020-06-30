@@ -563,11 +563,17 @@ class CostBand{
         cost_function='timeofday',
         parameters=null
     ){
+        this.error_range = error_range;
+        this.cost_function = cost_function;
+        this.parameters = parameters;
     }
 
 }
 class ErrorBandCost{
     // bands: array of CostBand
+    constructor(bands=[]){
+        this.bands = bands.map(x => new CostBand(...x));
+    }
 }
 class Cost{
     constructor(name=null, type='timeofday', parameters=null){
@@ -598,7 +604,7 @@ class Cost{
 }
 
 report_utils.suffix_name = function(the_name, index){
-    return (index ? the_name + `-{index}` : the_name);
+    return (index!=null ? the_name + `-${index}` : the_name);
 }
 
 report_utils.many_costs_field = function(the_div, cost_obj, index=null){
@@ -714,14 +720,14 @@ report_utils.cost_fill_field = function(the_div, cost_obj, index=null){
             name="${fill_field_name}"
             value="forward"
             ${cost_obj.fill == 'forward' ? 'checked' : ''}>
-           <label for="${report_utils.suffix_name('cost-fill-forward', index)}">forward</label>`)
+           <label for="${report_utils.suffix_name('cost-fill-forward', index)}">forward</label>`);
     var fill_field_backward = $(`<input
             type="radio"
             id="${report_utils.suffix_name('cost-fill', index)}"
             name="${fill_field_name}"
             value="mean"
             ${cost_obj.fill == 'backward' ? 'checked' : ''}>
-           <label for="${report_utils.suffix_name('cost-fill-backward', index)}">backward</label>`)
+           <label for="${report_utils.suffix_name('cost-fill-backward', index)}">backward</label>`);
     the_div.append($('<br/><label>Fill: </label>'));
     the_div.append(fill_field_forward);
     the_div.append(fill_field_backward);
@@ -951,8 +957,7 @@ report_utils.datetime_cost = function(cost_obj, index=null){
             this.setCustomValidity('');
             // check if the datetimes field is valid, and rerun validation
             // now that the fields are the same length
-            // TODO: FIX INFINITE RECURSION
-           let datetimes_field = $(
+            let datetimes_field = $(
                 `[name=${report_utils.suffix_name("cost-datetimes", index)}]`);
             if(!datetimes_field[0].checkValidity()){
                 datetimes_field.change();
@@ -992,12 +997,159 @@ report_utils.constant_cost = function(cost_obj, index=null){
     return the_div;
 }
 
-report_utils.errorband_cost = function(){
-    // TODO: add error bands and junk
+report_utils.cost_band = function(cost_obj, index=null){
+    var the_div = $('<div>')
+        .addClass('error-band-container');
+    var param_container = $('<div>')
+        .addClass('error-band-params-container');
+    var tod_band_radio = $(`<input
+        type="radio"
+        id="tod-dt-select"
+        name="${report_utils.suffix_name('cost-band-cost-function', index)}"
+        value="timeofday"
+        ${cost_obj.cost_function == 'timeofday' ? 'checked' : ''}
+        <label for="errorband-dt-select">Time of Day</label>`);
+    tod_band_radio.change(function(){
+        if (!(cost_obj.parameters instanceof TimeOfDayCost)){
+            cost_obj.parameters = new TimeOfDayCost();
+        }
+        param_container.empty();
+        param_container.html(
+            report_utils.timeofday_cost(cost_obj.parameters, index)
+        );
+    });
+    var dt_band_radio = $(`<input
+        type="radio"
+        id="errorband-dt-select"
+        name="${report_utils.suffix_name('cost-band-cost-function', index)}"
+        value="datetime"
+        ${cost_obj.cost_function == 'datetime' ? 'checked' : ''}>
+        <label for="errorband-dt-select">Datetime</label>`);
+    dt_band_radio.change(function(){
+        if (!(cost_obj.parameters instanceof DatetimeCost)){
+            cost_obj.parameters = new DatetimeCost();
+        }
+        param_container.empty();
+        param_container.html(
+            report_utils.datetime_cost(cost_obj.parameters, index)
+        );
+    });
+    var constant_band_radio = $(`<input
+        type="radio"
+        id="constant-dt-select"
+        name="${report_utils.suffix_name('cost-band-cost-function', index)}"
+        value="constant"
+        ${cost_obj.cost_function == 'constant' ? 'checked' : ''}>
+        <label for="errorband-dt-select">Constant</label>`);
+    constant_band_radio.change(function(){
+        if (!(cost_obj.parameters instanceof ConstantCost)){
+            cost_obj.parameters = new ConstantCost();
+        }
+        param_container.empty();
+        param_container.html(
+            report_utils.constant_cost(cost_obj.parameters, index)
+        );
+    });
+    var error_range_start = $(`<input
+        type="text"
+        name="${report_utils.suffix_name('cost-band-error-start', index)}"
+        value="${cost_obj.error_range[0]}">`)
+        .addClass('form-control unset-width');
+    error_range_start.change(function(){
+        if (parseFloat(this.value)){
+            var value = parseFloat(this.value);
+            var end_input = $(
+                `[name="${report_utils.suffix_name('cost-band-error-end', index)}"]`);
+            if (value >= end_input.val()){
+                this.setCustomValidity(
+                    "Error range start must be less than end.");
+            }else{
+                this.setCustomValidity('');
+                cost_obj.error_range[0] = value;
+            }
+        } else {
+            this.setCustomValidity(
+                "Error range start must be a float or +/- Infinity.");
+        }
+        this.reportValidity();
+    });
+    var error_range_end = $(`<input
+        type="text"
+        step="any"
+        name="${report_utils.suffix_name('cost-band-error-end', index)}"
+        value="${cost_obj.error_range[1]}">`)
+        .addClass('form-control unset-width');
+    error_range_end.change(function(){
+        if (parseFloat(this.value)){
+            var value = parseFloat(this.value);
+            var start_input = $(
+                `[name="${report_utils.suffix_name('cost-band-error-start', index)}"]`);
+            if (value <= start_input.val()){
+                this.setCustomValidity(
+                    "Error range end must be greater than start.");
+            }else{
+                this.setCustomValidity('');
+                cost_obj.error_range[1] = value;
+            }
+        } else {
+            this.setCustomValidity(
+                "Error range end must be a float or +/- Infinity.");
+        }
+        this.reportValidity();
+    })
+    the_div.append($('<label>Error Range Start:</label>'));
+    the_div.append(error_range_start);
+    the_div.append($('<br><label>Error Range End:</label>'));
+    the_div.append(error_range_end);
+    the_div.append($('<br><label>Errorband Cost Function: </label><br>'));
+    the_div.append(tod_band_radio);
+    the_div.append(dt_band_radio);
+    the_div.append(constant_band_radio);
+    the_div.append(param_container);
+
+    // fire change event ot initialize the first paramters
+    the_div.find(`[name=${report_utils.suffix_name('cost-band-cost-function', index)}]:checked`)
+        .change();
+    removal_button = $(
+        '<a role="button" class="error-band-delete-button">remove</a>');
+    removal_button.click(function(){
+        $(this).parent().remove();
+        if ($('.error-band-container').length == 0){
+            $('.error-bands-container').append(
+                $(`<div class="error-band-container alert-warning">
+                   No error bands</div>`)
+            );
+        }
+    });
+    the_div.append(removal_button);
+    return the_div;
+}
+report_utils.errorband_cost = function(cost_obj){
     // error range
     // cost_function
     // get inputs for cost parameters
-    return $('<p>errorband</p>');
+    var index = cost_obj.bands.length;
+    var the_div = $('<div>');
+    var error_bands_container = $('<div>')
+        .addClass('error-bands-container');
+    var add_band_button = $('<a>')
+        .attr('role', 'button')
+        .addClass('btn btn-primary btn-sm')
+        .html('Add Error Band')
+        .click(function(){
+            cost_obj.bands[index] = new CostBand();
+            error_bands_container.append(
+                report_utils.cost_band(cost_obj.bands[index], index));
+            index++;
+            $('.error-band-container.alert-warning').remove();
+        });
+    the_div.append(add_band_button);
+    the_div.append($('<br><label>Error Bands:</label><br>'));
+    error_bands_container.append(
+        $(`<div class="error-band-container alert-warning">
+          No error bands</div>`));
+    the_div.append(error_bands_container);
+    return the_div;
 
 }
 
@@ -1020,7 +1172,7 @@ report_utils.insert_cost_widget = function(){
         .append('<h5>Cost Parameters</h5>');
 
     // Create radio buttons for selecting the type of cost
-    var timeofday = $('<input id="master-cost-timeofday" type="radio" name="master-cost-type" value="timeofday"><label for="master-cost-timeofday">Time of Day</label>');
+    var timeofday = $('<input id="master-cost-timeofday" type="radio" name="master-cost-type" value="timeofday"><label for="master-cost-timeofday">Time of Day&nbsp;</label>');
     timeofday.change(function(){
         if (cost.type != this.value){
             cost.parameters = new TimeOfDayCost();
@@ -1031,7 +1183,7 @@ report_utils.insert_cost_widget = function(){
         );
     });
 
-    var datetime = $('<input  id="master-cost-datetime"type="radio" name="master-cost-type" value="datetime"><label for="master-cost-datetime">Datetime</label>');
+    var datetime = $('<input  id="master-cost-datetime"type="radio" name="master-cost-type" value="datetime"><label for="master-cost-datetime">Datetime&nbsp;</label>');
     datetime.change(function(){
         if (cost.type != this.value){
            cost.parameters = new DatetimeCost();
@@ -1042,7 +1194,7 @@ report_utils.insert_cost_widget = function(){
         );
     });
 
-    var constant = $('<input  id="master-cost-constant"type="radio" name="master-cost-type" value="constant"><label for="master-cost-constant">Constant</label>');
+    var constant = $('<input  id="master-cost-constant"type="radio" name="master-cost-type" value="constant"><label for="master-cost-constant">Constant&nbsp;</label>');
     constant.change(function(){
      if (cost.type != this.value){
             cost.parameters = new ConstantCost();
@@ -1053,9 +1205,7 @@ report_utils.insert_cost_widget = function(){
         );
     });
 
-    /* TODO: enable error band costs by nesting other costs and applying an
-     * error range
-    var errorband = $('<input id="master-cost-errorband"type="radio" name="master-cost-type" value="errorband"><label for="master-cost-errorband">Error Band</label>');
+    var errorband = $('<input id="master-cost-errorband"type="radio" name="master-cost-type" value="errorband"><label for="master-cost-errorband">Error Band&nbsp;</label>');
     errorband.change(function(){
         if (cost.type != this.value){
             cost.parameters = new ErrorBandCost();
@@ -1065,7 +1215,6 @@ report_utils.insert_cost_widget = function(){
             report_utils.errorband_cost(cost.parameters)
         );
     });
-    */
     /*
      * Container to hold top-level cost options. This allows the user to select
      * the primary cost type. Adds a '#primary-cost-fields' div for holding the
@@ -1085,7 +1234,7 @@ report_utils.insert_cost_widget = function(){
         .append(timeofday)
         .append(datetime)
         .append(constant)
-        //.append(errorband)
+        .append(errorband)
         .append($('<div>')
             .attr('id','primary-cost-fields'));
     widget_div.append(primary_cost)

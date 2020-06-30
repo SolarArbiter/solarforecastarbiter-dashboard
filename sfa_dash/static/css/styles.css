@@ -188,7 +188,7 @@ div.object-pair-list{
   padding-left: 0;
   margin-bottom: 1em;
 }
-a.object-pair-delete-button{
+a.object-pair-delete-button, a.error-band-delete-button{
     position: absolute;
     top: 5px;
     right: 20px;
@@ -660,4 +660,9 @@ div.report-header{
     background-color: #EEE;
     border: 1px solid #AAA;
     padding: .5em;
+}
+.error-band-container, .cost-definition{
+    border: 1px solid #dee2e6;
+    padding: .5em;
+    position: relative;
 }
