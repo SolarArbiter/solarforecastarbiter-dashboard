@@ -517,27 +517,26 @@ report_utils.restore_prev_value = function(the_node){
 }
 
 /*
- * Cost parameter functions
+ * Cost Class definitions
  */
-
 class TimeOfDayCost{
-    constructor(times=[], costs=[], aggregation='sum', net=false,
-                fill='forward'
+    constructor({times=[], costs=[], aggregation='sum', net=false,
+                fill='forward'}
     ){
         this.times = times;
         this.cost = costs;
         this.aggregation = aggregation;
         this.net = net;
-        this.fill = fill
+        this.fill = fill;
     }
 
 }
 class DatetimeCost{
-    constructor(datetimes=[], costs=[], aggregation='sum', net=false,
-                fill='forward', timezone=null
+    constructor({datetimes=[], cost=[], aggregation='sum', net=false,
+                fill='forward', timezone= null}
     ){
         this.datetimes = datetimes;
-        this.cost = costs;
+        this.cost = cost;
         this.aggregation = aggregation;
         this.net = net;
         this.fill = fill;
@@ -550,59 +549,66 @@ class DatetimeCost{
 
 }
 class ConstantCost{
-    constructor(cost_val=0.0, aggregation='sum', net=false){
-        this.cost = cost_val;
+    constructor({cost= 0.0, aggregation='sum', net=false}){
+        this.cost = cost;
         this.aggregation = aggregation;
         this.net = net;
     }
 }
 
 class CostBand{
-    constructor(
+    constructor({
         error_range=[-Infinity, Infinity],
         cost_function='timeofday',
         parameters=null
-    ){
+    }){
         this.error_range = error_range;
         this.cost_function = cost_function;
-        this.parameters = parameters;
+        var param_class = report_utils.get_cost_class(cost_function);
+        if (parameters == null){
+            this.parameters = new param_class();
+        } else {
+            this.parameters = new param_class(prameters);
+        }
     }
 
 }
 class ErrorBandCost{
     // bands: array of CostBand
-    constructor(bands=[]){
-        this.bands = bands.map(x => new CostBand(...x));
+    constructor({bands= []}){
+        this.bands = bands.map(x => new CostBand(x));
     }
 }
 class Cost{
-    constructor(name=null, type='timeofday', parameters=null){
+    constructor({name=null, type='timeofday', parameters=null}){
         this.name = name;
         this.type = type;
+        var param_class = report_utils.get_cost_class(type);
         if (!parameters){
-            switch (type){
-                case 'timeofday':
-                    this.parameters = new TimeOfDayCost();
-                    break;
-                case 'datetime':
-                    this.parameters = new DatetimeCost();
-                    break;
-                case 'errorband':
-                    this.parameters = new ErrorBandCost();
-                    break;
-                case 'constant':
-                    this.parameters = new ConstantCost();
-                    break;
-                default:
-                    this.parameters = null;
-                    break;
-            }
+            this.parameters = new param_class();
         } else {
-            this.parameters = parameters;
+            this.parameters = new param_class(parameters);
         }
     }
 }
+report_utils.get_cost_class = function(cost_type){
+    switch (cost_type){
+        case 'timeofday':
+            return TimeOfDayCost;
+        case 'datetime':
+            return DatetimeCost;
+        case 'errorband':
+            return ErrorBandCost;
+        case 'constant':
+            return ConstantCost;
+        default:
+            return null;
+    }
+}
 
+/*
+ * Cost field creation functions
+ */
 report_utils.suffix_name = function(the_name, index){
     return (index!=null ? the_name + `-${index}` : the_name);
 }
@@ -768,6 +774,11 @@ report_utils.cost_timezone_field = function(the_div, cost_obj, index=null){
     return tz_select;
 }
 
+/*
+ * Cost model ui creation functions. These create all of the inputs needed to
+ * create a new cost object, and will keep up to date with a passed in Cost
+ * object, or create new ones as necessary.
+ */
 report_utils.timeofday_cost = function(cost_obj, index=null){
     var the_div = $('<div>');
     var times_field = $('<input>')
@@ -875,8 +886,14 @@ report_utils.timeofday_cost = function(cost_obj, index=null){
     });
 
     var agg_field = report_utils.cost_aggregation_field(the_div, cost_obj, index);
+    agg_field.change(function(){cost_obj.aggregation = this.value});
+
     var net_field = report_utils.cost_net_field(the_div, cost_obj, index);
+    net_field.change(function(){cost_obj.net = this.value});
+
     var fill_field = report_utils.cost_fill_field(the_div, cost_obj, index);
+    fill_field.change(function(){cost_obj.fill = this.value});
+
     return the_div
 }
 report_utils.datetime_cost = function(cost_obj, index=null){
@@ -968,15 +985,23 @@ report_utils.datetime_cost = function(cost_obj, index=null){
 
     var agg_field = report_utils.cost_aggregation_field(
         the_div, cost_obj, index);
+    agg_field.change(function(){cost_obj.aggregation = this.value});
+
     var net_field = report_utils.cost_net_field(the_div, cost_obj, index);
+    net_field.change(function(){cost_obj.net = this.value});
+
     var fill_field = report_utils.cost_fill_field(the_div, cost_obj, index);
+    fill_field.change(function(){cost_obj.fill = this.value});
+
     var timezone_field = report_utils.cost_timezone_field(
         the_div, cost_obj, index);
+    timezone_field.change(function(){cost_obj.timezone = this.value});
     return the_div
 }
 report_utils.constant_cost = function(cost_obj, index=null){
     /* Returns inputs for defining a constant cost.
-     *
+     * @param {ConstantCost} cost_obj
+     *     ConstantCost object to store values into/parse values from.
      * @param {int} index
      *     If passed, suffixes the name of inputs with an integer
      *
@@ -985,15 +1010,25 @@ report_utils.constant_cost = function(cost_obj, index=null){
 
     var cost_field = $('<input>')
         .attr('name', report_utils.suffix_name('cost-value', index))
-        .attr('type', 'number')
-        .attr('step', 'any')
+        .attr('type', 'text')
         .attr('value', cost_obj.cost.toFixed(2))
         .addClass('form-control unset-width');
-
+    cost_field.change(function(){
+        if (parseFloat(this.value)){
+            cost_obj.value = parseFloat(this.value);
+            this.setCustomValidity('');
+        } else {
+            this.setCustomValidity('Cost must be a float.');
+        }
+    });
     the_div.append($('<label>Cost: $</label>'));
     the_div.append(cost_field);
+
     var agg_field = report_utils.cost_aggregation_field(the_div, cost_obj, index);
+    agg_field.change(function(){cost_obj.aggregation = this.value});
+
     var net_field = report_utils.cost_net_field(the_div, cost_obj, index);
+    net_field.change(function(){cost_obj.net = this.value});
     return the_div;
 }
 
@@ -1107,7 +1142,7 @@ report_utils.cost_band = function(cost_obj, index=null){
     the_div.append(constant_band_radio);
     the_div.append(param_container);
 
-    // fire change event ot initialize the first paramters
+    // fire change event to initialize the first paramters
     the_div.find(`[name=${report_utils.suffix_name('cost-band-cost-function', index)}]:checked`)
         .change();
     removal_button = $(
@@ -1125,9 +1160,6 @@ report_utils.cost_band = function(cost_obj, index=null){
     return the_div;
 }
 report_utils.errorband_cost = function(cost_obj){
-    // error range
-    // cost_function
-    // get inputs for cost parameters
     var index = cost_obj.bands.length;
     var the_div = $('<div>');
     var error_bands_container = $('<div>')
@@ -1153,23 +1185,17 @@ report_utils.errorband_cost = function(cost_obj){
 
 }
 
-report_utils.init_previous_cost_options = function(existing_cost){
-    // Store object of each previous type, so that switching the
-    // primary cost function does not lose any entered data.
-    console.log('TODO: report_utils.init_previous_cost_options');
-}
-
+/*
+ * Primary cost entrypoint. Initializes the cost inputs inside the container
+ * with id `cost-container`
+ */
 report_utils.insert_cost_widget = function(){
     /* Creates a widget for defining cost metrics. Contains nested functions
      * for defining each type of cost model, for nesting within error band.
      */
-    if (typeof cost === 'undefined'){
-        // initialize global cost variable if not already defined.
-        cost = new Cost();
-    }
+    report_utils.initialize_cost();
     var widget_div = $('<div>')
-        .addClass('cost-definition')
-        .append('<h5>Cost Parameters</h5>');
+        .addClass('cost-definition');
 
     // Create radio buttons for selecting the type of cost
     var timeofday = $('<input id="master-cost-timeofday" type="radio" name="master-cost-type" value="timeofday"><label for="master-cost-timeofday">Time of Day&nbsp;</label>');
@@ -1223,6 +1249,7 @@ report_utils.insert_cost_widget = function(){
     var cost_name = $('<input><br/>')
         .attr('name', 'master-cost-name')
         .attr('required', true)
+        .attr('value', cost.name)
         .addClass('form-control name-field')
         .change(function(){
             cost.name = this.value;
@@ -1246,7 +1273,19 @@ report_utils.insert_cost_widget = function(){
     primary_cost.find(`[name=master-cost-type]:checked`).trigger('change');
 }
 
-report_utils.convert_costs = function(costs){
-    /* TODO: build js Cost objects from api schema and set the global cost var
-     */
+report_utils.initialize_cost = function(){
+    /* Initialize global cost var from api costs. */
+    try{
+        var costs = form_data['report_parameters']['costs'];
+    } catch(error) {
+        // Continue, to allow setting cost to a new Cost object.
+    }
+    if (typeof costs !== 'undefined' && costs.length > 0){
+        console.log(costs);
+        // only handling one cost to start
+        var first_cost = costs[0];
+        cost = new Cost(first_cost);
+    } else {
+        cost = new Cost();
+    }
 }

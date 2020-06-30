@@ -461,3 +461,64 @@ def test_report_converter_formdata_to_payload_costs(report):
     }]
     for object_pair in params['object_pairs']:
         assert object_pair['cost'] == 'this is a cost'
+
+
+def test_report_converter_parse_form_errorband_costs():
+    form_data = ImmutableMultiDict([
+        ('cost-band-error-start-0', 1),
+        ('cost-band-error-end-0', 5),
+        ('cost-band-cost-function-0', 'constant'),
+        ('cost-value-0', '1.0'),
+        ('cost-aggregation-0', 'sum'),
+        ('cost-net-0', True),
+        ('cost-band-error-start-1', 5),
+        ('cost-band-error-end-1', 10),
+        ('cost-band-cost-function-1', 'timeofday'),
+        ('cost-times-1', '00:00,12:00'),
+        ('cost-costs-1', '1.5,2.5'),
+        ('cost-aggregation-1', 'mean'),
+        ('cost-fill-1', 'forward'),
+        ('cost-net-1', False),
+        ('cost-band-error-start-2', -5),
+        ('cost-band-error-end-2', 1),
+        ('cost-band-cost-function-2', 'datetime'),
+        ('cost-datetimes-2', '2020-01-01T00:00Z,2020-01-01T12:00Z'),
+        ('cost-costs-2', '1.0,3.0'),
+        ('cost-aggregation-2', 'sum'),
+        ('cost-net-2', True),
+        ('cost-fill-2', 'forward'),
+        ('cost-timezone-2', 'GMT'),
+    ])
+    bands = converters.ReportConverter.parse_form_errorband_cost(form_data)
+    assert bands[0] == {
+        'error_range': [1, 5],
+        'cost_function': 'constant',
+        'cost_function_parameters': {
+            'cost': 1.0,
+            'aggregation': 'sum',
+            'net': True,
+        }
+    }
+    assert bands[1] == {
+        'error_range': [5, 10],
+        'cost_function': 'timeofday',
+        'cost_function_parameters': {
+            'times': ['00:00', '12:00'],
+            'cost': [1.5, 2.5],
+            'aggregation': 'mean',
+            'fill': 'forward',
+            'net': False,
+        }
+    }
+    assert bands[2] == {
+        'error_range': [-5, 1],
+        'cost_function': 'datetime',
+        'cost_function_parameters': {
+            'datetimes': ['2020-01-01T00:00Z', '2020-01-01T12:00Z'],
+            'cost': [1.0, 3.0],
+            'aggregation': 'sum',
+            'fill': 'forward',
+            'net': True,
+            'timezone': 'GMT',
+        }
+    }

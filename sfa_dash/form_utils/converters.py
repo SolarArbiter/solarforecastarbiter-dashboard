@@ -422,7 +422,7 @@ class ReportConverter(FormConverter):
             suffix = f'-{index}'
         else:
             suffix = ''
-        cost = form_data[f'cost-value{suffix}']
+        cost = float(form_data[f'cost-value{suffix}'])
         aggregation = form_data[f'cost-aggregation{suffix}']
         net = form_data.get(f'cost-net{suffix}', False)
         return {
@@ -442,7 +442,7 @@ class ReportConverter(FormConverter):
         aggregation = form_data[f'cost-aggregation{suffix}']
         fill = form_data[f'cost-fill{suffix}']
         net = form_data.get(f'cost-net{suffix}', False)
-        timezone = form_data[f'timezone{suffix}']
+        timezone = form_data[f'cost-timezone{suffix}']
         return {
             'datetimes': datetimes,
             'cost': costs,
@@ -473,7 +473,25 @@ class ReportConverter(FormConverter):
 
     @classmethod
     def parse_form_errorband_cost(cls, form_data, index=None):
-        pass
+        # get number of error band indices from start_fields, these indices
+        # may not be contiguous if the user removed/added more bands
+        error_band_indices = [key.split('-')[-1]
+                              for key in form_data.keys()
+                              if key.startswith('cost-band-error-start-')]
+        bands = []
+        for i in error_band_indices:
+            error_range_start = form_data[f'cost-band-error-start-{i}']
+            error_range_end = form_data[f'cost-band-error-end-{i}']
+            error_range = [error_range_start, error_range_end]
+            cost_function = form_data[f'cost-band-cost-function-{i}']
+            param_func = cls.get_form_cost_parser(cost_function)
+            parameters = param_func(form_data, i)
+            bands.append({
+                'error_range': error_range,
+                'cost_function': cost_function,
+                'cost_function_parameters': parameters,
+            })
+        return bands
 
     @classmethod
     def get_form_cost_parser(cls, cost_type):
@@ -558,6 +576,7 @@ class ReportConverter(FormConverter):
         form_params['metrics'] = report_parameters.get('metrics', [])
         form_params['period-start'] = report_parameters['start']
         form_params['period-end'] = report_parameters['end']
+        form_params['costs'] = report_parameters['costs']
 
         # Objects pairs are left in the api format for parsing in javascript
         # see sfa_dash/static/js/report-utilities.js fill_object_pairs function
