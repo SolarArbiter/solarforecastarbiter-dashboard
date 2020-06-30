@@ -412,7 +412,8 @@ class ReportConverter(FormConverter):
     @classmethod
     def extract_many_costs(cls, value):
         costs = value.split(',')
-        costs = [float(cost) for cost in costs]
+        # if cost prevents parsing empty string in case of value = ''
+        costs = [float(cost) for cost in costs if cost]
         return costs
 
     @classmethod
@@ -462,12 +463,14 @@ class ReportConverter(FormConverter):
         aggregation = form_data[f'cost-aggregation{suffix}']
         fill = form_data[f'cost-fill{suffix}']
         net = form_data.get(f'cost-net{suffix}', False)
+        timezone = form_data[f'cost-timezone{suffix}']
         return {
             'times': times,
             'cost': costs,
             'aggregation': aggregation,
             'fill': fill,
             'net': net,
+            'timezone': timezone,
         }
 
     @classmethod
