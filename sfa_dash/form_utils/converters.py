@@ -362,7 +362,7 @@ class AggregateConverter(FormConverter):
 
 class ReportConverter(FormConverter):
     @classmethod
-    def zip_object_pairs(cls, form_data, cost_name=None):
+    def zip_object_pairs(cls, form_data):
         """Create a list of object pair dictionaries containing a
         forecast and either an observation or aggregate.
         """
@@ -386,8 +386,7 @@ class ReportConverter(FormConverter):
                   truth_types[i]: truth_ids[i],
                   'reference_forecast': reference_forecasts[i],
                   'uncertainty': uncertainty_values[i],
-                  'forecast_type': forecast_types[i],
-                  'cost': cost_name}
+                  'forecast_type': forecast_types[i]}
                  for i, f in enumerate(fx)]
         return pairs
 
@@ -557,13 +556,7 @@ class ReportConverter(FormConverter):
 
         costs = cls.parse_form_costs(form_dict)
         report_params['costs'] = costs
-
-        if len(costs) > 0:
-            cost_name = costs[0]['name']
-        else:
-            cost_name = None
-        report_params['object_pairs'] = cls.zip_object_pairs(
-            form_dict, cost_name)
+        report_params['object_pairs'] = cls.zip_object_pairs(form_dict)
         report_params['metrics'] = form_dict.getlist('metrics')
         report_params['categories'] = form_dict.getlist('categories')
         report_params['filters'] = cls.parse_form_filters(form_dict)
@@ -571,6 +564,13 @@ class ReportConverter(FormConverter):
         report_params['end'] = form_dict['period-end']
         report_params = cls.apply_crps(report_params)
         report_dict = {'report_parameters': report_params}
+        if len(costs) > 0:
+            cost_name = costs[0]['name']
+            report_params['metrics'].append('cost')
+        else:
+            cost_name = None
+        for pair in report_params['object_pairs']:
+            pair.update({'cost': cost_name})
         return report_dict
 
     @classmethod
