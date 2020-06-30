@@ -273,8 +273,12 @@ report_utils.validateReport = function(){
         return false;
     }
 }
-report_utils.validateDatetime = function(dt_string){
-    let iso_re = /(\d{4})-?(\d{2})-?(\d{2})T(\d{2})\:?(\d{2})\Z/;
+report_utils.validateDatetime = function(dt_string, enforce_utc=true){
+    if (enforce_utc){
+        var iso_re = /(\d{4})-?(\d{2})-?(\d{2})T(\d{2})\:?(\d{2})(Z|\+00:?00)$/;
+    } else {
+        var iso_re = /(\d{4})-?(\d{2})-?(\d{2})T(\d{2})\:?(\d{2})(Z|(\+|\-)\d{2}:?\d{2})?$/
+    }
     return dt_string.match(iso_re);
 }
 report_utils.registerDatetimeValidator = function(input_name){
@@ -291,9 +295,12 @@ report_utils.registerDatetimeValidator = function(input_name){
         } else {
               $(`[name="${input_name}"]`)[0].setCustomValidity(
                   'Please enter a datetime in ISO 8601 format with timezone ' +
-                  'Z and no units smaller than minutes, e.g ' +
+                  'Z or offset +00:00 and no units smaller than minutes, e.g ' +
                   '"2020-01-01T12:00Z');
         }
+    });
+    $(`[name="${input_name}"]`).change(function() {
+        this.reportValidity();
     });
 }
 
@@ -566,7 +573,7 @@ class CostBand{
         this.cost_function = cost_function;
         var param_class = report_utils.get_cost_class(cost_function);
         if (parameters == null){
-            this.parameters = new param_class();
+            this.parameters = new param_class({});
         } else {
             this.parameters = new param_class(prameters);
         }
@@ -585,7 +592,7 @@ class Cost{
         this.type = type;
         var param_class = report_utils.get_cost_class(type);
         if (!parameters){
-            this.parameters = new param_class();
+            this.parameters = new param_class({});
         } else {
             this.parameters = new param_class(parameters);
         }
@@ -916,7 +923,7 @@ report_utils.datetime_cost = function(cost_obj, index=null){
         cost_obj.datetimes = [];
 
         datetimes.forEach(function(dt, idx){
-            if (!report_utils.validateDatetime(dt)){
+            if (!report_utils.validateDatetime(dt, false)){
                 invalid_indices.push(idx);
             } else {
                 cost_obj.datetimes[idx] = dt;
@@ -925,8 +932,8 @@ report_utils.datetime_cost = function(cost_obj, index=null){
         if (invalid_indices.length){
             errors.push(
                 `Value ${invalid_indices.join(',')} are not valid datetime
-                values. Please use ISO 8601 format with timezone Z and no
-                units smaller than minutes, separated by commas.`);
+                values. Please use ISO 8601 format withno units smaller than
+                minutes, separated by commas.`);
         }
         if (datetimes.length != cost_obj.cost.length){
             errors.push('Datetimes and costs must be of equal length.');
@@ -1046,7 +1053,7 @@ report_utils.cost_band = function(cost_obj, index=null){
         <label for="errorband-dt-select">Time of Day</label>`);
     tod_band_radio.change(function(){
         if (!(cost_obj.parameters instanceof TimeOfDayCost)){
-            cost_obj.parameters = new TimeOfDayCost();
+            cost_obj.parameters = new TimeOfDayCost({});
         }
         param_container.empty();
         param_container.html(
@@ -1062,7 +1069,7 @@ report_utils.cost_band = function(cost_obj, index=null){
         <label for="errorband-dt-select">Datetime</label>`);
     dt_band_radio.change(function(){
         if (!(cost_obj.parameters instanceof DatetimeCost)){
-            cost_obj.parameters = new DatetimeCost();
+            cost_obj.parameters = new DatetimeCost({});
         }
         param_container.empty();
         param_container.html(
@@ -1078,7 +1085,7 @@ report_utils.cost_band = function(cost_obj, index=null){
         <label for="errorband-dt-select">Constant</label>`);
     constant_band_radio.change(function(){
         if (!(cost_obj.parameters instanceof ConstantCost)){
-            cost_obj.parameters = new ConstantCost();
+            cost_obj.parameters = new ConstantCost({});
         }
         param_container.empty();
         param_container.html(
@@ -1169,7 +1176,7 @@ report_utils.errorband_cost = function(cost_obj){
         .addClass('btn btn-primary btn-sm')
         .html('Add Error Band')
         .click(function(){
-            cost_obj.bands[index] = new CostBand();
+            cost_obj.bands[index] = new CostBand({});
             error_bands_container.append(
                 report_utils.cost_band(cost_obj.bands[index], index));
             index++;
@@ -1286,6 +1293,6 @@ report_utils.initialize_cost = function(){
         var first_cost = costs[0];
         cost = new Cost(first_cost);
     } else {
-        cost = new Cost();
+        cost = new Cost({});
     }
 }
