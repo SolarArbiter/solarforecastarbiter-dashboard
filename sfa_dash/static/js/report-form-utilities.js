@@ -528,7 +528,7 @@ report_utils.restore_prev_value = function(the_node){
  */
 class TimeOfDayCost{
     constructor({times=[], costs=[], aggregation='sum', net=false,
-                fill='forward'}
+                fill='forward'} = {}
     ){
         this.times = times;
         this.cost = costs;
@@ -540,7 +540,7 @@ class TimeOfDayCost{
 }
 class DatetimeCost{
     constructor({datetimes=[], cost=[], aggregation='sum', net=false,
-                fill='forward', timezone= null}
+                fill='forward', timezone= null} = {}
     ){
         this.datetimes = datetimes;
         this.cost = cost;
@@ -556,7 +556,7 @@ class DatetimeCost{
 
 }
 class ConstantCost{
-    constructor({cost= 0.0, aggregation='sum', net=false}){
+    constructor({cost= 0.0, aggregation='sum', net=false} = {}){
         this.cost = cost;
         this.aggregation = aggregation;
         this.net = net;
@@ -568,12 +568,12 @@ class CostBand{
         error_range=[-Infinity, Infinity],
         cost_function='timeofday',
         parameters=null
-    }){
+    } = {}){
         this.error_range = error_range;
         this.cost_function = cost_function;
         var param_class = report_utils.get_cost_class(cost_function);
         if (parameters == null){
-            this.parameters = new param_class({});
+            this.parameters = new param_class();
         } else {
             this.parameters = new param_class(prameters);
         }
@@ -582,17 +582,17 @@ class CostBand{
 }
 class ErrorBandCost{
     // bands: array of CostBand
-    constructor({bands= []}){
+    constructor({bands = []} = {}){
         this.bands = bands.map(x => new CostBand(x));
     }
 }
 class Cost{
-    constructor({name=null, type='timeofday', parameters=null}){
+    constructor({name=null, type='timeofday', parameters=null} = {}){
         this.name = name;
         this.type = type;
         var param_class = report_utils.get_cost_class(type);
         if (!parameters){
-            this.parameters = new param_class({});
+            this.parameters = new param_class();
         } else {
             this.parameters = new param_class(parameters);
         }
@@ -1053,7 +1053,7 @@ report_utils.cost_band = function(cost_obj, index=null){
         <label for="errorband-dt-select">Time of Day</label>`);
     tod_band_radio.change(function(){
         if (!(cost_obj.parameters instanceof TimeOfDayCost)){
-            cost_obj.parameters = new TimeOfDayCost({});
+            cost_obj.parameters = new TimeOfDayCost();
         }
         param_container.empty();
         param_container.html(
@@ -1069,7 +1069,7 @@ report_utils.cost_band = function(cost_obj, index=null){
         <label for="errorband-dt-select">Datetime</label>`);
     dt_band_radio.change(function(){
         if (!(cost_obj.parameters instanceof DatetimeCost)){
-            cost_obj.parameters = new DatetimeCost({});
+            cost_obj.parameters = new DatetimeCost();
         }
         param_container.empty();
         param_container.html(
@@ -1085,7 +1085,7 @@ report_utils.cost_band = function(cost_obj, index=null){
         <label for="errorband-dt-select">Constant</label>`);
     constant_band_radio.change(function(){
         if (!(cost_obj.parameters instanceof ConstantCost)){
-            cost_obj.parameters = new ConstantCost({});
+            cost_obj.parameters = new ConstantCost();
         }
         param_container.empty();
         param_container.html(
@@ -1176,14 +1176,14 @@ report_utils.errorband_cost = function(cost_obj){
         .addClass('btn btn-primary btn-sm')
         .html('Add Error Band')
         .click(function(){
-            cost_obj.bands[index] = new CostBand({});
+            cost_obj.bands[index] = new CostBand();
             error_bands_container.append(
                 report_utils.cost_band(cost_obj.bands[index], index));
             index++;
             $('.error-band-container.alert-warning').remove();
         });
-    the_div.append(add_band_button);
     the_div.append($('<br><label>Error Bands:</label><br>'));
+    the_div.append(add_band_button);
     error_bands_container.append(
         $(`<div class="error-band-container alert-warning">
           No error bands</div>`));
@@ -1293,6 +1293,6 @@ report_utils.initialize_cost = function(){
         var first_cost = costs[0];
         cost = new Cost(first_cost);
     } else {
-        cost = new Cost({});
+        cost = new Cost();
     }
 }
