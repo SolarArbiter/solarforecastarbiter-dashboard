@@ -362,7 +362,7 @@ class AggregateConverter(FormConverter):
 
 class ReportConverter(FormConverter):
     @classmethod
-    def zip_object_pairs(cls, form_data, cost_name):
+    def zip_object_pairs(cls, form_data, cost_name=None):
         """Create a list of object pair dictionaries containing a
         forecast and either an observation or aggregate.
         """
@@ -554,10 +554,16 @@ class ReportConverter(FormConverter):
     def formdata_to_payload(cls, form_dict):
         report_params = {}
         report_params['name'] = form_dict['name']
+
         costs = cls.parse_form_costs(form_dict)
         report_params['costs'] = costs
+
+        if len(costs) > 0:
+            cost_name = costs[0]['name']
+        else:
+            cost_name = None
         report_params['object_pairs'] = cls.zip_object_pairs(
-            form_dict, costs[0]['name'])
+            form_dict, cost_name)
         report_params['metrics'] = form_dict.getlist('metrics')
         report_params['categories'] = form_dict.getlist('categories')
         report_params['filters'] = cls.parse_form_filters(form_dict)

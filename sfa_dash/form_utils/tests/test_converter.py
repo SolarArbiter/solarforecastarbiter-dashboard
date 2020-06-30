@@ -381,7 +381,8 @@ def test_report_converter_formdata_to_payload(report):
     assert params['filters'] == expected['filters']
     assert pd.Timestamp(params['start']) == pd.Timestamp(expected['start'])
     assert pd.Timestamp(params['end']) == pd.Timestamp(expected['end'])
-    assert params['object_pairs'] == expected['object_pairs']
+    assert params['object_pairs'] == [{'cost': None, **pair}
+                                      for pair in expected['object_pairs']]
     assert params['name'] == expected['name']
 
 
@@ -400,6 +401,15 @@ def test_report_converter_payload_to_formdata(report):
         'reference_forecast': None,
         'uncertainty': None,
         'forecast_type': 'forecast',
+    }]
+    assert form_data['costs'] == [{
+        'name': 'example cost',
+        'type': 'constant',
+        'parameters': {
+            'cost': 1.1,
+            'aggregation': 'sum',
+            'net': False,
+        }
     }]
 
 
