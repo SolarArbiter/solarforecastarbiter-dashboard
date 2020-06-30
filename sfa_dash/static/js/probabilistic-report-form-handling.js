@@ -914,5 +914,4 @@ $(document).ready(function() {
     unpack_constant_values();
     report_utils.fill_existing_pairs();
     report_utils.register_uncertainty_handler('#observation-select');
-    report_utils.insert_cost_widget();
 });

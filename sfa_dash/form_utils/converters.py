@@ -566,7 +566,6 @@ class ReportConverter(FormConverter):
         report_dict = {'report_parameters': report_params}
         if len(costs) > 0:
             cost_name = costs[0]['name']
-            report_params['metrics'].append('cost')
         else:
             cost_name = None
         for pair in report_params['object_pairs']:

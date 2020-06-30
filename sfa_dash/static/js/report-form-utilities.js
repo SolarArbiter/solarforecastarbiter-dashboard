@@ -640,7 +640,7 @@ report_utils.many_costs_field = function(the_div, cost_obj, index=null){
     var costs_field = $('<input>')
         .attr('name', report_utils.suffix_name('cost-costs', index))
         .attr('type', 'text')
-        .attr('value', cost_obj.cost.map(x => x.toFixed(2).join(', ')))
+        .attr('value', cost_obj.cost.map(x => x.toFixed(2)).join(', '))
         .attr('placeholder', '1.0, 1.2, 1.5')
         .addClass('form-control');
     the_div.append($('<br/><label>Costs: </label>'));
@@ -900,6 +900,10 @@ report_utils.timeofday_cost = function(cost_obj, index=null){
 
     var fill_field = report_utils.cost_fill_field(the_div, cost_obj, index);
     fill_field.change(function(){cost_obj.fill = this.value});
+
+    var timezone_field = report_utils.cost_timezone_field(
+        the_div, cost_obj, index);
+    timezone_field.change(function(){cost_obj.timezone = this.value});
 
     return the_div
 }
