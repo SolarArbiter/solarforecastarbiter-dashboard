@@ -413,3 +413,51 @@ def test_report_converter_payload_to_formdata_defaults(report):
     assert form_data['metrics'] == []
     assert form_data['categories'] == []
     assert form_data['quality_flags'] == []
+
+
+def test_report_converter_formdata_to_payload_costs(report):
+    form_data = ImmutableMultiDict([
+        ('name', 'NREL MIDC OASIS GHI Forecast Analysis'),
+        ('period-start', '2019-04-01T07:00Z'),
+        ('period-end', '2019-06-01T06:59Z'),
+        ('forecast-id-0', '11c20780-76ae-4b11-bef1-7a75bdc784e3'),
+        ('truth-id-0', '123e4567-e89b-12d3-a456-426655440000'),
+        ('truth-type-0', 'observation'),
+        ('reference-forecast-0', 'null'),
+        ('deadband-value-0', 'null'),
+        ('forecast-type-0', 'forecast'),
+        ('observation-aggregate-radio', 'observation'),
+        ('site-select', '123e4567-e89b-12d3-a456-426655440001'),
+        ('forecast-select', '11c20780-76ae-4b11-bef1-7a75bdc784e3'),
+        ('observation-select', '123e4567-e89b-12d3-a456-426655440000'),
+        ('deadband-select', 'null'),
+        ('deadband-value', ''),
+        ('metrics', 'mae'),
+        ('metrics', 'rmse'),
+        ('categories', 'total'),
+        ('categories', 'date'),
+        ('quality_flags', 'USER FLAGGED'),
+        ('master-cost-type', 'timeofday'),
+        ('master-cost-name', 'this is a cost'),
+        ('cost-times', '06:00,18:00'),
+        ('cost-net', False),
+        ('cost-costs', '1.5,3.0'),
+        ('cost-aggregation', 'sum'),
+        ('cost-fill', 'forward'),
+        ('_csrf_token', '8a0771df3643d252cbafe4838263dbf7097f4982')]
+    )
+    api_payload = converters.ReportConverter.formdata_to_payload(form_data)
+    params = api_payload['report_parameters']
+    assert params['costs'] == [{
+        'name': 'this is a cost',
+        'type': 'timeofday',
+        'parameters': {
+            'times': ['06:00', '18:00'],
+            'cost': [1.5, 3.0],
+            'aggregation': 'sum',
+            'fill': 'forward',
+            'net': False
+        }
+    }]
+    for object_pair in params['object_pairs']:
+        assert object_pair['cost'] == 'this is a cost'

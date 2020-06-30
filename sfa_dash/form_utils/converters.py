@@ -362,7 +362,7 @@ class AggregateConverter(FormConverter):
 
 class ReportConverter(FormConverter):
     @classmethod
-    def zip_object_pairs(cls, form_data):
+    def zip_object_pairs(cls, form_data, cost_name):
         """Create a list of object pair dictionaries containing a
         forecast and either an observation or aggregate.
         """
@@ -386,7 +386,8 @@ class ReportConverter(FormConverter):
                   truth_types[i]: truth_ids[i],
                   'reference_forecast': reference_forecasts[i],
                   'uncertainty': uncertainty_values[i],
-                  'forecast_type': forecast_types[i]}
+                  'forecast_type': forecast_types[i],
+                  'cost': cost_name}
                  for i, f in enumerate(fx)]
         return pairs
 
@@ -399,6 +400,113 @@ class ReportConverter(FormConverter):
         return {
             'quality_flags': quality_flags
         }
+
+    @classmethod
+    def extract_tods(cls, value):
+        """Parses time of day values from a csv string"""
+        return value.split(',')
+
+    @classmethod
+    def extract_datetimes(cls, value):
+        return value.split(',')
+
+    @classmethod
+    def extract_many_costs(cls, value):
+        costs = value.split(',')
+        costs = [float(cost) for cost in costs]
+        return costs
+
+    @classmethod
+    def parse_form_constant_cost(cls, form_data, index=None):
+        if index is not None:
+            suffix = f'-{index}'
+        else:
+            suffix = ''
+        cost = form_data[f'cost-value{suffix}']
+        aggregation = form_data[f'cost-aggregation{suffix}']
+        net = form_data.get(f'cost-net{suffix}', False)
+        return {
+            'cost': cost,
+            'aggregation': aggregation,
+            'net': net,
+        }
+
+    @classmethod
+    def parse_form_datetime_cost(cls, form_data, index=None):
+        if index is not None:
+            suffix = f'-{index}'
+        else:
+            suffix = ''
+        datetimes = cls.extract_datetimes(form_data[f'cost-datetimes{suffix}'])
+        costs = cls.extract_many_costs(form_data[f'cost-costs{suffix}'])
+        aggregation = form_data[f'cost-aggregation{suffix}']
+        fill = form_data[f'cost-fill{suffix}']
+        net = form_data.get(f'cost-net{suffix}', False)
+        timezone = form_data[f'timezone{suffix}']
+        return {
+            'datetimes': datetimes,
+            'cost': costs,
+            'aggregation': aggregation,
+            'fill': fill,
+            'net': net,
+            'timezone': timezone,
+        }
+
+    @classmethod
+    def parse_form_tod_cost(cls, form_data, index=None):
+        if index is not None:
+            suffix = f'-{index}'
+        else:
+            suffix = ''
+        times = cls.extract_tods(form_data[f'cost-times{suffix}'])
+        costs = cls.extract_many_costs(form_data[f'cost-costs{suffix}'])
+        aggregation = form_data[f'cost-aggregation{suffix}']
+        fill = form_data[f'cost-fill{suffix}']
+        net = form_data.get(f'cost-net{suffix}', False)
+        return {
+            'times': times,
+            'cost': costs,
+            'aggregation': aggregation,
+            'fill': fill,
+            'net': net,
+        }
+
+    @classmethod
+    def parse_form_errorband_cost(cls, form_data, index=None):
+        pass
+
+    @classmethod
+    def get_form_cost_parser(cls, cost_type):
+        if cost_type == 'timeofday':
+            return cls.parse_form_tod_cost
+        elif cost_type == 'datetime':
+            return cls.parse_form_datetime_cost
+        elif cost_type == 'constant':
+            return cls.parse_form_constant_cost
+        elif cost_type == 'errorband':
+            return cls.parse_form_errorband_cost
+        else:
+            raise ValueError('Invalid cost_type')
+
+    @classmethod
+    def parse_form_costs(cls, form_data):
+        """Parses costs from form data into an api-conforming dictionary.
+        """
+        cost_name = form_data.get('master-cost-name')
+
+        # Check for existence of cost name before trying to parse the rest,
+        # as cost is an optional attribute.
+        if cost_name is not None:
+            cost_type = form_data['master-cost-type']
+            parameter_parser = cls.get_form_cost_parser(cost_type)
+            cost_parameters = parameter_parser(form_data)
+            return [{
+                'name': cost_name,
+                'type': cost_type,
+                'parameters': cost_parameters,
+            }]
+        else:
+            return []
 
     @classmethod
     def parse_form_filters(cls, form_data):
@@ -428,7 +536,10 @@ class ReportConverter(FormConverter):
     def formdata_to_payload(cls, form_dict):
         report_params = {}
         report_params['name'] = form_dict['name']
-        report_params['object_pairs'] = cls.zip_object_pairs(form_dict)
+        costs = cls.parse_form_costs(form_dict)
+        report_params['costs'] = costs
+        report_params['object_pairs'] = cls.zip_object_pairs(
+            form_dict, costs[0]['name'])
         report_params['metrics'] = form_dict.getlist('metrics')
         report_params['categories'] = form_dict.getlist('categories')
         report_params['filters'] = cls.parse_form_filters(form_dict)

@@ -9,6 +9,7 @@ report_utils = new Object();
 previous_observation = null;
 previous_reference_forecast = null;
 
+
 report_utils.fill_existing_pairs = function(){
     /*
      * Fill object pairs found in the form_data global var.
@@ -263,7 +264,7 @@ report_utils.validateReport = function(){
 
     // assert at least one pair was selected.
     if ($('.object-pair').length == 0){
-        insertErrorMessage(
+        report_utils.insertErrorMessage(
             "Analysis Pairs",
             "Must specify at least one Observation, Forecast pair.");
         errors++;
@@ -272,7 +273,10 @@ report_utils.validateReport = function(){
         return false;
     }
 }
-
+report_utils.validateDatetime = function(dt_string){
+    let iso_re = /(\d{4})-?(\d{2})-?(\d{2})T(\d{2})\:?(\d{2})\Z/;
+    return dt_string.match(iso_re);
+}
 report_utils.registerDatetimeValidator = function(input_name){
     /*
      * Applies a regex validator to ensure ISO8601 compliance. This is however, very strict. We
@@ -282,12 +286,13 @@ report_utils.registerDatetimeValidator = function(input_name){
      *                              validation.
      */
     $(`[name="${input_name}"]`).keyup(function (){
-        if($(`[name="${input_name}"]`).val().match(
-              /(\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\Z/
-        )) {
+        if(report_utils.validateDatetime($(`[name="${input_name}"]`).val())) {
               $(`[name="${input_name}"]`)[0].setCustomValidity("");
         } else {
-              $(`[name="${input_name}"]`)[0].setCustomValidity('Please enter a datetime in the format "YYYY-MM-DDTHH:MMZ');
+              $(`[name="${input_name}"]`)[0].setCustomValidity(
+                  'Please enter a datetime in ISO 8601 format with timezone ' +
+                  'Z and no units smaller than minutes, e.g ' +
+                  '"2020-01-01T12:00Z');
         }
     });
 }
@@ -520,7 +525,7 @@ class TimeOfDayCost{
                 fill='forward'
     ){
         this.times = times;
-        this.costs = costs;
+        this.cost = costs;
         this.aggregation = aggregation;
         this.net = net;
         this.fill = fill
@@ -532,12 +537,12 @@ class DatetimeCost{
                 fill='forward', timezone=null
     ){
         this.datetimes = datetimes;
-        this.costs = costs;
+        this.cost = costs;
         this.aggregation = aggregation;
         this.net = net;
         this.fill = fill;
         if (!timezone){
-            this.timezone = Object.keys(sfa_dash_config['TIMEZONES'])[0];
+            this.timezone = 'GMT';
         } else {
             this.timezone = timezone;
         }
@@ -591,9 +596,11 @@ class Cost{
         }
     }
 }
+
 report_utils.suffix_name = function(the_name, index){
     return (index ? the_name + `-{index}` : the_name);
 }
+
 report_utils.many_costs_field = function(the_div, cost_obj, index=null){
     /*  Inserts a costs field expecting input to be comma separated list
      *  of float costs.
@@ -614,11 +621,14 @@ report_utils.many_costs_field = function(the_div, cost_obj, index=null){
     var costs_field = $('<input>')
         .attr('name', report_utils.suffix_name('cost-costs', index))
         .attr('type', 'text')
-        .attr('value', cost_obj.costs.map(x => x.toFixed(2).join(', ')));
+        .attr('value', cost_obj.cost.map(x => x.toFixed(2).join(', ')))
+        .attr('placeholder', '1.0, 1.2, 1.5')
+        .addClass('form-control');
     the_div.append($('<br/><label>Costs: </label>'));
     the_div.append(costs_field);
     return costs_field;
 }
+
 report_utils.cost_aggregation_field = function(the_div, cost_obj, index=null){
     /*  Inserts an aggregation field with options "sum" and "mean".
      *
@@ -654,6 +664,7 @@ report_utils.cost_aggregation_field = function(the_div, cost_obj, index=null){
     the_div.append(agg_field_mean);
     return the_div.find(`[name=${agg_input_name}]`);
 }
+
 report_utils.cost_net_field = function(the_div, cost_obj, index=null){
     /*  Inserts a boolean net field.
      *
@@ -672,13 +683,14 @@ report_utils.cost_net_field = function(the_div, cost_obj, index=null){
      */
 
     var net_field = $(`<input type="checkbox"
-            id="${report_utils.suffix_name('net', index)}"
-            name="${report_utils.suffix_name('net', index)}"
+            id="${report_utils.suffix_name('cost-net', index)}"
+            name="${report_utils.suffix_name('cost-net', index)}"
             ${cost_obj.net ? 'checked' : ''}>`);
     the_div.append($('<br/><label>Net: </label>'));
     the_div.append(net_field);
     return net_field;
 }
+
 report_utils.cost_fill_field = function(the_div, cost_obj, index=null){
     /*  Inserts a fill field with radio buttons and options forward/backward.
      *
@@ -695,7 +707,6 @@ report_utils.cost_fill_field = function(the_div, cost_obj, index=null){
      *      Handle to the jQuery object so that the caller can register any
      *      custom callbacks.
      */
-
     var fill_field_name = report_utils.suffix_name('cost-fill', index);
     var fill_field_forward = $(`<input
             type="radio"
@@ -716,16 +727,147 @@ report_utils.cost_fill_field = function(the_div, cost_obj, index=null){
     the_div.append(fill_field_backward);
     return the_div.find(`[name=${fill_field_name}]`);
 }
+
+report_utils.cost_timezone_field = function(the_div, cost_obj, index=null){
+    /*  Inserts a timezone field populated with options from the
+     *  sfa_dash_config TIMEZONES config.
+     *
+     *  @param {Jquery} the_div
+     *      Div to insert field into.
+     *  @param {Object} cost_obj
+     *      Cost object with existing timezone field.
+     *  @param {int} index
+     *      Integer index used to identify index of the field, for use when
+     *      the timezone field defines a value for one of the bands in an
+     *      ErrorBandCost.
+     *
+     *  @returns {Jquery}
+     *      Handle to the jQuery object so that the caller can register any
+     *      custom callbacks.
+     */
+    var tz_select = $('<select>')
+        .attr('name', report_utils.suffix_name('cost-timezone', index))
+        .addClass('form-control unset-width');
+    var selected_tz = cost_obj.timezone;
+
+    // populate the timezone options from config
+    Object.entries(sfa_dash_config.TIMEZONES).forEach(tz => tz_select.append(
+        $('<option>')
+            .attr('value', tz[0])
+            .html(tz[1])
+            .prop('selected', tz[1] == selected_tz)
+    ));
+    the_div.append($('<br/><label>Timezone: </label>'));
+    the_div.append(tz_select);
+    return tz_select;
+}
+
 report_utils.timeofday_cost = function(cost_obj, index=null){
     var the_div = $('<div>');
     var times_field = $('<input>')
         .attr('name', report_utils.suffix_name('cost-times', index))
         .attr('type', 'text')
-        .attr('value', cost_obj.times.join(', '));
+        .attr('value', cost_obj.times.join(', '))
+        .attr('placeholder', '00:00, 06:00, 18:00')
+        .addClass('form-control');
     the_div.append($('<label>Times: </label>'));
     the_div.append(times_field);
 
     var costs_field = report_utils.many_costs_field(the_div, cost_obj, index);
+
+    // register change handlers to enforce same length times and costs, and
+    // validate inputs.
+    times_field.change(function(){
+        var times = this.value.split(',');
+        var errors = [];
+        var invalid_indices = [];
+
+        cost_obj.times = [];
+
+        times.forEach(function(tod, idx){
+            function validate_tod(tod){
+                let re = /\d{1,2}:\d{2}/;
+                if(tod.match(re)){
+                    let components = tod.split(':');
+                    let hours = parseInt(components[0]);
+                    if (hours > 23 || hours < 0){
+                        return false;
+                    }
+                    let minutes = parseInt(components[1]);
+                    if (minutes > 59 || minutes < 0){
+                        return false;
+                    }
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            if (!validate_tod(tod)){
+                invalid_indices.push(idx);
+            } else {
+                cost_obj.times[idx] = tod;
+            }
+        });
+        if (invalid_indices.length){
+            errors.push(
+                `Value ${invalid_indices.join(',')} are not valid time of day
+                values. Please use HH:MM format, separated by commas.`);
+        }
+        if (times.length != cost_obj.cost.length){
+            errors.push('Times and costs must be of equal length.');
+        }
+        if (errors.length > 0){
+            this.setCustomValidity(errors.join('\n'));
+        } else {
+            this.setCustomValidity('');
+            // check if the costs field is valid, and double check now that
+            // the fields are the same length
+            let costs_field = $(
+                `[name=${report_utils.suffix_name('cost-costs', index)}]`);
+            if (!costs_field[0].checkValidity()){
+                costs_field.change();
+            }
+        }
+        this.reportValidity();
+    });
+    costs_field.change(function(){
+        var costs = this.value.split(',');
+        var errors = [];
+        var invalid_indices = [];
+
+        cost_obj.cost = [];
+
+        costs.forEach(function(cost, idx){
+            if (!parseFloat(cost)){
+                invalid_indices.push(idx+1);
+            } else {
+                cost_obj.cost[idx] = parseFloat(cost);
+            }
+        });
+
+        if(invalid_indices.length){
+            errors.push(`Values ${invalid_indices.join(',')} are not valid
+                        costs. Please provide float values separated by
+                        commas.`);
+        }
+        if (costs.length != cost_obj.times.length){
+            errors.push('Costs and times must be of equal length.');
+        }
+        if (errors.length > 0){
+            this.setCustomValidity(errors.join('\n'));
+        } else {
+            this.setCustomValidity('');
+            // check if the timess field is valid, and double check now that
+            // the fields are the same length
+            let times_field = $(
+                `[name=${report_utils.suffix_name('cost-times', index)}]`);
+            if (!times_field[0].checkValidity()){
+                times_field.change();
+            }
+        }
+        this.reportValidity();
+    });
+
     var agg_field = report_utils.cost_aggregation_field(the_div, cost_obj, index);
     var net_field = report_utils.cost_net_field(the_div, cost_obj, index);
     var fill_field = report_utils.cost_fill_field(the_div, cost_obj, index);
@@ -736,21 +878,95 @@ report_utils.datetime_cost = function(cost_obj, index=null){
     var datetimes_field = $('<input>')
         .attr('name', report_utils.suffix_name('cost-datetimes', index))
         .attr('type', 'text')
-        .attr('value', cost_obj.datetimes.join(', '));
+        .attr('value', cost_obj.datetimes.join(', '))
+        .attr('placeholder', '2020-01-01T00:00Z, 2020-01-02T06:00Z, 2020-01-03T00:00Z')
+        .addClass('form-control');
     the_div.append($('<label>Datetimes: </label>'));
     the_div.append(datetimes_field);
-    var costs_field = $('<input>')
-        .attr('name', report_utils.suffix_name('cost-costs', index))
-        .attr('type', 'text')
-        .attr('value', cost_obj.costs.map(x => x.toFixed(2).join(', ')));
-    the_div.append($('<br/><label>Costs: </label>'));
-    the_div.append(costs_field);
+    var costs_field = report_utils.many_costs_field(the_div, cost_obj, index);
 
-    var agg_field = report_utils.cost_aggregation_field(the_div, cost_obj, index);
+    datetimes_field.change(function(){
+        var datetimes = this.value.split(',');
+        var errors = [];
+        var invalid_indices = [];
+
+        cost_obj.datetimes = [];
+
+        datetimes.forEach(function(dt, idx){
+            if (!report_utils.validateDatetime(dt)){
+                invalid_indices.push(idx);
+            } else {
+                cost_obj.datetimes[idx] = dt;
+            }
+        });
+        if (invalid_indices.length){
+            errors.push(
+                `Value ${invalid_indices.join(',')} are not valid datetime
+                values. Please use ISO 8601 format with timezone Z and no
+                units smaller than minutes, separated by commas.`);
+        }
+        if (datetimes.length != cost_obj.cost.length){
+            errors.push('Datetimes and costs must be of equal length.');
+        }
+        if (errors.length > 0){
+            this.setCustomValidity(errors.join('\n'));
+        } else {
+            this.setCustomValidity('');
+            // check if the costs field is valid, and double check now that
+            // the fields are the same length
+            let costs_field = $(
+                `[name=${report_utils.suffix_name('cost-costs', index)}]`);
+            if (!costs_field[0].checkValidity()){
+                costs_field.change();
+            }
+        }
+        this.reportValidity();
+    });
+    costs_field.change(function(){
+        var costs = this.value.split(',');
+        var errors = [];
+        var invalid_indices = [];
+
+        cost_obj.cost = [];
+
+        costs.forEach(function(cost, idx){
+            if (!parseFloat(cost)){
+                invalid_indices.push(idx+1);
+            } else {
+                cost_obj.cost[idx] = parseFloat(cost);
+            }
+        });
+
+        if(invalid_indices.length){
+            errors.push(`Values ${invalid_indices.join(',')} are not valid
+                        costs. Please provide float values separated by
+                        commas.`);
+        }
+        if (costs.length != cost_obj.datetimes.length){
+            errors.push('Costs and times must be of equal length.');
+        }
+        if (errors.length > 0){
+            this.setCustomValidity(errors.join('\n'));
+        } else {
+            this.setCustomValidity('');
+            // check if the datetimes field is valid, and rerun validation
+            // now that the fields are the same length
+            // TODO: FIX INFINITE RECURSION
+           let datetimes_field = $(
+                `[name=${report_utils.suffix_name("cost-datetimes", index)}]`);
+            if(!datetimes_field[0].checkValidity()){
+                datetimes_field.change();
+            }
+        }
+        this.reportValidity();
+    });
+
+    var agg_field = report_utils.cost_aggregation_field(
+        the_div, cost_obj, index);
     var net_field = report_utils.cost_net_field(the_div, cost_obj, index);
     var fill_field = report_utils.cost_fill_field(the_div, cost_obj, index);
-
-    //var timezone_field = $('<select>')
+    var timezone_field = report_utils.cost_timezone_field(
+        the_div, cost_obj, index);
     return the_div
 }
 report_utils.constant_cost = function(cost_obj, index=null){
@@ -767,6 +983,7 @@ report_utils.constant_cost = function(cost_obj, index=null){
         .attr('type', 'number')
         .attr('step', 'any')
         .attr('value', cost_obj.cost.toFixed(2))
+        .addClass('form-control unset-width');
 
     the_div.append($('<label>Cost: $</label>'));
     the_div.append(cost_field);
@@ -801,7 +1018,9 @@ report_utils.insert_cost_widget = function(){
     var widget_div = $('<div>')
         .addClass('cost-definition')
         .append('<h5>Cost Parameters</h5>');
-    var timeofday = $('<input id="master-cost-timeofday"type="radio" name="master-cost-type" value="timeofday"><label for="master-cost-timeofday">Time of Day</label>');
+
+    // Create radio buttons for selecting the type of cost
+    var timeofday = $('<input id="master-cost-timeofday" type="radio" name="master-cost-type" value="timeofday"><label for="master-cost-timeofday">Time of Day</label>');
     timeofday.change(function(){
         if (cost.type != this.value){
             cost.parameters = new TimeOfDayCost();
@@ -854,6 +1073,7 @@ report_utils.insert_cost_widget = function(){
      */
     var cost_name = $('<input><br/>')
         .attr('name', 'master-cost-name')
+        .attr('required', true)
         .addClass('form-control name-field')
         .change(function(){
             cost.name = this.value;
@@ -875,4 +1095,9 @@ report_utils.insert_cost_widget = function(){
     primary_cost.find(`[name=master-cost-type][value=${cost.type}]`)
         .prop('checked', true);
     primary_cost.find(`[name=master-cost-type]:checked`).trigger('change');
+}
+
+report_utils.convert_costs = function(costs){
+    /* TODO: build js Cost objects from api schema and set the global cost var
+     */
 }

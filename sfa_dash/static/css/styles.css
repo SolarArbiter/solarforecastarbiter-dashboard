@@ -294,6 +294,9 @@ a.help-button{
   min-width: 250px;
   width: 46%;
 }
+.form-control.unset-width{
+    width: unset;
+}
 .input-wrapper{
   width: calc(100% - 29px);
   display: inline-flex;
