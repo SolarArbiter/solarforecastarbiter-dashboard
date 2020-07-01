@@ -677,3 +677,7 @@ div.report-header{
 .primary-cost-container a[role=button].help-button{
   margin-left: .25em;
 }
+.account-menu{
+    width: 300px;
+    left: calc(-300px + 100%);
+}
