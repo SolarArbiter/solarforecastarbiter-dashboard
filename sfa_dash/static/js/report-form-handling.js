@@ -194,6 +194,7 @@ function createPairSelector(){
             }
             var variable = forecast.data().variable;
             var interval_length = forecast.data().intervalLength;
+            var interval_label = forecast.data().intervalLabel;
 
             // hide the "please select forecast" prompt"
             $('#no-reference-forecast-forecast-selection').attr('hidden', true);
@@ -219,11 +220,18 @@ function createPairSelector(){
             }
             // Filter out reference forecasts that don't have the same
             // interval length
-            mismatched_intervals = reference_forecasts.filter(function(){
+            var mismatched_intervals = reference_forecasts.filter(function(){
                 return $(this).data().intervalLength != interval_length ||
                     $(this).attr('value') == forecast_select.val();
             });
             toHide = toHide.add(mismatched_intervals);
+
+            var mismatched_labels = reference_forecasts.filter(function(){
+                console.log($(this).data().intervalLabel,' ', interval_label);
+                return $(this).data().inervalLabel != interval_label ||
+                    $(this).attr('value') == forecast_select.val();
+            });
+            toHide = toHide.add(mismatched_labels);
         }else{
             // No forecast was selected, hide all reference forecasts
             // and display a message.
@@ -437,6 +445,7 @@ function createPairSelector(){
                 .attr('data-site-id', this.site_id)
                 .attr('data-aggregate-id', this.aggregate_id)
                 .attr('data-interval-length', this.interval_length)
+                .attr('data-interval-label', this.interval_label)
                 .attr('data-variable', this.variable));
     });
     $.each(nonevent_forecasts, function(){
@@ -447,6 +456,7 @@ function createPairSelector(){
                 .attr('data-site-id', this.site_id)
                 .attr('data-aggregate-id', this.aggregate_id)
                 .attr('data-interval-length', this.interval_length)
+                .attr('data-interval-label', this.interval_label)
                 .attr('data-variable', this.variable));
     });
     $.each(page_data['aggregates'], function(){
