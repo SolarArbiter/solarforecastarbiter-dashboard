@@ -547,10 +547,10 @@ class DatetimeCost{
         this.aggregation = aggregation;
         this.net = net;
         this.fill = fill;
-        if (!timezone){
-            this.timezone = 'GMT';
-        } else {
+        if (timezone){
             this.timezone = timezone;
+        } else {
+            this.timezone = null;
         }
     }
 
@@ -769,6 +769,10 @@ report_utils.cost_timezone_field = function(the_div, cost_obj, index=null){
         .addClass('form-control unset-width');
     var selected_tz = cost_obj.timezone;
 
+    tz_select.append($('<option>')
+        .attr('value', null)
+        .html('None')
+        .prop('selected', selected_tz == null));
     // populate the timezone options from config
     Object.entries(sfa_dash_config.TIMEZONES).forEach(tz => tz_select.append(
         $('<option>')
@@ -927,7 +931,7 @@ report_utils.datetime_cost = function(cost_obj, index=null){
         cost_obj.datetimes = [];
 
         datetimes.forEach(function(dt, idx){
-            if (!report_utils.validateDatetime(dt, false)){
+            if (!report_utils.validateDatetime(dt)){
                 invalid_indices.push(idx);
             } else {
                 cost_obj.datetimes[idx] = dt;
@@ -935,9 +939,10 @@ report_utils.datetime_cost = function(cost_obj, index=null){
         });
         if (invalid_indices.length){
             errors.push(
-                `Value ${invalid_indices.join(',')} are not valid datetime
-                values. Please use ISO 8601 format withno units smaller than
-                minutes, separated by commas.`);
+                `Value ${invalid_indices.join(',')} are not valid UTC datetime
+                values. Please use ISO 8601 format with a timezone of 'Z' or
+                '+00:00' offset and no units smaller than minutes, separated
+                by commas.`);
         }
         if (datetimes.length != cost_obj.cost.length){
             errors.push('Datetimes and costs must be of equal length.');
@@ -1050,11 +1055,11 @@ report_utils.cost_band = function(cost_obj, index=null){
         .addClass('error-band-params-container');
     var tod_band_radio = $(`<input
         type="radio"
-        id="tod-dt-select"
+        id="errorband-tod-select"
         name="${report_utils.suffix_name('cost-band-cost-function', index)}"
         value="timeofday"
-        ${cost_obj.cost_function == 'timeofday' ? 'checked' : ''}
-        <label for="errorband-dt-select">Time of Day</label>`);
+        ${cost_obj.cost_function == 'timeofday' ? 'checked' : ''}>
+        <label>Time of Day</label>`);
     tod_band_radio.change(function(){
         if (!(cost_obj.parameters instanceof TimeOfDayCost)){
             cost_obj.parameters = new TimeOfDayCost();
@@ -1070,7 +1075,7 @@ report_utils.cost_band = function(cost_obj, index=null){
         name="${report_utils.suffix_name('cost-band-cost-function', index)}"
         value="datetime"
         ${cost_obj.cost_function == 'datetime' ? 'checked' : ''}>
-        <label for="errorband-dt-select">Datetime</label>`);
+        <label>Datetime</label>`);
     dt_band_radio.change(function(){
         if (!(cost_obj.parameters instanceof DatetimeCost)){
             cost_obj.parameters = new DatetimeCost();
@@ -1082,11 +1087,11 @@ report_utils.cost_band = function(cost_obj, index=null){
     });
     var constant_band_radio = $(`<input
         type="radio"
-        id="constant-dt-select"
+        id="errorband-constant-select"
         name="${report_utils.suffix_name('cost-band-cost-function', index)}"
         value="constant"
         ${cost_obj.cost_function == 'constant' ? 'checked' : ''}>
-        <label for="errorband-dt-select">Constant</label>`);
+        <label>Constant</label>`);
     constant_band_radio.change(function(){
         if (!(cost_obj.parameters instanceof ConstantCost)){
             cost_obj.parameters = new ConstantCost();
@@ -1209,7 +1214,7 @@ report_utils.insert_cost_widget = function(){
         .addClass('cost-definition');
 
     // Create radio buttons for selecting the type of cost
-    var timeofday = $('<input id="master-cost-timeofday" type="radio" name="master-cost-type" value="timeofday"><label for="master-cost-timeofday">Time of Day&nbsp;</label>');
+    var timeofday = $('<input id="master-cost-timeofday" type="radio" name="cost-primary-type" value="timeofday"><label>Time of Day</label>');
     timeofday.change(function(){
         if (cost.type != this.value){
             cost.parameters = new TimeOfDayCost();
@@ -1220,7 +1225,7 @@ report_utils.insert_cost_widget = function(){
         );
     });
 
-    var datetime = $('<input  id="master-cost-datetime"type="radio" name="master-cost-type" value="datetime"><label for="master-cost-datetime">Datetime&nbsp;</label>');
+    var datetime = $('<input  id="master-cost-datetime"type="radio" name="cost-primary-type" value="datetime"><label>Datetime</label>');
     datetime.change(function(){
         if (cost.type != this.value){
            cost.parameters = new DatetimeCost();
@@ -1231,7 +1236,7 @@ report_utils.insert_cost_widget = function(){
         );
     });
 
-    var constant = $('<input  id="master-cost-constant"type="radio" name="master-cost-type" value="constant"><label for="master-cost-constant">Constant&nbsp;</label>');
+    var constant = $('<input  id="master-cost-constant"type="radio" name="cost-primary-type" value="constant"><label>Constant</label>');
     constant.change(function(){
      if (cost.type != this.value){
             cost.parameters = new ConstantCost();
@@ -1242,7 +1247,7 @@ report_utils.insert_cost_widget = function(){
         );
     });
 
-    var errorband = $('<input id="master-cost-errorband"type="radio" name="master-cost-type" value="errorband"><label for="master-cost-errorband">Error Band&nbsp;</label>');
+    var errorband = $('<input id="master-cost-errorband"type="radio" name="cost-primary-type" value="errorband"><label>Error Band</label>');
     errorband.change(function(){
         if (cost.type != this.value){
             cost.parameters = new ErrorBandCost();
@@ -1258,7 +1263,7 @@ report_utils.insert_cost_widget = function(){
      * inputs used for setting the appropriate attributes.
      */
     var cost_name = $('<input><br/>')
-        .attr('name', 'master-cost-name')
+        .attr('name', 'cost-primary-name')
         .attr('required', true)
         .attr('value', cost.name)
         .addClass('form-control name-field')
@@ -1279,9 +1284,9 @@ report_utils.insert_cost_widget = function(){
 
     $('#cost-container').append(widget_div);
     // if cost has a type value, select it.
-    primary_cost.find(`[name=master-cost-type][value=${cost.type}]`)
+    primary_cost.find(`[name=cost-primary-type][value=${cost.type}]`)
         .prop('checked', true);
-    primary_cost.find(`[name=master-cost-type]:checked`).trigger('change');
+    primary_cost.find(`[name=cost-primary-type]:checked`).trigger('change');
 }
 
 report_utils.initialize_cost = function(){

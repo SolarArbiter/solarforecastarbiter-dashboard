@@ -443,14 +443,16 @@ class ReportConverter(FormConverter):
         fill = form_data[f'cost-fill{suffix}']
         net = form_data.get(f'cost-net{suffix}', False)
         timezone = form_data[f'cost-timezone{suffix}']
-        return {
+        payload = {
             'datetimes': datetimes,
             'cost': costs,
             'aggregation': aggregation,
             'fill': fill,
             'net': net,
-            'timezone': timezone,
         }
+        if timezone is not None:
+            payload.update({'timezone': timezone})
+        return payload
 
     @classmethod
     def parse_form_tod_cost(cls, form_data, index=None):
@@ -464,14 +466,17 @@ class ReportConverter(FormConverter):
         fill = form_data[f'cost-fill{suffix}']
         net = form_data.get(f'cost-net{suffix}', False)
         timezone = form_data[f'cost-timezone{suffix}']
-        return {
+        payload = {
             'times': times,
             'cost': costs,
             'aggregation': aggregation,
             'fill': fill,
             'net': net,
-            'timezone': timezone,
         }
+        if timezone is not None:
+            payload.update({'timezone': timezone})
+        return payload
+
 
     @classmethod
     def parse_form_errorband_cost(cls, form_data, index=None):
@@ -512,12 +517,12 @@ class ReportConverter(FormConverter):
     def parse_form_costs(cls, form_data):
         """Parses costs from form data into an api-conforming dictionary.
         """
-        cost_name = form_data.get('master-cost-name')
+        cost_name = form_data.get('cost-primary-name')
 
         # Check for existence of cost name before trying to parse the rest,
         # as cost is an optional attribute.
         if cost_name is not None:
-            cost_type = form_data['master-cost-type']
+            cost_type = form_data['cost-primary-type']
             parameter_parser = cls.get_form_cost_parser(cost_type)
             cost_parameters = parameter_parser(form_data)
             return [{
