@@ -1209,88 +1209,91 @@ report_utils.insert_cost_widget = function(){
     /* Creates a widget for defining cost metrics. Contains nested functions
      * for defining each type of cost model, for nesting within error band.
      */
-    report_utils.initialize_cost();
-    var widget_div = $('<div>')
-        .addClass('cost-definition');
+    // only create cost widgets if the cost container contains no html
+    if (!$.trim($('#cost-container').html())){
+        report_utils.initialize_cost();
+        var widget_div = $('<div>')
+            .addClass('cost-definition');
 
-    // Create radio buttons for selecting the type of cost
-    var timeofday = $('<input id="master-cost-timeofday" type="radio" name="cost-primary-type" value="timeofday"><label>Time of Day</label>');
-    timeofday.change(function(){
-        if (cost.type != this.value){
-            cost.parameters = new TimeOfDayCost();
-        }
-        cost.type = this.value;
-        $('#primary-cost-fields').html(
-            report_utils.timeofday_cost(cost.parameters)
-        );
-    });
-
-    var datetime = $('<input  id="master-cost-datetime"type="radio" name="cost-primary-type" value="datetime"><label>Datetime</label>');
-    datetime.change(function(){
-        if (cost.type != this.value){
-           cost.parameters = new DatetimeCost();
-        }
-        cost.type = this.value;
-        $('#primary-cost-fields').html(
-            report_utils.datetime_cost(cost.parameters)
-        );
-    });
-
-    var constant = $('<input  id="master-cost-constant"type="radio" name="cost-primary-type" value="constant"><label>Constant</label>');
-    constant.change(function(){
-     if (cost.type != this.value){
-            cost.parameters = new ConstantCost();
-        }
-        cost.type = this.value;
-        $('#primary-cost-fields').html(
-            report_utils.constant_cost(cost.parameters)
-        );
-    });
-
-    var errorband = $('<input id="master-cost-errorband"type="radio" name="cost-primary-type" value="errorband"><label>Error Band</label>');
-    errorband.change(function(){
-        if (cost.type != this.value){
-            cost.parameters = new ErrorBandCost();
-        }
-        cost.type = this.value;
-        $('#primary-cost-fields').html(
-            report_utils.errorband_cost(cost.parameters)
-        );
-    });
-    /*
-     * Container to hold top-level cost options. This allows the user to select
-     * the primary cost type. Adds a '#primary-cost-fields' div for holding the
-     * inputs used for setting the appropriate attributes.
-     */
-    var cost_name = $('<input><br/>')
-        .attr('name', 'cost-primary-name')
-        .attr('required', true)
-        .attr('value', cost.name)
-        .addClass('form-control name-field')
-        .change(function(){
-            cost.name = this.value;
+        // Create radio buttons for selecting the type of cost
+        var timeofday = $('<input id="master-cost-timeofday" type="radio" name="cost-primary-type" value="timeofday"><label>Time of Day</label>');
+        timeofday.change(function(){
+            if (cost.type != this.value){
+                cost.parameters = new TimeOfDayCost();
+            }
+            cost.type = this.value;
+            $('#primary-cost-fields').html(
+                report_utils.timeofday_cost(cost.parameters)
+            );
         });
-    var primary_cost = $('<div>')
-        .addClass('primary-cost-container')
-        .append($('<label>Name</label><br/>'))
-        .append(cost_name)
-        .append(timeofday)
-        .append(datetime)
-        .append(constant)
-        .append(errorband)
-        .append($('<div>')
-            .attr('id','primary-cost-fields'));
-    widget_div.append(primary_cost)
 
-    $('#cost-container').append(widget_div);
-    // if cost has a type value, select it.
-    primary_cost.find(`[name=cost-primary-type][value=${cost.type}]`)
-        .prop('checked', true);
-    primary_cost.find(`[name=cost-primary-type]:checked`).trigger('change');
+        var datetime = $('<input  id="master-cost-datetime"type="radio" name="cost-primary-type" value="datetime"><label>Datetime</label>');
+        datetime.change(function(){
+            if (cost.type != this.value){
+               cost.parameters = new DatetimeCost();
+            }
+            cost.type = this.value;
+            $('#primary-cost-fields').html(
+                report_utils.datetime_cost(cost.parameters)
+            );
+        });
+
+        var constant = $('<input  id="master-cost-constant"type="radio" name="cost-primary-type" value="constant"><label>Constant</label>');
+        constant.change(function(){
+         if (cost.type != this.value){
+                cost.parameters = new ConstantCost();
+            }
+            cost.type = this.value;
+            $('#primary-cost-fields').html(
+                report_utils.constant_cost(cost.parameters)
+            );
+        });
+
+        var errorband = $('<input id="master-cost-errorband"type="radio" name="cost-primary-type" value="errorband"><label>Error Band</label>');
+        errorband.change(function(){
+            if (cost.type != this.value){
+                cost.parameters = new ErrorBandCost();
+            }
+            cost.type = this.value;
+            $('#primary-cost-fields').html(
+                report_utils.errorband_cost(cost.parameters)
+            );
+        });
+        /*
+         * Container to hold top-level cost options. This allows the user to select
+         * the primary cost type. Adds a '#primary-cost-fields' div for holding the
+         * inputs used for setting the appropriate attributes.
+         */
+        var cost_name = $('<input><br/>')
+            .attr('name', 'cost-primary-name')
+            .attr('required', true)
+            .attr('value', cost.name)
+            .addClass('form-control name-field')
+            .change(function(){
+                cost.name = this.value;
+            });
+        var primary_cost = $('<div>')
+            .addClass('primary-cost-container')
+            .append($('<label>Name</label><br/>'))
+            .append(cost_name)
+            .append(timeofday)
+            .append(datetime)
+            .append(constant)
+            .append(errorband)
+            .append($('<div>')
+                .attr('id','primary-cost-fields'));
+        widget_div.append(primary_cost)
+
+        $('#cost-container').append(widget_div);
+        // if cost has a type value, select it.
+        primary_cost.find(`[name=cost-primary-type][value=${cost.type}]`)
+            .prop('checked', true);
+        primary_cost.find(`[name=cost-primary-type]:checked`).trigger('change');
+    }
 }
 
 report_utils.initialize_cost = function(){
-    /* Initialize global cost var from api costs. */
+    /* Initialize global cost var from api costs.*/
     try{
         var costs = form_data['report_parameters']['costs'];
     } catch(error) {

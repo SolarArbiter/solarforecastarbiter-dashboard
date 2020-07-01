@@ -666,3 +666,9 @@ div.report-header{
     padding: .5em;
     position: relative;
 }
+.primary-cost-container label {
+    padding: 0 5px;
+}
+.primary-cost-container a[role=button]{
+    margin: .25em 0;
+}

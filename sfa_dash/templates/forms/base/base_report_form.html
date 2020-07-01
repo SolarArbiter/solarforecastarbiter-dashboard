@@ -43,13 +43,13 @@
        </span>
      </div>
      {% if report_type == 'deterministic' %}
-     <h5>Cost Parameters</h5>
+     <h5 class="mt-3">Cost Parameters</h5>
      <p>Cost parameters will allow you to calculate the cost of forecast
      errors. Please see the <a target="_blank" href="https://solarforecastarbiter-core.readthedocs.io/en/latest/cost.html">Solar Forecast Arbiter core documentation on cost</a>
      for an in-depth explanation of these parameters.
      </p>
 
-     <a role="button" data-toggle="collapse" data-target="#cost-container" class="collapser-button collapsed">Show cost parameters</a>
+     <a role="button" id="cost-param-collapse" data-toggle="collapse" data-target="#cost-container" class="collapser-button collapsed">Show Cost Parameters</a>
      <div id="cost-container" class="form-element full-width collapse">
          {# Container to act as target for inserting cost metrics widget #}
      </div>
