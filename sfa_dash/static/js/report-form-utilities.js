@@ -798,8 +798,10 @@ report_utils.cost_timezone_field = function(the_div, cost_obj, index=null){
      *      Handle to the jQuery object so that the caller can register any
      *      custom callbacks.
      */
+    var input_wrapper = $('<div>').css('position', 'relative');
+    var timezone_name = report_utils.suffix_name('cost-timezone', index);
     var tz_select = $('<select>')
-        .attr('name', report_utils.suffix_name('cost-timezone', index))
+        .attr('name', timezone_name)
         .addClass('form-control unset-width');
     var selected_tz = cost_obj.timezone;
 
@@ -814,8 +816,18 @@ report_utils.cost_timezone_field = function(the_div, cost_obj, index=null){
             .html(tz[1])
             .prop('selected', tz[1] == selected_tz)
     ));
-    the_div.append($('<br/><label>Timezone: </label>'));
-    the_div.append(tz_select);
+    const [help_button, help_text] = report_utils.help_popup(
+        timezone_name,
+        `The timezone parameter defines the timezone if datetimes are not
+        localized, and if timezone is None, the timezone of the errors is
+        used.`
+    )
+    input_wrapper.append($('<br/><label>Timezone: </label>'));
+    input_wrapper.append(tz_select);
+    input_wrapper.append(help_button);
+    input_wrapper.append(help_text);
+
+    the_div.append(input_wrapper);
     return tz_select;
 }
 
@@ -1316,25 +1328,51 @@ report_utils.insert_cost_widget = function(){
          * the primary cost type. Adds a '#primary-cost-fields' div for holding the
          * inputs used for setting the appropriate attributes.
          */
-        var cost_name = $('<input><br/>')
-            .attr('name', 'cost-primary-name')
-            .attr('required', true)
-            .attr('value', cost.name)
-            .addClass('form-control name-field')
-            .change(function(){
-                cost.name = this.value;
-            });
+        var cost_name_wrapper = $('<div>')
+            .css('position', 'relative');
+        var cost_name = $('<div>')
+            .addClass('input-wrapper')
+            .append($('<input><br/>')
+                .attr('name', 'cost-primary-name')
+                .attr('required', true)
+                .attr('value', cost.name)
+                .addClass('form-control name-field')
+                .change(function(){
+                    cost.name = this.value;
+                })
+            );
+        const [name_help_button, name_help_text] = report_utils.help_popup(
+            'cost-primary-name',
+            `A name for this set of cost parameters. Will be used when
+            displaying cost metrics in the rendered report.`
+        )
+        cost_name_wrapper.append(cost_name);
+        cost_name_wrapper.append(name_help_button)
+        cost_name_wrapper.append(name_help_text)
+        var cost_type_wrapper = $('<div>')
+            .css('position', 'relative');
+        const [type_help_button, type_help_text] = report_utils.help_popup(
+            'cost-primary-type',
+            `The type of cost function to be used for this set of cost
+            parameters.`
+        )
+        cost_type_wrapper.append(datetime);
+        cost_type_wrapper.append(constant);
+        cost_type_wrapper.append(errorband);
+        cost_type_wrapper.append(timeofday);
+        cost_type_wrapper.append(type_help_button);
+        cost_type_wrapper.append(type_help_text);
+
         var primary_cost = $('<div>')
+            .css('position', 'relative')
             .addClass('primary-cost-container')
-            .append($('<label>Name</label><br/>'))
-            .append(cost_name)
-            .append(timeofday)
-            .append(datetime)
-            .append(constant)
-            .append(errorband)
+            .append($('<label>Name</label><br>'))
+            .append(cost_name_wrapper)
+            .append($('<label class="mt-1">Cost Function</label><br>'))
+            .append(cost_type_wrapper)
             .append($('<div>')
                 .attr('id','primary-cost-fields'));
-        widget_div.append(primary_cost)
+        widget_div.append(primary_cost);
 
         $('#cost-container').append(widget_div);
         // if cost has a type value, select it.
@@ -1365,7 +1403,7 @@ report_utils.initialize_cost = function(){
 report_utils.init_cost_parameters_toggle = function(){
     cost_metric = $('[name=metrics][value=cost]');
     cost_metric.next().after(
-        $('<a role="button" id="cost-param-collapse" data-toggle="collapse" data-target="#cost-block" class="collapser-button"> </a>'));
+        $('<a role="button" id="cost-param-collapse" data-toggle="collapse" data-target="#cost-block" class="collapser-button collapsed"> </a>'));
     cost_metric.change(function(){
         if (this.checked){
             $('#cost-container').prop('disabled', false);
