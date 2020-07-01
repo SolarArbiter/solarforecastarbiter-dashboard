@@ -113,8 +113,8 @@
        {% endif %}
        <input name="forecast_fill_method" type="radio" value="drop" {% if selected_fill_method == 'drop' %}checked{% endif %}>Drop<br>
        <input name="forecast_fill_method" type="radio" value="forward" {% if selected_fill_method == 'forward' %}checked{% endif %}>Forward<br>
-       <input name="forecast_fill_method" type="radio" value="provided" {% if selected_fill_method is float %}checked{% endif %}>Provided Value
-       <input name="provided_forecast_fill_method" type="number" step="any" required {% if selected_fill_method is float %}value="{{selected_fill_method}}"{% else %}disabled{% endif %}>
+       <input name="forecast_fill_method" type="radio" value="provided" {% if selected_fill_method | is_number %}checked{% endif %}>Provided Value
+       <input name="provided_forecast_fill_method" type="number" step="any" required {% if selected_fill_method | is_number %}value="{{selected_fill_method}}"{% else %}disabled{% endif %}>
      </div>
      {% endblock %}
     {{ form.token() }}
