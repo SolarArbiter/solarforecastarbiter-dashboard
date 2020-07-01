@@ -527,11 +527,11 @@ report_utils.restore_prev_value = function(the_node){
  * Cost Class definitions
  */
 class TimeOfDayCost{
-    constructor({times=[], costs=[], aggregation='sum', net=false,
+    constructor({times=[], cost=[], aggregation='sum', net=false,
                 fill='forward'} = {}
     ){
         this.times = times;
-        this.cost = costs;
+        this.cost = cost;
         this.aggregation = aggregation;
         this.net = net;
         this.fill = fill;
@@ -638,9 +638,11 @@ report_utils.many_costs_field = function(the_div, cost_obj, index=null){
      *      register custom callbacks such as asserting dependence on the
      *      datetimes or times field.
      */
+    console.log(cost_obj.cost);
     var costs_field = $('<input>')
         .attr('name', report_utils.suffix_name('cost-costs', index))
         .attr('type', 'text')
+        .attr('required', true)
         .attr('value', cost_obj.cost.map(x => x.toFixed(2)).join(', '))
         .attr('placeholder', '1.0, 1.2, 1.5')
         .addClass('form-control');
@@ -948,6 +950,7 @@ report_utils.datetime_cost = function(cost_obj, index=null){
     var datetimes_field = $('<input>')
         .attr('name', report_utils.suffix_name('cost-datetimes', index))
         .attr('type', 'text')
+        .attr('required', true)
         .attr('value', cost_obj.datetimes.join(', '))
         .attr('placeholder', '2020-01-01T00:00Z, 2020-01-02T06:00Z, 2020-01-03T00:00Z')
         .addClass('form-control');
@@ -1059,6 +1062,7 @@ report_utils.constant_cost = function(cost_obj, index=null){
     var cost_field = $('<input>')
         .attr('name', report_utils.suffix_name('cost-value', index))
         .attr('type', 'text')
+        .attr('required', true)
         .attr('value', cost_obj.cost.toFixed(2))
         .addClass('form-control unset-width');
     cost_field.change(function(){
