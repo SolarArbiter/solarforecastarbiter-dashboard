@@ -100,15 +100,15 @@ function humanReadableLabel(type, label){
 
 function replaceSpecial(value){
     return value.replace(/ |\^/g, "-")
-        .replaceAll(".", "dot")
-        .replaceAll("%", "percent")
-        .replaceAll("<", "lt")
-        .replaceAll(">", "gt")
-        .replaceAll("=", "eq")
-        .replaceAll("(", "lp")
-        .replaceAll(")", "rp")
-        .replaceAll("/", "fsl")
-        .replaceAll("\\", "bsl")
+        .replace(/\./g, "dot")
+        .replace(/\%/g, "percent")
+        .replace(/</g, "lt")
+        .replace(/>/g, "gt")
+        .replace(/=/g, "eq")
+        .replace(/\(/g, "lp")
+        .replace(/\)/g, "rp")
+        .replace(/\//g, "fsl")
+        .replace(/\\/g, "bsl")
         .replace(/[^\w-]/g, "special")
         .toLowerCase();
 }
