@@ -235,8 +235,9 @@ function populateReferenceForecasts(){
         // reference forecast <select> element.
         reference_selector = $('#reference-forecast-select');
         ref_fx.forEach(function(fx){
-            var forecast_id = fx['constant_values'].find(
+            var matching_constant = fx['constant_values'].find(
                 x => x['constant_value'] == constant_value);
+            var forecast_id = matching_constant['forecast_id'];
             reference_selector.append(
                 $('<option></option>')
                     .html(fx['name'])
@@ -822,6 +823,7 @@ function createPairSelector(){
             }else{
                 ref_text = selected_reference_forecast.text;
                 ref_id = selected_reference_forecast.value;
+                console.log(selected_reference_forecast);
             }
             constant_value_select.find('option:selected').each(function(){
                 let forecast_id = $(this).val();
