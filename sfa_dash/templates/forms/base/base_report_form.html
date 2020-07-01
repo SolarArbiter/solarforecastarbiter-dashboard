@@ -42,19 +42,7 @@
            The end of the analysis period as an ISO 8601 datetime.
        </span>
      </div>
-     {% if report_type == 'deterministic' %}
-     <h5 class="mt-3">Cost Parameters</h5>
-     <p>Cost parameters will allow you to calculate the cost of forecast
-     errors. Please see the <a target="_blank" href="https://solarforecastarbiter-core.readthedocs.io/en/latest/cost.html">Solar Forecast Arbiter core documentation on cost</a>
-     for an in-depth explanation of these parameters.
-     </p>
-
-     <a role="button" id="cost-param-collapse" data-toggle="collapse" data-target="#cost-container" class="collapser-button collapsed">Show Cost Parameters</a>
-     <div id="cost-container" class="form-element full-width collapse">
-         {# Container to act as target for inserting cost metrics widget #}
-     </div>
-     <hr>
-     {% endif %}
+     
      {# The following empty list is a target for the javascript found in report-handling.js
         list items are added dynamically on page load #}
 
@@ -92,6 +80,22 @@
      {% endfor %}
      </div>
      {% endblock %}
+
+     {% if report_type == 'deterministic' %}
+     <div id='cost-block' class=" collapse">
+     <h5 class="mt-3">Cost Parameters</h5>
+     <p>Cost parameters will allow you to calculate the cost of forecast
+     errors. Please see the <a target="_blank" href="https://solarforecastarbiter-core.readthedocs.io/en/latest/cost.html">Solar Forecast Arbiter core documentation on cost</a>
+     for an in-depth explanation of these parameters.
+     </p>
+     <a role="button" id="cost-param-collapse" data-toggle="collapse" data-target="#cost-container" class="collapser-button">Toggle Cost Parameter Display</a>
+     <div id="cost-container" class="form-element full-width collapse show">
+         {# Container to act as target for inserting cost metrics widget #}
+     </div>
+     <hr>
+     </div>
+     {% endif %}
+
      {% block quality_flag_field %}
      <div class="form-element full-width">
        <label>Quality Flag Filters</label><br>

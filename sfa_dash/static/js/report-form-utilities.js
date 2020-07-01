@@ -567,15 +567,16 @@ class CostBand{
     constructor({
         error_range=[-Infinity, Infinity],
         cost_function='timeofday',
-        parameters=null
+        cost_function_parameters=null
     } = {}){
         this.error_range = error_range;
         this.cost_function = cost_function;
         var param_class = report_utils.get_cost_class(cost_function);
-        if (parameters == null){
-            this.parameters = new param_class();
+        if (cost_function_parameters == null){
+            this.cost_function_parameters = new param_class();
         } else {
-            this.parameters = new param_class(prameters);
+            this.cost_function_parameters = new param_class(
+                cost_function_parameters);
         }
     }
 
@@ -663,6 +664,7 @@ report_utils.cost_aggregation_field = function(the_div, cost_obj, index=null){
      *      Handle to the jQuery object so that the caller can register any
      *      custom callbacks.
      */
+    var input_wrapper = $('<div>').css('position', 'relative');
     var agg_input_name = report_utils.suffix_name('cost-aggregation', index)
     var agg_field_sum = $(`<input
             type="radio"
@@ -678,9 +680,18 @@ report_utils.cost_aggregation_field = function(the_div, cost_obj, index=null){
             value="mean"
             ${cost_obj.aggregation == 'mean' ? 'checked' : ''}>
            <label for="${report_utils.suffix_name('cost-aggregation-sum', index)}">mean</label>`)
-    the_div.append($('<br/><label>Aggregation: </label>'));
-    the_div.append(agg_field_sum);
-    the_div.append(agg_field_mean);
+    const [help_button, help_text] = report_utils.help_popup(
+        agg_input_name,
+        `The aggregation parameter controls how the cost for each error
+        value in the timeseries are aggregated (e.g. summed or averaged)
+        into a single cost number.`
+    )
+    input_wrapper.append($('<label>Aggregation: </label>'));
+    input_wrapper.append(agg_field_sum);
+    input_wrapper.append(agg_field_mean);
+    input_wrapper.append(help_button);
+    input_wrapper.append(help_text);
+    the_div.append(input_wrapper);
     return the_div.find(`[name=${agg_input_name}]`);
 }
 
@@ -700,13 +711,25 @@ report_utils.cost_net_field = function(the_div, cost_obj, index=null){
      *      Handle to the jQuery object so that the caller can register any
      *      custom callbacks.
      */
+    var input_wrapper = $('<div>').css('position', 'relative');
+    var net_field_name = report_utils.suffix_name('cost-net', index)
+    var net_field = $('<input>')
+        .attr('type', 'checkbox')
+        .attr('id', net_field_name)
+        .attr('name', net_field_name)
+        .prop('checked', cost_obj.net);
 
-    var net_field = $(`<input type="checkbox"
-            id="${report_utils.suffix_name('cost-net', index)}"
-            name="${report_utils.suffix_name('cost-net', index)}"
-            ${cost_obj.net ? 'checked' : ''}>`);
-    the_div.append($('<br/><label>Net: </label>'));
-    the_div.append(net_field);
+    const [help_button, help_text] = report_utils.help_popup(
+        net_field_name,
+        `The net parameter indicates if the aggregation should keep the sign
+        of the error, or take the absolute value of the error before
+        aggregating.`
+    )
+    input_wrapper.append($('<label>Net: </label>'));
+    input_wrapper.append(net_field);
+    input_wrapper.append(help_button);
+    input_wrapper.append(help_text);
+    the_div.append(input_wrapper);
     return net_field;
 }
 
@@ -726,6 +749,7 @@ report_utils.cost_fill_field = function(the_div, cost_obj, index=null){
      *      Handle to the jQuery object so that the caller can register any
      *      custom callbacks.
      */
+    var input_wrapper = $('<div>').css('position', 'relative');
     var fill_field_name = report_utils.suffix_name('cost-fill', index);
     var fill_field_forward = $(`<input
             type="radio"
@@ -741,9 +765,17 @@ report_utils.cost_fill_field = function(the_div, cost_obj, index=null){
             value="mean"
             ${cost_obj.fill == 'backward' ? 'checked' : ''}>
            <label for="${report_utils.suffix_name('cost-fill-backward', index)}">backward</label>`);
-    the_div.append($('<br/><label>Fill: </label>'));
-    the_div.append(fill_field_forward);
-    the_div.append(fill_field_backward);
+    const [help_button, help_text] = report_utils.help_popup(
+        fill_field_name,
+        `The fill parameter specifies how the costs should be extended to
+        times that are not included in times.`
+    )
+    input_wrapper.append($('<label>Fill: </label>'));
+    input_wrapper.append(fill_field_forward);
+    input_wrapper.append(fill_field_backward);
+    input_wrapper.append(help_button);
+    input_wrapper.append(help_text);
+    the_div.append(input_wrapper)
     return the_div.find(`[name=${fill_field_name}]`);
 }
 
@@ -770,7 +802,7 @@ report_utils.cost_timezone_field = function(the_div, cost_obj, index=null){
     var selected_tz = cost_obj.timezone;
 
     tz_select.append($('<option>')
-        .attr('value', null)
+        .attr('value', 'null')
         .html('None')
         .prop('selected', selected_tz == null));
     // populate the timezone options from config
@@ -866,7 +898,7 @@ report_utils.timeofday_cost = function(cost_obj, index=null){
         cost_obj.cost = [];
 
         costs.forEach(function(cost, idx){
-            if (isNan(parseFloat(cost))){
+            if (isNaN(parseFloat(cost))){
                 invalid_indices.push(idx+1);
             } else {
                 cost_obj.cost[idx] = parseFloat(cost);
@@ -1061,12 +1093,13 @@ report_utils.cost_band = function(cost_obj, index=null){
         ${cost_obj.cost_function == 'timeofday' ? 'checked' : ''}>
         <label>Time of Day</label>`);
     tod_band_radio.change(function(){
-        if (!(cost_obj.parameters instanceof TimeOfDayCost)){
-            cost_obj.parameters = new TimeOfDayCost();
+        if (!(cost_obj.cost_function_parameters instanceof TimeOfDayCost)){
+            cost_obj.cost_function_parameters = new TimeOfDayCost();
         }
         param_container.empty();
         param_container.html(
-            report_utils.timeofday_cost(cost_obj.parameters, index)
+            report_utils.timeofday_cost(
+                cost_obj.cost_function_parameters, index)
         );
     });
     var dt_band_radio = $(`<input
@@ -1077,12 +1110,13 @@ report_utils.cost_band = function(cost_obj, index=null){
         ${cost_obj.cost_function == 'datetime' ? 'checked' : ''}>
         <label>Datetime</label>`);
     dt_band_radio.change(function(){
-        if (!(cost_obj.parameters instanceof DatetimeCost)){
-            cost_obj.parameters = new DatetimeCost();
+        if (!(cost_obj.cost_function_parameters instanceof DatetimeCost)){
+            cost_obj.cost_function_parameters = new DatetimeCost();
         }
         param_container.empty();
         param_container.html(
-            report_utils.datetime_cost(cost_obj.parameters, index)
+            report_utils.datetime_cost(
+                cost_obj.cost_function_parameters, index)
         );
     });
     var constant_band_radio = $(`<input
@@ -1093,12 +1127,13 @@ report_utils.cost_band = function(cost_obj, index=null){
         ${cost_obj.cost_function == 'constant' ? 'checked' : ''}>
         <label>Constant</label>`);
     constant_band_radio.change(function(){
-        if (!(cost_obj.parameters instanceof ConstantCost)){
-            cost_obj.parameters = new ConstantCost();
+        if (!(cost_obj.cost_function_parameters instanceof ConstantCost)){
+            cost_obj.cost_function_parameters = new ConstantCost();
         }
         param_container.empty();
         param_container.html(
-            report_utils.constant_cost(cost_obj.parameters, index)
+            report_utils.constant_cost(
+                cost_obj.cost_function_parameters, index)
         );
     });
     var error_range_start = $(`<input
@@ -1180,22 +1215,34 @@ report_utils.errorband_cost = function(cost_obj){
     var the_div = $('<div>');
     var error_bands_container = $('<div>')
         .addClass('error-bands-container');
+
+    function insert_errorband(cost_band, band_index){
+        error_bands_container.append(
+                report_utils.cost_band(cost_band, band_index));
+        $('.error-band-container.alert-warning').remove();
+    }
+
     var add_band_button = $('<a>')
         .attr('role', 'button')
         .addClass('btn btn-primary btn-sm')
         .html('Add Error Band')
         .click(function(){
             cost_obj.bands[index] = new CostBand();
-            error_bands_container.append(
-                report_utils.cost_band(cost_obj.bands[index], index));
+            insert_errorband(cost_obj.bands[index], index);
             index++;
-            $('.error-band-container.alert-warning').remove();
         });
     the_div.append($('<br><label>Error Bands:</label><br>'));
     the_div.append(add_band_button);
-    error_bands_container.append(
-        $(`<div class="error-band-container alert-warning">
-          No error bands</div>`));
+    // add any bands from existing cost.
+    if (cost_obj.bands.length > 0){
+        cost_obj.bands.forEach(function(band, idx){
+            insert_errorband(band, idx);
+        });
+    } else {
+        error_bands_container.append(
+            $(`<div class="error-band-container alert-warning">
+              No error bands</div>`));
+    }
     the_div.append(error_bands_container);
     return the_div;
 
@@ -1294,17 +1341,39 @@ report_utils.insert_cost_widget = function(){
 
 report_utils.initialize_cost = function(){
     /* Initialize global cost var from api costs.*/
-    try{
-        var costs = form_data['report_parameters']['costs'];
-    } catch(error) {
-        // Continue, to allow setting cost to a new Cost object.
+    if (typeof cost === 'undefined'){
+        try{
+            var costs = form_data['report_parameters']['costs'];
+        } catch(error) {
+            // Continue, to allow setting cost to a new Cost object.
+        }
+        if (typeof costs !== 'undefined' && costs.length > 0){
+            // only handling one cost to start
+            var first_cost = costs[0];
+            cost = new Cost(first_cost);
+        } else {
+            cost = new Cost();
+        }
     }
-    if (typeof costs !== 'undefined' && costs.length > 0){
-        console.log(costs);
-        // only handling one cost to start
-        var first_cost = costs[0];
-        cost = new Cost(first_cost);
-    } else {
-        cost = new Cost();
+}
+
+report_utils.init_cost_parameters_toggle = function(){
+    cost_metric = $('[name=metrics][value=cost]');
+    cost_metric.change(function(){
+        if (this.checked){
+            report_utils.insert_cost_widget();
+            $('#cost-block').collapse('show');
+        } else {
+            $('#cost-container').empty();
+            $('#cost-block').collapse('hide');
+        }
+    });
+    if (cost_metric.prop('checked')){
+        cost_metric.change();
     }
+}
+report_utils.help_popup = function(help_name, help_text){
+    var help_button = $(`<a data-toggle="collapse" data-target=".${help_name}-help-text" role="button" href="" class="help-button">?</a>`);
+    var help_box = $(`<span class="${help_name}-help-text form-text text-muted help-text collapse" aria-hidden="">${help_text}</span>`);
+    return [help_button, help_box]
 }

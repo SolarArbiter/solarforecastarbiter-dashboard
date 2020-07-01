@@ -672,3 +672,6 @@ div.report-header{
 .primary-cost-container a[role=button]{
     margin: .25em 0;
 }
+.primary-cost-container a[role=button].help-button{
+  margin-left: .25em;
+}
