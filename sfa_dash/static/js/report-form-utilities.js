@@ -638,7 +638,6 @@ report_utils.many_costs_field = function(the_div, cost_obj, index=null){
      *      register custom callbacks such as asserting dependence on the
      *      datetimes or times field.
      */
-    console.log(cost_obj.cost);
     var costs_field = $('<input>')
         .attr('name', report_utils.suffix_name('cost-costs', index))
         .attr('type', 'text')
