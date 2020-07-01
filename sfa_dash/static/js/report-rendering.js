@@ -107,6 +107,9 @@ function replaceSpecial(value){
         .replaceAll("=", "eq")
         .replaceAll("(", "lp")
         .replaceAll(")", "rp")
+        .replaceAll("/", "fsl")
+        .replaceAll("\\", "bsl")
+        .replace(/[^\w-]/g, "special")
         .toLowerCase();
 }
 
