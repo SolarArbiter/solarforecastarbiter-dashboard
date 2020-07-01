@@ -1432,6 +1432,9 @@ report_utils.register_forecast_fill_method_validator = function(
         }
     });
     if (forecast_type == 'event'){
-        forecast_fill.prop('step', 1).prop('min', 0).prop('max', 1);
+        $('[name=provided_forecast_fill_method]')
+            .prop('step', 1)
+            .prop('min', 0)
+            .prop('max', 1);
     }
 }
