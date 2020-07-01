@@ -187,7 +187,7 @@ function createPairSelector(){
         if (forecast[0]){
             // collect the site or aggregate id, variable and interval_length
             // of the currently selected forecast.
-            if(forecast.data.hasOwnProperty('siteId')){
+            if(forecast.data().hasOwnProperty('siteId')){
                 var site_id = forecast.data().siteId;
             }else{
                 var aggregate_id = forecast.data().aggregateId;
@@ -217,7 +217,6 @@ function createPairSelector(){
                     reference_forecasts.not(
                         `[data-aggregate-id=${aggregate_id}]`));
             }
-
             // Filter out reference forecasts that don't have the same
             // interval length
             mismatched_intervals = reference_forecasts.filter(function(){
