@@ -823,7 +823,6 @@ function createPairSelector(){
             }else{
                 ref_text = selected_reference_forecast.text;
                 ref_id = selected_reference_forecast.value;
-                console.log(selected_reference_forecast);
             }
             constant_value_select.find('option:selected').each(function(){
                 let forecast_id = $(this).val();
