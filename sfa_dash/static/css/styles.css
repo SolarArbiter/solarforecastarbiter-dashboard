@@ -227,11 +227,10 @@ a.object-pair-delete-button, a.error-band-delete-button{
   width: 100%;
 }
 fieldset{
-  float: left;
   background-color: #f8f9fa;
   box-shadow: 0 1px 3px #DDD;
   margin: 1em 0;
-  padding: 1em 0; 
+  padding: 1em 0;
 }
 pre.example-text{
   background-color: #f8f9fa;

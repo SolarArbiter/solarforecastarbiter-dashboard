@@ -1261,6 +1261,7 @@ report_utils.insert_cost_widget = function(){
      * for defining each type of cost model, for nesting within error band.
      */
     // only create cost widgets if the cost container contains no html
+    report_utils.init_cost_parameters_toggle();
     if (!$.trim($('#cost-container').html())){
         report_utils.initialize_cost();
         var widget_div = $('<div>')
@@ -1363,12 +1364,14 @@ report_utils.initialize_cost = function(){
 
 report_utils.init_cost_parameters_toggle = function(){
     cost_metric = $('[name=metrics][value=cost]');
+    cost_metric.next().after(
+        $('<a role="button" id="cost-param-collapse" data-toggle="collapse" data-target="#cost-block" class="collapser-button"> </a>'));
     cost_metric.change(function(){
         if (this.checked){
-            report_utils.insert_cost_widget();
+            $('#cost-container').prop('disabled', false);
             $('#cost-block').collapse('show');
         } else {
-            $('#cost-container').empty();
+            $('#cost-container').prop('disabled', true);
             $('#cost-block').collapse('hide');
         }
     });
