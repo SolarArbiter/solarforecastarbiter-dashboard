@@ -40,7 +40,7 @@ function hideMetricsOnSearch(){
     // Hide the headers of non-matching forecasts to avoid empty sections
     noMatchHeaderClasses = new Set(noMatch.map(function(){return $(this).data('forecast')}));
     noMatchHeaderClasses.forEach(function(fx){
-        headers = $(`.collapse-forecast-${fx.replace(/ /g,"-").toLowerCase()}`);
+        headers = $(`.collapse-forecast-${replaceSpecial(fx)}`);
         noMatch = noMatch.add(headers);
     });
     noMatch.attr('hidden', true);
