@@ -403,11 +403,11 @@ class ReportConverter(FormConverter):
     @classmethod
     def extract_tods(cls, value):
         """Parses time of day values from a csv string"""
-        return value.split(',')
+        return [v.strip() for v in value.split(',')]
 
     @classmethod
     def extract_datetimes(cls, value):
-        return value.split(',')
+        return [v.strip() for v in value.split(',')]
 
     @classmethod
     def extract_many_costs(cls, value):
@@ -450,7 +450,7 @@ class ReportConverter(FormConverter):
             'fill': fill,
             'net': net,
         }
-        if timezone is not None:
+        if timezone is not None and timezone != 'null':
             payload.update({'timezone': timezone})
         return payload
 
@@ -473,10 +473,9 @@ class ReportConverter(FormConverter):
             'fill': fill,
             'net': net,
         }
-        if timezone is not None:
+        if timezone is not None and timezone != 'null':
             payload.update({'timezone': timezone})
         return payload
-
 
     @classmethod
     def parse_form_errorband_cost(cls, form_data, index=None):
@@ -498,7 +497,7 @@ class ReportConverter(FormConverter):
                 'cost_function': cost_function,
                 'cost_function_parameters': parameters,
             })
-        return bands
+        return {'bands': bands}
 
     @classmethod
     def get_form_cost_parser(cls, cost_type):

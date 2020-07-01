@@ -447,13 +447,14 @@ def test_report_converter_formdata_to_payload_costs(report):
         ('categories', 'total'),
         ('categories', 'date'),
         ('quality_flags', 'USER FLAGGED'),
-        ('master-cost-type', 'timeofday'),
-        ('master-cost-name', 'this is a cost'),
+        ('cost-primary-type', 'timeofday'),
+        ('cost-primary-name', 'this is a cost'),
         ('cost-times', '06:00,18:00'),
         ('cost-net', False),
         ('cost-costs', '1.5,3.0'),
         ('cost-aggregation', 'sum'),
         ('cost-fill', 'forward'),
+        ('cost-timezone', 'null'),
         ('_csrf_token', '8a0771df3643d252cbafe4838263dbf7097f4982')]
     )
     api_payload = converters.ReportConverter.formdata_to_payload(form_data)
@@ -466,7 +467,7 @@ def test_report_converter_formdata_to_payload_costs(report):
             'cost': [1.5, 3.0],
             'aggregation': 'sum',
             'fill': 'forward',
-            'net': False
+            'net': False,
         }
     }]
     for object_pair in params['object_pairs']:
@@ -489,6 +490,7 @@ def test_report_converter_parse_form_errorband_costs():
         ('cost-aggregation-1', 'mean'),
         ('cost-fill-1', 'forward'),
         ('cost-net-1', False),
+        ('cost-timezone-1', 'America/Denver'),
         ('cost-band-error-start-2', -5),
         ('cost-band-error-end-2', 1),
         ('cost-band-cost-function-2', 'datetime'),
@@ -499,7 +501,8 @@ def test_report_converter_parse_form_errorband_costs():
         ('cost-fill-2', 'forward'),
         ('cost-timezone-2', 'GMT'),
     ])
-    bands = converters.ReportConverter.parse_form_errorband_cost(form_data)
+    params = converters.ReportConverter.parse_form_errorband_cost(form_data)
+    bands = params['bands']
     assert bands[0] == {
         'error_range': [1, 5],
         'cost_function': 'constant',
@@ -518,6 +521,7 @@ def test_report_converter_parse_form_errorband_costs():
             'aggregation': 'mean',
             'fill': 'forward',
             'net': False,
+            'timezone': 'America/Denver',
         }
     }
     assert bands[2] == {
