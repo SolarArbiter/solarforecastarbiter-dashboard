@@ -1356,10 +1356,10 @@ report_utils.insert_cost_widget = function(){
             `The type of cost function to be used for this set of cost
             parameters.`
         )
+        cost_type_wrapper.append(timeofday);
         cost_type_wrapper.append(datetime);
         cost_type_wrapper.append(constant);
         cost_type_wrapper.append(errorband);
-        cost_type_wrapper.append(timeofday);
         cost_type_wrapper.append(type_help_button);
         cost_type_wrapper.append(type_help_text);
 
