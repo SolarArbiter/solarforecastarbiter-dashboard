@@ -597,7 +597,7 @@ class ReportConverter(FormConverter):
         form_params['metrics'] = report_parameters.get('metrics', [])
         form_params['period-start'] = report_parameters['start']
         form_params['period-end'] = report_parameters['end']
-        form_params['costs'] = report_parameters.get('costs', [])
+        form_params['costs'] = report_parameters['costs']
         form_params['forecast_fill_method'] = report_parameters.get(
             'forecast_fill_method',
             'drop'
