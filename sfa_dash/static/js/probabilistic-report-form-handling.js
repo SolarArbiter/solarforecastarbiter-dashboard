@@ -914,5 +914,5 @@ $(document).ready(function() {
     unpack_constant_values();
     report_utils.fill_existing_pairs();
     report_utils.register_uncertainty_handler('#observation-select');
-    report_utils.register_forecast_fill_method_validator();
+    report_utils.register_forecast_fill_method_validator('probabilistic');
 });
