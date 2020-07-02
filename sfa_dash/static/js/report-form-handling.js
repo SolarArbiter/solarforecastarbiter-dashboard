@@ -361,7 +361,7 @@ function createPairSelector(){
     fxSelector.find('.report-field-filters').append(fxVariableSelector);
 
     refFxSelector.append(
-        $('<a role="button" id="ref-clear">clear reference forecast selection</a>').click(
+        $('<a role="button" id="ref-clear">Clear reference forecast selection</a>').click(
             function(){$('#reference-forecast-select').val('');})
     );
 
