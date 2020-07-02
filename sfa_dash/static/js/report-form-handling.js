@@ -227,7 +227,6 @@ function createPairSelector(){
             toHide = toHide.add(mismatched_intervals);
 
             var mismatched_labels = reference_forecasts.filter(function(){
-                console.log($(this).data().intervalLabel,' ', interval_label);
                 return $(this).data().inervalLabel != interval_label ||
                     $(this).attr('value') == forecast_select.val();
             });
@@ -360,6 +359,11 @@ function createPairSelector(){
     var fxVariableSelector = report_utils.createVariableSelect();
     var dbSelector = report_utils.deadbandSelector();
     fxSelector.find('.report-field-filters').append(fxVariableSelector);
+
+    refFxSelector.append(
+        $('<a role="button" id="ref-clear">clear reference forecast selection</a>').click(
+            function(){refFxSelector.val('');})
+    );
 
     // Buttons for adding an obs/fx pair for observations or aggregates
     var addObsButton = $('<a role="button" class="btn btn-primary" id="add-obs-object-pair" style="padding-left: 1em">Add a Forecast, Observation pair</a>');

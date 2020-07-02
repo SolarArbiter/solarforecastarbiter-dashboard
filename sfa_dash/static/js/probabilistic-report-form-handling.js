@@ -207,6 +207,7 @@ function populateReferenceForecasts(){
         var axis = constant_value_metadata['axis'];
         var variable = constant_value_metadata['variable'];
         var interval_length = constant_value_metadata['interval_length'];
+        var interval_label = constant_value_metadata['interval_label'];
         var loc = constant_value_metadata[location_key];
 
         // Create a filter function for removing reference forecasts that
@@ -225,6 +226,7 @@ function populateReferenceForecasts(){
                 && e['variable'] == variable
                 && e[location_key] == loc
                 && e['interval_length'] == interval_length
+                && e['interval_label'] == interval_label
                 && constant_values.includes(constant_value);
         };
         var ref_fx = page_data['forecasts'].filter(cv_filter);
@@ -583,6 +585,10 @@ function createPairSelector(){
     var refFxSelector = newSelector(
         "reference forecast", "forecast", required=false,
         description='Skill metrics will be calculated for any binary forecasts matching the selection above.');
+    refFxSelector.append(
+        $('<a role="button" id="ref-clear">clear reference forecast selection</a>').click(
+            function(){refFxSelector.val('')})
+    );
 
     var dbSelector = report_utils.deadbandSelector();
     var constantValueSelector = newConstantValueSelector();
@@ -709,17 +715,6 @@ function createPairSelector(){
                 .attr('data-interval-length', this.interval_length)
                 .attr('data-variable', this.variable));
     });
-    $.each(nonevent_forecasts, function(){
-        ref_forecast_select.append($('<option></option>')
-                .html(this.name)
-                .val(this.forecast_id)
-                .attr('hidden', true)
-                .attr('data-site-id', this.site_id)
-                .attr('data-aggregate-id', this.aggregate_id)
-                .attr('data-interval-length', this.interval_length)
-                .attr('data-variable', this.variable));
-    });
-
     $.each(page_data['aggregates'], function(){
         aggregate_select.append(
             $('<option></option>')
