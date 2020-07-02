@@ -586,7 +586,7 @@ function createPairSelector(){
         "reference forecast", "forecast", required=false,
         description='Skill metrics will be calculated for any binary forecasts matching the selection above.');
     refFxSelector.append(
-        $('<a role="button" id="ref-clear">clear reference forecast selection</a>').click(
+        $('<a role="button" id="ref-clear">Clear reference forecast selection</a>').click(
             function(){$('#reference-forecast-select').val('')})
     );
 
