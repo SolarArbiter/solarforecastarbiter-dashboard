@@ -587,7 +587,7 @@ function createPairSelector(){
         description='Skill metrics will be calculated for any binary forecasts matching the selection above.');
     refFxSelector.append(
         $('<a role="button" id="ref-clear">clear reference forecast selection</a>').click(
-            function(){refFxSelector.val('')})
+            function(){$('#reference-forecast-select').val('')})
     );
 
     var dbSelector = report_utils.deadbandSelector();

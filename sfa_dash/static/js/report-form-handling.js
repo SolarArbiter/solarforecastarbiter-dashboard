@@ -227,7 +227,7 @@ function createPairSelector(){
             toHide = toHide.add(mismatched_intervals);
 
             var mismatched_labels = reference_forecasts.filter(function(){
-                return $(this).data().inervalLabel != interval_label ||
+                return $(this).data().intervalLabel != interval_label ||
                     $(this).attr('value') == forecast_select.val();
             });
             toHide = toHide.add(mismatched_labels);
@@ -362,7 +362,7 @@ function createPairSelector(){
 
     refFxSelector.append(
         $('<a role="button" id="ref-clear">clear reference forecast selection</a>').click(
-            function(){refFxSelector.val('');})
+            function(){$('#reference-forecast-select').val('');})
     );
 
     // Buttons for adding an obs/fx pair for observations or aggregates
