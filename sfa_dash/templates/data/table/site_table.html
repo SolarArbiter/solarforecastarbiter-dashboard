@@ -20,7 +20,12 @@
     <tr>
       <td class="name-column"><a href="{{ row['link'] }}">{{ row['name'] }}</a></td>
       <td class="provider-column">{{ row['provider'] }}</td>
-      <td class="climate-zones-column">{{ row['climate_zones'] | join(', ') }}</td>
+      {% if row['climate_zones'] |length > 0 %}
+      {% set climate_zones = row['climate_zones'] |join(', ') %}
+      {% else %}
+      {% set climate_zones = "No Climate Zone" %}
+      {% endif %}
+      <td class="climate-zones-column">{{ climate_zones }}</td>
     </tr>
 	{% endfor %}
   </tbody>
