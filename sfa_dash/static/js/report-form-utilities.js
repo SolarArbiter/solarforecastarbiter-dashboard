@@ -207,7 +207,6 @@ report_utils.setVariables = function(){
      * current units.
      */
     var selected_var = $('#variable-select').val();
-    console.log(selected_var);
     var variable_options = $('#variable-select option');
     variable_options.removeAttr('hidden');
     if (current_units){
