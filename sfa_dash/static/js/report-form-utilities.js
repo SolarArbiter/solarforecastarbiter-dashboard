@@ -203,24 +203,30 @@ report_utils.searchObjects = function(object_type, object_id){
 }
 
 report_utils.setVariables = function(){
-	/* Displays or hides options in the variable <select> element based on the
-     * current units.
+	/*  Displays or hides options in the variable <select> element based on the
+     *  current units.
      */
     var selected_var = $('#variable-select').val();
     var variable_options = $('#variable-select option');
     variable_options.removeAttr('hidden');
     if (current_units){
+        // Iterate through variable options, comparing the variable units to
+        // current_units, hiding those that do not match.
         variable_options.each(function(){
             let units = sfa_dash_config.VARIABLE_UNIT_MAP[$(this).attr('value')]
             if (units != current_units){
                 $(this).attr('hidden', true);
                 $(this).attr('selected', false);
             } else {
-                if ($(this).val() == selected_var){
+                if ($(this).val() == selected_var) {
+                    // retain the previous selection if it matched.
                     $('#variable-select').val(selected_var);
                 }
             }
         });
+    } else {
+        // If current_units is not set, revert to "all variables"
+        $('#variable-select').val('');
     }
 }
 
