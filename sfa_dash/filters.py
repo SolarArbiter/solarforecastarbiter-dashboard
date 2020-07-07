@@ -84,10 +84,10 @@ def climate_zone_links(zones):
             return f'<a href="https://solarforecastarbiter.org/climatezones/#region{zone_number}">{zone_name}</a>'  # noqa: E501
         else:
             return zone_name
-    if not zones:
-        return ["No Climate Zone"]
-    else:
+    if zones:
         return [reference_zone_link(zone) for zone in zones]
+    else:
+        return ["No Climate Zone"]
 
 
 def register_jinja_filters(app):
