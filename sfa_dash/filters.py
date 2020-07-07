@@ -85,9 +85,9 @@ def climate_zone_links(zones):
         else:
             return zone_name
     if not zones:
-        return "No Climate Zone"
+        return ["No Climate Zone"]
     else:
-        return ', '.join([reference_zone_link(zone) for zone in zones])
+        return [reference_zone_link(zone) for zone in zones]
 
 
 def register_jinja_filters(app):
