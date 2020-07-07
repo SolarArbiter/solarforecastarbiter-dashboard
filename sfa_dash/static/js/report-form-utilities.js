@@ -207,8 +207,9 @@ report_utils.setVariables = function(variable=null){
      *  current units.
      *
      *  @param {string} variable
-     *      The variable to remain selected after filtering. Ignored when
-     *      current units are null.
+     *      The variable that will be selected after filtering. Ignored when
+     *      current units are null, as the variable filter will be reset to
+     *      "All Variables".
      */
     var variable_options = $('#variable-select option');
     variable_options.removeAttr('hidden');
