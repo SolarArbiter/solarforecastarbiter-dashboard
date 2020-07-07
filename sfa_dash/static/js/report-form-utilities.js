@@ -206,19 +206,23 @@ report_utils.setVariables = function(){
 	/* Displays or hides options in the variable <select> element based on the
      * current units.
      */
-    variable_options = $('#variable-select option');
+    var selected_var = $('#variable-select').val();
+    console.log(selected_var);
+    var variable_options = $('#variable-select option');
     variable_options.removeAttr('hidden');
-    variable_options.removeAttr('disabled');
     if (current_units){
         variable_options.each(function(){
-            units = sfa_dash_config.VARIABLE_UNIT_MAP[$(this).attr('value')]
-            if(units != current_units){
+            let units = sfa_dash_config.VARIABLE_UNIT_MAP[$(this).attr('value')]
+            if (units != current_units){
                 $(this).attr('hidden', true);
-                $(this).attr('disabled', true);
+                $(this).attr('selected', false);
+            } else {
+                if ($(this).val() == selected_var){
+                    $('#variable-select').val(selected_var);
+                }
             }
         });
     }
-    $('#variable-select').val(variable_options.filter(":not([hidden])").val());
 }
 
 report_utils.createVariableSelect = function(){
