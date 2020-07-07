@@ -170,7 +170,7 @@ report_utils.set_units = function(variable, filter_callback=null){
     if(units){
         current_units = units;
     }
-    report_utils.setVariables();
+    report_utils.setVariables(variable);
     if (filter_callback){
         filter_callback();
     }
@@ -202,11 +202,14 @@ report_utils.searchObjects = function(object_type, object_id){
     return metadata;
 }
 
-report_utils.setVariables = function(){
+report_utils.setVariables = function(variable=null){
 	/*  Displays or hides options in the variable <select> element based on the
      *  current units.
+     *
+     *  @param {string} variable
+     *      The variable to remain selected after filtering. Ignored when
+     *      current units are null.
      */
-    var selected_var = $('#variable-select').val();
     var variable_options = $('#variable-select option');
     variable_options.removeAttr('hidden');
     if (current_units){
@@ -218,9 +221,9 @@ report_utils.setVariables = function(){
                 $(this).attr('hidden', true);
                 $(this).attr('selected', false);
             } else {
-                if ($(this).val() == selected_var) {
+                if ($(this).val() == variable) {
                     // retain the previous selection if it matched.
-                    $('#variable-select').val(selected_var);
+                    $('#variable-select').val(variable);
                 }
             }
         });
