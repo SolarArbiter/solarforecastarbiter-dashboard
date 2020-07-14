@@ -655,12 +655,11 @@ class PermissionObjectAddition(PermissionView):
             api = self.get_api_handler(permission['object_type'])
             perm_objects = list(permission['objects'].keys())
 
-            if data_type == 'report':
-                all_objects = api.list_metadata()
-                all_objects = self.flatten_reports(all_objects)
-            else:
-                all_objects = api.list_metadata()
+            all_objects = api.list_metadata()
             all_objects = self.filter_by_org(all_objects, 'provider')
+
+            if data_type == 'report':
+                all_objects = self.flatten_reports(all_objects)
             # remove any objects alread on the permission
             object_id_key = f"{data_type}_id"
             all_objects = [obj for obj in all_objects
