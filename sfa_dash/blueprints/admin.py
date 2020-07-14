@@ -72,7 +72,7 @@ class AdminView(BaseView):
         """
         reports = [report.copy() for report in report_list]
         for report in reports:
-            report.update(report.get('report_parameters'))
+            report.update(report.pop('report_parameters'))
         return reports
 
     def get(self):
@@ -497,10 +497,9 @@ class PermissionView(AdminView):
             return render_template(
                 self.template, errors=e.errors, **self.template_args)
         if object_type == 'report':
-            object_map = self.flatten_reports(object_list)
-        else:
-            object_map = {obj[id_key]: obj
-                          for obj in object_list}
+            object_list = self.flatten_reports(object_list)
+        object_map = {obj[id_key]: obj
+                      for obj in object_list}
         # rebuild the 'objects' dict with the uuid: object structure
         # instead of uuid: created_at
         permission['objects'] = {
@@ -658,8 +657,7 @@ class PermissionObjectAddition(PermissionView):
 
             if data_type == 'report':
                 all_objects = api.list_metadata()
-                for rep in all_objects:
-                    rep.update(rep.pop('report_parameters'))
+                all_objects = self.flatten_reports(all_objects)
             else:
                 all_objects = api.list_metadata()
             all_objects = self.filter_by_org(all_objects, 'provider')
