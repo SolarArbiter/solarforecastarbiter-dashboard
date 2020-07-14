@@ -70,10 +70,9 @@ class AdminView(BaseView):
         top-level keys with the contents of 'report_parameters' for each
         report.
         """
-        reports = [report.copy() for report in report_list]
-        for report in reports:
-            report.update(report.pop('report_parameters'))
-        return reports
+        for report in report_list:
+            report.update({'name': report.pop('report_parameters')['name']})
+        return report_list
 
     def get(self):
         self.set_template_args()
@@ -660,7 +659,7 @@ class PermissionObjectAddition(PermissionView):
 
             if data_type == 'report':
                 all_objects = self.flatten_reports(all_objects)
-            # remove any objects alread on the permission
+            # remove any objects already on the permission
             object_id_key = f"{data_type}_id"
             all_objects = [obj for obj in all_objects
                            if obj[object_id_key] not in perm_objects]
