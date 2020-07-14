@@ -655,13 +655,14 @@ class PermissionObjectAddition(PermissionView):
             data_type = permission['object_type'][:-1]
             api = self.get_api_handler(permission['object_type'])
             perm_objects = list(permission['objects'].keys())
+
             if data_type == 'report':
                 all_objects = api.list_metadata()
-                all_objects = [rep.update(rep['report_parameters'])
-                               for rep in all_objects]
+                for rep in all_objects:
+                    rep.update(rep.pop('report_parameters'))
             else:
                 all_objects = api.list_metadata()
-                all_objects = self.filter_by_org(all_objects, 'provider')
+            all_objects = self.filter_by_org(all_objects, 'provider')
             # remove any objects alread on the permission
             object_id_key = f"{data_type}_id"
             all_objects = [obj for obj in all_objects
@@ -669,6 +670,7 @@ class PermissionObjectAddition(PermissionView):
             self.set_template_args(permission)
         return render_template(self.template,
                                table_data=all_objects,
+                               data_type=data_type,
                                **self.template_args,
                                **kwargs)
 
