@@ -49,8 +49,8 @@ def handle_response(request_object):
             }
             if previous_page is not None and previous_page != request.url:
                 errors['404'] = errors['404'] + (
-                    f' <a href="{escape(previous_page)}">Return to the previous '
-                    'page.</a>')
+                    f' <a href="{escape(previous_page)}">Return to the '
+                    'previous page.</a>')
         elif request_object.status_code == 422:
             errors = request_object.json()['errors']
         if errors:
