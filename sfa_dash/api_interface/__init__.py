@@ -1,6 +1,7 @@
 """Helper functions for all Solar Forecast Arbiter /sites/* endpoints.
 """
 from flask import current_app as app
+from requests.exceptions import ChunkedEncodingError
 
 
 from sfa_dash import oauth_request_session
@@ -22,8 +23,18 @@ def get_request(path, **kwargs):
     """
     # may need to handle errors if oauth_request_session does not exist somehow
     # definitely need to handle errors here
-    return handle_response(oauth_request_session.get(
-        f'{app.config["SFA_API_URL"]}{path}', **kwargs))
+    retries = kwargs.pop('chunked_retries', 2)
+    try:
+        req = oauth_request_session.get(
+            f'{app.config["SFA_API_URL"]}{path}', **kwargs)
+    except ChunkedEncodingError:
+        if retries > 0:
+            kwargs['chunked_retries'] = retries - 1
+            return get_request(path, **kwargs)
+        else:
+            raise
+    else:
+        return handle_response(req)
 
 
 def post_request(path, payload, json=True):
