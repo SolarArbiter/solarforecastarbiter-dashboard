@@ -66,9 +66,9 @@ class AdminView(BaseView):
         self.template_args = {'subnav': self.format_subnav(**subnav_kwargs)}
 
     def flatten_reports(self, report_list):
-        """Takes a list of report objects from the api and updates the
-        top-level keys with the contents of 'report_parameters' for each
-        report.
+        """Takes a list of report metadata dictionaries and moved the `name`
+        field to the top-level dictionary and removes unneeded report
+        parameters and raw report.
         """
         for report in report_list:
             report.update({'name': report.pop('report_parameters')['name']})
