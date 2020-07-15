@@ -36,4 +36,5 @@ def bad():
     return '', 405
 
 
-test_app.run(port=sys.argv[1])
+if __name__ == '__main__':
+    test_app.run(port=sys.argv[1])
