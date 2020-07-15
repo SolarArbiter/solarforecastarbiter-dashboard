@@ -1,5 +1,8 @@
 """Helper functions for all Solar Forecast Arbiter /sites/* endpoints.
 """
+import time
+
+
 from flask import current_app as app
 from requests.exceptions import ChunkedEncodingError
 
@@ -30,6 +33,7 @@ def get_request(path, **kwargs):
     except ChunkedEncodingError:
         if retries > 0:
             kwargs['chunked_retries'] = retries - 1
+            time.sleep((3 - retries) * 0.1)
             return get_request(path, **kwargs)
         else:
             raise
