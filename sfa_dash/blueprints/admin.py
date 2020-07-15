@@ -72,6 +72,7 @@ class AdminView(BaseView):
         """
         for report in report_list:
             report.update({'name': report.pop('report_parameters')['name']})
+            report.pop('raw_report', None)
         return report_list
 
     def get(self):
