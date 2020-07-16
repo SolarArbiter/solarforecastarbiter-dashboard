@@ -29,7 +29,7 @@
   <p>Select the action this permission will allow.</p>
   <input type="radio" name="permission-action" value="create" required>Create
   <input type="radio" name="permission-action" value="read">Read
-  {% if data_type not in ['fpermission-orecast', 'observation', 'site'] %}
+  {% if data_type not in ['forecast', 'observation', 'site'] %}
   <input type="radio" name="permission-action" value="update">Update
   {% endif %}
   <input type="radio" name="permission-action" value="delete">Delete
