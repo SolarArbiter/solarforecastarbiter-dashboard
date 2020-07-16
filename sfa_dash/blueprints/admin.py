@@ -306,28 +306,27 @@ class RoleGrant(AdminView):
     def post(self, uuid):
         form_data = request.form
         user_email = form_data.get('user_email', '')
+        redirect_url = session.pop(
+            'redirect_link',
+            url_for('admin.role_view', uuid=uuid))
         try:
             users.add_role_by_email(user_email, uuid)
         except DataRequestException:
             # flash a message that grant failed
-            flash('Failed to grant role', 'error')
+            flash('Failed to grant role.', 'error')
             try:
                 role = roles.get_metadata(uuid)
             except DataRequestException as e:
                 # User could not read the role, flash a 404
                 self.flash_api_errors(e.errors)
                 role = None
-            self.set_template_args()
+            self.set_template_args(role, redirect_url)
             return render_template(
                 self.template,
-                role=role,
                 form_data=form_data,
                 **self.template_args)
         # flash success message and redirect to the referrer, or the role view
         flash('Role granted successfully', 'message')
-        redirect_url = session.pop(
-            'redirect_link',
-            url_for('admin.role_view', uuid=uuid))
         return redirect(redirect_url)
 
 
