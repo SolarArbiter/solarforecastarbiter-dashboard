@@ -64,6 +64,17 @@ $(document).ready(function(){
         }
     });
     // hide interval_label = 'event' by default.
-    $('[name="interval_label"] option[value="event"]').prop(
-                'hidden', true);
+    $('[name="interval_label"] option[value="event"]').prop('hidden', true);
+
+    $('[name="permission-action"]').change(function(){
+        if (this.value == 'create'){
+            $('#non-create-permission-fields')
+                .prop('disabled', true)
+                .prop('hidden', true);
+        } else {
+            $('#non-create-permission-fields')
+                .prop('disabled', false)
+                .prop('hidden', false);
+        }
+    });
 });

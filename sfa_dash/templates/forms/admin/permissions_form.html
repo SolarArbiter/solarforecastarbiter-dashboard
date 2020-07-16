@@ -27,18 +27,19 @@
 <div class="form-element full-width">
   <label>Action</label><br/>
   <p>Select the action this permission will allow.</p>
-  <input type="radio" name="action" value="create" required>Create
-  <input type="radio" name="action" value="read">Read
-  {% if data_type not in ['forecast', 'observation', 'site'] %}
-  <input type="radio" name="action" value="update">Update 
+  <input type="radio" name="permission-action" value="create" required>Create
+  <input type="radio" name="permission-action" value="read">Read
+  {% if data_type not in ['fpermission-orecast', 'observation', 'site'] %}
+  <input type="radio" name="permission-action" value="update">Update
   {% endif %}
-  <input type="radio" name="action" value="delete">Delete
+  <input type="radio" name="permission-action" value="delete">Delete
   {% if data_type != "site" %}
-  <input type="radio" name="action" value="read_values">Read Values
-  <input type="radio" name="action" value="write_values">Write Values
-  <input type="radio" name="action" value="delete_values">Delete Values
+  <input type="radio" name="permission-action" value="read_values">Read Values
+  <input type="radio" name="permission-action" value="write_values">Write Values
+  <input type="radio" name="permission-action" value="delete_values">Delete Values
   {% endif %}
 </div>
+<fieldset id="non-create-permission-fields">
 <div class="form-element full-width">
   <label>Applies to all</label>
   <input type="checkbox" name="applies-to-all" data-toggle="collapse" data-target="#object-selector">
@@ -69,7 +70,7 @@
               <i class="fa fa-warning"></i>
               No Result
             </td>
-          </tr> 
+          </tr>
           {% for i in range(table_data | length) %}
           {{ row_macro(data_type, table_data[i], i, "objects-list" + i |string in form_data ) }}
           {% endfor %}
@@ -78,4 +79,5 @@
     </div>
   </div>
 </div>
+</fieldset>
 {% endblock %}
