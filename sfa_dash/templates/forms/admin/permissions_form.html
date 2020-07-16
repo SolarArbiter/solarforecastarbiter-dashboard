@@ -39,7 +39,13 @@
   <input type="radio" name="permission-action" value="delete_values">Delete Values
   {% endif %}
 </div>
-<fieldset id="non-create-permission-fields">
+<div id="create-permission-explanation" class="collapse">
+<p>Create permissions don't require any further configuration, but creating new
+metadata may require other permissions. For example, creating an Observation at
+a Site requires <i>Create</i> permissions for Observations and <i>Read</i>
+permission on the Site.</p>
+</div>
+<fieldset id="non-create-permission-fields" class="collapse show">
 <div class="form-element full-width">
   <label>Applies to all</label>
   <input type="checkbox" name="applies-to-all" data-toggle="collapse" data-target="#object-selector">

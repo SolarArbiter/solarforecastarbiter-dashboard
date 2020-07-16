@@ -70,11 +70,17 @@ $(document).ready(function(){
         if (this.value == 'create'){
             $('#non-create-permission-fields')
                 .prop('disabled', true)
-                .prop('hidden', true);
+                .collapse('hide');
+            $('#create-permission-explanation')
+                .prop('hidden', false)
+                .collapse('show');
         } else {
             $('#non-create-permission-fields')
                 .prop('disabled', false)
-                .prop('hidden', false);
+                .collapse('show');
+            $('#create-permission-explanation')
+                .prop('hidden', true)
+                .collapse('hide');
         }
     });
 });
