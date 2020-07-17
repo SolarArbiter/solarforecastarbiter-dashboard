@@ -40,10 +40,18 @@
   {% endif %}
 </div>
 <div id="create-permission-explanation" class="collapse">
-<p>Create permissions don't require any further configuration, but creating new
-metadata may require other permissions. For example, creating an Observation at
-a Site requires <i>Create</i> permissions for Observations and <i>Read</i>
-permission on the Site.</p>
+{% set perm_requirements = {
+    'site': '',
+    'observation': '<i>Read</i> permissions on the associated Site',
+    'forecast': '<i>Read</i> permissions on the associated Site',
+    'aggregate': '<i>Read</i> and <i>Read Values</i> permissions on Observations to make up the aggregate',
+    'cdf_forecast_group': '<i>Read</i> permissions on the associated Site',
+    'report': '<i>Read</i> and <i>Read Values</i> permissions on any Forecasts or Observations you would like to analyze in the Report',
+} %}
+<p>Create permissions don't require any further configuration
+{% if perm_requirements.get(data_type, '') | length %} but creating new
+{{ data_type | convert_data_type }}s requires {{ perm_requirements[data_type] | safe }}
+{% endif %}.</p>
 </div>
 <fieldset id="non-create-permission-fields" class="collapse show">
 <div class="form-element full-width">
