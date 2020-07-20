@@ -18,7 +18,7 @@ data_type_mapping = {
 
 # variables that require a site has modeling parameters
 MODELING_PARAM_VARIABLES = ['ac_power', 'dc_power', 'poa_global',
-                            'curtailment', 'availability']
+                            'availability']
 
 
 def api_to_dash_varname(api_varname):
