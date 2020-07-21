@@ -16,6 +16,10 @@ data_type_mapping = {
     'aggregate': 'Aggregate',
 }
 
+# variables that require a site has modeling parameters
+MODELING_PARAM_VARIABLES = ['ac_power', 'dc_power', 'poa_global',
+                            'availability']
+
 
 def api_to_dash_varname(api_varname):
     return COMMON_NAMES[api_varname]
@@ -90,6 +94,18 @@ def climate_zone_links(zones):
         return ["No Climate Zone"]
 
 
+def site_variable_options(site_metadata):
+    has_modeling_parameters = any(
+        site_metadata['modeling_parameters'].values())
+    variable_options = {key: f'{value} ({api_varname_to_units(key)})'
+                        for key, value in variable_mapping.items()}
+    if has_modeling_parameters:
+        return variable_options
+    else:
+        return {k: v for k, v in variable_options.items()
+                if k not in MODELING_PARAM_VARIABLES}
+
+
 def register_jinja_filters(app):
     app.jinja_env.filters['convert_varname'] = api_to_dash_varname
     app.jinja_env.filters['var_to_units'] = api_varname_to_units
@@ -98,3 +114,4 @@ def register_jinja_filters(app):
     app.jinja_env.filters['format_datetime'] = format_datetime
     app.jinja_env.filters['is_number'] = is_number
     app.jinja_env.filters['climate_zone_links'] = climate_zone_links
+    app.jinja_env.filters['site_variable_options'] = site_variable_options
