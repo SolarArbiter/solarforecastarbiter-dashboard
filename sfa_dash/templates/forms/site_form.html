@@ -36,9 +36,10 @@
   <input type="radio" name="site_type" data-toggle="collapse" data-target=".pv-model-params:not(.show)" value="power-plant" class="site_type-field"{% if site_type == 'power-plant' %} checked{% endif %}/>Power Plant
   {{ form.help_button('site_type') }}
   <span class="site_type-help-text form-text text-muted help-text collapse" aria-hidden>
-      Power plants will require pv system modeling parameters and will allow
-      for power forecasts and observations (AC power, DC power, plane of array
-      irradiance, and availability).
+     Choose Weather Station if the Site will only be used for observations and
+     forecasts of irradiance and other weather variables. Choose Power Plant to
+     specify PV system modeling parameters and enable observations and
+     forecasts of power.
   </span>
 </div>
 <div class="pv-model-params collapse {% if site_type == 'power-plant' %}show{% endif %}">
