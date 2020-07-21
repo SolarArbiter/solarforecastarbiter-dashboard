@@ -33,9 +33,6 @@ DEFAULT_METRICS = ['mae', 'mbe', 'rmse']
 
 DEFAULT_CATEGORIES = ['total', 'year', 'month', 'hour', 'date']
 
-MODELING_PARAM_VARIABLES = ['ac_power', 'dc_power', 'poa_global',
-                            'curtailment', 'availability']
-
 ALL_METRICS = {}
 ALL_METRICS.update(ALLOWED_DETERMINISTIC_METRICS)
 ALL_METRICS.update(ALLOWED_EVENT_METRICS)
