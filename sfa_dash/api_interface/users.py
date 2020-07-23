@@ -50,3 +50,13 @@ def get_email(user_id):
 def actions_on(uuid):
     req = get_request(f'/users/actions-on/{uuid}')
     return req
+
+
+def actions_on_type(object_type):
+    req = get_request(f'/users/actions-on-type/{object_type}')
+    return req
+
+
+def get_create_permissions():
+    req = get_request('/users/can-create/')
+    return req

@@ -75,6 +75,24 @@ def is_allowed(action):
     return action in allowed
 
 
+def can_create(object_type):
+    """Returns if a user can create an object type or not
+
+    Parameters
+    ----------
+    object_type: str
+        Type of object to check for create permissions. Should use the plural
+        e.g. observations.
+
+    Returns
+    -------
+    bool
+        True if the user can create the object type, else false.
+    """
+    allowed = object_type in getattr(g, 'can_create', [])
+    return allowed
+
+
 def template_variables():
     return {
         'dashboard_version': sfa_dash.__version__,
@@ -96,4 +114,5 @@ def template_variables():
         'variable_names': COMMON_NAMES,
         'variable_unit_map': ALLOWED_VARIABLES,
         'interval_label_options': INTERVAL_LABEL_OPTIONS,
+        'can_create': can_create,
     }
