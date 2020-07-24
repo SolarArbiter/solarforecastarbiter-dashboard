@@ -1,6 +1,6 @@
 <div class="tools observation-tools mt-1">
 <input type="text" placeholder="Search" class="search">
-{% if creation_link is not none %}
+{% if creation_link is not none and can_create('observations') %}
 <a role="button" class="btn btn-primary btn-sm" href="{{ creation_link }}">Create new Observation</a>
 {% endif %}
 </div>
