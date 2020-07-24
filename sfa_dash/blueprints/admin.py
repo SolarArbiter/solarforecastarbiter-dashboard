@@ -119,12 +119,28 @@ class UserRoleAddition(AdminView):
 
     def set_template_args(self, user, all_roles):
         super().set_template_args()
+
+        # Get list of role uuids the grantee already has
         user_roles = list(user['roles'].keys())
-        all_roles = roles.list_metadata()
-        all_roles = self.filter_by_org(all_roles, 'organization')
-        # remove any roles the user already has
+
+        try:
+            all_roles = roles.list_metadata()
+        except DataRequestException:
+            all_roles = []
+
+        # Get a list of role uuids the current grantor can grant
+        try:
+            role_permissions = users.actions_on_type('roles')
+        except DataRequestException:
+            role_permissions = {}
+        grantable_roles = [role_id
+                           for role_id, actions in role_permissions.items()
+                           if 'grant' in actions]
+
+        # remove any roles the grantee already has or grantor cannot be granted
         all_roles = [role for role in all_roles
-                     if role['role_id'] not in user_roles]
+                     if role['role_id'] not in user_roles
+                     and role['role_id'] in grantable_roles]
         self.template_args['user'] = user
         self.template_args['table_data'] = all_roles
 
