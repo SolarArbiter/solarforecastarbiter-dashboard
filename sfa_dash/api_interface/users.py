@@ -53,8 +53,10 @@ def actions_on(uuid):
 
 
 def actions_on_type(object_type):
+    """Returns a dictionary of `{uuid: actions, ..}`."""
     req = get_request(f'/users/actions-on-type/{object_type}')
-    return req
+    actions_dict = {obj['object_id']: obj['actions'] for obj in req['objects']}
+    return actions_dict
 
 
 def get_create_permissions():
