@@ -41,7 +41,7 @@
             <td class="action-column">{{ perm["action"] }}</td>
             <td class="object-type-column">{{ perm["object_type"] }} </td>
 
-            <td class="applies-to-all-column">{% if perm["applies_to_all"] %}&#10004;{% endif %} </td>
+            <td class="applies-to-all-column">{% if perm["applies_to_all"] %}&#10004;{% else %}&#10060;{% endif %} </td>
         </tr>
       {% endfor %}
     {% endif %}
