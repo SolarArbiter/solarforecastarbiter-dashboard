@@ -89,10 +89,10 @@ def create_app(config=None):
                 # cdf_forecast_single, where permissions are dependent on
                 # the parent cdf_forecast_group
                 pass
-            try:
-                g.can_create = users.get_create_permissions()['can_create']
-            except DataRequestException:
-                pass
+        try:
+            g.can_create = users.get_create_permissions()['can_create']
+        except DataRequestException:
+            pass
         global_template_args.update(template_variables())
         return global_template_args
 
