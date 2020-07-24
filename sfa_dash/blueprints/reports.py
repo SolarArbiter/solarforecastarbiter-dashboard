@@ -2,7 +2,7 @@ from flask import (request, redirect, url_for, render_template, send_file,
                    current_app, flash)
 
 from sfa_dash.api_interface import (observations, forecasts, sites, reports,
-                                    aggregates, cdf_forecast_groups)
+                                    aggregates, cdf_forecast_groups, users)
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.errors import DataRequestException
 from sfa_dash.form_utils import converters
@@ -24,6 +24,13 @@ class ReportsView(BaseView):
             reports_list = reports.list_metadata()
         except DataRequestException as e:
             return {'errors': e.errors}
+        try:
+            all_actions = users.actions_on_type('reports')
+        except DataRequestException:
+            all_actions = {}
+        for report in reports_list:
+            report.update(
+                {'actions': all_actions.get(report['report_id'], [])})
         self.template_args = {
             "page_title": 'Reports',
             "reports": reports_list,

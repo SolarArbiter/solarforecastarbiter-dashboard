@@ -76,7 +76,10 @@
             <a role="button" class="report-details-closer">close</a>
             </div>
             {# end report metadata block #}
-        <td><a role="button" class="btn btn-danger btn-sm" href="{{ url_for('data_dashboard.delete_report', uuid=report['report_id']) }}">Delete</a>
+        <td>
+            {% if 'delete' in report['actions'] %}
+            <a role="button" class="btn btn-danger btn-sm" href="{{ url_for('data_dashboard.delete_report', uuid=report['report_id']) }}">Delete</a>
+            {% endif %}
         <td class="reports-table-status-column">{{ report['status'] }}</td>
     </tr>
   {% endfor %}
