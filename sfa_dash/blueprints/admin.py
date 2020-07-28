@@ -137,7 +137,9 @@ class UserRoleAddition(AdminView):
                            for role_id, actions in role_permissions.items()
                            if 'grant' in actions]
 
-        # remove any roles the grantee already has or grantor cannot be granted
+        # Remove any roles the grantee already has or grantor cannot grant.
+        # Note that no user should have grant priveleges on a role belonging to
+        # another organization, as this is disallowed at the API.
         all_roles = [role for role in all_roles
                      if role['role_id'] not in user_roles
                      and role['role_id'] in grantable_roles]
