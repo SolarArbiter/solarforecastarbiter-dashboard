@@ -50,3 +50,27 @@ def get_email(user_id):
 def actions_on(uuid):
     req = get_request(f'/users/actions-on/{uuid}')
     return req
+
+
+def actions_on_type(object_type):
+    """Get a list of objects and actions user can perform on them.
+
+    Parameters
+    ----------
+    object_type: str
+        The type of object to query for. Note that the api uses plural type
+        notation, e.g. `observations`.
+    Returns
+    -------
+    dict
+        Dictionary where keys are object uuids and values are a list of
+        permitted actions.
+    """
+    req = get_request(f'/users/actions-on-type/{object_type}')
+    actions_dict = {obj['object_id']: obj['actions'] for obj in req['objects']}
+    return actions_dict
+
+
+def get_create_permissions():
+    req = get_request('/users/can-create/')
+    return req

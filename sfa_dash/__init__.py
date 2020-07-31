@@ -79,15 +79,21 @@ def create_app(config=None):
     def inject_globals():
         # Injects variables into all rendered templates
         global_template_args = {}
-        global_template_args['current_user'] = session.get('userinfo')
-        if 'uuid' in request.view_args:
-            uuid = request.view_args.get('uuid')
+        current_user = session.get('userinfo')
+        global_template_args['current_user'] = current_user
+        if current_user is not None:
+            if 'uuid' in request.view_args:
+                uuid = request.view_args.get('uuid')
+                try:
+                    g.allowed_actions = users.actions_on(uuid)['actions']
+                except DataRequestException:
+                    # Allow for special cases to later set g.allowed_actions
+                    # e.g. cdf_forecast_single, where permissions are dependent
+                    # on the parent cdf_forecast_group
+                    pass
             try:
-                g.allowed_actions = users.actions_on(uuid)['actions']
-            except DataRequestException:
-                # Allow for special cases to later set g.allowed_actions e.g.
-                # cdf_forecast_single, where permissions are dependent on
-                # the parent cdf_forecast_group
+                g.can_create = users.get_create_permissions()['can_create']
+            except (DataRequestException):
                 pass
         global_template_args.update(template_variables())
         return global_template_args
