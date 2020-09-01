@@ -240,10 +240,16 @@ function populateReferenceForecasts(){
             var matching_constant = fx['constant_values'].find(
                 x => x['constant_value'] == constant_value);
             var forecast_id = matching_constant['forecast_id'];
+            // Due to repopulating the <select> element with options, the
+            // report_utils.restore_prev_value function does not work here.
+            // So manually check for matching forecast id.
+            let is_selected = previous_reference_forecast && previous_reference_forecast.value == forecast_id;
             reference_selector.append(
                 $('<option></option>')
                     .html(fx['name'])
                     .val(forecast_id)
+                    .prop('selected', is_selected)
+                    .attr('data-dist-id', fx['forecast_id'])
                     .attr('data-site-id', fx['site_id'])
                     .attr('data-aggregate-id', fx['aggregate_id'])
                     .attr('data-interval-length', fx['interval_length'])
@@ -461,7 +467,6 @@ function createPairSelector(){
             }
         } else {
             $('#no-distributions').attr('hidden', true);
-            report_utils.restore_prev_value(previous_reference_forecast);
         }
         populateReferenceForecasts();
         if (compareTo == 'observation'){
@@ -585,9 +590,14 @@ function createPairSelector(){
     var refFxSelector = newSelector(
         "reference forecast", "forecast", required=false,
         description='Skill metrics will be calculated for any binary forecasts matching the selection above.');
+    refFxSelector.find('label').after(report_utils.reference_inclusion_button);
     refFxSelector.append(
         $('<a role="button" id="ref-clear">Clear reference forecast selection</a>').click(
-            function(){$('#reference-forecast-select').val('')})
+            function(){
+                $('#reference-forecast-select').val('');
+                previous_reference_forecast = null;
+            }
+        )
     );
 
     var dbSelector = report_utils.deadbandSelector();
@@ -739,11 +749,13 @@ function createPairSelector(){
             var selected_forecast = forecast_select.find(':selected')[0];
             var selected_reference_forecast = ref_forecast_select.find(':selected')[0];
             if(!selected_reference_forecast){
-                ref_text = "Unset";
-                ref_id = null;
+                var ref_text = "Unset";
+                var ref_id = null;
+                var ref_distribution_id = null;
             }else{
-                ref_text = selected_reference_forecast.text;
-                ref_id = selected_reference_forecast.value;
+                var ref_text = selected_reference_forecast.text;
+                var ref_id = selected_reference_forecast.value;
+                var ref_distribution_id = selected_reference_forecast.dataset.distId;
             }
             // try to parse deadband values
             try{
@@ -782,6 +794,22 @@ function createPairSelector(){
                     constant_value_label,
                     distribution_id,
                 )
+                if ($('[name="include-reference"]:checked').val() == "true"
+                    && ref_id != null){
+                    addPair('observation',
+                            selected_observation.text,
+                            selected_observation.value,
+                            ref_text,
+                            ref_id,
+                            "Unset",
+                            null,
+                            deadband_values[0],
+                            deadband_values[1],
+                            forecast_type,
+                            constant_value_label,
+                            ref_distribution_id,
+                    )
+                }
             });
 
             var variable = selected_forecast.dataset.variable;
@@ -813,11 +841,12 @@ function createPairSelector(){
             var selected_forecast = forecast_select.find('option:selected')[0];
             var selected_reference_forecast = ref_forecast_select.find('option:selected')[0];
             if(!selected_reference_forecast){
-                ref_text = "Unset";
-                ref_id = null;
+                var ref_text = "Unset";
+                var ref_id = null;
             }else{
-                ref_text = selected_reference_forecast.text;
-                ref_id = selected_reference_forecast.value;
+                var ref_text = selected_reference_forecast.text;
+                var ref_id = selected_reference_forecast.value;
+                var ref_distribution_id = selected_reference_forecast.dataset.distId;
             }
             constant_value_select.find('option:selected').each(function(){
                 let forecast_id = $(this).val();
@@ -850,6 +879,22 @@ function createPairSelector(){
                     constant_value_label,
                     distribution_id,
                 );
+                if ($('[name="include-reference"]:checked').val() == "true"
+                    && ref_id != null){
+                    addPair('aggregate',
+                            selected_observation.text,
+                            selected_observation.value,
+                            ref_text,
+                            ref_id,
+                            "Unset",
+                            null,
+                            deadband_values[0],
+                            deadband_values[1],
+                            forecast_type,
+                            constant_value_label,
+                            ref_distribution_id,
+                    )
+                }
             });
             var variable = selected_forecast.dataset.variable;
             report_utils.set_units(variable, filterForecasts);

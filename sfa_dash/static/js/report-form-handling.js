@@ -356,13 +356,18 @@ function createPairSelector(){
     var obsSelector = report_utils.newSelector("observation", "forecast");
     var fxSelector = report_utils.newSelector("forecast", "site");
     var refFxSelector = report_utils.newSelector("reference forecast", "forecast", required=false);
+    refFxSelector.find('label').after(report_utils.reference_inclusion_button);
     var fxVariableSelector = report_utils.createVariableSelect();
     var dbSelector = report_utils.deadbandSelector();
     fxSelector.find('.report-field-filters').append(fxVariableSelector);
 
     refFxSelector.append(
         $('<a role="button" id="ref-clear">Clear reference forecast selection</a>').click(
-            function(){$('#reference-forecast-select').val('');})
+            function(){
+                $('#reference-forecast-select').val('');
+                previous_reference_forecast = null;
+            }
+        )
     );
 
     // Buttons for adding an obs/fx pair for observations or aggregates
@@ -509,6 +514,19 @@ function createPairSelector(){
                     deadband_values[0],
                     deadband_values[1],
             );
+            if ($('[name="include-reference"]:checked').val() == "true"
+                && ref_id != null){
+                addPair('observation',
+                        selected_observation.text,
+                        selected_observation.value,
+                        ref_text,
+                        ref_id,
+                        "Unset",
+                        null,
+                        deadband_values[0],
+                        deadband_values[1],
+                );
+            }
             var variable = selected_forecast.dataset.variable;
             report_utils.set_units(variable, filterForecasts);
             $(".empty-reports-list").attr('hidden', 'hidden');
@@ -550,6 +568,20 @@ function createPairSelector(){
                            "Unset",
                            null,
             );
+            if ($('[name="include-reference"]:checked').val() == "true"
+                && ref_id != null){
+                console.log
+                addPair('aggregate',
+                        selected_aggregate.text,
+                        selected_aggregate.value,
+                        ref_text,
+                        ref_id,
+                        "Unset",
+                        null,
+                        deadband_values[0],
+                        deadband_values[1],
+                );
+            }
             var variable = selected_forecast.dataset.variable;
             report_utils.set_units(variable, filterForecasts);
 

@@ -1457,3 +1457,13 @@ report_utils.register_forecast_fill_method_validator = function(
             .prop('max', 1);
     }
 }
+
+report_utils.reference_inclusion_button = function(){
+    /*
+     * Create a radio button with options for including.
+     */
+    return $(`<div>
+    <input type="radio" name="include-reference" value="true" checked> Also Include as standard Forecast.<br>
+    <input type="radio" name="include-reference" value="false"> Use only for skill metric.<br>
+    </div>`);
+}
