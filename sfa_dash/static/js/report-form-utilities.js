@@ -9,6 +9,8 @@ report_utils = new Object();
 previous_observation = null;
 previous_reference_forecast = null;
 
+// Global for tracking object pairs, used to prevent duplicates.
+object_pairs = [];
 
 report_utils.fill_existing_pairs = function(){
     /*
@@ -1467,4 +1469,56 @@ report_utils.reference_inclusion_button = function(){
     <input type="radio" name="include-reference" value="true" checked> Also include as standard forecast/observation pair with full metrics.<br>
     <input type="radio" name="include-reference" value="false"> Use only for skill metric.<br>
     </div>`);
+}
+
+
+report_utils.compare_object_pairs = function(p1, p2){
+    // Compare object keys
+    var pair_keys = ['forecast', 'observation', 'reference',
+                     'deadband', 'deadband_value'];
+    for (var i =0; i < pair_keys.length; i++){
+        let key = pair_keys[i];
+        if (p1[key] !== p2[key]){
+            return false;
+        }
+    }
+    return true;
+}
+
+report_utils.try_insert_pair = function(fxid, obsid, reffxid, dblabel, dbvalue){
+    /*
+     * Try to add a pair to the object_pair list, returns true on successful
+     * insertion, returns false if the object already exists.
+     */
+    var pair_object = {
+        'forecast': fxid,
+        'observation': obsid,
+        'reference': reffxid,
+        'deadband': dblabel,
+        'deadband_value': dbvalue,
+    }
+    var already_exists = object_pairs.some(
+        x => report_utils.compare_object_pairs(pair_object, x))
+    if (already_exists){
+        return false;
+    } else {
+        object_pairs.push(pair_object);
+        return true;
+    }
+}
+
+report_utils.remove_pair = function(fxid, obsid, reffxid, dblabel, dbvalue){
+    /*
+     * Remove an object pair from the list of object pairs.
+     */
+    var pair_object = {
+        'forecast': fxid,
+        'observation': obsid,
+        'reference': reffxid,
+        'deadband': dblabel,
+        'deadband_value': dbvalue,
+    }
+    object_pairs = object_pairs.filter(
+        x => !report_utils.compare_object_pairs(pair_object, x)
+    )
 }
