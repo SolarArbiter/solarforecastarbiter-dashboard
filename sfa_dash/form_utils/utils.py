@@ -23,7 +23,9 @@ def parse_timedelta_from_form(data_dict, key_root):
         If the units field is not one of 'minutes', 'hours' or 'days', or if
         the number field is not a valid integer.
     """
-    value = int(data_dict[f'{key_root}_number'])
+    # Cast first to float to handle case where user has entered an integer as
+    # a floating point number.
+    value = int(float(data_dict[f'{key_root}_number']))
     units = data_dict[f'{key_root}_units']
     if units == 'minutes':
         return value
@@ -64,12 +66,12 @@ def parse_timedelta_from_api(data_dict, key_root):
     interval_units = 'minutes'
     if interval_minutes % 1440 == 0:
         interval_units = 'days'
-        interval_value = interval_minutes / 1440
+        interval_value = int(interval_minutes / 1440)
     elif interval_minutes % 60 == 0:
         interval_units = 'hours'
-        interval_value = interval_minutes / 60
+        interval_value = int(interval_minutes / 60)
     else:
-        interval_value = interval_minutes
+        interval_value = int(interval_minutes)
     return {
         f'{key_root}_number': interval_value,
         f'{key_root}_units': interval_units,
