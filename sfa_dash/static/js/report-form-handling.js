@@ -570,7 +570,6 @@ function createPairSelector(){
             );
             if ($('[name="include-reference"]:checked').val() == "true"
                 && ref_id != null){
-                console.log
                 addPair('aggregate',
                         selected_aggregate.text,
                         selected_aggregate.value,
