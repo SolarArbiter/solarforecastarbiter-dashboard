@@ -351,7 +351,7 @@ report_utils.applyFxDependentFilters = function(){
     filterReferenceForecasts();
 }
 
-report_utils.newSelector = function(field_name, depends_on=null, required=true){
+report_utils.newSelector = function(field_name, depends_on=null, required=true, description="", classes=[]){
     /*
      * Returns a JQuery object containing labels and select elements with base
      * options.
@@ -380,9 +380,10 @@ report_utils.newSelector = function(field_name, depends_on=null, required=true){
     var field_type = field_name.toLowerCase().replace(/ /g, '-');
     return $(`<div class="form-element full-width ${field_type}-select-wrapper">
                 <label>Select a ${field_name} ${required ? "" : "(Optional)"}</label>
-                  <div class="report-field-filters"><input id="${field_type}-option-search" class="form-control half-width" placeholder="Search by ${field_name} name"/></div><br>
+                  <div class="report-field-filters input-wrapper"><input id="${field_type}-option-search" class="form-control ${field_type == 'reference-forecast' ? '': 'half-width'}" placeholder="Search by ${field_name} name"/></div><br>
+                <div class="selector-description">${description}</div>
                 <div class="input-wrapper">
-                  <select id="${field_type}-select" class="form-control ${field_type}-field" name="${field_type}-select" size="5">
+                  <select id="${field_type}-select" class="form-control ${field_type}-field ${classes.join(" ")}" name="${field_type}-select" size="5">
                   ${depends_on ? `<option id="no-${field_type}-${depends_on}-selection" disabled> Please select a ${depends_on}.</option>` : ""}
                   <option id="no-${field_type}s" disabled hidden>No matching ${field_name}s</option>
                 </select>
@@ -1463,7 +1464,7 @@ report_utils.reference_inclusion_button = function(){
      * Create a radio button with options for including.
      */
     return $(`<div>
-    <input type="radio" name="include-reference" value="true" checked> Also Include as standard Forecast.<br>
+    <input type="radio" name="include-reference" value="true" checked> Also include as standard forecast/observation pair with full metrics.<br>
     <input type="radio" name="include-reference" value="false"> Use only for skill metric.<br>
     </div>`);
 }

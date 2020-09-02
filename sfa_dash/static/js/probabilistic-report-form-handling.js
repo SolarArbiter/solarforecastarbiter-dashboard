@@ -323,27 +323,6 @@ function newConstantValueSelector(){
           </div>`);
 }
 
-function newSelector(field_name, depends_on=null, required=true, description="",classes=[]){
-    /*
-     * Returns a JQuery object containing labels and select elements for appending options to.
-     * Initializes with one default and one optional select option:
-     *     Always adds an option containing "No matching <field_Type>s
-     *     If depends_on is provided, inserts a "Please select a <depends_on> option>
-     */
-    var field_type = field_name.toLowerCase().replace(/ /g, '-');
-    return $(`<div class="form-element full-width ${field_type}-select-wrapper">
-                <label>Select a ${field_name} ${required ? "" : "(Optional)"}</label>
-                  <div class="report-field-filters"><input id="${field_type}-option-search" class="form-control half-width" placeholder="Search by ${field_name} name"/></div><br>
-                <div class="selector-description">${description}</div>
-                <div class="input-wrapper">
-                  <select id="${field_type}-select" class="form-control ${field_type}-field ${classes.join(" ")}" name="${field_type}-select" size="5">
-                  ${depends_on ? `<option id="no-${field_type}-${depends_on}-selection" disabled> Please select a ${depends_on}.</option>` : ""}
-                  <option id="no-${field_type}s" disabled hidden>No matching ${field_name}s</option>
-                </select>
-                </div>
-              </div>`);
-}
-
 function createPairSelector(){
     /*
      * Returns a JQuery object containing Forecast, Observation pair widgets to insert into the DOM
@@ -570,10 +549,10 @@ function createPairSelector(){
      * Create the control elements for creating observation, forecast pairs
      *
      *********************************************************************/
-    var siteSelector = newSelector("site");
-    var aggregateSelector = newSelector("aggregate", "distribution",);
-    var obsSelector = newSelector("observation", "distribution");
-    var fxSelector = newSelector(
+    var siteSelector = report_utils.newSelector("site");
+    var aggregateSelector = report_utils.newSelector("aggregate", "distribution",);
+    var obsSelector = report_utils.newSelector("observation", "distribution");
+    var fxSelector = report_utils.newSelector(
         "distribution", "site", required=true,
         description=`
             The Solar Forecast Arbiter supports the specification of
@@ -587,7 +566,7 @@ function createPairSelector(){
             for each forecast.`
     );
 
-    var refFxSelector = newSelector(
+    var refFxSelector = report_utils.newSelector(
         "reference forecast", "forecast", required=false,
         description='Skill metrics will be calculated for any binary forecasts matching the selection above.');
     refFxSelector.find('label').after(report_utils.reference_inclusion_button);
