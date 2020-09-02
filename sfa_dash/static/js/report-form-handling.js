@@ -29,35 +29,37 @@ function addPair(
      *  @param {string} forecast_type
      *      The type of forecast in the pair.
      */
-
-    var new_object_pair = $(`<div class="pair-container object-pair object-pair-${pair_index}">
-            <div class="input-wrapper">
-              <div class="col-md-12">
-                <div class="object-pair-label forecast-name-${pair_index}"><b>Forecast: </b>${fx_name}</div>
-                <input type="hidden" class="form-control forecast-value" name="forecast-id-${pair_index}" required value="${fx_id}"/>
-                <div class="object-pair-label truth-name-${pair_index}"><b>Observation: </b> ${truth_name}</div>
-                <input type="hidden" class="form-control truth-value" name="truth-id-${pair_index}" required value="${truth_id}"/>
-                <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truth_type}"/>
-                <div class="object-pair-label reference-forecast-name"><b>Reference Forecast: </b> ${ref_fx_name}</div>
-                <input type="hidden" class="form-control reference-forecast-value" name="reference-forecast-${pair_index}" required value="${ref_fx_id}"/>
-                <div class="object-pair-label deadband-label"><b>Uncertainty: </b> ${db_label}</div>
-                <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="${db_value}"/>
-                <input type="hidden" class="forecast-type-value" required name="forecast-type-${pair_index}" value="${forecast_type}"/>
-              </div>
-             </div>
-             <a role="button" class="object-pair-delete-button">remove</a>
-           </div>`);
-    var remove_button = new_object_pair.find(".object-pair-delete-button");
-    remove_button.click(function(){
-        new_object_pair.remove();
-        if ($('.object-pair-list .object-pair').length == 0){
-            $('.empty-reports-list')[0].hidden = false;
-            report_utils.unset_units(x => $('#site-select').change());
-        }
-        report_utils.toggle_reference_dependent_metrics();
-    });
-    pair_container.append(new_object_pair);
-    pair_index++;
+    if (report_utils.try_insert_pair(fx_id, truth_id, ref_fx_id, db_label, db_value)){
+        var new_object_pair = $(`<div class="pair-container object-pair object-pair-${pair_index}">
+                <div class="input-wrapper">
+                  <div class="col-md-12">
+                    <div class="object-pair-label forecast-name-${pair_index}"><b>Forecast: </b>${fx_name}</div>
+                    <input type="hidden" class="form-control forecast-value" name="forecast-id-${pair_index}" required value="${fx_id}"/>
+                    <div class="object-pair-label truth-name-${pair_index}"><b>Observation: </b> ${truth_name}</div>
+                    <input type="hidden" class="form-control truth-value" name="truth-id-${pair_index}" required value="${truth_id}"/>
+                    <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truth_type}"/>
+                    <div class="object-pair-label reference-forecast-name"><b>Reference Forecast: </b> ${ref_fx_name}</div>
+                    <input type="hidden" class="form-control reference-forecast-value" name="reference-forecast-${pair_index}" required value="${ref_fx_id}"/>
+                    <div class="object-pair-label deadband-label"><b>Uncertainty: </b> ${db_label}</div>
+                    <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="${db_value}"/>
+                    <input type="hidden" class="forecast-type-value" required name="forecast-type-${pair_index}" value="${forecast_type}"/>
+                  </div>
+                 </div>
+                 <a role="button" class="object-pair-delete-button">remove</a>
+               </div>`);
+        var remove_button = new_object_pair.find(".object-pair-delete-button");
+        remove_button.click(function(){
+            new_object_pair.remove();
+            report_utils.remove_pair(fx_id, truth_id, ref_fx_id, db_label, db_value);
+            if ($('.object-pair-list .object-pair').length == 0){
+                $('.empty-reports-list')[0].hidden = false;
+                report_utils.unset_units(x => $('#site-select').change());
+            }
+            report_utils.toggle_reference_dependent_metrics();
+        });
+        pair_container.append(new_object_pair);
+        pair_index++;
+    }
 }
 
 function createPairSelector(){
@@ -356,13 +358,18 @@ function createPairSelector(){
     var obsSelector = report_utils.newSelector("observation", "forecast");
     var fxSelector = report_utils.newSelector("forecast", "site");
     var refFxSelector = report_utils.newSelector("reference forecast", "forecast", required=false);
+    refFxSelector.find('label').after(report_utils.reference_inclusion_button);
     var fxVariableSelector = report_utils.createVariableSelect();
     var dbSelector = report_utils.deadbandSelector();
     fxSelector.find('.report-field-filters').append(fxVariableSelector);
 
     refFxSelector.append(
         $('<a role="button" id="ref-clear">Clear reference forecast selection</a>').click(
-            function(){$('#reference-forecast-select').val('');})
+            function(){
+                $('#reference-forecast-select').val('');
+                previous_reference_forecast = null;
+            }
+        )
     );
 
     // Buttons for adding an obs/fx pair for observations or aggregates
@@ -509,6 +516,19 @@ function createPairSelector(){
                     deadband_values[0],
                     deadband_values[1],
             );
+            if ($('[name="include-reference"]:checked').val() == "true"
+                && ref_id != null){
+                addPair('observation',
+                        selected_observation.text,
+                        selected_observation.value,
+                        ref_text,
+                        ref_id,
+                        "Unset",
+                        null,
+                        deadband_values[0],
+                        deadband_values[1],
+                );
+            }
             var variable = selected_forecast.dataset.variable;
             report_utils.set_units(variable, filterForecasts);
             $(".empty-reports-list").attr('hidden', 'hidden');
@@ -550,6 +570,19 @@ function createPairSelector(){
                            "Unset",
                            null,
             );
+            if ($('[name="include-reference"]:checked').val() == "true"
+                && ref_id != null){
+                addPair('aggregate',
+                        selected_aggregate.text,
+                        selected_aggregate.value,
+                        ref_text,
+                        ref_id,
+                        "Unset",
+                        null,
+                        deadband_values[0],
+                        deadband_values[1],
+                );
+            }
             var variable = selected_forecast.dataset.variable;
             report_utils.set_units(variable, filterForecasts);
 

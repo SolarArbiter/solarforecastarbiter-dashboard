@@ -408,8 +408,8 @@ a:not([href]).collapser-button:hover{
     color: #0056b3;
 }
 .collapser-button::after{
-    width: 0; 
-    height: 0; 
+    width: 0;
+    height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-bottom: 5px solid #007bff;
@@ -423,6 +423,10 @@ a:not([href]).collapser-button:hover{
 }
 .report-field-filters{
     display: inline-block;
+    margin-bottom: .5em;
+}
+.report-field-filters .form-control{
+    margin-left: 0;
 }
 ul.pair-constant-values{
     padding-left: 2em;

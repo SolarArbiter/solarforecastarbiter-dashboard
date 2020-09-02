@@ -24,30 +24,33 @@ function addPair(
      *  @param {string} forecast_type
      *      The type of forecast in the pair. Defaults to 'event_forecast'.
      */
-    var new_object_pair = $(`<div class="object-pair pair-container object-pair-${pair_index}">
-            <div class="input-wrapper">
-              <div class="col-md-12">
-                <div class="object-pair-label forecast-name-${pair_index}"><b>Forecast: </b>${fx_name}</div>
-                <input type="hidden" class="form-control forecast-value" name="forecast-id-${pair_index}" required value="${fx_id}"/>
-                <div class="object-pair-label truth-name-${pair_index}"><b>Observation: </b> ${truth_name}</div>
-                <input type="hidden" class="form-control truth-value" name="truth-id-${pair_index}" required value="${truth_id}"/>
-                <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truth_type}"/>
-                <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="null"/>
-                <input type="hidden" class="form-control reference-forecast-value" name="reference-forecast-${pair_index}" required value="null"/>
-                <input type="hidden" class="forecast-type-value" name="forecast-type-${pair_index}" required value="${forecast_type}"/>
-              </div>
-             </div>
-             <a role="button" class="object-pair-delete-button">remove</a>
-           </div>`);
-    var remove_button = new_object_pair.find(".object-pair-delete-button");
-    remove_button.click(function(){
-        new_object_pair.remove();
-        if ($('.object-pair-list .object-pair').length == 0){
-            $('.empty-reports-list')[0].hidden = false;
-        }
-    });
-    pair_container.append(new_object_pair);
-    pair_index++;
+    if (report_utils.try_insert_pair(fx_id, truth_id, null, null, null)){
+        var new_object_pair = $(`<div class="object-pair pair-container object-pair-${pair_index}">
+                <div class="input-wrapper">
+                  <div class="col-md-12">
+                    <div class="object-pair-label forecast-name-${pair_index}"><b>Forecast: </b>${fx_name}</div>
+                    <input type="hidden" class="form-control forecast-value" name="forecast-id-${pair_index}" required value="${fx_id}"/>
+                    <div class="object-pair-label truth-name-${pair_index}"><b>Observation: </b> ${truth_name}</div>
+                    <input type="hidden" class="form-control truth-value" name="truth-id-${pair_index}" required value="${truth_id}"/>
+                    <input type="hidden" class="form-control truth-type-value" name="truth-type-${pair_index}" required value="${truth_type}"/>
+                    <input type="hidden" class="form-control deadband-value" name="deadband-value-${pair_index}" required value="null"/>
+                    <input type="hidden" class="form-control reference-forecast-value" name="reference-forecast-${pair_index}" required value="null"/>
+                    <input type="hidden" class="forecast-type-value" name="forecast-type-${pair_index}" required value="${forecast_type}"/>
+                  </div>
+                 </div>
+                 <a role="button" class="object-pair-delete-button">remove</a>
+               </div>`);
+        var remove_button = new_object_pair.find(".object-pair-delete-button");
+        remove_button.click(function(){
+            new_object_pair.remove();
+            report_utils.remove_pair(fx_id, truth_id, null, null, null);
+            if ($('.object-pair-list .object-pair').length == 0){
+                $('.empty-reports-list')[0].hidden = false;
+            }
+        });
+        pair_container.append(new_object_pair);
+        pair_index++;
+    }
 }
 
 function createPairSelector(){

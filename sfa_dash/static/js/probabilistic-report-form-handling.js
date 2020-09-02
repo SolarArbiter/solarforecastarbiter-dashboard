@@ -105,62 +105,65 @@ function addPair(
      *      probabilistic forecast groups, this is just the forecast_id. For
      *      probabilistic forecast constant values, this is the parent field.
      */
-    var new_container = false;
+    if (report_utils.try_insert_pair(fx_id, truth_id, ref_fx_id, db_label, db_value)){
+        var new_container = false;
 
-    if (forecast_type=='probabilistic_forecast'){
-        $('[name="metrics"][value="crps"]').attr('checked', true);
-    }
-
-    // Check for the parent pair container that groups object_pairs
-    // with similar observations, forecasts and uncertainties
-    var pair_container = $(`
-        .pair-container[data-truth-id=${truth_id}][data-fx-id=${distribution_id}][data-deadband-value="${db_value}"]`);
-    if (pair_container.length == 0){
-        pair_container = pairWrapper(
-            truth_type, truth_id, truth_name, fx_id, fx_name, ref_fx_name,
-            db_label, db_value, distribution_id);
-        new_container = true;
-    }
-
-    // Get a handle to the list where we will append constant value pairs
-    var constant_values = pair_container.find('.pair-constant-values');
-
-    var constant_value_pair = $(`<li class="object-pair object-pair-${pair_index}">
-        <div class="constant-value-label">${constant_value}</div>
-        <div class="object-pair-label reference-forecast-name"><b>Reference Forecast: </b> ${ref_fx_name}</div>
-        <input type="hidden" class="forecast-value" name="forecast-id-${pair_index}" required value="${fx_id}"/>
-        <input type="hidden" class="truth-value" name="truth-id-${pair_index}" required value="${truth_id}"/>
-        <input type="hidden" class="truth-type-value" name="truth-type-${pair_index}" required value="${truth_type}"/>
-        <input type="hidden" class="reference-forecast-value" name="reference-forecast-${pair_index}" required value="${ref_fx_id}"/>
-        <input type="hidden" class="deadband-value" name="deadband-value-${pair_index}" required value="${db_value}"/>
-        <input type="hidden" class="forecast-type-value" name="forecast-type-${pair_index}" required value="${forecast_type}"/>
-    </li>`);
-
-    // Add a 'remove' button for the constant value pair
-    constant_value_pair.append('<a role="button" class="object-pair-delete-button">remove</a>')
-    var remove_button = constant_value_pair.find(".object-pair-delete-button");
-    remove_button.click(function(){
-        constant_value_pair.remove();
-        if (constant_values.find('li').length == 0){
-            // removing the last pair, remove the parent container
-            pair_container.remove();
+        if (forecast_type=='probabilistic_forecast'){
+            $('[name="metrics"][value="crps"]').attr('checked', true);
         }
-        if ($('.object-pair-list .object-pair').length == 0){
-            // if the last pairs were removed, remove the units constraint
-            $('.empty-reports-list')[0].hidden = false;
-            report_utils.unset_units(x => $('#site-select').change());
+
+        // Check for the parent pair container that groups object_pairs
+        // with similar observations, forecasts and uncertainties
+        var pair_container = $(`
+            .pair-container[data-truth-id=${truth_id}][data-fx-id=${distribution_id}][data-deadband-value="${db_value}"]`);
+        if (pair_container.length == 0){
+            pair_container = pairWrapper(
+                truth_type, truth_id, truth_name, fx_id, fx_name, ref_fx_name,
+                db_label, db_value, distribution_id);
+            new_container = true;
         }
-        report_utils.toggle_reference_dependent_metrics();
-    });
 
-    // add the constant value pair to the parent container
-    constant_values.append(constant_value_pair);
+        // Get a handle to the list where we will append constant value pairs
+        var constant_values = pair_container.find('.pair-constant-values');
 
-    // If the parent container was just created, add it to the dom.
-    if (new_container){
-        $('.object-pair-list').append(pair_container);
+        var constant_value_pair = $(`<li class="object-pair object-pair-${pair_index}">
+            <div class="constant-value-label">${constant_value}</div>
+            <div class="object-pair-label reference-forecast-name"><b>Reference Forecast: </b> ${ref_fx_name}</div>
+            <input type="hidden" class="forecast-value" name="forecast-id-${pair_index}" required value="${fx_id}"/>
+            <input type="hidden" class="truth-value" name="truth-id-${pair_index}" required value="${truth_id}"/>
+            <input type="hidden" class="truth-type-value" name="truth-type-${pair_index}" required value="${truth_type}"/>
+            <input type="hidden" class="reference-forecast-value" name="reference-forecast-${pair_index}" required value="${ref_fx_id}"/>
+            <input type="hidden" class="deadband-value" name="deadband-value-${pair_index}" required value="${db_value}"/>
+            <input type="hidden" class="forecast-type-value" name="forecast-type-${pair_index}" required value="${forecast_type}"/>
+        </li>`);
+
+        // Add a 'remove' button for the constant value pair
+        constant_value_pair.append('<a role="button" class="object-pair-delete-button">remove</a>')
+        var remove_button = constant_value_pair.find(".object-pair-delete-button");
+        remove_button.click(function(){
+            constant_value_pair.remove();
+            report_utils.remove_pair(fx_id, truth_id, ref_fx_id, db_label, db_value);
+            if (constant_values.find('li').length == 0){
+                // removing the last pair, remove the parent container
+                pair_container.remove();
+            }
+            if ($('.object-pair-list .object-pair').length == 0){
+                // if the last pairs were removed, remove the units constraint
+                $('.empty-reports-list')[0].hidden = false;
+                report_utils.unset_units(x => $('#site-select').change());
+            }
+            report_utils.toggle_reference_dependent_metrics();
+        });
+
+        // add the constant value pair to the parent container
+        constant_values.append(constant_value_pair);
+
+        // If the parent container was just created, add it to the dom.
+        if (new_container){
+            $('.object-pair-list').append(pair_container);
+        }
+        pair_index++;
     }
-    pair_index++;
 }
 
 
@@ -240,10 +243,16 @@ function populateReferenceForecasts(){
             var matching_constant = fx['constant_values'].find(
                 x => x['constant_value'] == constant_value);
             var forecast_id = matching_constant['forecast_id'];
+            // Due to repopulating the <select> element with options, the
+            // report_utils.restore_prev_value function does not work here.
+            // So manually check for matching forecast id.
+            let is_selected = previous_reference_forecast && previous_reference_forecast.value == forecast_id;
             reference_selector.append(
                 $('<option></option>')
                     .html(fx['name'])
                     .val(forecast_id)
+                    .prop('selected', is_selected)
+                    .attr('data-dist-id', fx['forecast_id'])
                     .attr('data-site-id', fx['site_id'])
                     .attr('data-aggregate-id', fx['aggregate_id'])
                     .attr('data-interval-length', fx['interval_length'])
@@ -315,27 +324,6 @@ function newConstantValueSelector(){
             </select>
             </div>
           </div>`);
-}
-
-function newSelector(field_name, depends_on=null, required=true, description="",classes=[]){
-    /*
-     * Returns a JQuery object containing labels and select elements for appending options to.
-     * Initializes with one default and one optional select option:
-     *     Always adds an option containing "No matching <field_Type>s
-     *     If depends_on is provided, inserts a "Please select a <depends_on> option>
-     */
-    var field_type = field_name.toLowerCase().replace(/ /g, '-');
-    return $(`<div class="form-element full-width ${field_type}-select-wrapper">
-                <label>Select a ${field_name} ${required ? "" : "(Optional)"}</label>
-                  <div class="report-field-filters"><input id="${field_type}-option-search" class="form-control half-width" placeholder="Search by ${field_name} name"/></div><br>
-                <div class="selector-description">${description}</div>
-                <div class="input-wrapper">
-                  <select id="${field_type}-select" class="form-control ${field_type}-field ${classes.join(" ")}" name="${field_type}-select" size="5">
-                  ${depends_on ? `<option id="no-${field_type}-${depends_on}-selection" disabled> Please select a ${depends_on}.</option>` : ""}
-                  <option id="no-${field_type}s" disabled hidden>No matching ${field_name}s</option>
-                </select>
-                </div>
-              </div>`);
 }
 
 function createPairSelector(){
@@ -461,7 +449,6 @@ function createPairSelector(){
             }
         } else {
             $('#no-distributions').attr('hidden', true);
-            report_utils.restore_prev_value(previous_reference_forecast);
         }
         populateReferenceForecasts();
         if (compareTo == 'observation'){
@@ -565,10 +552,10 @@ function createPairSelector(){
      * Create the control elements for creating observation, forecast pairs
      *
      *********************************************************************/
-    var siteSelector = newSelector("site");
-    var aggregateSelector = newSelector("aggregate", "distribution",);
-    var obsSelector = newSelector("observation", "distribution");
-    var fxSelector = newSelector(
+    var siteSelector = report_utils.newSelector("site");
+    var aggregateSelector = report_utils.newSelector("aggregate", "distribution",);
+    var obsSelector = report_utils.newSelector("observation", "distribution");
+    var fxSelector = report_utils.newSelector(
         "distribution", "site", required=true,
         description=`
             The Solar Forecast Arbiter supports the specification of
@@ -582,12 +569,17 @@ function createPairSelector(){
             for each forecast.`
     );
 
-    var refFxSelector = newSelector(
+    var refFxSelector = report_utils.newSelector(
         "reference forecast", "forecast", required=false,
         description='Skill metrics will be calculated for any binary forecasts matching the selection above.');
+    refFxSelector.find('label').after(report_utils.reference_inclusion_button);
     refFxSelector.append(
         $('<a role="button" id="ref-clear">Clear reference forecast selection</a>').click(
-            function(){$('#reference-forecast-select').val('')})
+            function(){
+                $('#reference-forecast-select').val('');
+                previous_reference_forecast = null;
+            }
+        )
     );
 
     var dbSelector = report_utils.deadbandSelector();
@@ -739,11 +731,13 @@ function createPairSelector(){
             var selected_forecast = forecast_select.find(':selected')[0];
             var selected_reference_forecast = ref_forecast_select.find(':selected')[0];
             if(!selected_reference_forecast){
-                ref_text = "Unset";
-                ref_id = null;
+                var ref_text = "Unset";
+                var ref_id = null;
+                var ref_distribution_id = null;
             }else{
-                ref_text = selected_reference_forecast.text;
-                ref_id = selected_reference_forecast.value;
+                var ref_text = selected_reference_forecast.text;
+                var ref_id = selected_reference_forecast.value;
+                var ref_distribution_id = selected_reference_forecast.dataset.distId;
             }
             // try to parse deadband values
             try{
@@ -782,6 +776,22 @@ function createPairSelector(){
                     constant_value_label,
                     distribution_id,
                 )
+                if ($('[name="include-reference"]:checked').val() == "true"
+                    && ref_id != null){
+                    addPair('observation',
+                            selected_observation.text,
+                            selected_observation.value,
+                            ref_text,
+                            ref_id,
+                            "Unset",
+                            null,
+                            deadband_values[0],
+                            deadband_values[1],
+                            forecast_type,
+                            constant_value_label,
+                            ref_distribution_id,
+                    )
+                }
             });
 
             var variable = selected_forecast.dataset.variable;
@@ -813,11 +823,12 @@ function createPairSelector(){
             var selected_forecast = forecast_select.find('option:selected')[0];
             var selected_reference_forecast = ref_forecast_select.find('option:selected')[0];
             if(!selected_reference_forecast){
-                ref_text = "Unset";
-                ref_id = null;
+                var ref_text = "Unset";
+                var ref_id = null;
             }else{
-                ref_text = selected_reference_forecast.text;
-                ref_id = selected_reference_forecast.value;
+                var ref_text = selected_reference_forecast.text;
+                var ref_id = selected_reference_forecast.value;
+                var ref_distribution_id = selected_reference_forecast.dataset.distId;
             }
             constant_value_select.find('option:selected').each(function(){
                 let forecast_id = $(this).val();
@@ -850,6 +861,22 @@ function createPairSelector(){
                     constant_value_label,
                     distribution_id,
                 );
+                if ($('[name="include-reference"]:checked').val() == "true"
+                    && ref_id != null){
+                    addPair('aggregate',
+                            selected_observation.text,
+                            selected_observation.value,
+                            ref_text,
+                            ref_id,
+                            "Unset",
+                            null,
+                            deadband_values[0],
+                            deadband_values[1],
+                            forecast_type,
+                            constant_value_label,
+                            ref_distribution_id,
+                    )
+                }
             });
             var variable = selected_forecast.dataset.variable;
             report_utils.set_units(variable, filterForecasts);
