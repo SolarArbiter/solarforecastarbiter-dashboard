@@ -83,4 +83,12 @@ $(document).ready(function(){
                 .collapse('hide');
         }
     });
+    $('[name="site_type"]').change(function(){
+        // Enable or disable modeling parameters based on site type
+        if (this.value == 'weather-station'){
+            $('fieldset[name="modeling_parameters"]').prop('disabled', true);
+        } else {
+            $('fieldset[name="modeling_parameters"]').prop('disabled', false);
+        }
+    });
 });
