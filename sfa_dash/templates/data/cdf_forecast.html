@@ -11,12 +11,7 @@
     Plotly.newPlot(
         'probabilistic-forecast-plot',
         JSON.parse('{{ plot | safe }}')
-    ).then(gd => {
-        gd.on('plotly_legendclick', () => false)});
-    {# removes plotly legend click function, because disabling a trace
-       causes the fill to run down to the next trace, which makes for an
-       inaccurate representation of the plot
-     #}
+    )
 </script>
 <p>For forecasts parameterized symmetrically around the 50th percentile, brighter colors indicate percentiles farther from the 50th percentile and darker colors indicate percentiles closer to the 50th percentile. For forecasts parameterized asymmetrically around the 50th percentile, brighter colors indicate smaller percentiles and darker colors indicate larger percentiles. Use the hover tool to determine the percentile.</p>
 {% endif %}
