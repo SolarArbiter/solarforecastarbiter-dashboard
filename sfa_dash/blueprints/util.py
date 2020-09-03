@@ -301,6 +301,18 @@ def timeseries_adapter(type_, metadata, json_value_response):
         data = io_utils.json_payload_to_observation_df(json_value_response)
         return timeseries.generate_observation_figure(
             obj, data, return_components=True, limit=None)
+    elif type_ == 'probabilistic_forecast':
+        cvs = []
+        for constant_value in metadata['constant_values']:
+            cv_dict = metadata.copy()
+            cv_dict.update(constant_value)
+            cvs.append(
+                datamodel.ProbabilisticForecastConstantValue.from_dict(cv_dict))
+        metadata['constant_values'] = cvs
+        obj = datamodel.ProbabilisticForecast.from_dict(
+            metadata, raise_on_extra=False)
+        return timeseries.generate_probabilistic_forecast_figure(
+            obj, json_value_response)
     else:
         # remove observations, we aren't using them for plotting aggregates
         metadata['observations'] = []

@@ -4,7 +4,17 @@
 {% if delete_link is defined and is_allowed('delete') %}
   <a role="button" class="btn btn-danger btn-sm" href="{{ delete_link }}">Delete</a>
 {% endif %}
-
+{% if plot is defined %}
+<div id="probabilistic-forecast-plot">
+</div>
+<script>
+    Plotly.newPlot(
+        'probabilistic-forecast-plot',
+        JSON.parse('{{ plot | safe }}')
+    );
+</script>
+{% endif %}
+{% include "data/time_widgets.html" %}
 {% if constant_values is defined %}
 <div class="bin-list">
   <table>
