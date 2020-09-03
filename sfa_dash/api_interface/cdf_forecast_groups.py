@@ -59,8 +59,18 @@ def valid_times(metadata):
                      for cv in constant_values]
     mins = pd.to_datetime([c['min_timestamp'] for c in cv_timeranges])
     maxs = pd.to_datetime([c['max_timestamp'] for c in cv_timeranges])
+    time_min = mins.min()
+    time_max = maxs.max()
+    if pd.isna(time_min):
+        start = None
+    else:
+        start = time_min.isoformat()
+    if pd.isna(time_max):
+        end = None
+    else:
+        end = time_max.isoformat()
     return {
         'forecast_id': metadata['forecast_id'],
-        'min_timestamp': mins.min().isoformat(),
-        'max_timestamp': maxs.max().isoformat(),
+        'min_timestamp': start,
+        'max_timestamp': end,
     }
