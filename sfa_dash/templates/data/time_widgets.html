@@ -3,7 +3,8 @@
 {% if is_allowed('read_values') %}
 {# Time widgets are used for either setting the bounds of the plot or download #}
 <p class="mt-3">
-Use the start and end selectors below to set the range of the plot above{% if 'constant_values' in metadata %}.{% else %}
+Use the start and end selectors below to set the range of the plot above{% if 'constant_values' in metadata %}. Data may be downloaded from individual constant value forecasts
+linked in the table below.{% else %}
 or download data. A maximum of one year of data may be downloaded.{% endif %}
 </p>
 {# TODO: generate a message about the correct plotting limit based on current

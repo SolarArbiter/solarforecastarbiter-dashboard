@@ -13,10 +13,17 @@
         JSON.parse('{{ plot | safe }}')
     )
 </script>
+{% if metadata['axis'] == 'y' %}
 <p>For forecasts parameterized symmetrically around the 50th percentile, brighter colors indicate percentiles farther from the 50th percentile and darker colors indicate percentiles closer to the 50th percentile. For forecasts parameterized asymmetrically around the 50th percentile, brighter colors indicate smaller percentiles and darker colors indicate larger percentiles. Use the hover tool to determine the percentile.</p>
+{% endif %}
 {% endif %}
 {% include "data/time_widgets.html" %}
 {% if constant_values is defined %}
+{% if metadata['axis'] == 'y' %}
+{% set units = '%' %}
+{% else %}
+{% set units = metadata['variable'] | var_to_units %}
+{% endif %}
 <div class="bin-list table">
   <table>
     <tr>
@@ -24,7 +31,7 @@
     </tr>
     {% for cdf_bin in constant_values %}
     <tr>
-        <td><a href="{{url_for('data_dashboard.cdf_forecast_view', uuid=cdf_bin['forecast_id'])}}">{{ cdf_bin['constant_value'] }}</a></td>
+        <td><a href="{{url_for('data_dashboard.cdf_forecast_view', uuid=cdf_bin['forecast_id'])}}">{{ cdf_bin['constant_value'] }} {{ units }}</a></td>
     </tr>
     {% endfor %}
   </table>
