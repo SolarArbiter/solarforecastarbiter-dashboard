@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -41,21 +42,28 @@ def get_values(metadata, **kwargs):
         Dataframe where column names are constant values.
     """
     constant_values = metadata['constant_values']
-    data = pd.DataFrame()
 
     @with_app_context
     @copy_current_request_context
     def request_constant_value_values(cv):
-        return get_cdf_values(cv["forecast_id"], **kwargs)
+        """Function to pass to ThreadPoolExecutor to make a request against
+        the API while maintaining the Request/App context and the current user
+        session.
+        """
+        return (
+            str(cv['constant_value']),
+            json_payload_to_forecast_series(
+                get_cdf_values(cv["forecast_id"], **kwargs)
+            )
+        )
 
-    all_series = ThreadPoolExecutor(max_workers=4).map(
-        request_constant_value_values,
-        constant_values
-    )
-
-    for cv, req in zip(constant_values, all_series):
-        data[str(cv['constant_value'])] = json_payload_to_forecast_series(req)
-    return data
+    # collect a list of tuple, series objects asynchronously
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        all_series = executor.map(
+            request_constant_value_values,
+            constant_values
+        )
+    return pd.DataFrame.from_records(OrderedDict(all_series))
 
 
 def list_metadata(site_id=None, aggregate_id=None):
