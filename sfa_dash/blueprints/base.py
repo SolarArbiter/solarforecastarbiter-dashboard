@@ -72,7 +72,7 @@ class BaseView(MethodView):
                 else:
                     if self.plot_type == 'probabilistic_forecast':
                         self.template_args.update({
-                            'plot': script_plot,
+                            'plot': script_plot.to_json(),
                             'includes_plotly': True,
                         })
                     else:
