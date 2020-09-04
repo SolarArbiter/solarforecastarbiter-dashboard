@@ -312,7 +312,7 @@ def timeseries_adapter(type_, metadata, json_value_response):
         obj = datamodel.ProbabilisticForecast.from_dict(
             metadata, raise_on_extra=False)
         return timeseries.generate_probabilistic_forecast_figure(
-            obj, json_value_response)
+            obj, json_value_response).to_json()
     else:
         # remove observations, we aren't using them for plotting aggregates
         metadata['observations'] = []
