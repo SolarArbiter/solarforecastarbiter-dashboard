@@ -307,7 +307,10 @@ def timeseries_adapter(type_, metadata, json_value_response):
             cv_dict = metadata.copy()
             cv_dict.update(constant_value)
             cvs.append(
-                datamodel.ProbabilisticForecastConstantValue.from_dict(cv_dict))
+                datamodel.ProbabilisticForecastConstantValue.from_dict(
+                    cv_dict
+                )
+            )
         metadata['constant_values'] = cvs
         obj = datamodel.ProbabilisticForecast.from_dict(
             metadata, raise_on_extra=False)

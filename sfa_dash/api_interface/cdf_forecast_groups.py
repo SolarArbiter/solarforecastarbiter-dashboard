@@ -1,3 +1,8 @@
+from concurrent.futures import ThreadPoolExecutor
+
+
+from flask import copy_current_request_context
+from flask.globals import _app_ctx_stack
 import pandas as pd
 
 
@@ -10,6 +15,16 @@ from solarforecastarbiter.io.utils import json_payload_to_forecast_series
 def get_metadata(forecast_id):
     req = get_request(f'/forecasts/cdf/{forecast_id}')
     return req
+
+
+def with_app_context(func):
+    app_context = _app_ctx_stack.top
+
+    def wrapper(*args, **kwargs):
+        with app_context:
+            return func(*args, **kwargs)
+
+    return wrapper
 
 
 def get_values(metadata, **kwargs):
@@ -27,8 +42,18 @@ def get_values(metadata, **kwargs):
     """
     constant_values = metadata['constant_values']
     data = pd.DataFrame()
-    for cv in constant_values:
-        req = get_cdf_values(cv["forecast_id"], **kwargs)
+
+    @with_app_context
+    @copy_current_request_context
+    def request_constant_value_values(cv):
+        return get_cdf_values(cv["forecast_id"], **kwargs)
+
+    all_series = ThreadPoolExecutor(max_workers=4).map(
+        request_constant_value_values,
+        constant_values
+    )
+
+    for cv, req in zip(constant_values, all_series):
         data[str(cv['constant_value'])] = json_payload_to_forecast_series(req)
     return data
 
