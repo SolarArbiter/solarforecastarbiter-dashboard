@@ -18,6 +18,7 @@
 <form action="{{ url_for('forms.create_'+report_type+'_report') }}" method="post" id="report-form" onSubmit="return report_utils.validateReport();">
   <div class="form-group">
      <div class="form-element full-width">
+       <label for="name">Name:</label><br/>
        <div class="input-wrapper">
          <input type="text" class="form-control  name-field" required="" name="name" {{ form.name_validation() }} value="{% if form_data %}{{form_data['report_parameters']['name']}}{% else %}{%endif%}"/>
        </div>
