@@ -1,4 +1,5 @@
 from copy import deepcopy
+from functools import partial
 
 
 from flask import url_for, render_template, request, flash, current_app
@@ -41,10 +42,15 @@ class BaseView(MethodView):
         total_points = timerange_minutes / interval_length
 
         if total_points <= max_pts:
+            if self.plot_type == 'probabilistic_forecast':
+                value_get = partial(
+                    self.api_handle.get_values, self.metadata)
+            else:
+                value_get = partial(
+                    self.api_handle.get_values, uuid)
             try:
-                values = self.api_handle.get_values(
-                    uuid, params={'start': start.isoformat(),
-                                  'end': end.isoformat()})
+                values = value_get(params={'start': start.isoformat(),
+                                           'end': end.isoformat()})
             except DataRequestException as e:
                 if e.status_code == 422:
                     self.template_args.update({'warnings': e.errors})
@@ -64,11 +70,17 @@ class BaseView(MethodView):
                                  f"{self.human_label} during this period.")]},
                     })
                 else:
-                    self.template_args.update({
-                        'plot': script_plot[1],
-                        'includes_bokeh': True,
-                        'bokeh_script': script_plot[0]
-                    })
+                    if self.plot_type == 'probabilistic_forecast':
+                        self.template_args.update({
+                            'plot': script_plot.to_json(),
+                            'includes_plotly': True,
+                        })
+                    else:
+                        self.template_args.update({
+                            'plot': script_plot[1],
+                            'includes_bokeh': True,
+                            'bokeh_script': script_plot[0]
+                        })
         else:
             allowable_days = pd.Timedelta(f"{max_pts*interval_length} minutes")
             self.template_args.update({
@@ -85,8 +97,12 @@ class BaseView(MethodView):
         'min_timestamp' and 'max_timestamp' keys in metdata. If the range
         cannot be found the keys will not be set.
         """
+        if self.plot_type == 'probabilistic_forecast':
+            valid_time_args = self.metadata
+        else:
+            valid_time_args = self.metadata[self.id_key]
         try:
-            timerange = self.api_handle.valid_times(self.metadata[self.id_key])
+            timerange = self.api_handle.valid_times(valid_time_args)
         except DataRequestException:
             return
         else:

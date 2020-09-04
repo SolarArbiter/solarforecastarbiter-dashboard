@@ -35,6 +35,10 @@
 <script src="https://cdn.pydata.org/bokeh/release/bokeh-tables-{{ bkversion }}.min.js"></script>
 {% endif %}
 
+{% if includes_plotly %}
+<script src="https://cdn.plot.ly/plotly-1.52.3.min.js"></script>
+{% endif %}
+
 {# internal script inclusions #}
 <script src="/static/js/table-search.js"></script>
 <script src="/static/js/table-checkall.js"></script>

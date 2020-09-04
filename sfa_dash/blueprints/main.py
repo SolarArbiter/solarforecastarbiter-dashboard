@@ -216,6 +216,8 @@ class SingleCDFForecastGroupView(SingleObjectView):
     template = 'data/cdf_forecast.html'
     metadata_template = 'data/metadata/cdf_forecast_group_metadata.html'
     human_label = human_friendly_datatype('cdf_forecast')
+    api_handle = cdf_forecast_groups
+    plot_type = 'probabilistic_forecast'
 
     def __init__(self):
         pass
@@ -274,10 +276,14 @@ class SingleCDFForecastGroupView(SingleObjectView):
         template folder for how these are layed out.
         """
         self.template_args = {}
+        self.set_timerange()
+        start, end = self.parse_start_end_from_querystring()
         try:
             self.set_site_or_aggregate_metadata()
         except DataRequestException:
-            pass
+            self.template_args.update({'plot': None})
+        else:
+            self.insert_plot(self.metadata['forecast_id'], start, end)
         finally:
             self.set_site_or_aggregate_link()
         self.template_args['current_path'] = request.path
@@ -293,6 +299,11 @@ class SingleCDFForecastGroupView(SingleObjectView):
         self.template_args['delete_link'] = url_for(
             f'data_dashboard.delete_cdf_forecast_group',
             uuid=self.metadata['forecast_id'])
+
+        self.template_args['period_start_date'] = start.strftime('%Y-%m-%d')
+        self.template_args['period_start_time'] = start.strftime('%H:%M')
+        self.template_args['period_end_date'] = end.strftime('%Y-%m-%d')
+        self.template_args['period_end_time'] = end.strftime('%H:%M')
 
     def get(self, uuid, **kwargs):
         try:

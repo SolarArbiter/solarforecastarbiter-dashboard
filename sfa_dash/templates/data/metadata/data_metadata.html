@@ -27,7 +27,7 @@
   {% if timerange_start is defined and timerange_start is not none %}
     {{ macro.li('Start', timerange_start | format_datetime) }}
   {% endif %}
-  {% if timerange_end is defined and timerange_end is not none %} 
+  {% if timerange_end is defined and timerange_end is not none %}
     {{ macro.li('End', timerange_end | format_datetime) }}
   {% endif %}
 </ul>
