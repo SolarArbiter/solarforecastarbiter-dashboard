@@ -469,7 +469,9 @@ th.selection-column{
     padding-bottom: 1em;
     margin-bottom: 1em;
 }
-
+table.obsfx-table td{
+    padding: .5rem;
+}
 #metrics-sort-list{
     list-style: none;
     padding-left: 0;
