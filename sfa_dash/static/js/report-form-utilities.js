@@ -12,6 +12,12 @@ previous_reference_forecast = null;
 // Global for tracking object pairs, used to prevent duplicates.
 object_pairs = [];
 
+// List of reference forecast dependent metric JQuery selectors to toggle
+// messages for in the toggle_reference_dependent_metrics function.
+reference_dependent_metrics = ['[name=metrics][value=s]',
+                               '[name=metrics][value=bss]',
+                               '[name=metrics][value=qss]'];
+
 report_utils.fill_existing_pairs = function(){
     /*
      * Fill object pairs found in the form_data global var.
@@ -131,17 +137,23 @@ report_utils.toggle_reference_dependent_metrics = function(){
 
     // If reference forecasts exist, remove  the reference warning, otherwise
     // insert a warning after the skill metric.
-    var skill = $('[name=metrics][value=s]');
+
     if (reference_exist){
         // show skill remove warning
-        $('#reference-warning').remove();
+        $('.reference-warning.warning-message').remove();
     } else {
-        // hide skill, insert warning
-        if ($('#reference-warning').length == 0){
-            $(`<span id="reference-warning" class="warning-message">
-               (Requires reference forecast selection)</span>`
-             ).insertAfter(skill.next());
-        }
+        // For each dependent metric, insert a warning
+        reference_dependent_metrics.forEach(function(metric_selector){
+            let metric = $(metric_selector);
+            if (metric.length){
+                // hide skill, insert warning
+                if ($('#reference-warning').length == 0){
+                    $(`<span class="reference-warning warning-message">
+                       (Requires reference forecast selection)</span>`
+                     ).insertAfter(metric.next());
+                }
+            }
+        });
     }
 }
 
