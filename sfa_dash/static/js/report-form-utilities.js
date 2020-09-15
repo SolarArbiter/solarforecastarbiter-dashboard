@@ -145,7 +145,6 @@ report_utils.toggle_reference_dependent_metrics = function(){
         // For each dependent metric, insert a warning
         reference_dependent_metrics.forEach(function(metric_selector){
             let metric = $(metric_selector);
-            console.log(metric);
             if (metric.length){
                 // hide skill, insert warning
                 if ($('#reference-warning').length == 0){
