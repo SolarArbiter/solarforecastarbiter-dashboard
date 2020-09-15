@@ -296,9 +296,9 @@ report_utils.validateReport = function(){
 }
 report_utils.validateDatetime = function(dt_string, enforce_utc=true){
     if (enforce_utc){
-        var iso_re = /(\d{4})-?(\d{2})-?(\d{2})T(\d{2})(:?\d{2})?(:?\d{2})?(Z|\+00:?00)$/;
+        var iso_re = /(\d{4})-?(\d{2})-?(\d{2})T(\d{2})(:?\d{2})?(:?\d{2})?(Z|\+00:?00)$/g;
     } else {
-        var iso_re = /(\d{4})-?(\d{2})-?(\d{2})T(\d{2})(:?\d{2})(:?\d{2})(Z|(\+|\-)\d{2}:?\d{2})?$/
+        var iso_re = /(\d{4})-?(\d{2})-?(\d{2})T(\d{2})(:?\d{2})(:?\d{2})(Z|(\+|\-)\d{2}:?\d{2})?$/g;
     }
     return dt_string.match(iso_re);
 }
