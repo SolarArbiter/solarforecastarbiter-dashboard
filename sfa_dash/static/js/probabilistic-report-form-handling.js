@@ -246,7 +246,8 @@ function populateReferenceForecasts(){
             // Due to repopulating the <select> element with options, the
             // report_utils.restore_prev_value function does not work here.
             // So manually check for matching forecast id.
-            let is_selected = previous_reference_forecast && previous_reference_forecast.value == forecast_id;
+            let is_selected = previous_reference_forecast
+                && (previous_reference_forecast.dataset.distId == fx['forecast_id']);
             reference_selector.append(
                 $('<option></option>')
                     .html(fx['name'])
