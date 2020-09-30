@@ -242,6 +242,40 @@ class DeleteReportView(BaseView):
     template = 'forms/deletion_form.html'
     metadata_template = 'data/metadata/report_metadata.html'
 
+    def _object_pair_template_attributes(self, pair):
+        pair_template_attrs = {}
+        forecast_type = pair['forecast_type']
+        if forecast_type == 'forecast' or forecast_type == 'event_forecast':
+            forecast_metadata = forecasts.get_metadata(pair['forecast'])
+            if pair['reference_forecast'] is not None:
+                reference_metadata = forecasts.get_metadata(
+                        pair['reference_forecast'])
+            else:
+                reference_metadata = None
+            forecast_view = 'forecast_view'
+        else if forecast_type == 'probabilistic_forecast':
+            forecast_metadata = cdf_forecast_groups.get_metadata(
+                pair['forecast'])
+            if pair['reference_forecast'] is not None:
+                reference_metadata = cdf_forecast_Groups.get_metadata(
+                    pair['reference_forecast'])
+            else:
+                reference_metadata = None
+            forecast_view = 'cdf_forecast_view'
+        else:
+            forecast_metadata = cdf_forecasts.get_metadata(pair['forecast'])
+            if pair['reference_forecast'] is not None:
+            forecast_view = 'cdf_forecast_view'
+        # GET obs/aggregate metadata
+
+        # set uncertainty
+
+    def load_pair_metadata(self):
+        report_object_pairs = self.metadata['report_parameters']
+        # for each pair, get name and create a link to the dash page
+        # - check for agg or obs
+        # - check for forecast_type
+
     def set_template_args(self):
         self.template_args = {
             'data_type': 'report',
