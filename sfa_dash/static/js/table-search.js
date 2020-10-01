@@ -14,6 +14,26 @@
  * https://codepen.io/adobewordpress/pen/gbewLV
  */
 $(document).ready(function() {
+    function delay_callback(fn, delay_ms=300){
+        /* Delays running a function until after the delay passes. If called
+         * with the same function again, resets the delay and cancels the
+         * initial call. Anonymous functions are considered the same function.
+         *
+         *  @param {function} fn - Function to run after delay.
+         *  @param {number} delay_ms - Delay in miliseconds.
+         *
+         *  @returns {function} Function
+         */
+        if (typeof(window.delayed_callbacks) === 'undefined'){
+            window.delayed_callbacks = {};
+        }
+        var fn_name = fn.name ? fn.name: "undef";
+        return function(...args){
+            clearTimeout(delayed_callbacks[fn_name]);
+            delayed_callbacks[fn_name] = setTimeout(
+                fn.bind(this, ...args), delay_ms);
+        }
+    }
     /* Add containsi filter to JQuery selectors that selects for any word in a phrase */
     $.extend($.expr[':'], {'containsi': function(elem, i, match, array){
             lowerElementText = (elem.textContent || elem.innerText || '').toLowerCase()
@@ -193,7 +213,7 @@ $(document).ready(function() {
     /*
      * Register DOM element callbacks
      */
-    $(".search").keyup(applyTableFilters);
+    $(".search").keyup(delay_callback(applyTableFilters));
     if ($(".search").val() != null){
         // if searchbar is filled on page load, apply filters
         applyTableFilters();
