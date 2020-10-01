@@ -46,7 +46,7 @@ function hideMetricsOnSearch(){
     noMatch.attr('hidden', true);
 
     // Apply sorting and load visible visible plots before hiding empty
-    // sections. 
+    // sections.
     applySorting();
     loadVisiblePlots();
     hideEmptyMetricSections();
@@ -144,8 +144,8 @@ function createContainerDiv(parentValue, type, value){
 }
 
 function createSubsetContainers(sortOrder, valueSet){
-    /* Builds the containing divs based on the first two elements of the 
-     * sort order such that each nested container has a 
+    /* Builds the containing divs based on the first two elements of the
+     * sort order such that each nested container has a
      * data-wrapper-{field}-{value} class for later selection. Nested divs
      * will have the value of their parent div added as a class to
      * differentiate targets for collapsing.
@@ -174,8 +174,8 @@ function createSubsetContainers(sortOrder, valueSet){
     container.find('a:first').removeClass('collapsed');
     firstElement = container.find('div.plot-attribute-wrapper:first');
     firstElement.addClass('show');
-    firstElement.find('a').removeClass('collapsed');
-    firstElement.find('div.plot-attribute-wrapper').addClass('show');
+    firstElement.find('a:first').removeClass('collapsed');
+    firstElement.find('div.plot-attribute-wrapper:first').addClass('show');
     return container;
 }
 
@@ -196,7 +196,7 @@ function getSortedMetricBlocks(){
      * Builds and returns the new nested div structure based on the current
      * state of the sorting list.
      */
-    
+
     // Determine the current order of the sorting list.
     sortOrder = $('.metric-sort .metric-sort-value').map(function(){
         return $(this).text();
@@ -286,7 +286,7 @@ function loadVisiblePlots(){
             var isHidden = plotDiv.attr('hidden');
             var parentVisible = plotDiv.parent().hasClass('show');
             var plotExists = plotDiv.hasClass('js-plotly-plot');
-            
+
             if(!isHidden && !plotExists && parentVisible){
                 renderPlotly(plotDiv[0], metric_plots[key]);
             }
