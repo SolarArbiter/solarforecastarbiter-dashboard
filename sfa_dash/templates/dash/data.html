@@ -30,7 +30,12 @@
 
 {% if page_title is defined or breadcrumb is defined %}
 <h2 class="page-title">
-{{ page_title }}{{ breadcrumb|safe }}
+{# display a breadcrumb if present, otherwise use page_title #}
+{% if breadcrumb is defined %}
+{{ breadcrumb|safe }}
+{% else %}
+{{ page_title }}
+{% endif %}
 </h2>
 {% endif %}
 

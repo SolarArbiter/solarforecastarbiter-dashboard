@@ -26,6 +26,7 @@ class SitesListingView(SiteDashView):
         self.template_args['data_table'] = table
         self.template_args['current_path'] = request.path
         self.template_args['breadcrumb'] = self.breadcrumb_html()
+        self.template_args['page_title'] = 'Sites'
 
     def get(self):
         try:
