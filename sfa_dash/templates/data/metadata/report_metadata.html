@@ -2,16 +2,16 @@
 {% import "data/metadata/meta_macro.jinja" as macro %}
 {% block metadata %}
 <ul class="data-metadata-fields col-md-6 col-sm-12">
-      {{ macro.li('Name', metadata_object['report_parameters']['name']) }}
-      {{ macro.li('Organization', metadata_object['provider']) }}
-      {{ macro.li('Status', metadata_object['status']) }}
+      {{ macro.li('Name', metadata['report_parameters']['name']) }}
+      {{ macro.li('Organization', metadata['provider']) }}
+      {{ macro.li('Status', metadata['status']) }}
 </ul>
 <ul class="data-metadata-fields col-md-6 col-sm-12">
-  {{ macro.li('Start', metadata_object['report_parameters']['start'] | format_datetime)}}
-  {{ macro.li('End', metadata_object['report_parameters']['end'] | format_datetime)}}
+  {{ macro.li('Start', metadata['report_parameters']['start'] | format_datetime)}}
+  {{ macro.li('End', metadata['report_parameters']['end'] | format_datetime)}}
   <li class="metadata-field"><span class="data-metadata-label">Metrics:</span>
       <ul>
-        {% for metric in metadata_object['report_parameters']['metrics'] %}
+        {% for metric in metadata['report_parameters']['metrics'] %}
         <li>{{ all_metrics[metric] }}</li>
         {% endfor %}
       </ul>
@@ -21,7 +21,7 @@
 <ul class="data-metadata-fields col-md-6 col-sm-12">
   <li class="metadata-field"><span class="data-metadata-label">Metric Categories:</span>
   <ul>
-    {% for category in metadata_object['report_parameters']['categories'] %}
+    {% for category in metadata['report_parameters']['categories'] %}
     <li>{{ metric_categories[category]  }}</li>
     {% endfor %}
   </ul>
@@ -30,7 +30,7 @@
 <ul class="data-metadata-fields col-md-6 col-sm-12">
   <li class="metadata-field"><span class="data-metadata-label">Filters:</span>
       <ul>
-        {% for report_filter in metadata_object['report_parameters']['filters'] %}
+        {% for report_filter in metadata['report_parameters']['filters'] %}
         {% for filter_name, values in report_filter.items() %}
         <li class="metadata-field"><span class="data-metadata-label">{{ filter_name }}</span>
           <ul>

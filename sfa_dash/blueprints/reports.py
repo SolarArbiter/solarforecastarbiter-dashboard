@@ -158,7 +158,9 @@ class ReportView(BaseView):
             'report_template': report_template,
             'dash_url': request.url_root.rstrip('/'),
             'include_metrics_toc': False,
-            'includes_bokeh': True
+            'includes_bokeh': True,
+            'metadata': {
+                'report_parameters': self.metadata['report_parameters']},
         })
         if not include_timeseries:
             # display a message about omitting timeseries
@@ -244,10 +246,12 @@ class DeleteReportView(BaseView):
         self.template_args = {
             'data_type': 'report',
             'uuid': self.metadata['report_id'],
-            'metadata': render_template(
+            'metadata': {
+                'report_parameters': self.metadata['report_parameters']},
+            'metadata_block': render_template(
                 self.metadata_template,
                 data_type='Report',
-                metadata_object=self.metadata
+                metadata=self.metadata
             ),
         }
 
