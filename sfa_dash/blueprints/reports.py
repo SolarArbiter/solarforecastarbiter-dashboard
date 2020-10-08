@@ -292,14 +292,14 @@ class DeleteReportView(BaseView):
             else:
                 uncertainty = None
         else:
-            uncertainty = pair['uncertainty']
+            uncertainty = pair.get('uncertainty')
         return {
             'forecast': forecast_metadata,
             'observation': observation_metadata,
             'aggregate': aggregate_metadata,
             'reference_forecast': reference_metadata,
             'uncertainty': uncertainty,
-            'cost': pair['cost'],
+            'cost': pair.get('cost'),
             'forecast_view': forecast_view,
         }
 
