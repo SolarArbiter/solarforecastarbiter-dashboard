@@ -27,6 +27,7 @@
   </ul>
   </li>
 </ul>
+{% if metadata['report_parameters']['filters'] %}
 <ul class="data-metadata-fields col-md-6 col-sm-12">
   <li class="metadata-field"><span class="data-metadata-label">Filters:</span>
       <ul>
@@ -37,9 +38,72 @@
             {% for value in values %}
             <li>{{ value }}</li>
             {% endfor %}
+          </ul>
+        </li>
         {% endfor %}
         {% endfor %}
       </ul>
   </li>
 </ul>
+{% endif %}
+{% if metadata['report_parameters']['costs'] %}
+<ul class="data-metadata-fields col-md-12 col-sm-12">
+  <li class="metadata-field"><span class="data-metadata-label">Costs:</span>
+      <ul>
+        {% for cost in metadata['report_parameters']['costs'] %}
+        {{ macro.cost(cost) }}
+        {% endfor %}
+      </ul>
+  </li>
+</ul>
+{% endif %}
+<div class="col-md-12 col-sm-12">
+<span class="data-metadata-label">Object Pairs:</span>
+<ul class="object-pair-list data-metadata-fields">
+ {% for pair in object_pairs %}
+ <li class='object-pair-wrapper object-pair'>
+   <div>
+   <ul class="pair-attribute-list">
+     <li><b>Forecast: </b>
+       <a href="
+         {{ url_for('data_dashboard.'+pair['forecast_view'],
+                    uuid=pair['forecast']['forecast_id']) }}">
+         {{pair['forecast']['name']}}
+       </a>
+     </li>
+     {% if pair['observation'] is not none %}
+     <li><b>Observation: </b>
+       <a href="
+         {{url_for('data_dashboard.observation_view',
+                   uuid=pair['observation']['observation_id'])}}">
+         {{ pair['observation']['name'] }}
+       </a>
+     </li>
+     {% endif %}
+     {% if pair['aggregate'] is not none %}
+     <li><b>Aggregate: </b>
+       <a href="
+         {{url_for('data_dashboard.aggregate_view',
+                   uuid=pair['aggregate']['aggregate_id'])}}">
+         {{pair['aggregate']['name']}}
+       </a>
+     </li>
+     {% endif %}
+     {% if pair['reference_forecast'] is not none %}
+     <li><b>Reference Forecast: </b>
+         <a href="
+           {{ url_for('data_dashboard.'+pair['forecast_view'],
+                      uuid=pair['forecast']['forecast_id']) }}">
+             {{pair['reference_forecast']['name']}}
+         </a>
+     </li>
+     {% endif %}
+     <li><b>Uncertainty:</b> {{ pair['uncertainty'] }}</li>
+     <li><b>Cost:</b> {{ pair['cost'] }}</li>
+   </ul>
+   </div>
+ </li>
+ {% endfor %}
+</ul>
+</div>
 {% endblock %}
