@@ -243,8 +243,12 @@ class DeleteReportView(BaseView):
     metadata_template = 'data/metadata/report_metadata.html'
 
     def _object_pair_template_attributes(self, pair):
+        """Load metadata for objects included in forecast/obs pairs.
+        """
         pair_template_attrs = {}
+
         forecast_type = pair['forecast_type']
+
         if forecast_type == 'forecast' or forecast_type == 'event_forecast':
             forecast_metadata = forecasts.get_metadata(pair['forecast'])
             if pair['reference_forecast'] is not None:
@@ -253,22 +257,45 @@ class DeleteReportView(BaseView):
             else:
                 reference_metadata = None
             forecast_view = 'forecast_view'
-        else if forecast_type == 'probabilistic_forecast':
+        elif forecast_type == 'probabilistic_forecast':
             forecast_metadata = cdf_forecast_groups.get_metadata(
                 pair['forecast'])
             if pair['reference_forecast'] is not None:
-                reference_metadata = cdf_forecast_Groups.get_metadata(
+                reference_metadata = cdf_forecast_groups.get_metadata(
+                    pair['reference_forecast'])
+            else:
+                reference_metadata = None
+            forecast_view = 'cdf_forecast_group_view'
+        else:
+            forecast_metadata = cdf_forecasts.get_metadata(pair['forecast'])
+            if pair['reference_forecast'] is not None:
+                reference_metadata = cdf_forecasts.get_metadata(
                     pair['reference_forecast'])
             else:
                 reference_metadata = None
             forecast_view = 'cdf_forecast_view'
-        else:
-            forecast_metadata = cdf_forecasts.get_metadata(pair['forecast'])
-            if pair['reference_forecast'] is not None:
-            forecast_view = 'cdf_forecast_view'
         # GET obs/aggregate metadata
+        if pair['observation'] is not None:
+           observation_metadata = observations.get_metadata(
+                pair['observations'])
+        else:
+            observation_metadata = None
+
+        if pair['aggregate'] is not None:
+            aggregate_metadata = aggregates.get_metadata(
+                pair['aggregate'])
+        else:
+            aggregate_metadata = None
 
         # set uncertainty
+        if pair['uncertainty'] == 'observation_uncertainty':
+            if observation_metadata is not None:
+               uncertainty = observation_metadata['uncertainty']
+            else:
+               uncertainty = None
+        else:
+            uncertainty = pair['uncertainty']
+
 
     def load_pair_metadata(self):
         report_object_pairs = self.metadata['report_parameters']
