@@ -797,7 +797,7 @@ report_utils.cost_fill_field = function(the_div, cost_obj, index=null){
             type="radio"
             id="${report_utils.suffix_name('cost-fill', index)}"
             name="${fill_field_name}"
-            value="mean"
+            value="backward"
             ${cost_obj.fill == 'backward' ? 'checked' : ''}>
            <label for="${report_utils.suffix_name('cost-fill-backward', index)}">backward</label>`);
     const [help_button, help_text] = report_utils.help_popup(
