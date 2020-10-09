@@ -58,18 +58,26 @@
 </ul>
 {% endif %}
 <div class="col-md-12 col-sm-12">
-<span class="data-metadata-label">Object Pairs:</span>
+<span class="data-metadata-label">Forecasts and Observations:</span>
 <ul class="object-pair-list data-metadata-fields">
- {% for pair in object_pairs %}
+{% if object_pairs | length == 0 %}
+<p>Could not read the metadata of included forecasts and observations.<p>
+{% endif %}
+{% for pair in object_pairs %}
  <li class='object-pair-wrapper object-pair'>
    <div>
    <ul class="pair-attribute-list">
      <li><b>Forecast: </b>
+
+       {% if pair['forecast'] is not none %}
        <a href="
          {{ url_for('data_dashboard.'+pair['forecast_view'],
                     uuid=pair['forecast']['forecast_id']) }}">
          {{pair['forecast']['name']}}
        </a>
+       {% else %}
+       Could not read Forecast.
+       {% endif %}
      </li>
      {% if pair['observation'] is not none %}
      <li><b>Observation: </b>

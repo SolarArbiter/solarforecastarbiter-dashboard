@@ -249,40 +249,68 @@ class DeleteReportView(BaseView):
         forecast_type = pair['forecast_type']
 
         if forecast_type == 'forecast' or forecast_type == 'event_forecast':
-            forecast_metadata = forecasts.get_metadata(pair['forecast'])
+            try:
+                forecast_metadata = forecasts.get_metadata(pair['forecast'])
+            except DataRequestException:
+                forecast_metadata = None
+
             if pair['reference_forecast'] is not None:
-                reference_metadata = forecasts.get_metadata(
+                try:
+                    reference_metadata = forecasts.get_metadata(
                         pair['reference_forecast'])
+                except DataRequestException:
+                    reference_metadata = None
             else:
                 reference_metadata = None
             forecast_view = 'forecast_view'
         elif forecast_type == 'probabilistic_forecast':
-            forecast_metadata = cdf_forecast_groups.get_metadata(
-                pair['forecast'])
+            try:
+                forecast_metadata = cdf_forecast_groups.get_metadata(
+                    pair['forecast'])
+            except DataRequestException:
+                forecast_metadata = None
+
             if pair.get('reference_forecast') is not None:
-                reference_metadata = cdf_forecast_groups.get_metadata(
-                    pair['reference_forecast'])
+                try:
+                    reference_metadata = cdf_forecast_groups.get_metadata(
+                        pair['reference_forecast'])
+                except DataRequestException:
+                    reference_metadata = None
             else:
                 reference_metadata = None
             forecast_view = 'cdf_forecast_group_view'
         else:
-            forecast_metadata = cdf_forecasts.get_metadata(pair['forecast'])
+            try:
+                forecast_metadata = cdf_forecasts.get_metadata(
+                    pair['forecast'])
+            except DataRequestException:
+                forecast_metadata = None
+
             if pair.get('reference_forecast') is not None:
-                reference_metadata = cdf_forecasts.get_metadata(
-                    pair['reference_forecast'])
+                try:
+                    reference_metadata = cdf_forecasts.get_metadata(
+                        pair['reference_forecast'])
+                except DataRequestException:
+                    reference_metadata = None
             else:
                 reference_metadata = None
             forecast_view = 'cdf_forecast_view'
 
         if pair.get('observation') is not None:
-            observation_metadata = observations.get_metadata(
-                pair['observation'])
+            try:
+                observation_metadata = observations.get_metadata(
+                    pair['observation'])
+            except DataRequestException:
+                observation_metadata = None
         else:
             observation_metadata = None
 
         if pair.get('aggregate') is not None:
-            aggregate_metadata = aggregates.get_metadata(
-                pair['aggregate'])
+            try:
+                aggregate_metadata = aggregates.get_metadata(
+                    pair['aggregate'])
+            except DataRequestException:
+                aggregate_metadata = None
         else:
             aggregate_metadata = None
 
@@ -308,8 +336,18 @@ class DeleteReportView(BaseView):
         object_pairs = params['object_pairs']
         pair_template_args = []
         for pair in object_pairs:
+            pair_args = self._object_pair_template_attributes(pair)
+            # check if the user has access to some metadata before including
+            # the object pair.
+            if (
+                pair_args['forecast'] is None
+                and pair_args['observation'] is None
+                and pair_args['aggregate'] is None
+                and pair_args['reference_forecast'] is None
+            ):
+                continue
             pair_template_args.append(
-               self._object_pair_template_attributes(pair)
+                pair_args
             )
         return pair_template_args
 
