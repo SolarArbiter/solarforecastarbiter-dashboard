@@ -261,6 +261,30 @@ class DeleteReportView(BaseView):
 
     def _object_pair_template_attributes(self, pair):
         """Load metadata for objects included in forecast/obs pairs.
+
+        Parameters
+        ----------
+        pair:
+            Dict created from an object in the `object_pairs` field of the
+            Solar Forecast Arbiter API report JSON response.
+
+        Returns
+        -------
+        dict:
+            Dict containing the following keys and values:
+            * forecast: dict of forecast metadata or None
+            * observation: dict of observation metadata or None
+            * aggregate: dict of aggregate metadata or None
+            * reference_forecast: dict of forecast metadata or None
+            * uncertainty: dependent on value
+              * float: float
+              * 'observation_uncertainty': The value of the observation's
+                  uncertainty field if available.
+              * None: None
+            * cost: cost value of the pair (str or None)
+            * forecast_view: The name of the forecast view relative to the
+                data_dashboard blueprint e.g. accessible via
+                `data_dashboard.<forecast_view>`.
         """
         forecast_type = pair['forecast_type']
 
