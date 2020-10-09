@@ -181,7 +181,7 @@ class ReportView(BaseView):
                     plots included:
                     <a href="{download_link}">Download HTML Report.</a>""",
                     'warning')
-            elif not self.metadata['values'] and report_status == 'success':
+            elif not self.metadata['values'] and report_status == 'complete':
                 flash('Could not load report values. Timeseries and scatter '
                       'plots will not be included.',
                       'warning')
