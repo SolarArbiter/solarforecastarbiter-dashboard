@@ -6,6 +6,7 @@ from sfa_dash.api_interface import (observations, forecasts, sites, reports,
                                     cdf_forecasts)
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.errors import DataRequestException
+from sfa_dash.filters import api_varname_to_units
 from sfa_dash.form_utils import converters
 from sfa_dash.utils import check_sign_zip
 from solarforecastarbiter.datamodel import Report, RawReport
@@ -243,58 +244,55 @@ class DeleteReportView(BaseView):
     template = 'forms/deletion_form.html'
     metadata_template = 'data/metadata/report_metadata.html'
 
+    def rename_forecast(self, forecast):
+        """Applies a percentile label to the end of a probabilistic forecast
+        constant value name.
+        """
+        name = forecast['name']
+        if 'constant_value' in forecast:
+            constant_value = forecast['constant_value']
+            if forecast['axis'] == 'x':
+                units = api_varname_to_units(forecast['variable'])
+                return f'{name} Prob(x <= {constant_value} {units}'
+            else:
+                return f'{name} Prob(f <= x) = {constant_value}%'
+        else:
+            return name
+
     def _object_pair_template_attributes(self, pair):
         """Load metadata for objects included in forecast/obs pairs.
         """
         forecast_type = pair['forecast_type']
 
         if forecast_type == 'forecast' or forecast_type == 'event_forecast':
-            try:
-                forecast_metadata = forecasts.get_metadata(pair['forecast'])
-            except DataRequestException:
-                forecast_metadata = None
-
-            if pair['reference_forecast'] is not None:
-                try:
-                    reference_metadata = forecasts.get_metadata(
-                        pair['reference_forecast'])
-                except DataRequestException:
-                    reference_metadata = None
-            else:
-                reference_metadata = None
+            forecast_get = forecasts.get_metadata
             forecast_view = 'forecast_view'
+
         elif forecast_type == 'probabilistic_forecast':
-            try:
-                forecast_metadata = cdf_forecast_groups.get_metadata(
-                    pair['forecast'])
-            except DataRequestException:
-                forecast_metadata = None
-
-            if pair.get('reference_forecast') is not None:
-                try:
-                    reference_metadata = cdf_forecast_groups.get_metadata(
-                        pair['reference_forecast'])
-                except DataRequestException:
-                    reference_metadata = None
-            else:
-                reference_metadata = None
+            forecast_get = cdf_forecast_groups.get_metadata
             forecast_view = 'cdf_forecast_group_view'
-        else:
-            try:
-                forecast_metadata = cdf_forecasts.get_metadata(
-                    pair['forecast'])
-            except DataRequestException:
-                forecast_metadata = None
 
-            if pair.get('reference_forecast') is not None:
-                try:
-                    reference_metadata = cdf_forecasts.get_metadata(
-                        pair['reference_forecast'])
-                except DataRequestException:
-                    reference_metadata = None
-            else:
-                reference_metadata = None
+        else:
+            forecast_get = cdf_forecasts.get_metadata
             forecast_view = 'cdf_forecast_view'
+
+        try:
+            forecast_metadata = forecast_get(pair['forecast'])
+        except DataRequestException:
+            forecast_metadata = None
+        else:
+            forecast_metadata['name'] = self.rename_forecast(forecast_metadata)
+
+        if pair.get('reference_forecast') is not None:
+            try:
+                reference_metadata = forecast_get(pair['reference_forecast'])
+            except DataRequestException:
+                reference_metadata = None
+            else:
+                reference_metadata['name'] = self.rename_forecast(
+                    reference_metadata)
+        else:
+            reference_metadata = None
 
         if pair.get('observation') is not None:
             try:
