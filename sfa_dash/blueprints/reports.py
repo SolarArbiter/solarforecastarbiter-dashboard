@@ -160,24 +160,31 @@ class ReportView(BaseView):
             'report_template': report_template,
             'dash_url': request.url_root.rstrip('/'),
             'include_metrics_toc': False,
-            'includes_bokeh': True,
             'metadata': {
                 'report_parameters': self.metadata['report_parameters']},
         })
-        if not include_timeseries:
+        # If we're not including timeseries, or values could not be read,
+        # pop all of the timeseries/scatter spec template arguments
+        if not include_timeseries or not self.metadata['values']:
+            report_status = self.metadata.get('status')
             # display a message about omitting timeseries
             download_link = url_for('data_dashboard.download_report_html',
                                     uuid=self.metadata['report_id'])
-            script = ''
-            div = f"""<div class="alert alert-warning">
-    <strong>Warning</strong> To improve performance timeseries plots have been
-    omitted from this report. You may download a copy of this report with the
-    timeseries plots included:
-    <a href="{download_link}">Download HTML Report.</a></div>"""
-            report_kwargs.update({
-                'timeseries_div': div,
-                'timeseries_script': script,
-            })
+            report_kwargs.pop('timeseries_spec', None)
+            report_kwargs.pop('timeseries_prob_spec', None)
+            report_kwargs.pop('scatter_spec', None)
+            if not include_timeseries and report_status == 'success':
+                flash(
+                    f"""<strong>Warning</strong> To improve performance
+                    timeseries plots have been omitted from this report. You
+                    may download a copy of this report with the timeseries
+                    plots included:
+                    <a href="{download_link}">Download HTML Report.</a>""",
+                    'warning')
+            elif not self.metadata['values'] and report_status == 'success':
+                flash('Could not load report values. Timeseries and scatter '
+                      'plots will not be included.',
+                      'warning')
         self.template_args = report_kwargs
 
     def set_metadata(self, uuid):
