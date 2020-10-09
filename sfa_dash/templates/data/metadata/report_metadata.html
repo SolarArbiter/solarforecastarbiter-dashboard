@@ -58,8 +58,15 @@
 </ul>
 {% endif %}
 <div class="col-md-12 col-sm-12">
+
 <span class="data-metadata-label">Forecasts and Observations:</span>
 <ul class="object-pair-list data-metadata-fields">
+{# Note that this field is populated from a separate object_pairs variable. NOT
+   the 'object_pairs' field of the report metadata. This variable should
+   contain all of the available metadata for each object pair. See docstring of
+   sfa_dash.blueprints.reports.DeleteReportView._object_pair_template_attributes
+   for details.
+#}
 {% if object_pairs | length == 0 %}
 <p>Could not read the metadata of included forecasts and observations.<p>
 {% endif %}
