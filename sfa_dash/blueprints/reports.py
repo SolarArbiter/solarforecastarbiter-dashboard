@@ -173,7 +173,7 @@ class ReportView(BaseView):
             report_kwargs.pop('timeseries_spec', None)
             report_kwargs.pop('timeseries_prob_spec', None)
             report_kwargs.pop('scatter_spec', None)
-            if not include_timeseries and report_status == 'success':
+            if not include_timeseries and report_status == 'complete':
                 flash(
                     f"""<strong>Warning</strong> To improve performance
                     timeseries plots have been omitted from this report. You
