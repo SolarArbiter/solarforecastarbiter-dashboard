@@ -165,29 +165,26 @@ class ReportView(BaseView):
         })
         # If we're not including timeseries, or values could not be read,
         # pop all of the timeseries/scatter spec template arguments
-        if not include_timeseries or not self.metadata['values']:
-            report_status = self.metadata.get('status')
-            # display a message about omitting timeseries
+        report_status = self.metadata.get('status')
+
+        # display a message about omitting timeseries
+        if not include_timeseries and report_status == 'complete':
             download_link = url_for('data_dashboard.download_report_html',
                                     uuid=self.metadata['report_id'])
-            report_kwargs.pop('timeseries_spec', None)
-            report_kwargs.pop('timeseries_prob_spec', None)
-            report_kwargs.pop('scatter_spec', None)
-            if not include_timeseries and report_status == 'complete':
-                flash(
-                    f"""<strong>Warning</strong> Too many timeseries points
-                    detected. To improve performance time series plots have
-                    been omitted from this report. You may download a copy
-                    of this report with the timeseries plots included:
-                    <a href="{download_link}">Download HTML Report.</a>""",
-                    'warning')
-            elif not self.metadata['values'] and report_status == 'complete':
-                flash('Could not load any time series values of observations '
-                      'or forecasts. Timeseries and scatter plots will not '
-                      'be included. You may require the `read_values` '
-                      'permission on this report, or the included forecasts '
-                      'and observations.',
-                      'warning')
+            flash(
+                f"""<strong>Warning</strong> Too many timeseries points
+                detected. To improve performance time series plots have
+                been omitted from this report. You may download a copy
+                of this report with the timeseries plots included:
+                <a href="{download_link}">Download HTML Report.</a>""",
+                'warning')
+        elif not self.metadata['values'] and report_status == 'complete':
+            flash('Could not load any time series values of observations '
+                  'or forecasts. Timeseries and scatter plots will not '
+                  'be included. You may require the `read_values` '
+                  'permission on this report, or the included forecasts '
+                  'and observations.',
+                  'warning')
         self.template_args = report_kwargs
 
     def set_metadata(self, uuid):
