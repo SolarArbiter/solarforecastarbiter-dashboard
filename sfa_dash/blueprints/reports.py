@@ -2,9 +2,11 @@ from flask import (request, redirect, url_for, render_template, send_file,
                    current_app, flash)
 
 from sfa_dash.api_interface import (observations, forecasts, sites, reports,
-                                    aggregates, cdf_forecast_groups, users)
+                                    aggregates, cdf_forecast_groups, users,
+                                    cdf_forecasts)
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.errors import DataRequestException
+from sfa_dash.filters import api_varname_to_units
 from sfa_dash.form_utils import converters
 from sfa_dash.utils import check_sign_zip
 from solarforecastarbiter.datamodel import Report, RawReport
@@ -242,7 +244,137 @@ class DeleteReportView(BaseView):
     template = 'forms/deletion_form.html'
     metadata_template = 'data/metadata/report_metadata.html'
 
+    def rename_forecast(self, forecast):
+        """Applies a percentile label to the end of a probabilistic forecast
+        constant value name.
+        """
+        name = forecast['name']
+        if 'constant_value' in forecast:
+            constant_value = forecast['constant_value']
+            if forecast['axis'] == 'x':
+                units = api_varname_to_units(forecast['variable'])
+                return f'{name} Prob(x <= {constant_value} {units}'
+            else:
+                return f'{name} Prob(f <= x) = {constant_value}%'
+        else:
+            return name
+
+    def _object_pair_template_attributes(self, pair):
+        """Load metadata for objects included in forecast/obs pairs.
+
+        Parameters
+        ----------
+        pair:
+            Dict created from an object in the `object_pairs` field of the
+            Solar Forecast Arbiter API report JSON response.
+
+        Returns
+        -------
+        dict:
+            Dict containing the following keys and values:
+            * forecast: dict of forecast metadata or None
+            * observation: dict of observation metadata or None
+            * aggregate: dict of aggregate metadata or None
+            * reference_forecast: dict of forecast metadata or None
+            * uncertainty: dependent on value
+              * float: float
+              * 'observation_uncertainty': The value of the observation's
+                  uncertainty field if available.
+              * None: None
+            * cost: cost value of the pair (str or None)
+            * forecast_view: The name of the forecast view relative to the
+                data_dashboard blueprint e.g. accessible via
+                `data_dashboard.<forecast_view>`.
+        """
+        forecast_type = pair['forecast_type']
+
+        if forecast_type == 'forecast' or forecast_type == 'event_forecast':
+            forecast_get = forecasts.get_metadata
+            forecast_view = 'forecast_view'
+
+        elif forecast_type == 'probabilistic_forecast':
+            forecast_get = cdf_forecast_groups.get_metadata
+            forecast_view = 'cdf_forecast_group_view'
+
+        else:
+            forecast_get = cdf_forecasts.get_metadata
+            forecast_view = 'cdf_forecast_view'
+
+        try:
+            forecast_metadata = forecast_get(pair['forecast'])
+        except DataRequestException:
+            forecast_metadata = None
+        else:
+            forecast_metadata['name'] = self.rename_forecast(forecast_metadata)
+
+        if pair.get('reference_forecast') is not None:
+            try:
+                reference_metadata = forecast_get(pair['reference_forecast'])
+            except DataRequestException:
+                reference_metadata = None
+            else:
+                reference_metadata['name'] = self.rename_forecast(
+                    reference_metadata)
+        else:
+            reference_metadata = None
+
+        if pair.get('observation') is not None:
+            try:
+                observation_metadata = observations.get_metadata(
+                    pair['observation'])
+            except DataRequestException:
+                observation_metadata = None
+        else:
+            observation_metadata = None
+
+        if pair.get('aggregate') is not None:
+            try:
+                aggregate_metadata = aggregates.get_metadata(
+                    pair['aggregate'])
+            except DataRequestException:
+                aggregate_metadata = None
+        else:
+            aggregate_metadata = None
+
+        if pair['uncertainty'] == 'observation_uncertainty':
+            if observation_metadata is not None:
+                uncertainty = observation_metadata['uncertainty']
+            else:
+                uncertainty = None
+        else:
+            uncertainty = pair.get('uncertainty')
+        return {
+            'forecast': forecast_metadata,
+            'observation': observation_metadata,
+            'aggregate': aggregate_metadata,
+            'reference_forecast': reference_metadata,
+            'uncertainty': uncertainty,
+            'cost': pair.get('cost'),
+            'forecast_view': forecast_view,
+        }
+
+    def load_pair_template_args(self):
+        params = self.metadata['report_parameters']
+        object_pairs = params['object_pairs']
+        pair_template_args = []
+        for pair in object_pairs:
+            pair_args = self._object_pair_template_attributes(pair)
+            # check if the user has access to some metadata before including
+            # the object pair.
+            if (
+                pair_args['forecast'] is None
+                and pair_args['observation'] is None
+                and pair_args['aggregate'] is None
+                and pair_args['reference_forecast'] is None
+            ):
+                continue
+            pair_template_args.append(
+                pair_args
+            )
+        return pair_template_args
+
     def set_template_args(self):
+        object_pair_template_args = self.load_pair_template_args()
         self.template_args = {
             'data_type': 'report',
             'uuid': self.metadata['report_id'],
@@ -251,7 +383,8 @@ class DeleteReportView(BaseView):
             'metadata_block': render_template(
                 self.metadata_template,
                 data_type='Report',
-                metadata=self.metadata
+                metadata=self.metadata,
+                object_pairs=object_pair_template_args,
             ),
         }
 

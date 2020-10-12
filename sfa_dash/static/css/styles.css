@@ -188,6 +188,14 @@ div.object-pair-list{
   padding-left: 0;
   margin-bottom: 1em;
 }
+ul.object-pair-list{
+    padding-left: 0;
+    list-style: none;
+}
+ul.pair-attribute-list{
+    padding-left: 1em;
+    list-style: none;
+}
 a.object-pair-delete-button, a.error-band-delete-button{
     position: absolute;
     top: 5px;

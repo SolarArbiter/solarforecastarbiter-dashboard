@@ -3,3 +3,47 @@
 <li class="metadata-field"><span class="data-metadata-label">{{ label }}: </span>{{ attribute | string | replace("_", " ")}} {% if unit != '' %} ({{ unit }}) {% endif %}</li>
 {% endif %}
 {% endmacro %}
+{% macro _cost(type, params) %}
+{% if type == 'timeofday' %}
+  <li class="metadata-field"><b>Aggregation: </b>{{ params['aggregation'] }}</li>
+  <li class="metadata-field"><b>Times: </b>{{ ', '.join(params['times']) }}</li>
+  <li class="metadata-field"><b>Cost: </b>{% for c in params['cost'] %}{{ c }}{% if not loop.last %}, {% endif %}{% endfor %}</li>
+  <li class="metadata-field"><b>Fill: </b>{{ params['fill'] }}</li>
+  <li class="metadata-field"><b>Net: </b>{{ params['net'] }}</li>
+  <li class="metadata-field"><b>Timezone: </b>{{ params['timezone'] or 'Unset' }}</li>
+  {% elif type == 'constant' %}
+  <li class="metadata-field"><b>Aggregation: </b>{{ params['aggregation'] }}</li>
+  <li class="metadata-field"><b>Cost: </b>{{ params['cost'] }}</li>
+  <li class="metadata-field"><b>Net: </b>{{ params['net'] }}</li>
+  {% elif type == 'datetime' %}
+  <li class="metadata-field"><b>Aggregation: </b>{{ params['aggregation'] }}</li>
+  <li class="metadata-field"><b>Datetimes: </b>{% for d in params['datetimes'] %}{{ d | format_datetime }}{% if not loop.last %}, {% endif %}{% endfor %}</li>
+  <li class="metadata-field"><b>Cost: </b>{% for c in params['cost'] %}{{ c }}{% if not loop.last %}, {% endif %}{% endfor %}</li>
+  <li class="metadata-field"><b>Fill: </b>{{ params['fill'] }}</li>
+  <li class="metadata-field"><b>Net: </b>{{ params['net'] }}</li>
+  <li class="metadata-field"><b>Timezone: </b>{{ params['timezone'] or 'Unset' }}</li>
+  {% elif type == 'errorband' %}
+  <li class="metadata-field"><b>Bands: </b></li>
+  <ul>
+  {% for band in params['bands'] %}
+	<li><ul>
+    <li><b>Error Range: </b> {{ band['error_range'] }}</li>
+	<li><b>Cost Function: </b>{{ band['cost_function'] }}</li>
+    <li><b>Cost Function Parameters: </b>
+      <ul>{{ _cost(band['cost_function'], band['cost_function_parameters']) }}
+	  </ul>
+    </li>
+	</ul></li>
+  {% endfor %}
+  </ul>
+  {% endif %}
+{% endmacro %}
+
+{% macro cost(cost) %}
+<li class="metadata-field"><span class="data-metadata-label">{{ cost['name'] }}</span>
+<ul>
+  <li class="metadata-field"><b>Type: </b>{{ cost['type'] }}</li>
+  {{ _cost(cost['type'], cost['parameters']) }}
+</ul>
+</li>
+{% endmacro %}
