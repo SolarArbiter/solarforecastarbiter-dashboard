@@ -163,8 +163,6 @@ class ReportView(BaseView):
             'metadata': {
                 'report_parameters': self.metadata['report_parameters']},
         })
-        # If we're not including timeseries, or values could not be read,
-        # pop all of the timeseries/scatter spec template arguments
         report_status = self.metadata.get('status')
 
         # display a message about omitting timeseries
