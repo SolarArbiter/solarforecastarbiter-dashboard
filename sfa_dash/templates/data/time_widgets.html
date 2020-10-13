@@ -22,11 +22,11 @@ or download data. A maximum of one year of data may be downloaded.{% endif %}
 </div>
 {# form makes a post request to download data #}
 <div class="form-element full-width">
-  <button type="submit" id="plot-range-adjust-submit" form="plot-range-adjust" value="Submit" class="btn btn-primary">Update graph</button>
+  <button type="submit" id="plot-range-adjust-submit" form="plot-range-adjust" value="Submit" class="btn btn-primary mt-2">Update graph</button>
 
   {% if 'constant_values' not in metadata %}
   <form action="" method="post" id="download-form" onsubmit="ParseStartEnd()">
-  <button type="submit" id="download-submit" form="download-form" value="Submit" class="btn btn-primary">Download data</button>
+  <button type="submit" id="download-submit" form="download-form" value="Submit" class="btn btn-primary mt-2">Download data</button>
   <label for="format">Format: </label>
   <input type="radio" name="format" value="text/csv" checked>CSV</input>
   <input type="radio" name="format" value="application/json">JSON</input>
@@ -35,6 +35,12 @@ or download data. A maximum of one year of data may be downloaded.{% endif %}
   <input type="text" class="end" name="end" hidden>
   {{ form.token() }}
   </form>
+  {% endif %}
+  {% if 'observation_id' in metadata %}
+  <p class="mt-2">Observation data will include validation results in the
+  <b><i>quality_flag</i></b> field. See the
+  <a href="https://solarforecastarbiter.org/documentation/dashboard/working-with-data/#data-validation">data validation documentation</a>
+  for descriptions of these quality flags.
   {% endif %}
 </div>
 {# Form reloads the page with start and end query parameters #}
