@@ -213,6 +213,8 @@ class DownloadReportView(ReportView):
             errors = {'errors': e.errors}
             return ReportView().get(uuid, errors=errors)
 
+        exclude_timeseries = 'exclude_timeseries' in request.args
+
         # don't do the work of making a report if the format is incorrect
         if self.format_ not in ('html', 'pdf'):
             raise ValueError(
@@ -226,7 +228,7 @@ class DownloadReportView(ReportView):
             bytes_out = render_html(
                 report_object,
                 request.url_root.rstrip('/'),
-                with_timeseries=True, body_only=False
+                with_timeseries=not exclude_timeseries, body_only=False
             ).encode('utf-8')
         elif self.format_ == 'pdf':
             bytes_out = render_pdf(
