@@ -160,24 +160,29 @@ class ReportView(BaseView):
             'report_template': report_template,
             'dash_url': request.url_root.rstrip('/'),
             'include_metrics_toc': False,
-            'includes_bokeh': True,
             'metadata': {
                 'report_parameters': self.metadata['report_parameters']},
         })
-        if not include_timeseries:
-            # display a message about omitting timeseries
+        report_status = self.metadata.get('status')
+
+        # display a message about omitting timeseries
+        if not include_timeseries and report_status == 'complete':
             download_link = url_for('data_dashboard.download_report_html',
                                     uuid=self.metadata['report_id'])
-            script = ''
-            div = f"""<div class="alert alert-warning">
-    <strong>Warning</strong> To improve performance timeseries plots have been
-    omitted from this report. You may download a copy of this report with the
-    timeseries plots included:
-    <a href="{download_link}">Download HTML Report.</a></div>"""
-            report_kwargs.update({
-                'timeseries_div': div,
-                'timeseries_script': script,
-            })
+            flash(
+                f"""<strong>Warning</strong> Too many timeseries points
+                detected. To improve performance time series plots have
+                been omitted from this report. You may download a copy
+                of this report with the timeseries plots included:
+                <a href="{download_link}">Download HTML Report.</a>""",
+                'warning')
+        elif not self.metadata['values'] and report_status == 'complete':
+            flash('Could not load any time series values of observations '
+                  'or forecasts. Timeseries and scatter plots will not '
+                  'be included. You may require the `read_values` '
+                  'permission on this report, or the included forecasts '
+                  'and observations.',
+                  'warning')
         self.template_args = report_kwargs
 
     def set_metadata(self, uuid):
@@ -208,6 +213,8 @@ class DownloadReportView(ReportView):
             errors = {'errors': e.errors}
             return ReportView().get(uuid, errors=errors)
 
+        exclude_timeseries = 'exclude_timeseries' in request.args
+
         # don't do the work of making a report if the format is incorrect
         if self.format_ not in ('html', 'pdf'):
             raise ValueError(
@@ -221,7 +228,7 @@ class DownloadReportView(ReportView):
             bytes_out = render_html(
                 report_object,
                 request.url_root.rstrip('/'),
-                with_timeseries=True, body_only=False
+                with_timeseries=not exclude_timeseries, body_only=False
             ).encode('utf-8')
         elif self.format_ == 'pdf':
             bytes_out = render_pdf(

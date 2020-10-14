@@ -15,7 +15,8 @@
 {% set report_url = dash_url + '/reports/'+ report['report_id'] %}
 <p>
   This report can be downloaded as a
-  <a href="{{ report_url + '/download/html' }}">standalone HTML file</a> or
+  <a href="{{ report_url + '/download/html' }}">standalone HTML file</a>,
+  <a href="{{ report_url + '/download/html?exclude_timeseries=true' }}">standalone HTML file without timeseries</a> or
   <a href="{{ report_url + '/download/pdf' }}">PDF file</a>.
   The download is a ZIP archive that includes checksums for the
   report file and a PGP signature that can be used to verify the

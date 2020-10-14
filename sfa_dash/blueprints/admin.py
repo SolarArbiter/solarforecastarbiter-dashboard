@@ -735,7 +735,10 @@ class PermissionObjectAddition(PermissionView):
                 all_objects = self.flatten_reports(all_objects)
 
             # remove any objects already on the permission
-            object_id_key = f"{data_type}_id"
+            if 'forecast' in data_type:
+                object_id_key = 'forecast_id'
+            else:
+                object_id_key = f"{data_type}_id"
             all_objects = [obj for obj in all_objects
                            if obj[object_id_key] not in perm_objects]
             self.set_template_args(permission)

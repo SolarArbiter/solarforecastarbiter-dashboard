@@ -2,10 +2,10 @@
 {% autoescape true %}
 {% if data_type == 'observation' %}
   {% set uuid = row_values['observation_id'] %}
-{% elif data_type == 'forecast' %}
-  {% set uuid = row_values['forecast_id'] %}
 {% elif data_type == 'aggregate' %}
   {% set uuid = row_values['aggregate_id'] %}
+{% elif 'forecast' in data_type %}
+  {% set uuid = row_values['forecast_id'] %}
 {% endif %}
 <tr visible="true">
   <td><input type="checkbox" name="objects-list-{{ index }}" value="{{ uuid }}" {% if checked %}checked{% endif %}></td>
