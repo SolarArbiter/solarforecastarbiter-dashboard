@@ -10,6 +10,10 @@ from functools import reduce
 from math import isinf
 
 
+from solarforecastarbiter.validation.quality_mapping import (
+    DISCARD_BEFORE_RESAMPLE)
+
+
 from sfa_dash.form_utils import utils
 
 
@@ -540,8 +544,11 @@ class ReportConverter(FormConverter):
         """
         filters = []
         quality_flags = form_data.getlist('quality_flags')
-        if quality_flags:
-            filters.append({'quality_flags': quality_flags})
+        for flag in quality_flags:
+            filters.append({
+                'quality_flags': [flag],
+                'discard_before_resample': flag in DISCARD_BEFORE_RESAMPLE,
+            })
         return filters
 
     @classmethod

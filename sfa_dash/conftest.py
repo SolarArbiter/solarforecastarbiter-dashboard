@@ -658,7 +658,12 @@ def report():
         'report_parameters': {
             'categories': ['total', 'date'],
             'end': '2019-06-01T06:59:00+00:00',
-            'filters': [{'quality_flags': ['USER FLAGGED']}],
+            'filters': [{'quality_flags': ['USER FLAGGED'],
+                         'discard_before_resample': True,
+                         },
+                        {'quality_flags': ['STALE VALUES'],
+                         'discard_before_resample': False,
+                         }],
             'metrics': ['mae', 'rmse'],
             'name': 'NREL MIDC OASIS GHI Forecast Analysis',
             'object_pairs': [
