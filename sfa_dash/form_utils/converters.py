@@ -12,6 +12,7 @@ from math import isinf
 
 from solarforecastarbiter.validation.quality_mapping import (
     DISCARD_BEFORE_RESAMPLE)
+from solarforecastarbiter.datamodel import QualityFlagFilter as QFF
 
 
 from sfa_dash.form_utils import utils
@@ -548,6 +549,7 @@ class ReportConverter(FormConverter):
             filters.append({
                 'quality_flags': [flag],
                 'discard_before_resample': flag in DISCARD_BEFORE_RESAMPLE,
+                'resample_threshold_percentage': QFF.resample_threshold_percentage,  # noqa: E501
             })
         return filters
 
