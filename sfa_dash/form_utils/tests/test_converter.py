@@ -372,6 +372,7 @@ def test_report_converter_formdata_to_payload(report):
         ('categories', 'total'),
         ('categories', 'date'),
         ('quality_flags', 'USER FLAGGED'),
+        ('quality_flags', 'STALE VALUES'),
         ('forecast_fill_method', 'forward'),
         ('_csrf_token', '8a0771df3643d252cbafe4838263dbf7097f4982')]
     )
@@ -397,7 +398,7 @@ def test_report_converter_payload_to_formdata(report):
     assert form_data['period-end'] == '2019-06-01T06:59:00+00:00'
     assert form_data['metrics'] == ['mae', 'rmse']
     assert form_data['categories'] == ['total', 'date']
-    assert form_data['quality_flags'] == ['USER FLAGGED']
+    assert form_data['quality_flags'] == ['USER FLAGGED', 'STALE VALUES']
     assert form_data['object_pairs'] == [{
         'forecast': '11c20780-76ae-4b11-bef1-7a75bdc784e3',
         'observation': '123e4567-e89b-12d3-a456-426655440000',
@@ -450,6 +451,7 @@ def test_report_converter_formdata_to_payload_costs(report):
         ('categories', 'total'),
         ('categories', 'date'),
         ('quality_flags', 'USER FLAGGED'),
+        ('quality_flags', 'STALE VALUES'),
         ('cost-primary-type', 'timeofday'),
         ('cost-primary-name', 'this is a cost'),
         ('cost-times', '06:00,18:00'),

@@ -6,11 +6,13 @@ import pymysql
 import pytest
 from flask import url_for
 
+from solarforecastarbiter.datamodel import QualityFlagFilter as QFF
 
 from sfa_dash import create_app
 
 BASE_URL = 'http://localhost'
 
+resample_threshold = QFF.resample_threshold_percentage
 
 @pytest.fixture(scope='session')
 def auth_token():
@@ -658,7 +660,14 @@ def report():
         'report_parameters': {
             'categories': ['total', 'date'],
             'end': '2019-06-01T06:59:00+00:00',
-            'filters': [{'quality_flags': ['USER FLAGGED']}],
+            'filters': [{'quality_flags': ['USER FLAGGED'],
+                         'discard_before_resample': True,
+                         'resample_threshold_percentage': resample_threshold,
+                         },
+                        {'quality_flags': ['STALE VALUES'],
+                         'discard_before_resample': False,
+                         'resample_threshold_percentage': resample_threshold,
+                         }],
             'metrics': ['mae', 'rmse'],
             'name': 'NREL MIDC OASIS GHI Forecast Analysis',
             'object_pairs': [
