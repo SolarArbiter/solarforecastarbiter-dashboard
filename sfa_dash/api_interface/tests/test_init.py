@@ -11,6 +11,7 @@ import requests
 
 
 from sfa_dash import api_interface
+from sfa_dash.errors import DataRequestException
 
 
 @pytest.fixture()
@@ -90,3 +91,9 @@ def test_bad_length_retries_exhausted(context, background_server):
     context.config['SFA_API_URL'] = background_server
     with pytest.raises(requests.exceptions.ChunkedEncodingError):
         api_interface.get_request('/alwaysfail')
+
+
+def test_get_request_connection_error(context, background_server):
+    context.config['SFA_API_URL'] = background_server
+    with pytest.raises(DataRequestException):
+        api_interface.get_request('/kill')

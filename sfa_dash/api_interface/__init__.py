@@ -4,11 +4,13 @@ import time
 
 
 from flask import current_app as app
-from requests.exceptions import ChunkedEncodingError
+from requests.exceptions import ChunkedEncodingError, ConnectionError
+from sentry_sdk import capture_exception
 
 
 from sfa_dash import oauth_request_session
 from sfa_dash.api_interface.util import handle_response
+from sfa_dash.errors import DataRequestException
 
 
 def get_request(path, **kwargs):
@@ -37,6 +39,12 @@ def get_request(path, **kwargs):
             return get_request(path, **kwargs)
         else:
             raise
+    except ConnectionError as e:
+        capture_exception(e)
+        # The api hung up, handle an error, attempts to reconnect can work
+        # but often fail to reconnect and raise a different exception
+        raise DataRequestException(
+            'API connection failed. Please wait a moment and try again.')
     else:
         return handle_response(req)
 
