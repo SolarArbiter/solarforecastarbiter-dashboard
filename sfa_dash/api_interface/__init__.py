@@ -43,8 +43,9 @@ def get_request(path, **kwargs):
         capture_exception(e)
         # The api hung up, handle an error, attempts to reconnect can work
         # but often fail to reconnect and raise a different exception
-        raise DataRequestException(
-            'API connection failed. Please wait a moment and try again.')
+        raise DataRequestException(503, {
+            'Error': 'API connection failed. Please try again.'
+        })
     else:
         return handle_response(req)
 
