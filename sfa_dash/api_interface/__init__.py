@@ -28,26 +28,30 @@ def get_request(path, **kwargs):
     """
     # may need to handle errors if oauth_request_session does not exist somehow
     # definitely need to handle errors here
-    retries = kwargs.pop('chunked_retries', 2)
+    retries = kwargs.pop('failure_retries', 2)
+    errors = None
     try:
         req = oauth_request_session.get(
             f'{app.config["SFA_API_URL"]}{path}', **kwargs)
-    except ChunkedEncodingError:
-        if retries > 0:
-            kwargs['chunked_retries'] = retries - 1
-            time.sleep((3 - retries) * 0.1)
-            return get_request(path, **kwargs)
-        else:
-            raise
+    except ChunkedEncodingError as e:
+        errors = e
     except ConnectionError as e:
-        capture_exception(e)
-        # The api hung up, handle an error, attempts to reconnect can work
-        # but often fail to reconnect and raise a different exception
-        raise DataRequestException(503, {
-            'Error': 'API connection failed. Please try again.'
-        })
-    else:
-        return handle_response(req)
+        errors = e
+    finally:
+        if errors is not None:
+            if retries > 0:
+                kwargs['failure_retries'] = retries - 1
+                time.sleep((3 - retries) * 0.1)
+                return get_request(path, **kwargs)
+            else:
+                # API timed out or dropped the connection, send the error to
+                # sentry for tracking and return a message to the user.
+                capture_exception(errors)
+                raise DataRequestException(503, {
+                    'Error': 'API connection failed. Please try again.'
+                })
+        else:
+            return handle_response(req)
 
 
 def post_request(path, payload, json=True):
