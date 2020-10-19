@@ -37,21 +37,20 @@ def get_request(path, **kwargs):
         errors = e
     except ConnectionError as e:
         errors = e
-    finally:
-        if errors is not None:
-            if retries > 0:
-                kwargs['failure_retries'] = retries - 1
-                time.sleep((3 - retries) * 0.1)
-                return get_request(path, **kwargs)
-            else:
-                # API timed out or dropped the connection, send the error to
-                # sentry for tracking and return a message to the user.
-                capture_exception(errors)
-                raise DataRequestException(503, {
-                    'Error': 'API connection failed. Please try again.'
-                })
+    if errors is not None:
+        if retries > 0:
+            kwargs['failure_retries'] = retries - 1
+            time.sleep((3 - retries) * 0.1)
+            return get_request(path, **kwargs)
         else:
-            return handle_response(req)
+            # API timed out or dropped the connection, send the error to
+            # sentry for tracking and return a message to the user.
+            capture_exception(errors)
+            raise DataRequestException(503, {
+                'Error': 'API connection failed. Please try again.'
+            })
+    else:
+        return handle_response(req)
 
 
 def post_request(path, payload, json=True):
