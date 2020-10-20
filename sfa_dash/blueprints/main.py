@@ -180,6 +180,10 @@ class SingleObjectView(DataDashView):
             uuid=self.metadata[self.id_key])
 
         if self.data_type != 'cdf_forecast':
+            self.template_args['update_link'] = url_for(
+                f'forms.update_{self.data_type}',
+                uuid=self.metadata[self.id_key])
+
             self.template_args['delete_link'] = url_for(
                 f'data_dashboard.delete_{self.data_type}',
                 uuid=self.metadata[self.id_key])
@@ -299,6 +303,10 @@ class SingleCDFForecastGroupView(SingleObjectView):
         self.template_args['delete_link'] = url_for(
             f'data_dashboard.delete_cdf_forecast_group',
             uuid=self.metadata['forecast_id'])
+        self.template_args['update_link'] = url_for(
+            f'forms.update_cdf_forecast_group',
+            uuid=self.metadata['forecast_id'])
+
 
         self.template_args['period_start_date'] = start.strftime('%Y-%m-%d')
         self.template_args['period_start_time'] = start.strftime('%H:%M')
