@@ -249,7 +249,17 @@ class BaseView(MethodView):
         errors: dict
             Dict of errors returned by the API.
         """
-        to_flash = [f'({key}) {", ".join(msg)}' for key, msg in errors.items()]
+        to_flash = []
+        def _make_message(key, msg):
+            if isinstance(msg, dict):
+                return [_make_message(k, m)[0] for k,m in msg.items()]
+            if isinstance(msg[0], dict):
+                return _make_message(key, msg[0])
+            return [f'<b>{key}</b> {", ".join(msg)}']
+
+        for key, msg in errors.items():
+            to_flash += _make_message(key, msg)
+
         for error in to_flash:
             flash(error, 'error')
 
