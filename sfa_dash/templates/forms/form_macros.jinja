@@ -5,7 +5,7 @@
 {% endmacro %}
 
 
-{% macro input(label, type, name, help_text=None, form_data=None, required=False, class='', default='', units=None) %}
+{% macro input(label, type, name, help_text=None, form_data=None, required=False, class='', default='', units=None, disabled=False) %}
   {% set extra_attr = '' %}
 
   {% if type == 'number' %}
@@ -21,6 +21,7 @@
      class="form-control {{ class }} {{ name }}-field"
      {{ extra_attr }}
      name="{{ name }}"
+     {% if disabled %} disabled {% endif %}
      {% if name == 'name' %}{{ name_validation() }}{% endif %}
      {% if form_data is not none %}
      value="{{ form_data.get(name, default) | e}}"
@@ -33,11 +34,13 @@
   {% endif %}
 {% endmacro %}
 
-{% macro select(label, name, options, default_value, help_text=None, required=False, form_data={}) %}
+{% macro select(label, name, options, default_value, help_text=None, required=False, form_data={}, disabled=False) %}
 {% autoescape true %}
   <label>{{ label }}</label>
   <div class="input-wrapper">
-    <select class="form-control {{ name }}-field" name="{{ name }}"{% if required %} required {% endif %}>
+    <select class="form-control {{ name }}-field" name="{{ name }}"
+     {% if required %} required {% endif %}
+     {% if disabled %} disabled {% endif %}>
       {% for option, option_label in options.items() %}
       <option value="{{ option }}" {% if option == form_data.get(name, default_value)  %} selected="selected"{% endif %}>{{ option_label }}</option>
       {% endfor %}
@@ -50,11 +53,15 @@
 {% endautoescape %}
 {% endmacro %}
 
-{% macro radio(label, name, options, help_text=None, required=False, form_data={}) %}
+{% macro radio(label, name, options, help_text=None, required=False, form_data={}, disabled=False) %}
   <label>{{ label }}</label><br/>
   <div class="input-wrapper">
     {% for option, option_label in options.items() %}
-    <input name="{{ name }}" type="radio" class="{{ name }}-field" {% if required %}required{% endif %} value="{{ option }}" {% if form_data.get(name) == option %} checked {% endif %}>{{ option_label }}</label>
+    <input name="{{ name }}" type="radio" class="{{ name }}-field"
+     {% if required %} required {% endif %}
+     value="{{ option }}"
+     {% if form_data.get(name) == option %} checked {% endif %}
+     {% if disabled %} disabled {% endif %}>{{ option_label }}</label>
     {% endfor %}
   </div>
   {% if help_text is not none %}
@@ -70,12 +77,15 @@
    posted from this macro. See `sfa_dash.form_utils.utils.parse_timedelta_from_api`
    for converting api response fields into values for prefilling these inputs.
 #}
-{% macro timedelta(label, name, help_text=None, form_data={}) %}
+{% macro timedelta(label, name, help_text=None, form_data={}, disabled=False) %}
   <label>{{ label }}</label><br/>
   <div class="input-wrapper">
-  <input type="number" name="{{ name }}_number" step="1" min="0" {% if name+'_number' in form_data %}value="{{ form_data[name+'_number'] }}"{% endif %} required class="form-control time-field {{name }}-value-field">
+  <input type="number" required class="form-control time-field {{name }}-value-field"
+   name="{{ name }}_number" step="1" min="0"
+   {% if name+'_number' in form_data %}value="{{ form_data[name+'_number'] }}"{% endif %}
+   {% if disabled %} disabled {% endif %}>
   {% set selected = form_data.get(name+'_units') %}
-  <select required name="{{ name }}_units" class="form-control time-field {{ name }}-units-field">
+  <select required name="{{ name }}_units" class="form-control time-field {{ name }}-units-field" {% if disabled %} disabled {% endif %}>
     <option {% if selected == "minutes" %}selected{% endif %} value="minutes">Minutes</option>
     <option {% if selected == "hours" %}selected{% endif %} value="hours">Hours</option>
     <option {% if selected == "days" %}selected{% endif %} value="days">Days</option>
@@ -93,16 +103,22 @@
    `sfa_dash.form_utils.utils.parse_timedelta_from_api` for converting api
    response fields into values for prefilling these inputs.
 #}
-{% macro time_of_day(label, name, help_text=None, required=False, form_data={}) %}
+{% macro time_of_day(label, name, help_text=None, required=False, form_data={}, disabled=False) %}
   <label>{{ label }}</label><br/>
   <div class="input-wrapper">
-    <select {% if required %}required{% endif %} name="{{ name }}_hours" class="form-control time-field {{ name }}_hours-field">
+    <select name="{{ name }}_hours"
+            class="form-control time-field {{ name }}_hours-field"
+            {% if required %}required{% endif %}
+            {% if disabled %} disabled {% endif %}>
       {% for i in range(0,24) %}
       <option {% if i == form_data.get(name+'_hours') %}selected{% endif %} value="{{ i }}">{{ '%02d' % i }}</option>
       {% endfor %}
     </select>
     :
-    <select {% if required %}required{% endif %} name="{{ name }}_minutes" class="form-control time-field {{ name }}_minutes-field">
+    <select name="{{ name }}_minutes"
+            class="form-control time-field {{ name }}_minutes-field"
+            {% if required %} required {% endif %}
+            {% if disabled %} disabled {% endif %}>
       {% for i in range(0,60) %}
       <option {% if i == form_data.get(name+'_minutes') %}selected{% endif %} value="{{ i }}">{{ '%02d' % i }}</option>
       {% endfor %}
@@ -124,4 +140,20 @@
     <label>Extra parameters (optional)</label>
     <textarea cols="40" rows="5" name="extra_parameters" class="form-control extra-parameters-field" placeholder="This field will store any ASCII text. We recommend using it to store other parameters you have collected in a format such as YAML or JSON."></textarea>
   </div>
+{% endmacro %}
+
+{% macro updatable_extra_parameters(form_data, disabled=False) %}
+  <div class="form-element full-width">
+    <label>Extra parameters (optional)</label>
+    <textarea cols="40" rows="5" name="extra_parameters" class="form-control extra-parameters-field" placeholder="This field will store any ASCII text. We recommend using it to store other parameters you have collected in a format such as YAML or JSON.">{% autoescape true %}{{ form_data.get('extra_parameters', '') }}{% endautoescape%}</textarea>
+  </div>
+{% endmacro %}
+
+{% macro interval_label(form_data, interval_label_options, disabled=False) %}
+<div class="form-element">
+{{ select('Interval label', 'interval_label',
+          interval_label_options, null,
+          'Indicates the alignment of time labels, beginning or ending of the interval or instantaneous. An interval_label of "event" will be set when variable is set to "event".',
+          form_data=form_data, disabled=disabled) }}
+</div>
 {% endmacro %}

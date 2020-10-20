@@ -1,0 +1,36 @@
+{% extends "forms/base/update_form.html" %}
+{% import "forms/form_macros.jinja" as form %}
+{% set page_title = 'Update Observation' %}
+{% set data_type, form_enc  = 'observation', 'application/json' %}
+{% if form_data is not defined %}
+{% set form_data = {} %}
+{% endif %}
+{% block fields %}
+<div class="form-element">
+  {{ form.input('Name', 'text', 'name', 'Name of the Observation.', form_data=form_data) }}
+</div>
+<div class="form-element">
+  {{ form.select('Variable', 'variable',
+                 site_metadata | site_variable_options,
+                 default_variable,
+                 form_data=form_data, disabled=True) }}
+</div>
+<div class="form-element">
+  {{ form.select('Interval value type', 'interval_value_type',
+                  {"interval_mean": "Interval Mean",
+                   "instantaneous": "Instantaneous"},
+                   form_data=form_data, disabled=True) }}
+</div>
+<div class="form-element">
+  {{ form.input('Uncertainty', 'number', 'uncertainty',
+                'A measure of uncertainty of Observation values.',
+                form_data=form_data, units='&percnt;') }}
+</div>
+<div class="form-element">
+  {{ form.timedelta('Interval length', 'interval_length',
+                    'The length of time that each data point represents. Values must be integers.',
+                    form_data=form_data, disabled=True) }}
+</div>
+{{ form.interval_label(form_data, interval_label_options, disabled=True) }}
+{{ form.updatable_extra_parameters(form_data) }}
+{% endblock %}

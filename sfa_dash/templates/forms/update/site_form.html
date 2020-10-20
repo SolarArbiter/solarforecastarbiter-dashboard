@@ -1,0 +1,127 @@
+{% extends "forms/base/update_form.html" %}
+{% import "forms/form_macros.jinja" as form %}
+{% set page_title = 'Update Site' %}
+{% set data_type, form_enc = 'site', 'application/json' %}
+{% if form_data is not defined %}
+{% set form_data = {} %}
+{% endif %}
+{% block fields %}
+<div class="form-element full-width">
+{{ form.input('Name', 'text', 'name', 'Name for the Site.', required=True, form_data=form_data) }}
+</div>
+<div class="form-element">
+{{ form.input('Latitude', 'number', 'latitude',
+              'Latitude in decimal degrees North of the equator.',
+              required=True, form_data=form_data,
+              units='&deg;N') }}</div>
+<div class="form-element">
+{{ form.input('Longitude', 'number', 'longitude',
+              'Longitude in decimal degrees East of the prime meridian.',
+              required=True, form_data=form_data, units='&deg;E') }}
+</div>
+<div class="form-element">
+{{ form.input('Elevation', 'number', 'elevation',
+              'Elevation in meters above sea level.',
+              required=True, form_data=form_data, units='m')}}
+</div>
+<div class="form-element">
+    {{ form.select('Timezone', 'timezone',
+                   timezone_options,
+                   required=True, form_data=form_data)}}
+</div>
+<div class="form-element full-width">
+  <label>Site type</label><br/>
+  {% set site_type = form_data.get('site_type', None) %}
+  <input type="radio" name="site_type" value="weather-station" class="site_type-field"{% if site_type == 'weather-station' or site_type is none %} checked {% endif %}/>Weather Station
+  <input type="radio" name="site_type" value="power-plant" class="site_type-field"{% if site_type == 'power-plant' %} checked{% endif %}/>Power Plant
+  {{ form.help_button('site_type') }}
+  <span class="site_type-help-text form-text text-muted help-text collapse" aria-hidden>
+     Choose Weather Station if the Site will only be used for observations and
+     forecasts of irradiance and other weather variables. Choose Power Plant to
+     specify PV system modeling parameters and enable observations and
+     forecasts of power.
+  </span>
+</div>
+<div class="pv-model-params">
+  <fieldset name="modeling_parameters" {% if site_type != 'power-plant' %}disabled{% endif %}>
+    <legend>PV modeling parameters</legend>
+    <div class="form-element">
+    {{ form.input('AC capacity', 'number', 'ac_capacity',
+                  'Nameplate AC power rating in megawatts.',
+                  form_data=form_data, units='MW') }}
+    </div>
+    <div class="form-element">
+    {{ form.input('DC capacity', 'number', 'dc_capacity',
+                  'Nameplate DC power rating in megawatts.',
+                  form_data=form_data, units='MW') }}
+    </div>
+    <div class="form-element">
+    {{ form.input('AC loss factor', 'number', 'ac_loss_factor',
+                  'Loss factor applied to AC current in &percnt;.',
+                  form_data=form_data,
+                  default=0, units='&percnt;')}}
+    </div>
+    <div class="form-element">
+    {{ form.input('DC loss factor', 'number', 'dc_loss_factor',
+                  'Loss factor applied to DC current in &percnt;.',
+                  form_data=form_data,
+                  default=0, units='&percnt;')}}
+    </div>
+    <div class="form-element">
+    {{ form.input('Temperature coefficient', 'number', 'temperature_coefficient',
+                  'Temperature coefficient of DC power in units of %/C.',
+                  form_data=form_data, units='%/C') }}
+    </div>
+    <div class="form-element full-width">
+      <label>Tracking type</label>
+      {% set tracking_type = form_data.get('tracking_type', None) %}
+      <input type="radio" name="tracking_type" value="fixed" data-toggle="collapse" data-target=".tracking_type_fields" {% if tracking_type == "fixed" or tracking_type is none %} checked {% endif %}/>Fixed
+      <input type="radio" name="tracking_type" value="single_axis" data-toggle="collapse" data-target=".tracking_type_fields" {% if tracking_type == "single_axis"%}checked{% endif %}/>Single axis
+    </div>
+    <div class="fixed tracking_type_fields collapse{% if tracking_type == "fixed" or tracking_type is none%} show{% endif %}">
+        <div class="form-element">
+        {{ form.input('Surface tilt', 'number' ,'surface_tilt',
+                      help_text='Tilt from horizontal of a fixed tilt system.', form_data=form_data,
+                      units='&deg;') }}
+      </div>
+      <div class="form-element">
+        {{ form.input('Surface azimuth', 'number', 'surface_azimuth',
+                      help_text='Azimuth angle of a fixed tilt system.', form_data=form_data,
+                      units='&deg;') }}
+      </div>
+    </div>
+    <div class="single_axis tracking_type_fields collapse {% if tracking_type == "single_axis"%} show{% endif %}">
+      <div class="form-element">
+        {{ form.input('Axis tilt', 'number', 'axis_tilt',
+                      help_text='Tilt from horizontal of the tracker axis, degrees.',
+                      form_data=form_data, default=0,
+                      units='&deg;') }}
+      </div>
+      <div class="form-element">
+        {{ form.input('Axis azimuth', 'number', 'axis_azimuth',
+                      help_text='Azimuth angle of the tracker axis, degrees East of North.',
+                      form_data=form_data, default=0,
+                      units='&deg;')}}
+      </div>
+      <div class="form-element">
+        {{ form.input('Ground coverage ratio', 'number', 'ground_coverage_ratio',
+                      help_text='Azimuth angle of the tracker axis, degrees East of North.', form_data=form_data,
+                      units='&deg;') }}
+      </div>
+      <div class="form-element">
+        {{ form.input('Maximum rotation angle', 'number', 'max_rotation_angle',
+                      help_text='Maximum rotation from horizontal of a single axis tracker, degrees.', form_data=form_data,
+                      units='&deg;') }}
+      </div>
+      <div class="form-element">
+        <label>Backtrack</label>
+        <input type='radio' name="backtrack" value="true" class="backtrack-field" checked/>True
+        <input type='radio' name="backtrack" value="false" class="backtrack-field"/>False
+        {{ form.help_button('backtrack') }}
+	    <span class="help-text backtrack-help-text collapse">Indicator of if a tracking system uses backtracking.</span>
+      </div>
+    </div>
+  </fieldset>
+</div>
+{{ form.updatable_extra_parameters(form_data) }}
+{% endblock %}
