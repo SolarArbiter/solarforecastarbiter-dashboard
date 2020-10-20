@@ -92,8 +92,7 @@ class SiteConverter(FormConverter):
             dictionary of form data.
         """
         form_dict = {key: payload_dict[key]
-                     for key in cls.top_level_keys
-                     if key != 'extra_parameters'}
+                     for key in cls.top_level_keys}
         # test if any 'modeling_parameter' items are not None
         is_plant = reduce(lambda a, b: a or b,
                           [x is not None for x in
@@ -161,8 +160,7 @@ class ObservationConverter(FormConverter):
             attributes.
         """
         form_dict = {key: payload_dict[key]
-                     for key in cls.direct_keys
-                     if key != 'extra_parameters'}
+                     for key in cls.direct_keys}
         form_dict.update(
             utils.parse_timedelta_from_api(
                 payload_dict,
@@ -215,8 +213,7 @@ class ForecastConverter(FormConverter):
             attributes.
         """
         form_dict = {key: payload_dict[key]
-                     for key in cls.direct_keys
-                     if key != 'extra_parameters'}
+                     for key in cls.direct_keys}
         form_dict.update(utils.get_location_id(payload_dict))
         form_dict.update(
             utils.parse_hhmm_field_from_api(payload_dict, 'issue_time_of_day')
@@ -338,8 +335,7 @@ class AggregateConverter(FormConverter):
             its corresponding observation.
         """
         form_dict = {key: payload_dict[key]
-                     for key in cls.direct_keys
-                     if key != 'extra_parameters'}
+                     for key in cls.direct_keys}
         form_dict.update(utils.parse_timedelta_from_api(
             payload_dict, 'interval_length'))
         return form_dict
@@ -636,3 +632,96 @@ class ReportConverter(FormConverter):
         form_params['object_pairs'] = report_parameters['object_pairs']
         form_params.update(cls.parse_api_filters(report_parameters))
         return {'report_parameters': form_params}
+
+
+class ObservationUpdateConverter(ObservationConverter):
+    form = 'forms/update/observation_form.html'
+
+    @classmethod
+    def formdata_to_payload(cls, form_dict):
+        """Formats the result of a observation update webform into an API
+        payload.
+
+        Parameters
+        ----------
+        form_dict:  dict
+            The posted form data parsed into a dict.
+        Returns
+        -------
+        dictionary
+            Form data formatted to the API spec.
+        """
+        obs_metadata = {}
+        obs_metadata = {key: form_dict[key]
+                        for key in cls.direct_keys
+                        if form_dict.get(key, "") != ""}
+        return obs_metadata
+
+
+class ForecastUpdateConverter(ForecastConverter):
+    form = 'forms/update/forecast_form.html'
+
+    @classmethod
+    def formdata_to_payload(cls, form_dict):
+        """Formats the result of a forecast webform into an API payload.
+
+        Parameters
+        ----------
+        form_dict:  dict
+            The posted form data parsed into a dict.
+        Returns
+        -------
+        dictionary
+            Form data formatted to the API spec.
+        """
+        fx_metadata = {}
+        fx_metadata = {key: form_dict[key]
+                       for key in cls.direct_keys
+                       if form_dict.get(key, '') != ''}
+        return fx_metadata
+
+
+class CDFForecastUpdateConverter(CDFForecastConverter):
+    form = 'forms/update/cdf_forecast_group_form.html'
+
+    @classmethod
+    def formdata_to_payload(cls, form_dict):
+        """Formats the result of a cdf forecast webform into an API payload.
+
+        Parameters
+        ----------
+        form_dict:  dict
+            The posted form data parsed into a dict.
+
+        Returns
+        -------
+        dictionary
+            Form data formatted to the API spec.
+        """
+        fx_metadata = ForecastUpdateConverter.formdata_to_payload(form_dict)
+        return fx_metadata
+
+
+class AggregateUpdateConverter(AggregateConverter):
+    form = 'forms/updates/aggregate_form.html'
+
+
+    @classmethod
+    def formdata_to_payload(cls, form_dict):
+        """Converts an aggregate form submission dict to an api post payload.
+
+        Parameters
+        ----------
+        form_dict: dict
+            The posted form data parsed into a dict.
+
+        Returns
+        -------
+        dict
+            Form data formatted to API spec.
+        """
+        formatted = {key: form_dict[key]
+                     for key in cls.direct_keys
+                     if form_dict.get(key, '') != ''}
+        return formatted
+
