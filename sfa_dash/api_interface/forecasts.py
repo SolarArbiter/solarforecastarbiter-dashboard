@@ -39,3 +39,8 @@ def delete(forecast_id):
 def valid_times(forecast_id):
     req = get_request(f'/forecasts/single/{forecast_id}/values/timerange')
     return req
+
+
+def update(forecast_id, updates):
+    req = post_request(f'/forecasts/single/{forecast_id}/metadata', updates)
+    return req

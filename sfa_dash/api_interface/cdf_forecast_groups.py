@@ -107,3 +107,8 @@ def valid_times(metadata):
         'min_timestamp': start,
         'max_timestamp': end,
     }
+
+
+def update(forecast_id, updates):
+    req = post_request(f'/forecasts/cdf/{forecast_id}', updates)
+    return req
