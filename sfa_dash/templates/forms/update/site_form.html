@@ -83,7 +83,7 @@
       <input type="radio" name="tracking_type" value="fixed" data-toggle="collapse" data-target=".tracking_type_fields" {% if tracking_type == "fixed" or tracking_type is none %} checked{% endif %}/>Fixed
       <input type="radio" name="tracking_type" value="single_axis" data-toggle="collapse" data-target=".tracking_type_fields" {% if tracking_type == "single_axis"%}checked{% endif %}/>Single axis
     </div>
-    <fieldset name="fixed_tracking_fields" class="fixed tracking_type_fields collapse{% if tracking_type == "fixed" or tracking_type is none%} show" {% else %}" disabled {% endif %}">
+    <fieldset name="fixed_tracking_fields" class="fixed tracking_type_fields collapse{% if tracking_type == "fixed" or tracking_type is none%} show" {% else %}" disabled {% endif %}>
         <div class="form-element">
         {{ form.input('Surface tilt', 'number' ,'surface_tilt',
                       help_text='Tilt from horizontal of a fixed tilt system.', form_data=form_data,
