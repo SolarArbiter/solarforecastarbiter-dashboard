@@ -1,2 +1,5 @@
 {% extends "data/metadata/data_metadata.html" %}
+{% block extra_fields %}
+{{ macro.li('Uncertainty', uncertainty, unit='&percnt;' )}}
+{% endblock %}
 {% set data_type = 'Observation' %}
