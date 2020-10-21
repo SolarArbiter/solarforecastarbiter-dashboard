@@ -103,5 +103,14 @@ $(document).ready(function(){
             $('fieldset[name="single_axis_fields"]').prop('disabled', false);
 
         }
-    })
+    });
+    // Prevent default on <a role='button' class="help-button"> which are
+    // occasionally disabled. Firefox treats them like a normal anchor tag
+    // when disabled.
+    $('a.help-button').each(
+        function(){this.addEventListener(
+            'click',
+            function(e){e.preventDefault()}
+        )}
+    );
 });
