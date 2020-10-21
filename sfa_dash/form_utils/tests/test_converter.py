@@ -187,6 +187,30 @@ def test_observation_converter_formdata_to_payload(observation):
     }
 
 
+def test_observation_converter_formdata_to_payload(observation):
+    form_data = {
+        'name': 'GHI Instrument 1',
+        'variable': 'ghi',
+        'interval_label': 'beginning',
+        'interval_value_type': 'interval_mean',
+        'interval_length_number': 5,
+        'interval_length_units': 'minutes',
+        'uncertainty': '',
+        'site_id': observation['site_id']
+    }
+    api_data = converters.ObservationConverter.formdata_to_payload(
+        form_data)
+    assert api_data == {
+        'name': 'GHI Instrument 1',
+        'variable': 'ghi',
+        'interval_label': 'beginning',
+        'interval_value_type': 'interval_mean',
+        'interval_length': 5,
+        'uncertainty': None,
+        'site_id': observation['site_id']
+    }
+
+
 def test_forecast_converter_roundtrip(forecast):
     form_data = converters.ForecastConverter.payload_to_formdata(forecast)
     api_data = converters.ForecastConverter.formdata_to_payload(form_data)
