@@ -14,6 +14,7 @@ BASE_URL = 'http://localhost'
 
 resample_threshold = QFF.resample_threshold_percentage
 
+
 @pytest.fixture(scope='session')
 def auth_token():
     token_req = requests.post(

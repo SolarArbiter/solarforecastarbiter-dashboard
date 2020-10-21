@@ -11,7 +11,6 @@ from sfa_dash.form_utils import converters
 
 def without_extra(the_dict):
     new_dict = deepcopy(the_dict)
-    new_dict.pop('extra_parameters', None)
     new_dict.pop('_links', None)
     new_dict.pop('forecast_id', None)
     new_dict.pop('observation_id', None)
@@ -159,6 +158,7 @@ def test_observation_converter_payload_to_formdata(observation):
         'interval_length_units': 'minutes',
         'uncertainty': 0.1,
         'site_id': observation['site_id'],
+        'extra_parameters': '{"instrument": "Ascension Technology Rotating Shadowband Pyranometer", "network": "UO SRML"}',  # noqa
     }
 
 
@@ -209,6 +209,7 @@ def test_forecast_converter_payload_to_formdata(forecast):
         'variable': 'ghi',
         'aggregate_id': None,
         'site_id': forecast['site_id'],
+        'extra_parameters': '',
     }
 
 
@@ -274,7 +275,8 @@ def test_cdfforecast_converter_payload_to_formdata(cdf_forecast):
         'run_length_number': 1.0,
         'run_length_units': 'days',
         'site_id': '123e4567-e89b-12d3-a456-426655440001',
-        'variable': 'ghi'
+        'variable': 'ghi',
+        'extra_parameters': '',
     }
 
 
@@ -310,7 +312,7 @@ def test_cdfforecast_converter_formdata_to_payload(forecast):
         'name': 'DA GHI',
         'run_length': 1440,
         'site_id': '123e4567-e89b-12d3-a456-426655440001',
-        'variable': 'ghi'
+        'variable': 'ghi',
     }
 
 
@@ -324,7 +326,9 @@ def test_aggregate_converter_payload_to_formdata(aggregate):
         'interval_length_units': 'hours',
         'name': 'Test Aggregate ghi',
         'timezone': 'America/Denver',
-        'variable': 'ghi'}
+        'variable': 'ghi',
+        'extra_parameters': 'extra',
+    }
 
 
 def test_aggregate_converter_formdata_to_payload():

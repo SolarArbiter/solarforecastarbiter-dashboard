@@ -258,7 +258,6 @@ class BaseView(MethodView):
             else:
                 flash(f'<b>{key}</b> {", ".join(msg)}', 'error')
 
-
     def safe_metadata(self):
         """Creates a copy of the metadata attribute without the
         `extra_parameters` keys.

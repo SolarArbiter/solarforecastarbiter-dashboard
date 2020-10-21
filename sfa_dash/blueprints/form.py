@@ -349,12 +349,12 @@ class UpdateForm(CreateForm):
         # instead of relying on metadata_template being set by init.
         if 'site' in self.metadata:
             self.template_args['site_metadata'] = self.metadata['site']
-            self.template_args['metadata_block'] = self.render_metadata_section(
+            self.template_args['metadata_block'] = self.render_metadata_section(  # noqa
                 self.template_args['site_metadata'],
                 'data/metadata/site_metadata.html')
         elif 'aggregate' in self.metadata:
             self.template_args['aggregate_metadata'] = self.metadata['aggregate']  # noqa
-            self.template_args['metadata_block'] = self.render_metadata_section(
+            self.template_args['metadata_block'] = self.render_metadata_section(  # noqa
                 self.template_args['aggregate_metadata'],
                 'data/metadata/aggregate_metadata.html')
         form_data = self.formatter.payload_to_formdata(self.metadata)
@@ -500,17 +500,17 @@ forms_blp.add_url_rule('/aggregates/<uuid>/remove/<observation_id>',
 # update endpoints
 forms_blp.add_url_rule('/sites/<uuid>/update',
                        view_func=UpdateForm.as_view('update_site',
-                                                   data_type='site'))
+                                                    data_type='site'))
 forms_blp.add_url_rule('/aggregates/<uuid>/update',
                        view_func=UpdateForm.as_view('update_aggregate',
-                                                   data_type='aggregate'))
+                                                    data_type='aggregate'))
 
 forms_blp.add_url_rule('/observations/<uuid>/update',
                        view_func=UpdateForm.as_view('update_observation',
-                                                   data_type='observation'))
+                                                    data_type='observation'))
 forms_blp.add_url_rule('/forecasts/single/<uuid>/update',
                        view_func=UpdateForm.as_view('update_forecast',
-                                                   data_type='forecast'))
+                                                    data_type='forecast'))
 forms_blp.add_url_rule('/forecasts/cdf/<uuid>/update',
                        view_func=UpdateForm.as_view(
                            'update_cdf_forecast_group',
