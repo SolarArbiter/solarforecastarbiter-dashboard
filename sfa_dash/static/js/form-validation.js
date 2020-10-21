@@ -91,4 +91,17 @@ $(document).ready(function(){
             $('fieldset[name="modeling_parameters"]').prop('disabled', false);
         }
     });
+    $('[name="tracking_type"]').change(function(){
+        // Enable or disable the tracting type specific fields based on
+        // tracking type
+        if (this.value == 'fixed'){
+            $('fieldset[name="fixed_tracking_fields"]').prop(
+                'disabled', false);
+            $('fieldset[name="single_axis_fields"]').prop('disabled', true);
+        } else {
+            $('fieldset[name="fixed_tracking_fields"]').prop('disabled', true);
+            $('fieldset[name="single_axis_fields"]').prop('disabled', false);
+
+        }
+    })
 });
