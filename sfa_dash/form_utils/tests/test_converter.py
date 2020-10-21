@@ -24,6 +24,7 @@ def test_site_converter_roundtrip_no_modeling(site):
     expected = without_extra(site)
     expected.pop('site_id')
     expected.pop('modeling_parameters')
+    expected['modeling_parameters'] = {}
     form_data = converters.SiteConverter.payload_to_formdata(site)
     api_data = converters.SiteConverter.formdata_to_payload(form_data)
     assert api_data == expected
