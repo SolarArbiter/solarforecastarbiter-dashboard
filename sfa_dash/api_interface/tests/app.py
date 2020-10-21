@@ -58,5 +58,10 @@ def always():
     return resp
 
 
+@test_app.route('/kill')
+def hangup():
+    sys.exit()
+
+
 if __name__ == '__main__':
     test_app.run(port=sys.argv[1])

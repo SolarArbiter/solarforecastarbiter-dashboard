@@ -4,11 +4,13 @@ import time
 
 
 from flask import current_app as app
-from requests.exceptions import ChunkedEncodingError
+from requests.exceptions import ChunkedEncodingError, ConnectionError
+from sentry_sdk import capture_exception
 
 
 from sfa_dash import oauth_request_session
 from sfa_dash.api_interface.util import handle_response
+from sfa_dash.errors import DataRequestException
 
 
 def get_request(path, **kwargs):
@@ -26,17 +28,27 @@ def get_request(path, **kwargs):
     """
     # may need to handle errors if oauth_request_session does not exist somehow
     # definitely need to handle errors here
-    retries = kwargs.pop('chunked_retries', 2)
+    retries = kwargs.pop('failure_retries', 2)
+    errors = None
     try:
         req = oauth_request_session.get(
             f'{app.config["SFA_API_URL"]}{path}', **kwargs)
-    except ChunkedEncodingError:
+    except ChunkedEncodingError as e:
+        errors = e
+    except ConnectionError as e:
+        errors = e
+    if errors is not None:
         if retries > 0:
-            kwargs['chunked_retries'] = retries - 1
+            kwargs['failure_retries'] = retries - 1
             time.sleep((3 - retries) * 0.1)
             return get_request(path, **kwargs)
         else:
-            raise
+            # API timed out or dropped the connection, send the error to
+            # sentry for tracking and return a message to the user.
+            capture_exception(errors)
+            raise DataRequestException(503, {
+                'Error': 'API connection failed. Please try again.'
+            })
     else:
         return handle_response(req)
 
