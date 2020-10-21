@@ -80,10 +80,10 @@
     <div class="form-element full-width">
       <label>Tracking type</label>
       {% set tracking_type = form_data.get('tracking_type', None) %}
-      <input type="radio" name="tracking_type" value="fixed" data-toggle="collapse" data-target=".tracking_type_fields" {% if tracking_type == "fixed" or tracking_type is none %} checked {% else %} disabled {% endif %}/>Fixed
+      <input type="radio" name="tracking_type" value="fixed" data-toggle="collapse" data-target=".tracking_type_fields" {% if tracking_type == "fixed" or tracking_type is none %} checked {% endif %}/>Fixed
       <input type="radio" name="tracking_type" value="single_axis" data-toggle="collapse" data-target=".tracking_type_fields" {% if tracking_type == "single_axis"%}checked{% endif %}/>Single axis
     </div>
-    <fieldset name="fixed_tracking_fields" class="fixed tracking_type_fields collapse{% if tracking_type == "fixed" or tracking_type is none%} show{% endif %}">
+    <fieldset name="fixed_tracking_fields" class="fixed tracking_type_fields collapse{% if tracking_type == "fixed" or tracking_type is none%} show" {% else %}" disabled {% endif %}">
         <div class="form-element">
         {{ form.input('Surface tilt', 'number' ,'surface_tilt',
                       help_text='Tilt from horizontal of a fixed tilt system.', form_data=form_data,
@@ -95,7 +95,7 @@
                       units='&deg;', required=True) }}
       </div>
     </fieldset>
-    <fieldset name="single_axis_fields" class="single_axis tracking_type_fields collapse {% if tracking_type == "single_axis"%} show {% else %}disabled{% endif %}">
+    <fieldset name="single_axis_fields" class="single_axis tracking_type_fields collapse {% if tracking_type == "single_axis"%} show" {% else %}" disabled{% endif %}">
       <div class="form-element">
         {{ form.input('Axis tilt', 'number', 'axis_tilt',
                       help_text='Tilt from horizontal of the tracker axis, degrees.',
