@@ -189,6 +189,8 @@ class ObservationConverter(FormConverter):
         obs_metadata = {key: form_dict[key]
                         for key in cls.direct_keys
                         if form_dict.get(key) is not None}
+        if obs_metadata['uncertainty'] == '':
+            obs_metadata['uncertainty'] = None
         obs_metadata['interval_length'] = utils.parse_timedelta_from_form(
             form_dict,
             'interval_length')
@@ -658,6 +660,8 @@ class ObservationUpdateConverter(ObservationConverter):
         obs_metadata = {key: form_dict[key]
                         for key in cls.direct_keys
                         if form_dict.get(key) is not None}
+        if obs_metadata['uncertainty'] == '':
+            obs_metadata['uncertainty'] = None
         return obs_metadata
 
 
