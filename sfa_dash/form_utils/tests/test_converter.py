@@ -11,7 +11,6 @@ from sfa_dash.form_utils import converters
 
 def without_extra(the_dict):
     new_dict = deepcopy(the_dict)
-    new_dict.pop('extra_parameters', None)
     new_dict.pop('_links', None)
     new_dict.pop('forecast_id', None)
     new_dict.pop('observation_id', None)
@@ -25,6 +24,7 @@ def test_site_converter_roundtrip_no_modeling(site):
     expected = without_extra(site)
     expected.pop('site_id')
     expected.pop('modeling_parameters')
+    expected['modeling_parameters'] = {}
     form_data = converters.SiteConverter.payload_to_formdata(site)
     api_data = converters.SiteConverter.formdata_to_payload(form_data)
     assert api_data == expected
@@ -159,6 +159,7 @@ def test_observation_converter_payload_to_formdata(observation):
         'interval_length_units': 'minutes',
         'uncertainty': 0.1,
         'site_id': observation['site_id'],
+        'extra_parameters': '{"instrument": "Ascension Technology Rotating Shadowband Pyranometer", "network": "UO SRML"}',  # noqa
     }
 
 
@@ -186,6 +187,30 @@ def test_observation_converter_formdata_to_payload(observation):
     }
 
 
+def test_observation_converter_formdata_to_payload(observation):
+    form_data = {
+        'name': 'GHI Instrument 1',
+        'variable': 'ghi',
+        'interval_label': 'beginning',
+        'interval_value_type': 'interval_mean',
+        'interval_length_number': 5,
+        'interval_length_units': 'minutes',
+        'uncertainty': '',
+        'site_id': observation['site_id']
+    }
+    api_data = converters.ObservationConverter.formdata_to_payload(
+        form_data)
+    assert api_data == {
+        'name': 'GHI Instrument 1',
+        'variable': 'ghi',
+        'interval_label': 'beginning',
+        'interval_value_type': 'interval_mean',
+        'interval_length': 5,
+        'uncertainty': None,
+        'site_id': observation['site_id']
+    }
+
+
 def test_forecast_converter_roundtrip(forecast):
     form_data = converters.ForecastConverter.payload_to_formdata(forecast)
     api_data = converters.ForecastConverter.formdata_to_payload(form_data)
@@ -209,6 +234,7 @@ def test_forecast_converter_payload_to_formdata(forecast):
         'variable': 'ghi',
         'aggregate_id': None,
         'site_id': forecast['site_id'],
+        'extra_parameters': '',
     }
 
 
@@ -274,7 +300,8 @@ def test_cdfforecast_converter_payload_to_formdata(cdf_forecast):
         'run_length_number': 1.0,
         'run_length_units': 'days',
         'site_id': '123e4567-e89b-12d3-a456-426655440001',
-        'variable': 'ghi'
+        'variable': 'ghi',
+        'extra_parameters': '',
     }
 
 
@@ -310,7 +337,7 @@ def test_cdfforecast_converter_formdata_to_payload(forecast):
         'name': 'DA GHI',
         'run_length': 1440,
         'site_id': '123e4567-e89b-12d3-a456-426655440001',
-        'variable': 'ghi'
+        'variable': 'ghi',
     }
 
 
@@ -324,7 +351,9 @@ def test_aggregate_converter_payload_to_formdata(aggregate):
         'interval_length_units': 'hours',
         'name': 'Test Aggregate ghi',
         'timezone': 'America/Denver',
-        'variable': 'ghi'}
+        'variable': 'ghi',
+        'extra_parameters': 'extra',
+    }
 
 
 def test_aggregate_converter_formdata_to_payload():

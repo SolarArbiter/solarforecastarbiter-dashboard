@@ -1,0 +1,55 @@
+{% import "forms/form_macros.jinja" as form %}
+{% extends "forms/base/update_form.html" %}
+{% set page_title = 'Update Aggregate' %}
+{% set data_type, form_enc  = 'aggregate', 'application/json' %}
+{% block fields%}
+ {% if form_data is not defined %} {% set form_data = {} %}{% endif %}
+<div class="form-element full-width">
+  {{ form.input('Name', 'text', 'name', 'Name of the Aggregate.', form_data=form_data) }}
+</div>
+<div class="form-element full-width">
+   <label>Description</label><br/>
+   <input type="text" class="form-control" name="description">
+</div>
+<div class="form-element">
+  {{ form.select(
+         'Interval label', 'interval_label',
+         interval_label_options, null,
+         'Indicates the alignment of time labels, beginning or ending '
+         'of the interval or instantaneous. An interval_label of '
+         '"event" will be set when variable is set to "event". '
+         'Constituent observations will be normalized.',
+         form_data=form_data,
+         disabled=True) }}
+</div>
+<div class="form-element">
+  {{ form.timedelta('Interval length', 'interval_length',
+                    'The length of time that each data point represents. All observations that make up the aggregate must have an interval length shorter than or equal to this value.',
+                    form_data=form_data,
+                    disabled=True) }}
+</div>
+<div class="form-element">
+  {{ form.select('Variable', 'variable',
+                 variable_options,
+                 default_variable,
+                 form_data=form_data,
+                 help_text='Variable described by the aggregate. All observations that make up the Aggregate must also have this variable.',
+                 disabled=True) }}
+</div>
+<div class="form-element">
+  {{ form.select('Timezone', 'timezone',
+                 timezone_options,
+                 required=True, form_data=form_data)}}
+</div>
+<div class="form-element">
+  {{ form.select('Aggregation type', 'aggregate_type',
+                 {'sum': 'Sum',
+                  'mean': 'Mean',
+                  'median': 'Median',
+                  'max': 'Max',
+                  'min': 'Min'},
+                  'Type of aggregation to perform.',
+                  disabled=True) }}
+</div>
+{{ form.updatable_extra_parameters(form_data) }}
+{% endblock %}

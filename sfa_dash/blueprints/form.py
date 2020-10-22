@@ -273,12 +273,12 @@ class CloneForm(CreateForm):
         # instead of relying on metadata_template being set by init.
         if 'site' in self.metadata:
             self.template_args['site_metadata'] = self.metadata['site']
-            self.template_args['metadata'] = self.render_metadata_section(
+            self.template_args['metadata_block'] = self.render_metadata_section(  # noqa
                 self.template_args['site_metadata'],
                 'data/metadata/site_metadata.html')
         elif 'aggregate' in self.metadata:
             self.template_args['aggregate_metadata'] = self.metadata['aggregate']  # noqa
-            self.template_args['metadata'] = self.render_metadata_section(
+            self.template_args['metadata_block'] = self.render_metadata_section(  # noqa
                 self.template_args['aggregate_metadata'],
                 'data/metadata/aggregate_metadata.html')
         form_data = self.formatter.payload_to_formdata(self.metadata)
@@ -301,6 +301,116 @@ class CloneForm(CreateForm):
                     return redirect(
                         url_for(f'data_dashboard.{self.data_type}', uuid=uuid))
         return render_template(self.template, **self.template_args)
+
+
+class UpdateForm(CreateForm):
+    def __init__(self, data_type):
+        super().__init__(data_type)
+        if data_type == 'forecast':
+            self.template = 'forms/update/forecast_form.html'
+            self.formatter = converters.ForecastUpdateConverter
+        elif data_type == 'cdf_forecast_group':
+            self.template = 'forms/update/cdf_forecast_group_form.html'
+            self.formatter = converters.CDFForecastUpdateConverter
+        elif data_type == 'observation':
+            self.template = 'forms/update/observation_form.html'
+            self.formatter = converters.ObservationUpdateConverter
+        elif data_type == 'site':
+            self.template = 'forms/update/site_form.html'
+            self.formatter = converters.SiteConverter
+        elif data_type == 'aggregate':
+            self.template = 'forms/update/aggregate_form.html'
+            self.formatter = converters.AggregateUpdateConverter
+        else:
+            raise ValueError(f'No metadata form defined for {data_type}')
+
+    def fill_nested_metadata(self):
+        pass
+
+    def set_template_args(self):
+        """Attempts to fetch and render the site or aggregate metadata if
+        needed, then converts metadata into form data for prefilling a form.
+
+        Raises
+        ------
+        DataRequestException
+            If the site or aggregate metadata could not be read.
+        """
+        self.template_args = {}
+        if(
+            self.data_type != 'site'
+            and self.data_type != 'aggregate'
+        ):
+            self.set_site_or_aggregate_metadata()
+            self.set_site_or_aggregate_link()
+
+        # We must pass a metadata template path here, because we must
+        # parse a site or aggregate from the object being cloned,
+        # instead of relying on metadata_template being set by init.
+        if 'site' in self.metadata:
+            self.template_args['site_metadata'] = self.metadata['site']
+            self.template_args['metadata_block'] = self.render_metadata_section(  # noqa
+                self.template_args['site_metadata'],
+                'data/metadata/site_metadata.html')
+        elif 'aggregate' in self.metadata:
+            self.template_args['aggregate_metadata'] = self.metadata['aggregate']  # noqa
+            self.template_args['metadata_block'] = self.render_metadata_section(  # noqa
+                self.template_args['aggregate_metadata'],
+                'data/metadata/aggregate_metadata.html')
+        form_data = self.formatter.payload_to_formdata(self.metadata)
+        self.template_args['form_data'] = form_data
+        self.template_args['uuid'] = self.metadata[self.id_key]
+
+    def get(self, uuid=None):
+        try:
+            self.metadata = self.api_handle.get_metadata(uuid)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+            return redirect(url_for(
+                f'data_dashboard.{self.data_type}s'))
+        else:
+            try:
+                self.set_template_args()
+            except DataRequestException:
+                flash('Could not read site metadata. Update not allowed.',
+                      'error')
+                return redirect(
+                    url_for(f'data_dashboard.{self.data_type}', uuid=uuid))
+        return render_template(self.template, **self.template_args)
+
+    def post(self, uuid):
+        form_data = request.form
+        formatted_form = self.formatter.formdata_to_payload(form_data)
+        try:
+            self.api_handle.update(uuid, formatted_form)
+        except DataRequestException as e:
+            if e.status_code == 404:
+                errors = {
+                    '404': [('You do not have permission to update this'
+                             'object. You may need to request '
+                             'permissions from your organization '
+                             'administrator.')]
+                }
+            else:
+                errors = e.errors
+            self.flash_api_errors(errors)
+            try:
+                self.metadata = self.api_handle.get_metadata(uuid)
+            except DataRequestException as e:
+                self.flash_api_errors(e.errors)
+                return redirect(url_for(
+                    f'data_dashboard.{self.data_type}s'))
+            try:
+                self.set_template_args()
+            except DataRequestException:
+                flash('Could not read site metadata. Update not allowed.',
+                      'error')
+                return redirect(
+                    url_for(f'data_dashboard.{self.data_type}', uuid=uuid))
+            self.template_args['form_data'] = form_data
+            return render_template(self.template, **self.template_args)
+        return redirect(url_for(f'data_dashboard.{self.data_type}_view',
+                                uuid=uuid))
 
 
 forms_blp = Blueprint('forms', 'forms')
@@ -386,3 +496,22 @@ forms_blp.add_url_rule('/aggregates/<uuid>/add',
 forms_blp.add_url_rule('/aggregates/<uuid>/remove/<observation_id>',
                        view_func=AggregateObservationRemovalForm.as_view(
                            'remove_aggregate_observations'))
+
+# update endpoints
+forms_blp.add_url_rule('/sites/<uuid>/update',
+                       view_func=UpdateForm.as_view('update_site',
+                                                    data_type='site'))
+forms_blp.add_url_rule('/aggregates/<uuid>/update',
+                       view_func=UpdateForm.as_view('update_aggregate',
+                                                    data_type='aggregate'))
+
+forms_blp.add_url_rule('/observations/<uuid>/update',
+                       view_func=UpdateForm.as_view('update_observation',
+                                                    data_type='observation'))
+forms_blp.add_url_rule('/forecasts/single/<uuid>/update',
+                       view_func=UpdateForm.as_view('update_forecast',
+                                                    data_type='forecast'))
+forms_blp.add_url_rule('/forecasts/cdf/<uuid>/update',
+                       view_func=UpdateForm.as_view(
+                           'update_cdf_forecast_group',
+                           data_type='cdf_forecast_group'))

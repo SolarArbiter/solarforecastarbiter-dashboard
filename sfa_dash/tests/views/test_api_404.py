@@ -7,7 +7,7 @@ from sfa_dash.conftest import BASE_URL, site_id_route_list
 def assert_contains_404(response_text):
     assert (
         "<b>404: </b>" in response_text or
-        '<li class="alert alert-danger">(404)' in response_text
+        '<li class="alert alert-danger"><b>404</b>' in response_text
     )
 
 

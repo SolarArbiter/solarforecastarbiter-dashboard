@@ -8,8 +8,8 @@ from sfa_dash.blueprints.base import BaseView
 
 
 @pytest.mark.parametrize('errors,expected', [
-    ({'it': ['broke']}, '(it) broke'),
-    ({'2': ['er', 'rors']}, '(2) er, rors'),
+    ({'it': ['broke']}, '<b>it</b> broke'),
+    ({'2': ['er', 'rors']}, '<b>2</b> er, rors'),
 ])
 def test_flash_errors_formatting(mocker, app, errors, expected):
     flasher = mocker.patch('sfa_dash.blueprints.base.flash')
@@ -19,7 +19,11 @@ def test_flash_errors_formatting(mocker, app, errors, expected):
 
 
 @pytest.mark.parametrize('errors,expected', [
-    ({'it': ['broke'], '2': ['er', 'rors']}, ('(it) broke', '(2) er, rors')),
+    ({'it': ['broke'], '2': ['er', 'rors']},
+     ('<b>it</b> broke', '<b>2</b> er, rors')),
+    ({'errors': [{'it': ['broke']}, {'2': ['er', 'rors']}]},
+     ('<b>it</b> broke', '<b>2</b> er, rors')),
+
 ])
 def test_flash_errors_list_comp(mocker, app, errors, expected):
     flasher = mocker.patch('sfa_dash.blueprints.base.flash')

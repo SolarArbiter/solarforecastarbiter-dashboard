@@ -92,8 +92,7 @@ class SiteConverter(FormConverter):
             dictionary of form data.
         """
         form_dict = {key: payload_dict[key]
-                     for key in cls.top_level_keys
-                     if key != 'extra_parameters'}
+                     for key in cls.top_level_keys}
         # test if any 'modeling_parameter' items are not None
         is_plant = reduce(lambda a, b: a or b,
                           [x is not None for x in
@@ -124,16 +123,19 @@ class SiteConverter(FormConverter):
         """
         site_metadata = {key: form_dict[key]
                          for key in cls.top_level_keys
-                         if form_dict.get(key, "") != ""}
+                         if form_dict.get(key) is not None}
+
         if form_dict['site_type'] == 'power-plant':
             modeling_params = {key: form_dict[key]
                                for key in cls.modeling_keys
-                               if form_dict.get(key, "") != ""}
+                               if form_dict.get(key) is not None}
             tracking_type = form_dict['tracking_type']
             tracking_fields = {key: form_dict[key]
                                for key in cls.tracking_keys[tracking_type]}
             modeling_params.update(tracking_fields)
-            site_metadata['modeling_parameters'] = modeling_params
+        else:
+            modeling_params = {}
+        site_metadata['modeling_parameters'] = modeling_params
         return site_metadata
 
 
@@ -161,8 +163,7 @@ class ObservationConverter(FormConverter):
             attributes.
         """
         form_dict = {key: payload_dict[key]
-                     for key in cls.direct_keys
-                     if key != 'extra_parameters'}
+                     for key in cls.direct_keys}
         form_dict.update(
             utils.parse_timedelta_from_api(
                 payload_dict,
@@ -187,7 +188,9 @@ class ObservationConverter(FormConverter):
         obs_metadata = {}
         obs_metadata = {key: form_dict[key]
                         for key in cls.direct_keys
-                        if form_dict.get(key, "") != ""}
+                        if form_dict.get(key) is not None}
+        if obs_metadata['uncertainty'] == '':
+            obs_metadata['uncertainty'] = None
         obs_metadata['interval_length'] = utils.parse_timedelta_from_form(
             form_dict,
             'interval_length')
@@ -215,8 +218,7 @@ class ForecastConverter(FormConverter):
             attributes.
         """
         form_dict = {key: payload_dict[key]
-                     for key in cls.direct_keys
-                     if key != 'extra_parameters'}
+                     for key in cls.direct_keys}
         form_dict.update(utils.get_location_id(payload_dict))
         form_dict.update(
             utils.parse_hhmm_field_from_api(payload_dict, 'issue_time_of_day')
@@ -248,7 +250,7 @@ class ForecastConverter(FormConverter):
         fx_metadata = {}
         fx_metadata = {key: form_dict[key]
                        for key in cls.direct_keys
-                       if form_dict.get(key, '') != ''}
+                       if form_dict.get(key) is not None}
         fx_metadata.update(utils.get_location_id(form_dict))
         fx_metadata['issue_time_of_day'] = utils.parse_hhmm_field_from_form(
             form_dict,
@@ -338,8 +340,7 @@ class AggregateConverter(FormConverter):
             its corresponding observation.
         """
         form_dict = {key: payload_dict[key]
-                     for key in cls.direct_keys
-                     if key != 'extra_parameters'}
+                     for key in cls.direct_keys}
         form_dict.update(utils.parse_timedelta_from_api(
             payload_dict, 'interval_length'))
         return form_dict
@@ -360,7 +361,7 @@ class AggregateConverter(FormConverter):
         """
         formatted = {key: form_dict[key]
                      for key in cls.direct_keys
-                     if form_dict.get(key, '') != ''}
+                     if form_dict.get(key) is not None}
         formatted['interval_length'] = utils.parse_timedelta_from_form(
             form_dict, 'interval_length')
         return formatted
@@ -636,3 +637,96 @@ class ReportConverter(FormConverter):
         form_params['object_pairs'] = report_parameters['object_pairs']
         form_params.update(cls.parse_api_filters(report_parameters))
         return {'report_parameters': form_params}
+
+
+class ObservationUpdateConverter(ObservationConverter):
+    form = 'forms/update/observation_form.html'
+
+    @classmethod
+    def formdata_to_payload(cls, form_dict):
+        """Formats the result of a observation update webform into an API
+        payload.
+
+        Parameters
+        ----------
+        form_dict:  dict
+            The posted form data parsed into a dict.
+        Returns
+        -------
+        dictionary
+            Form data formatted to the API spec.
+        """
+        obs_metadata = {}
+        obs_metadata = {key: form_dict[key]
+                        for key in cls.direct_keys
+                        if form_dict.get(key) is not None}
+        if obs_metadata['uncertainty'] == '':
+            obs_metadata['uncertainty'] = None
+        return obs_metadata
+
+
+class ForecastUpdateConverter(ForecastConverter):
+    form = 'forms/update/forecast_form.html'
+
+    @classmethod
+    def formdata_to_payload(cls, form_dict):
+        """Formats the result of a forecast webform into an API payload.
+
+        Parameters
+        ----------
+        form_dict:  dict
+            The posted form data parsed into a dict.
+        Returns
+        -------
+        dictionary
+            Form data formatted to the API spec.
+        """
+        fx_metadata = {}
+        fx_metadata = {key: form_dict[key]
+                       for key in cls.direct_keys
+                       if form_dict.get(key) is not None}
+        return fx_metadata
+
+
+class CDFForecastUpdateConverter(CDFForecastConverter):
+    form = 'forms/update/cdf_forecast_group_form.html'
+
+    @classmethod
+    def formdata_to_payload(cls, form_dict):
+        """Formats the result of a cdf forecast webform into an API payload.
+
+        Parameters
+        ----------
+        form_dict:  dict
+            The posted form data parsed into a dict.
+
+        Returns
+        -------
+        dictionary
+            Form data formatted to the API spec.
+        """
+        fx_metadata = ForecastUpdateConverter.formdata_to_payload(form_dict)
+        return fx_metadata
+
+
+class AggregateUpdateConverter(AggregateConverter):
+    form = 'forms/updates/aggregate_form.html'
+
+    @classmethod
+    def formdata_to_payload(cls, form_dict):
+        """Converts an aggregate form submission dict to an api post payload.
+
+        Parameters
+        ----------
+        form_dict: dict
+            The posted form data parsed into a dict.
+
+        Returns
+        -------
+        dict
+            Form data formatted to API spec.
+        """
+        formatted = {key: form_dict[key]
+                     for key in cls.direct_keys
+                     if form_dict.get(key) is not None}
+        return formatted

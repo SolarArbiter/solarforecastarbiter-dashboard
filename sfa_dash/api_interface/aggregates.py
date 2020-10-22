@@ -23,9 +23,9 @@ def post_metadata(aggregate_dict):
     return req
 
 
-def update(aggregate_id, observations_dict):
+def update(aggregate_id, updates):
     req = post_request(f'/aggregates/{aggregate_id}/metadata',
-                       observations_dict, json=True)
+                       updates, json=True)
     return req
 
 

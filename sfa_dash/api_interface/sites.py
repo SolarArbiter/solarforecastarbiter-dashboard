@@ -21,3 +21,8 @@ def post_metadata(site_dict):
 def delete(site_id):
     req = delete_request(f'/sites/{site_id}')
     return req
+
+
+def update(site_id, updates):
+    req = post_request(f'/sites/{site_id}', updates)
+    return req

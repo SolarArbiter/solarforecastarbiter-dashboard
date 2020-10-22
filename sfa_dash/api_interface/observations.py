@@ -37,3 +37,8 @@ def delete(observation_id):
 def valid_times(observation_id):
     req = get_request(f'/observations/{observation_id}/values/timerange')
     return req
+
+
+def update(observation_id, updates):
+    req = post_request(f'/observations/{observation_id}/metadata', updates)
+    return req

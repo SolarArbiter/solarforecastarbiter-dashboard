@@ -249,9 +249,14 @@ class BaseView(MethodView):
         errors: dict
             Dict of errors returned by the API.
         """
-        to_flash = [f'({key}) {", ".join(msg)}' for key, msg in errors.items()]
-        for error in to_flash:
-            flash(error, 'error')
+        for key, msg in errors.items():
+            if isinstance(msg, dict):
+                self.flash_api_errors(msg)
+            elif isinstance(msg[0], dict):
+                # sometimes, errors are a nested list of dicts
+                [self.flash_api_errors(error) for error in msg]
+            else:
+                flash(f'<b>{key}</b> {", ".join(msg)}', 'error')
 
     def safe_metadata(self):
         """Creates a copy of the metadata attribute without the
