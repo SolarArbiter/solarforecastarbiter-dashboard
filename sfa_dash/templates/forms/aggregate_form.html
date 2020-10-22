@@ -15,7 +15,9 @@
      <div class="form-element">
        {{ form.select(
               'Interval label', 'interval_label',
-              interval_label_options, null,
+              {'beginning': 'Beginning',
+               'ending': 'Ending'},
+               null,
               'Indicates the alignment of time labels, beginning or ending '
               'of the interval or instantaneous. An interval_label of '
               '"event" will be set when variable is set to "event". '
@@ -44,7 +46,8 @@
                        'mean': 'Mean',
                        'median': 'Median',
                        'max': 'Max',
-                       'min': 'Min'},
+                       'min': 'Min',
+                       'std': 'Standard Deviation'},
                        'Type of aggregation to perform.') }}
      </div>
      {{ form.extra_parameters() }}
