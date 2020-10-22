@@ -1,6 +1,6 @@
 import re
 import subprocess
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 
 
 import pytest
@@ -118,6 +118,7 @@ def test_check_sign_zip(mocker):
     with ZipFile(out, 'r') as z:
         assert set(z.namelist()) == {'mine.txt', 'sha256.txt', 'mine.txt.asc'}
         assert 'mine.txt' in z.read('sha256.txt').decode()
+        assert z.getinfo('mine.txt').compress_type == ZIP_DEFLATED
 
 
 def test_check_sign_zip_sign_fail(mocker):

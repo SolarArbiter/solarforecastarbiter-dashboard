@@ -1,7 +1,7 @@
 import hashlib
 from io import BytesIO
 import logging
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 
 
 logger = logging.getLogger(__name__)
@@ -114,7 +114,8 @@ def check_sign_zip(bytes_, filename, key_id, passphrase_file):
     except SigningError as e:
         logger.error('Failed to sign data: %s', e)
         sig = False
-    with ZipFile(out, 'w') as z:
+    with ZipFile(out, mode='w', compression=ZIP_DEFLATED,
+                 compresslevel=4) as z:
         z.writestr(filename, bytes_)
         for alg, hsh in make_hashes(bytes_).items():
             z.writestr(f'{alg}.txt', f'{hsh}  {filename}')
