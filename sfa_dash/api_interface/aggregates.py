@@ -32,3 +32,9 @@ def update(aggregate_id, updates):
 def delete(aggregate_id):
     req = delete_request(f'/aggregates/{aggregate_id}')
     return req
+
+
+def delete_observation(aggregate_id, observation_id):
+    req = delete_request(
+        f'/aggregates/{aggregate_id}/observations/{observation_id}')
+    return req
