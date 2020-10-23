@@ -94,7 +94,7 @@ class AggregateObservationAdditionForm(BaseView):
         template_arguments = {
             "observations": observations,
             "aggregate": aggregate,
-            "metadata": metadata,
+            "metadata_block": metadata,
             "breadcrumb": self.breadcrumb_html(
                 self.get_breadcrumb()),
         }
@@ -229,6 +229,66 @@ class AggregateObservationRemovalForm(BaseView):
                 errors = e.errors
             return self.get(uuid, form_data=form_data,
                             errors=flatten_dict(errors))
+        return redirect(url_for('data_dashboard.aggregate_view', uuid=uuid))
+
+
+class AggregateObservationDeletionForm(BaseView):
+    """Form for adding new observations to an aggregate
+    """
+    template = 'forms/aggregate_observation_deletion_form.html'
+    metadata_template = 'data/metadata/aggregate_metadata.html'
+
+    def get_breadcrumb(self):
+        breadcrumb = []
+        breadcrumb.append(('Aggregates', url_for('data_dashboard.aggregates')))
+        breadcrumb.append(
+            (self.metadata['name'],
+             url_for('data_dashboard.aggregate_view',
+                     uuid=self.metadata['aggregate_id']))
+        )
+        breadcrumb.append(('Remove Observation', ''))
+        return breadcrumb
+
+    def set_template_args(self, observation_id, **kwargs):
+        metadata = render_template(
+            self.metadata_template, **self.metadata)
+        aggregate = self.metadata.copy()
+        del aggregate['extra_parameters']
+        template_arguments = {
+            "aggregate": aggregate,
+            "metadata_block": metadata,
+            "breadcrumb": self.breadcrumb_html(
+                self.get_breadcrumb()),
+        }
+        try:
+            observation = observations.get_metadata(observation_id)
+        except DataRequestException:
+            template_arguments['warnings'] = {
+                'observation': ['Observation could not be read.']
+            }
+            template_arguments['observation'] = {
+                'observation_id': observation_id
+            }
+        else:
+            template_arguments['observation'] = observation
+        template_arguments.update(kwargs)
+        self.template_args = template_arguments
+
+    def get(self, uuid, observation_id, **kwargs):
+        try:
+            self.metadata = aggregates.get_metadata(uuid)
+        except DataRequestException as e:
+            return render_template(
+                self.template, errors=e.errors)
+        self.set_template_args(observation_id, **kwargs)
+        return render_template(self.template, **self.template_args)
+
+    def post(self, uuid, observation_id):
+        try:
+            aggregates.delete_observation(uuid, observation_id)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+            return self.get(uuid, observation_id)
         return redirect(url_for('data_dashboard.aggregate_view', uuid=uuid))
 
 
