@@ -41,29 +41,42 @@
     <tr class="warning no-result">
       <td colspan="4"><i class="fa fa-warning"></i>No result</td> 
     </tr>
-    {% for obs in observations %}
+    {% for _, obs in observations.items() %}
+    {% for ef in obs['effective_ranges'] %}
     <tr class="aggregate-observation-row">
-        <td scope="col">
+        {# print name and org columns to span all of the rows of effective_ranges #}
+        {% if loop.index == 1 %}
+        <td scope="col" rowspan={{ obs['effective_ranges'] | length }}>
           {% if 'name' in obs %}
           <a href="{{ url_for('data_dashboard.observation_view', uuid=obs["observation_id"]) }}">{{ obs["name"] }}</a>
           {% else %}
           {{ obs['observation_id'] }}
           {% endif %}
         </td>
-
-        <td scope="col" class="provider-column">{{ obs["provider"] }}</td>
-        <td scope="col" class="effective-from-column datetime-td">{{ obs["effective_from"] | format_datetime}}</td>
-        {% if obs["effective_until"] is not none %}
-        <td scope="col" class="effective-until-column datetime-td">{{ obs["effective_until"] | format_datetime}}</td>
+        <td scope="col" class="provider-column" rowspan={{ obs['effective_ranges'] | length }}>{{ obs["provider"] }}</td>
+        {% endif %}
+        <td scope="col" class="effective-from-column datetime-td">{{ ef["effective_from"] | format_datetime}}</td>
+        {% if ef["effective_until"] is not none %}
+        <td scope="col" class="effective-until-column datetime-td">{{ ef["effective_until"] | format_datetime}}</td>
         {% else %}
+        <td scope="col">
         {% if update_allowed %}
-        <td scope="col"><a href="{{ url_for('forms.remove_aggregate_observations', uuid=metadata['aggregate_id'], observation_id=obs['observation_id']) }}">Set Effective Until</a></td>
+        <a href="{{ url_for('forms.remove_aggregate_observations', uuid=metadata['aggregate_id'], observation_id=obs['observation_id']) }}">Set Effective Until</a>
+        {% else %}
+        {{ ef["effective_until"] }}
         {% endif %}
+        </td>
         {% endif %}
+        {# only print the delete button once per observation #}
+        {% if loop.index == 1 %}
+        <td scope="col" rowspan={{ obs['effective_ranges'] | length }}>
         {% if update_allowed %}
-        <td scope="col"><a role="button" class="btn btn-sm btn-danger" href="{{ url_for('forms.delete_aggregate_observations', uuid=metadata['aggregate_id'], observation_id=obs['observation_id']) }}">Delete</a></td>
+        <a role="button" class="btn btn-sm btn-danger" href="{{ url_for('forms.delete_aggregate_observations', uuid=metadata['aggregate_id'], observation_id=obs['observation_id']) }}">Delete</a></td>
+        {% endif %}
+        </td>
         {% endif %}
     </tr>
+    {% endfor %}
     {% endfor %}
   </tbody>
 </table>

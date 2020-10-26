@@ -322,7 +322,7 @@ class AggregateView(BaseView):
         self.template_args.update({
             'metadata_block': render_template(
                 self.metadata_template, **self.metadata),
-            'observations': self.observation_list,
+            'observations': self.observation_dict,
             'breadcrumb': self.breadcrumb_html(
                 self.get_breadcrumb()),
             'metadata': self.safe_metadata(),
@@ -351,24 +351,33 @@ class AggregateView(BaseView):
             self.template_args.update({'errors': e.errors})
         else:
             start, end = self.parse_start_end_from_querystring()
-            self.observation_list = []
+            self.observation_dict = {}
             observations_list = observations.list_metadata()
-            observation_dict = {obs['observation_id']: obs
-                                for obs in observations_list}
+            observations_dict = {obs['observation_id']: obs
+                                 for obs in observations_list}
             for obs in self.metadata['observations']:
                 curr_id = obs['observation_id']
-                if curr_id in observation_dict:
-                    observation = observation_dict[curr_id].copy()
-                    observation.update(obs)
-                    self.observation_list.append(observation)
-                else:
-                    flash(
-                        f"Could not read observation '{obs['observation_id']}'"
-                        " you may require `read` or `read_values` permissions "
-                        "to view this aggregate properly.",
-                        "warning"
-                    )
-                    self.observation_list.append(obs)
+                if curr_id not in self.observation_dict:
+                    self.observation_dict[curr_id] = {
+                        'observation_id': curr_id,
+                        'effective_ranges': []
+                    }
+                    if curr_id in observations_dict:
+                        self.observation_dict[curr_id].update(
+                            observations_dict[curr_id])
+                    else:
+                        flash(
+                            "Could not read observation "
+                            f"'{obs['observation_id']}'  you may require "
+                            "`read` or `read_values` permissions to view this "
+                            "aggregate properly.",
+                            "warning"
+                        )
+                self.observation_dict[curr_id]['effective_ranges'].append({
+                    'effective_from': obs['effective_from'],
+                    'effective_until': obs['effective_until']
+                })
+
             self.insert_plot(uuid, start, end)
             self.set_template_args(start, end, **kwargs)
         return render_template(self.template, **self.template_args)
