@@ -1,4 +1,4 @@
-from flask import render_template, url_for, request, redirect
+from flask import render_template, url_for, request, redirect, flash
 import pandas as pd
 
 from sfa_dash.api_interface import observations, sites, aggregates
@@ -361,6 +361,14 @@ class AggregateView(BaseView):
                     observation = observation_dict[curr_id].copy()
                     observation.update(obs)
                     self.observation_list.append(observation)
+                else:
+                    flash(
+                        f"Could not read observation '{obs['observation_id']}'"
+                        " you may require `read` or `read_values` permissions "
+                        "to view this aggregate properly.",
+                        "warning"
+                    )
+                    self.observation_list.append(obs)
             self.insert_plot(uuid, start, end)
             self.set_template_args(start, end, **kwargs)
         return render_template(self.template, **self.template_args)
