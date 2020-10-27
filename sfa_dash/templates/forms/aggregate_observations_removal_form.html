@@ -3,7 +3,7 @@
 {% block content %}
 {% if aggregate is defined and observation is defined %}
 <h3>Remove an Observation from an Aggregate</h3>
-<p>Set the date that the observation, <b>{{ observation['name'] }}</b>, will no longer contribute to the aggregate.</p>
+<p>Set the date that the observation, <b>{{ observation['name'] }}</b>, will no longer contribute to the aggregate. <a target="_blank" href="https://solarforecastarbiter.org/documentation/dashboard/working-with-data/#end-an-observations-contribution-to-an-aggregate">See documentation for details.</a></p>
 <form action="{{ url_for('forms.remove_aggregate_observations', uuid=aggregate['aggregate_id'], observation_id=observation['observation_id']) }}" method="post" enctype="application/json" id="remove-aggregate-observations-form">
   <div class="form-group">
     <div class="form-element full-width">
