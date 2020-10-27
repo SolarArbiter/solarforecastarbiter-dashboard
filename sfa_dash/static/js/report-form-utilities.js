@@ -16,7 +16,8 @@ object_pairs = [];
 // messages for in the toggle_reference_dependent_metrics function.
 reference_dependent_metrics = ['[name=metrics][value=s]',
                                '[name=metrics][value=bss]',
-                               '[name=metrics][value=qss]'];
+                               '[name=metrics][value=qss]',
+                               '[name=metrics][value=crpss]'];
 
 report_utils.fill_existing_pairs = function(){
     /*
@@ -147,7 +148,7 @@ report_utils.toggle_reference_dependent_metrics = function(){
             let metric = $(metric_selector);
             if (metric.length){
                 // hide skill, insert warning
-                if ($('#reference-warning').length == 0){
+                if ($('.reference-warning.warning-message').length == 0){
                     $(`<span class="reference-warning warning-message">
                        (Requires reference forecast selection)</span>`
                      ).insertAfter(metric.next());
