@@ -7,7 +7,8 @@ from sfa_dash.api_interface import (sites, observations, forecasts,
                                     cdf_forecasts, cdf_forecast_groups,
                                     aggregates)
 from sfa_dash.blueprints.aggregates import (AggregateObservationAdditionForm,
-                                            AggregateObservationRemovalForm)
+                                            AggregateObservationRemovalForm,
+                                            AggregateObservationDeletionForm)
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.reports import (ReportForm, RecomputeReportView,
                                          ReportCloneView)
@@ -496,7 +497,9 @@ forms_blp.add_url_rule('/aggregates/<uuid>/add',
 forms_blp.add_url_rule('/aggregates/<uuid>/remove/<observation_id>',
                        view_func=AggregateObservationRemovalForm.as_view(
                            'remove_aggregate_observations'))
-
+forms_blp.add_url_rule('/aggregates/<uuid>/delete/<observation_id>',
+                       view_func=AggregateObservationDeletionForm.as_view(
+                           'delete_aggregate_observations'))
 # update endpoints
 forms_blp.add_url_rule('/sites/<uuid>/update',
                        view_func=UpdateForm.as_view('update_site',

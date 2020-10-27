@@ -1,4 +1,4 @@
-from flask import render_template, url_for, request, redirect
+from flask import render_template, url_for, request, redirect, flash
 import pandas as pd
 
 from sfa_dash.api_interface import observations, sites, aggregates
@@ -94,7 +94,7 @@ class AggregateObservationAdditionForm(BaseView):
         template_arguments = {
             "observations": observations,
             "aggregate": aggregate,
-            "metadata": metadata,
+            "metadata_block": metadata,
             "breadcrumb": self.breadcrumb_html(
                 self.get_breadcrumb()),
         }
@@ -232,6 +232,66 @@ class AggregateObservationRemovalForm(BaseView):
         return redirect(url_for('data_dashboard.aggregate_view', uuid=uuid))
 
 
+class AggregateObservationDeletionForm(BaseView):
+    """Form for adding new observations to an aggregate
+    """
+    template = 'forms/aggregate_observation_deletion_form.html'
+    metadata_template = 'data/metadata/aggregate_metadata.html'
+
+    def get_breadcrumb(self):
+        breadcrumb = []
+        breadcrumb.append(('Aggregates', url_for('data_dashboard.aggregates')))
+        breadcrumb.append(
+            (self.metadata['name'],
+             url_for('data_dashboard.aggregate_view',
+                     uuid=self.metadata['aggregate_id']))
+        )
+        breadcrumb.append(('Remove Observation', ''))
+        return breadcrumb
+
+    def set_template_args(self, observation_id, **kwargs):
+        metadata = render_template(
+            self.metadata_template, **self.metadata)
+        aggregate = self.metadata.copy()
+        del aggregate['extra_parameters']
+        template_arguments = {
+            "aggregate": aggregate,
+            "metadata_block": metadata,
+            "breadcrumb": self.breadcrumb_html(
+                self.get_breadcrumb()),
+        }
+        try:
+            observation = observations.get_metadata(observation_id)
+        except DataRequestException:
+            template_arguments['warnings'] = {
+                'observation': ['Observation could not be read.']
+            }
+            template_arguments['observation'] = {
+                'observation_id': observation_id
+            }
+        else:
+            template_arguments['observation'] = observation
+        template_arguments.update(kwargs)
+        self.template_args = template_arguments
+
+    def get(self, uuid, observation_id, **kwargs):
+        try:
+            self.metadata = aggregates.get_metadata(uuid)
+        except DataRequestException as e:
+            return render_template(
+                self.template, errors=e.errors)
+        self.set_template_args(observation_id, **kwargs)
+        return render_template(self.template, **self.template_args)
+
+    def post(self, uuid, observation_id):
+        try:
+            aggregates.delete_observation(uuid, observation_id)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+            return self.get(uuid, observation_id)
+        return redirect(url_for('data_dashboard.aggregate_view', uuid=uuid))
+
+
 class AggregateView(BaseView):
     """Standard view of a single aggregate.
     """
@@ -262,7 +322,7 @@ class AggregateView(BaseView):
         self.template_args.update({
             'metadata_block': render_template(
                 self.metadata_template, **self.metadata),
-            'observations': self.observation_list,
+            'observations': self.observation_dict,
             'breadcrumb': self.breadcrumb_html(
                 self.get_breadcrumb()),
             'metadata': self.safe_metadata(),
@@ -291,16 +351,33 @@ class AggregateView(BaseView):
             self.template_args.update({'errors': e.errors})
         else:
             start, end = self.parse_start_end_from_querystring()
-            self.observation_list = []
+            self.observation_dict = {}
             observations_list = observations.list_metadata()
-            observation_dict = {obs['observation_id']: obs
-                                for obs in observations_list}
+            observations_dict = {obs['observation_id']: obs
+                                 for obs in observations_list}
             for obs in self.metadata['observations']:
                 curr_id = obs['observation_id']
-                if curr_id in observation_dict:
-                    observation = observation_dict[curr_id].copy()
-                    observation.update(obs)
-                    self.observation_list.append(observation)
+                if curr_id not in self.observation_dict:
+                    self.observation_dict[curr_id] = {
+                        'observation_id': curr_id,
+                        'effective_ranges': []
+                    }
+                    if curr_id in observations_dict:
+                        self.observation_dict[curr_id].update(
+                            observations_dict[curr_id])
+                    else:
+                        flash(
+                            "Could not read observation "
+                            f"'{obs['observation_id']}'  you may require "
+                            "`read` or `read_values` permissions to view this "
+                            "aggregate properly.",
+                            "warning"
+                        )
+                self.observation_dict[curr_id]['effective_ranges'].append({
+                    'effective_from': obs['effective_from'],
+                    'effective_until': obs['effective_until']
+                })
+
             self.insert_plot(uuid, start, end)
             self.set_template_args(start, end, **kwargs)
         return render_template(self.template, **self.template_args)

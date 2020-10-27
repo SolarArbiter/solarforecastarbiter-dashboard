@@ -187,7 +187,8 @@ def test_observation_converter_formdata_to_payload(observation):
     }
 
 
-def test_observation_converter_formdata_to_payload(observation):
+def test_observation_converter_formdata_to_payload_empty_uncertainty(
+        observation):
     form_data = {
         'name': 'GHI Instrument 1',
         'variable': 'ghi',

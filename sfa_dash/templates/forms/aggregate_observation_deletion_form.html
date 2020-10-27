@@ -1,0 +1,40 @@
+{% import "forms/form_macros.jinja" as form %}
+{% extends "dash/data.html" %}
+{% block content %}
+{% if aggregate is defined and observation is defined %}
+<h3>Delete Observation from an Aggregate</h3>
+<p></p>
+<table class="table">
+    <thead><th>Observation</th><th>Effective From</th><th>Effective Until</th></thead>
+  <tbody>
+  {% for obs in aggregate['observations'] %}
+  {% if obs['observation_id'] == observation['observation_id'] %}
+  <tr>
+    <td>{% if 'name' in observation %}
+        {{ observation['name'] }}
+        {% else %}
+        {{ obs['observation_id'] }}
+        {% endif %}
+    </td>
+    <td>{{ obs['effective_from'] |format_datetime}}</td>
+    <td>{{ obs['effective_until'] }} </td>
+  </tr>
+  {% endif %}
+  {% endfor %}
+  </tbody>
+</table>
+<form action="{{ url_for('forms.delete_aggregate_observations', uuid=aggregate['aggregate_id'], observation_id=observation['observation_id']) }}" method="post" enctype="application/json" id="delete-aggregate-observations-form">
+  <div class="form-group">
+    <div class="form-element full-width">
+      <p>Are you sure you want to delete the observation from this aggregate?
+         All of the effective times in the table above will be removed.
+         This action is irreversible.
+      </p>
+      <button type="submit" form="delete-aggregate-observations-form" value="Submit" class="btn btn-danger btn-sml">Yes</button>
+      <a href="{{ url_for('data_dashboard.aggregate_view', uuid=aggregate['aggregate_id']) }}" class="btn btn-primary">No</a>
+  </div>
+  {{ form.token() }}
+  </div>
+</form>
+{% endif %}
+{% endblock %}
