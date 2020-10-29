@@ -559,13 +559,20 @@ class ReportConverter(FormConverter):
         """Checks for "probabilistic_forecast' forecast_type in object pairs
         and if found, appends the CRPS metric to the metrics options.
         """
+        new_params = params.copy()
         pair_fx_types = [f['forecast_type'] for f in params['object_pairs']]
         if'probabilistic_forecast' in pair_fx_types:
-            new_params = params.copy()
             new_params['metrics'].append('crps')
-            return new_params
-        else:
-            return params
+
+        contains_distribution_with_reference = any([
+            f['forecast_type'] == 'probabilistic_forecast'
+            and f['reference_forecast'] is not None
+            for f in params['object_pairs']])
+
+        if contains_distribution_with_reference:
+            new_params['metrics'].append('crpss')
+
+        return new_params
 
     @classmethod
     def parse_fill_method(cls, form_dict):
