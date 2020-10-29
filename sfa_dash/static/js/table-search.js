@@ -78,8 +78,11 @@ $(document).ready(function() {
         rowsToHide = $([]);
         $(optionSelector).each(function (e){
             if (!this.checked){
+                let value = this.value;
                 rowsToHide = rowsToHide.add(
-                    $(`${columnSelector}:contains("${this.value}")`).parent());
+                    $(columnSelector).filter(function(){
+                        return $(this).text() == value;
+                    }).parent());
             }
         });
         return rowsToHide
