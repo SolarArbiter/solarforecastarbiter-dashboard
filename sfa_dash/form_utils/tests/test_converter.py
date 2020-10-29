@@ -601,3 +601,31 @@ def test_report_converter_stringify_infinity(error_range, expected):
          ]
     )
     assert result[0]['parameters']['bands'][0]['error_range'] == expected
+
+
+@pytest.mark.parametrize('pair,expected_metrics', [
+    ({'observation': 'a',
+      'forecast': 'b',
+      'reference_forecast': None,
+      'forecast_type': 'forecast',
+      },
+      [],
+    ), ({'observation': 'a',
+         'forecast': 'b',
+         'reference_forecast': None,
+         'forecast_type': 'probabilistic_forecast',
+         },
+         ['crps'],
+    ),({'observation': 'a',
+        'forecast': 'b',
+        'reference_forecast': 'c',
+        'forecast_type': 'probabilistic_forecast',
+       },
+       ['crps', 'crpss'],
+    ),
+])
+def test_report_converter_apply_crps_crpss(pair, expected_metrics):
+    params = {'object_pairs': [pair], 'metrics': []}
+    updated = converters.ReportConverter.apply_crps(params)
+    assert updated['metrics'] == expected_metrics
+

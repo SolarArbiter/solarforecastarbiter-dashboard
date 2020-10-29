@@ -147,7 +147,7 @@ report_utils.toggle_reference_dependent_metrics = function(){
             let metric = $(metric_selector);
             if (metric.length){
                 // hide skill, insert warning
-                if ($('#reference-warning').length == 0){
+                if ($('.reference-warning.warning-message').length == 0){
                     $(`<span class="reference-warning warning-message">
                        (Requires reference forecast selection)</span>`
                      ).insertAfter(metric.next());
