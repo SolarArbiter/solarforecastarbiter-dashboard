@@ -557,7 +557,8 @@ class ReportConverter(FormConverter):
     @classmethod
     def apply_crps(cls, params):
         """Checks for "probabilistic_forecast' forecast_type in object pairs
-        and if found, appends the CRPS metric to the metrics options.
+        and if found, appends the CRPS metric to the metrics options. If a
+        reference forecast is also selected, applies CRPSS metric.
         """
         new_params = params.copy()
         pair_fx_types = [f['forecast_type'] for f in params['object_pairs']]
