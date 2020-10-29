@@ -110,6 +110,10 @@ function addPair(
 
         if (forecast_type=='probabilistic_forecast'){
             $('[name="metrics"][value="crps"]').attr('checked', true);
+            if (ref_fx_id != null){
+                $('[name="metrics"][value="crpss"]').attr('checked', true);
+
+            }
         }
 
         // Check for the parent pair container that groups object_pairs
@@ -194,55 +198,55 @@ function populateReferenceForecasts(){
         $('#no-reference-forecasts').attr('hidden', true);
         return;
     }
-
-    var constant_value_forecast_id = selected_constant_value.val();
-    if (constant_value_forecast_id == 'full-cdf-group'){
-        // No support for reference forecasts for full distributions
-        $('#no-reference-forecast-forecast-selection').removeAttr('hidden');
-        $('#no-reference-forecasts').attr('hidden', true);
-        return;
-    } else {
-        // Get the metadata of the selected constant value. Metadata fields
-        // will be used for filtering reference forecasts.
-        var constant_value_metadata = report_utils.searchObjects(
-            'forecasts', forecast);
-        var constant_value = selected_constant_value.data().measurement;
-        var axis = constant_value_metadata['axis'];
-        var variable = constant_value_metadata['variable'];
-        var interval_length = constant_value_metadata['interval_length'];
-        var interval_label = constant_value_metadata['interval_label'];
-        var loc = constant_value_metadata[location_key];
-
-        // Create a filter function for removing reference forecasts that
-        // dont share constant value, axis, variable, site or agg, and
-        // interval length.
-        var cv_filter = function(e){
-            constant_values = e['constant_values'].map(function(c){
-                if(c['forecast_id'] == constant_value_forecast_id){
-                    return [];
-                } else {
-                    return c['constant_value'];
-                }
-            });
-            return e['forecast_id'] != selected_constant_value.val()
-                && e['axis'] == axis
-                && e['variable'] == variable
-                && e[location_key] == loc
-                && e['interval_length'] == interval_length
-                && e['interval_label'] == interval_label
-                && constant_values.includes(constant_value);
-        };
-        var ref_fx = page_data['forecasts'].filter(cv_filter);
+    var selected_forecast_id = selected_constant_value.val();
+    if (selected_forecast_id == 'full-cdf-group'){
+        selected_forecast_id = forecast;
     }
+    // Get the metadata of the selected constant value. Metadata fields
+    // will be used for filtering reference forecasts.
+    var forecast_metadata = report_utils.searchObjects(
+        'forecasts', forecast);
+    var constant_value = selected_constant_value.data().measurement;
+    var axis = forecast_metadata['axis'];
+    var variable = forecast_metadata['variable'];
+    var interval_length = forecast_metadata['interval_length'];
+    var interval_label = forecast_metadata['interval_label'];
+    var loc = forecast_metadata[location_key];
+
+    // Create a filter function for removing reference forecasts that
+    // dont share constant value, axis, variable, site or agg, and
+    // interval length.
+    var cv_filter = function(e){
+        constant_values = e['constant_values'].map(function(c){
+            if(c['forecast_id'] == selected_forecast_id){
+                return [];
+            } else {
+                return c['constant_value'];
+            }
+        });
+        return e['forecast_id'] != selected_forecast_id
+            && e['axis'] == axis
+            && e['variable'] == variable
+            && e[location_key] == loc
+            && e['interval_length'] == interval_length
+            && e['interval_label'] == interval_label
+            && (constant_value == 'full'
+                ||constant_values.includes(constant_value));
+    };
+    var ref_fx = page_data['forecasts'].filter(cv_filter);
 
     if (ref_fx.length != 0){
         // If there are matching reference forecast, insert them into the
         // reference forecast <select> element.
         reference_selector = $('#reference-forecast-select');
         ref_fx.forEach(function(fx){
-            var matching_constant = fx['constant_values'].find(
-                x => x['constant_value'] == constant_value);
-            var forecast_id = matching_constant['forecast_id'];
+            if (constant_value == 'full'){
+                var forecast_id = fx['forecast_id'];
+            } else {
+                var matching_constant = fx['constant_values'].find(
+                    x => x['constant_value'] == constant_value);
+                var forecast_id = matching_constant['forecast_id'];
+            }
             // Due to repopulating the <select> element with options, the
             // report_utils.restore_prev_value function does not work here.
             // So manually check for matching forecast id.

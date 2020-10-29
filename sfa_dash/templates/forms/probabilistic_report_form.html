@@ -3,8 +3,8 @@
 {% set report_type = 'probabilistic' %}
 {% set report_script = '/static/js/probabilistic-report-form-handling.js' %}
 {% set constant_value_metric_options = probabilistic_metrics %}
-{% set excluded_constant_value_metrics = ['crps'] %}
-{% set full_group_metric_options = {'crps': 'CRPS'} %}
+{% set excluded_constant_value_metrics = ['crps', 'crpss'] %}
+{% set full_group_metric_options = {'crps': 'CRPS', 'crpss': 'CRPSS'} %}
 
 
 {% extends "forms/base/base_report_form.html" %}

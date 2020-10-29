@@ -16,8 +16,7 @@ object_pairs = [];
 // messages for in the toggle_reference_dependent_metrics function.
 reference_dependent_metrics = ['[name=metrics][value=s]',
                                '[name=metrics][value=bss]',
-                               '[name=metrics][value=qss]',
-                               '[name=metrics][value=crpss]'];
+                               '[name=metrics][value=qss]'];
 
 report_utils.fill_existing_pairs = function(){
     /*
