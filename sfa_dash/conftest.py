@@ -221,7 +221,6 @@ def site_id_route(request):
 
 observation_id_route_list = [
     '/observations/{observation_id}',
-    '/observations/{observation_id}/upload',
     '/observations/{observation_id}/delete',
 ]
 
@@ -235,7 +234,6 @@ def observation_id_route(request):
 
 forecast_id_route_list = [
     '/forecasts/single/{forecast_id}',
-    '/forecasts/single/{forecast_id}/upload',
     '/forecasts/single/{forecast_id}/delete',
 ]
 
@@ -261,7 +259,6 @@ def cdf_forecast_id_route(request):
 
 
 cdf_forecast_single_id_routes_list = [
-    '/forecasts/cdf/single/{forecast_id}/upload',
     '/forecasts/cdf/single/{forecast_id}',
 ]
 

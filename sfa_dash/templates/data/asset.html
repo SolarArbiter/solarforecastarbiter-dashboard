@@ -3,16 +3,13 @@
 
 {% block content %}
 
-{% if upload_link is defined and is_allowed('write_values') %}
-<a role="button" class="btn btn-primary btn-sm" href="{{upload_link}}">Upload data</a>
-{% endif %}
-
 {% if update_link is defined and is_allowed('update') %}
 <a role="button" class="btn btn-primary btn-sm" href="{{update_link}}">Update Metadata</a>
 {% endif %}
 {% if delete_link is defined and is_allowed('delete') %}
 <a role="button" class="btn btn-danger btn-sm" href="{{ delete_link }}">Delete</a>
 {% endif %}
+
 
 {% if plot is not none %}
 <div class="row data-plots-wrapper">
@@ -25,4 +22,18 @@
 {% include "data/time_widgets.html" %}
 </div>
 {% endif %}
+{% if is_allowed('write_values') %}
+<a role="button" class="collapser-button collapsed" data-toggle="collapse" data-target="#upload-block">Upload data</a>
+<hr/>
+<div id="upload-block" class="collapse border mb-3">
+    {% if data_type == 'observation' %}
+    {% include "forms/observation_upload_form.html" %}
+    {% elif data_type == 'forecast' %}
+    {% include "forms/forecast_upload_form.html" %}
+    {% elif data_type == 'cdf_forecast' %}
+    {% include "forms/cdf_forecast_upload_form.html" %}
+    {% endif %}
+</div>
+{% endif %}
+
 {% endblock %}
