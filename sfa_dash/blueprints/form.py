@@ -152,6 +152,9 @@ class CreateForm(BaseView):
 
 
 class UploadForm(BaseView):
+    # Manually override get method of parent to return 405
+    methods = ['POST']
+
     def __init__(self, data_type):
         self.data_type = data_type
         if data_type == 'observation':
