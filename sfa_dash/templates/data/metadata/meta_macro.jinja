@@ -47,3 +47,7 @@
 </ul>
 </li>
 {% endmacro %}
+
+{% macro uuid(the_uuid) %}
+<li class="metadata-field"><span class="data-metadata-label">UUID: </span><span id="object_uuid">{{ the_uuid | string }}</span></li>
+{% endmacro %}

@@ -2,6 +2,7 @@
 {% macro report_metadata(metadata, all_metrics, metric_categories, object_pairs) %}
 <ul class="data-metadata-fields col-md-6 col-sm-12">
       {{ macro.li('Name', metadata['report_parameters']['name']) }}
+      {{ macro.uuid(metadata['report_id']) }}
       {{ macro.li('Organization', metadata['provider']) }}
       {{ macro.li('Status', metadata['status']) }}
 </ul>

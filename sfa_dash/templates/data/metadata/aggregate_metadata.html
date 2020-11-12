@@ -4,6 +4,7 @@
 {% block metadata %}
 <ul class="data-metadata-fields col-md-6 col-sm-12">
       {{ macro.li('Name', name) }}
+      {{ macro.uuid(aggregate_id) }}
       {{ macro.li('Description', description) }}
       {{ macro.li('Timezone', timezone ) }}
 </ul>

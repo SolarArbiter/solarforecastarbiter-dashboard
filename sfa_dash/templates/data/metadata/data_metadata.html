@@ -6,6 +6,24 @@
 {% block metadata %}
 <ul class="data-metadata-fields col-md-6 col-sm-12">
       {{ macro.li('Name', name) }}
+      {# select the correct uuid for printing #}
+      {% if site_id is defined %}
+        {% if forecast_id is defined %}
+          {% set uuid = forecast_id %}
+        {% elif observation_id is defined %}
+          {% set uuid = observation_id %}
+        {% else %}
+          {% set uuid = site_id %}
+        {% endif %}
+      {% elif aggregate_id is defined %}
+        {% if forecast_id is defined %}
+          {% set uuid = forecast_id %}
+        {% else %}
+          {% set uuid = aggregate_id %}
+        {% endif %}
+      {% endif %}
+      {{ macro.uuid(uuid) }}
+
       {% if site_link is defined %}
         {{ macro.li('Site', site_link )}}
       {% elif location_link is defined %}
@@ -16,6 +34,7 @@
         {% endif %}
         {{ macro.li(location_label, location_link) }}
       {% endif %}
+
 </ul>
 <ul class="data-metadata-fields col-md-6 col-sm-12">
   {{ macro.li('Variable', variable |convert_varname, variable | var_to_units) }}
