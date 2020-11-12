@@ -62,7 +62,7 @@ function toggleDownloadUpdate(){
                 var interval_length = 1;
             }
             var intervals = miliseconds / (interval_length * 1000 * 60);
-            
+
             if (intervals > sfa_dash_config.MAX_PLOT_DATAPOINTS){
                 $('#plot-range-adjust-submit').attr('disabled', true);
                 insertWarning(
