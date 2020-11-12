@@ -68,7 +68,25 @@ class DeleteConfirmation(DataDashView):
             # the confirmation page, redirect to confirm.
             return redirect(confirmation_url)
         try:
+            self.metadata = self.api_handle.get_metadata(uuid)
+        except DataRequestException:
+            redirect_url = url_for(f'data_dashboard.{self.data_type}s')
+        else:
+            if self.metadata.get('site_id') is not None:
+                if self.data_type == 'site':
+                    redirect_url = url_for('data_dashboard.sites')
+                else:
+                    redirect_url = url_for(f'data_dashboard.{self.data_type}s',
+                                           site_id=self.metadata['site_id'])
+            else:
+                if self.data_type == 'aggregate':
+                    redirect_url = url_for('data_dashboard.aggregates')
+                else:
+                    redirect_url = url_for(
+                        f'data_dashboard.{self.data_type}s',
+                        aggregate_id=self.metadata['aggregate_id'])
+        try:
             self.api_handle.delete(uuid)
         except DataRequestException as e:
             return self.get(uuid, errors=e.errors)
-        return redirect(url_for(f'data_dashboard.{self.data_type}s'))
+        return redirect(redirect_url)
