@@ -1,5 +1,7 @@
 import json
 from json.decoder import JSONDecodeError
+from requests.exceptions import HTTPError
+
 
 from flask import (Blueprint, render_template, request,
                    abort, redirect, url_for, flash)
@@ -198,6 +200,11 @@ class UploadForm(BaseView):
                                                     json=False)
                     except DataRequestException as e:
                         errors = e.errors
+                    except HTTPError as e:
+                        errors = {
+                            'Upload Failure': [
+                                'An error ocurred while uploading data.'],
+                        }
             elif posted_file.mimetype == 'application/json':
                 try:
                     posted_data = json.load(posted_file)
@@ -210,6 +217,11 @@ class UploadForm(BaseView):
                         self.api_handle.post_values(uuid, posted_data)
                     except DataRequestException as e:
                         errors = e.errors
+                    except HTTPError as e:
+                        errors = {
+                            'Upload Failure': [
+                                'An error ocurred while uploading data.'],
+                        }
             else:
                 errors = {
                     'mime-type': [
