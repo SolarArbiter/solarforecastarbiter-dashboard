@@ -3,3 +3,6 @@
 {{ macro.li('Uncertainty', uncertainty, unit='&percnt;' )}}
 {% endblock %}
 {% set data_type = 'Observation' %}
+{% block upload_block %}
+{% include "forms/observation_upload_form.html" %}
+{% endblock %}

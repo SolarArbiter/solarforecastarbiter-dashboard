@@ -155,39 +155,13 @@ class UploadForm(BaseView):
     def __init__(self, data_type):
         self.data_type = data_type
         if data_type == 'observation':
-            self.template = 'forms/observation_upload_form.html'
-            self.metadata_template = 'data/metadata/observation_metadata.html'
             self.api_handle = observations
         elif data_type == 'forecast':
-            self.template = 'forms/forecast_upload_form.html'
-            self.metadata_template = 'data/metadata/forecast_metadata.html'
             self.api_handle = forecasts
         elif data_type == 'cdf_forecast':
-            self.template = 'forms/cdf_forecast_upload_form.html'
-            self.metadata_template = 'data/metadata/cdf_forecast_metadata.html'
             self.api_handle = cdf_forecasts
         else:
             raise ValueError(f'No upload form defined for {data_type}')
-
-    def set_template_args(self):
-        self.template_args = {}
-        self.template_args['metadata_block'] = render_template(
-            self.metadata_template,
-            **self.metadata)
-        self.template_args['metadata'] = self.safe_metadata()
-
-    def get(self, uuid, **kwargs):
-        try:
-            self.metadata = self.api_handle.get_metadata(uuid)
-            self.set_site_or_aggregate_metadata()
-            self.metadata['site_link'] = self.generate_site_link(
-                self.metadata)
-        except DataRequestException as e:
-            return render_template(self.template, errors=e.errors)
-        else:
-            self.set_template_args()
-        return render_template(self.template, uuid=uuid, **self.template_args,
-                               **kwargs)
 
     def post(self, uuid):
         errors = {}
@@ -239,10 +213,9 @@ class UploadForm(BaseView):
                         f'Unsupported file type {posted_file.mimetype}.']
                 }
         if errors:
-            return self.get(uuid=uuid, errors=errors)
-        else:
-            return redirect(url_for(f'data_dashboard.{self.data_type}_view',
-                                    uuid=uuid))
+            self.flash_api_errors(errors)
+        return redirect(url_for(f'data_dashboard.{self.data_type}_view',
+                                uuid=uuid))
 
 
 class CloneForm(CreateForm):
