@@ -148,6 +148,7 @@ header nav{
 	width: inherit;
 }
 .data-metadata{
+    position:relative;
 	padding: 1em;
 }
 ul.data-metadata-fields{
