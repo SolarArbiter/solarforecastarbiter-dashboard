@@ -3,12 +3,6 @@
 
 {% block content %}
 
-{% if is_allowed('write_values') %}
-{# if write_values is allowed, this button will control the display of the
-   upload form included below #}
-<a role="button" class="btn btn-primary btn-sm" data-toggle="collapse" data-target="#upload-block">Upload data</a>
-{% endif %}
-
 {% if update_link is defined and is_allowed('update') %}
 <a role="button" class="btn btn-primary btn-sm" href="{{update_link}}">Update Metadata</a>
 {% endif %}
@@ -16,17 +10,6 @@
 <a role="button" class="btn btn-danger btn-sm" href="{{ delete_link }}">Delete</a>
 {% endif %}
 
-{% if is_allowed('write_values') %}
-<div id="upload-block" class="collapse border mb-3">
-    {% if data_type == 'observation' %}
-    {% include "forms/observation_upload_form.html" %}
-    {% elif data_type == 'forecast' %}
-    {% include "forms/forecast_upload_form.html" %}
-    {% elif data_type == 'cdf_forecast' %}
-    {% include "forms/cdf_forecast_upload_form.html" %}
-    {% endif %}
-</div>
-{% endif %}
 
 {% if plot is not none %}
 <div class="row data-plots-wrapper">
@@ -39,4 +22,18 @@
 {% include "data/time_widgets.html" %}
 </div>
 {% endif %}
+{% if is_allowed('write_values') %}
+<a role="button" class="collapser-button collapsed" data-toggle="collapse" data-target="#upload-block">Upload data</a>
+<hr/>
+<div id="upload-block" class="collapse border mb-3">
+    {% if data_type == 'observation' %}
+    {% include "forms/observation_upload_form.html" %}
+    {% elif data_type == 'forecast' %}
+    {% include "forms/forecast_upload_form.html" %}
+    {% elif data_type == 'cdf_forecast' %}
+    {% include "forms/cdf_forecast_upload_form.html" %}
+    {% endif %}
+</div>
+{% endif %}
+
 {% endblock %}
