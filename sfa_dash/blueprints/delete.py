@@ -78,13 +78,15 @@ class DeleteConfirmation(DataDashView):
                 else:
                     redirect_url = url_for(f'data_dashboard.{self.data_type}s',
                                            site_id=self.metadata['site_id'])
-            else:
+            elif self.metadata.get('aggregate_id') is not None:
                 if self.data_type == 'aggregate':
                     redirect_url = url_for('data_dashboard.aggregates')
                 else:
                     redirect_url = url_for(
                         f'data_dashboard.{self.data_type}s',
                         aggregate_id=self.metadata['aggregate_id'])
+            else:
+                redirect_url = url_for(f'data_dashboard.{self.data_type}s')
         try:
             self.api_handle.delete(uuid)
         except DataRequestException as e:
