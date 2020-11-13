@@ -404,9 +404,11 @@ class DeleteReportView(BaseView):
         return super().get()
 
     def post(self, uuid):
-        confirmation_url = url_for(f'data_dashboard.delete_report',
-                                   _external=True,
-                                   uuid=uuid)
+        confirmation_url = url_for(
+            'data_dashboard.delete_report',
+            _external=True,
+            uuid=uuid
+        )
         if request.headers['Referer'] != confirmation_url:
             # If the user was directed from anywhere other than
             # the confirmation page, redirect to confirm.
@@ -414,10 +416,11 @@ class DeleteReportView(BaseView):
         try:
             reports.delete(uuid)
         except DataRequestException as e:
-            return self.get(uuid, errors=e.errors)
-        return redirect(url_for(
-            f'data_dashboard.reports',
-            messages={'delete': ['Success']}))
+            self.flash_api_errors(e.errors)
+            return redirect(url_for('data_dashboard.delete_report',
+                                    uuid=uuid))
+        flash("Report deleted successfully")
+        return redirect(url_for('data_dashboard.reports'))
 
 
 class RecomputeReportView(BaseView):
