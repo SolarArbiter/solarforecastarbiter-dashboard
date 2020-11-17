@@ -6,33 +6,73 @@
 <h2 class="page-title">Solar Forecast Arbiter Dashboard</h2>
 {% include "sections/notifications.html" %}
 {% if current_user is none %}
-<p>Welcome to the Solar Forecast Arbiter Dashboard. If you have an account, please
+<p>Welcome to the Solar Forecast Arbiter, a tool for evaluating your
+solar power and irradiance forecasts.</p>
+<p>
+The Arbiter allows you to:
+<ul>
+    <li>Securely upload forecast and observation data</li>
+    <li>Analyze historical forecast accuracy and track ongoing forecast accuracy</li>
+    <li>Optionally share data and analysis reports with other users</li>
+    <li>Participate in anonymous, multi-vendor, operational forecast trials</li>
+</ul>
+</p>
+
+<p>The Arbiter provides a large collection of
+<a href="https://solarforecastarbiter.org/referencedata/">reference observations</a>
+from several distinct
+<a href="https://solarforecastarbiter.org/climatezones/">climate zones</a>
+throughout the United States. A suite of
+<a href="https://solarforecastarbiter.org/benchmarks/">benchmark forecasts</a>
+are provided alongside these reference observations.</p>
+
+<p>
+Returning users can
 <a href="{{ url_for('auth0.login') }}">log in</a> to access the dashboard.</p>
-<p>New users can create an account using the '<i>Sign up</i>' link at the bottom
-of the <a href="{{url_for('auth0.login') }}">log in form.</a> See
-<a href="https://solarforecastarbiter.org/documentation/dashboard/#getting-started">
-Getting Started</a> for more information.</p>
+
+<p>To get started with the reference dataset, follow the '<i>Sign up</i>' link
+at the bottom of the <a href="{{url_for('auth0.login') }}">log in form.</a> See
+<a href="https://solarforecastarbiter.org/documentation/dashboard/getting-started/">
+Getting Started</a> for more information on how to access the rest of the
+Solar Forecast Arbiter's features.</p>
+
 {% else %}
-<p>Use the links on the left to access data.</p>
+<p>Use the links in the sidebar on the left to access data.</p>
 
-<p>The <b>Sites</b> link lists the Sites available to you. From this menu, you
-explore Sites and their associated data. Selecting a Site will display its
-metadata and present options to list or create Observations, Forecasts and
-Probabilistic Forecasts associated with the Site.</p>
+<p>The <a class="font-weight-bold" href="/sites">Sites</a> link lists all
+of the Sites available to you. Use this menu to explore existing Sites and
+their associated data. Selecting a Site displays its metadata and links to
+list Observations, Forecasts and Probabilistic Forecasts associated with the
+Site. Users with the proper permissions can
+<a href="https://solarforecastarbiter.org/documentation/dashboard/working-with-data/#create-new-site">create new Sites</a>
+or <a  href="https://solarforecastarbiter.org/documentation/dashboard/working-with-data/#create-new-observation-or-forecast">create Observations, Forecasts, and Probabilistic Forecasts</a>
+at existing Sites in this menu.</p>
 
-<p>The <b>Aggregates</b> link lists Aggregates available to you. From
-the aggregates menu, you will be able to create new aggregates, associate
-existing observations with an aggregate and view aggregate data.</p>
+<p>The <a class="font-weight-bold" href="/aggregates" >Aggregates</a>
+link lists Aggregates available to you. Use this menu to view existing
+Aggregates and associated data. Selecting an Aggregate displays its constituent
+Observations and aggregated observation data. Users with the proper permissions
+can <a href="https://solarforecastarbiter.org/documentation/dashboard/working-with-data/#create-new-aggregate">create new Aggregates</a>,
+<a href="https://solarforecastarbiter.org/documentation/dashboard/working-with-data/#add-observations-to-an-aggregate">associate existing Observations with an Aggregate</a>,
+or <a href="https://solarforecastarbiter.org/documentation/dashboard/working-with-data/#create-new-forecast">create Forecasts and Probabilistic Forecasts</a>
+for an existing Aggregate from this menu.</p>
 
-<p>The <b>Reports</b> link lists Reports available to you and allow you
-to create new reports.</p>
+<p>The <a class="font-weight-bold" href="/reports" >Reports</a>
+link lists Reports available to you. Users with proper permissions can
+<a href="https://solarforecastarbiter.org/documentation/dashboard/working-with-data/#create-new-report">create new Reports</a> from this menu.</p>
 
-<p>The <b>Forecasts and Observations</b> link contains pages that will
-list all of the observations, forecasts and probabilistic forecasts you
-have access to regardless of their site or aggregate association.</p>
+<p>The <a class="font-weight-bold" href="/observations">Forecasts and Observations</a>
+link contains pages that list all of the Observations, Forecasts, and
+Probabilistic Forecasts you have access to regardless of their site or
+aggregate association.</p>
 
-<p>See <a href="https://solarforecastarbiter.org/documentation/dashboard/">documentation</a> for more details.</p>
- 
+<p>Administrators can find tools for managing users and sharing data by
+clicking the <a href="/admin/">User Administration</a> option in the
+<em>Account</em> menu at the top right of the page.</p>
+
+<p>See <a href="https://solarforecastarbiter.org/documentation/dashboard/">documentation</a>
+for more details.</p>
+
 {% endif %}
 {% include "sections/subnav.html" %}
 {% endblock %}
