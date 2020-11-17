@@ -7,10 +7,16 @@
 {% include "sections/notifications.html" %}
 {% if current_user is none %}
 <p>Welcome to the Solar Forecast Arbiter, a tool for evaluating your
-solar power and irradiance forecasts. The Arbiter will allow you to securely
-upload forecast data for your own private evaluation, or to participate in
-competitive forecast trials that compare forecast performance between
-anonymous participants.</p>
+solar power and irradiance forecasts.</p>
+<p>
+The Arbiter allows you to:
+<ul>
+    <li>Securely upload forecast and observation data</li>
+    <li>Analyze historical forecast accuracy and track ongoing forecast accuracy</li>
+    <li>Optionally share data and analysis reports with other users</li>
+    <li>Participate in anonymous, multi-vendor, operational forecast trials</li>
+</ul>
+</p>
 
 <p>The Arbiter provides a large collection of
 <a href="https://solarforecastarbiter.org/referencedata/">reference observations</a>
@@ -54,6 +60,7 @@ link lists Reports available to you and allows you to create new reports.</p>
 link contains pages that will list all of the observations, forecasts, and
 probabilistic forecasts you have access to regardless of their site or
 aggregate association.</p>
+
 
 <p>See <a href="https://solarforecastarbiter.org/documentation/dashboard/">documentation</a>
 for more details.</p>
