@@ -196,11 +196,11 @@ class UploadForm(BaseView):
                     }
                 else:
                     try:
-                        self.api_handle.post_values(uuid, decoded_data,
-                                                    json=False)
+                        self.api_handle.post_values(
+                            uuid, decoded_data.encode('utf-8'), json=False)
                     except DataRequestException as e:
                         errors = e.errors
-                    except HTTPError as e:
+                    except HTTPError:
                         errors = {
                             'Upload Failure': [
                                 'An error ocurred while uploading data.'],
@@ -217,7 +217,7 @@ class UploadForm(BaseView):
                         self.api_handle.post_values(uuid, posted_data)
                     except DataRequestException as e:
                         errors = e.errors
-                    except HTTPError as e:
+                    except HTTPError:
                         errors = {
                             'Upload Failure': [
                                 'An error ocurred while uploading data.'],

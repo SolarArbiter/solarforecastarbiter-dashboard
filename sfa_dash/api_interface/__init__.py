@@ -75,8 +75,6 @@ def post_request(path, payload, json=True):
     if json:
         kwargs = {'json': payload}
     else:
-        if isinstance(payload, str):
-            payload = payload.encode('utf-8')
         kwargs = {'headers': {'Content-type': 'text/csv'},
                   'data': payload}
     return handle_response(oauth_request_session.post(
