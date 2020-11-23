@@ -550,14 +550,15 @@ th.selection-column {
 }
 
 /* add pseudo elements so possible anchors clear sticky header */
-#report-block [id]:before{
-    display: block;
-    content: " ";
-    margin-top: -7rem;
-    height: 7rem;
-    visibility: hidden;
+@media (min-width: 768px){
+  #report-block [id]:before{
+      display: block;
+      content: " ";
+      margin-top: -7rem;
+      height: 7rem;
+      visibility: hidden;
+  }
 }
-
 
 #metric-plot-wrapper {
   border-bottom: 1px solid #dee2e6;
