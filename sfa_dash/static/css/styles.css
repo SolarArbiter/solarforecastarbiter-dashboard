@@ -543,9 +543,21 @@ th.selection-column {
 
 #report-block h1,
 #report-block h2,
-#report-block h3 {
+#report-block h3,
+#report-block h4 {
   margin-top: 2rem;
   margin-bottom: 0.5rem;
+}
+
+/* add pseudo elements so possible anchors clear sticky header */
+@media (min-width: 768px){
+  #report-block [id]:before{
+      display: block;
+      content: " ";
+      margin-top: -7rem;
+      height: 7rem;
+      visibility: hidden;
+  }
 }
 
 #metric-plot-wrapper {
