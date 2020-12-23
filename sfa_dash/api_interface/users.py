@@ -11,7 +11,8 @@ def get_metadata(user_id):
     except HTTPError as e:
         if e.response.status_code == 500:
             raise DataRequestException(500, {
-                "errors": "Failed to load user info please try again."
+                "errors": ["Failed to load user info, please wait a minute "
+                           "and try again."]
             })
     return req
 
@@ -22,7 +23,8 @@ def list_metadata():
     except HTTPError as e:
         if e.response.status_code == 500:
             raise DataRequestException(500, {
-                "errors": "Failed to load user list, please try again."
+                "errors": ["Failed to load user list, please wait a minute "
+                           "and try again."]
             })
     return req
 
@@ -48,7 +50,8 @@ def get_metadata_by_email(email):
     except HTTPError as e:
         if e.response.status_code == 500:
             raise DataRequestException(500, {
-                "errors": "Failed to retrieve user by email, please try again."
+                "errors": ["Failed to retrieve user by email, please wait a "
+                           "minute and try again."]
             })
     return req
 
@@ -60,7 +63,8 @@ def add_role_by_email(email, role_id):
     except HTTPError as e:
         if e.response.status_code == 500:
             raise DataRequestException(500, {
-                "errors": "Failed to grant role by email, please try again."
+                "errors": ["Failed to grant role by email, please wait a "
+                           "minute and try again."]
             })
     return req
 
@@ -71,7 +75,8 @@ def remove_role_by_email(email, role_id):
     except HTTPError as e:
         if e.response.status_code == 500:
             raise DataRequestException(500, {
-                "errors": "Failed to remove role by email, please try again."
+                "errors": ["Failed to remove role by email, please wait a "
+                           "minute and try again."]
             })
     return req
 
@@ -82,7 +87,8 @@ def get_email(user_id):
     except HTTPError as e:
         if e.response.status_code == 500:
             raise DataRequestException(500, {
-                "errors": "Failed to look up user email, please try again."
+                "errors": ["Failed to look up user email, please wait a "
+                           "minute and try again."]
             })
     return req
 
