@@ -352,9 +352,12 @@ class RoleGrant(AdminView):
             url_for('admin.role_view', uuid=uuid))
         try:
             users.add_role_by_email(user_email, uuid)
-        except DataRequestException:
-            # flash a message that grant failed
-            flash('Failed to grant role.', 'error')
+        except DataRequestException as e:
+            if e.status_code == 500:
+                self.flash_api_errors(e.errors)
+            else:
+                # flash a message that grant failed
+                flash('Failed to grant role.', 'error')
             try:
                 role = roles.get_metadata(uuid)
             except DataRequestException as e:
