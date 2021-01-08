@@ -413,6 +413,10 @@ def download_timeseries(view_class, uuid):
 
     The endpoint makes a request to the api, and returns a file of the
     requested type.
+
+    Raises
+    ------
+    DataRequestException if the GET request for data fails.
     """
     form_data = request.form
     try:
@@ -421,29 +425,22 @@ def download_timeseries(view_class, uuid):
         errors = {'start-end': ['Invalid datetime']}
         return view_class.get(uuid, form_data=form_data, errors=errors)
     else:
+        data = view_class.api_handle.get_values(
+            uuid,
+            headers=headers,
+            params=params)
         try:
-            data = view_class.api_handle.get_values(
-                uuid,
-                headers=headers,
-                params=params)
-        except DataRequestException as e:
-            return render_template(
-                view_class.template,
-                **view_class.template_args(uuid),
-                errors=e.errors)
+            metadata = view_class.api_handle.get_metadata(uuid)
+        except DataRequestException:
+            filename = 'data'
         else:
-            try:
-                metadata = view_class.api_handle.get_metadata(uuid)
-            except DataRequestException:
-                filename = 'data'
-            else:
-                name = metadata['name'].replace(' ', '_')
-                time_range = f"{params['start']}-{params['end']}"
-                filename = f'{name}_{time_range}'
-            if form_data['format'] == 'application/json':
-                response = json_file_response(filename, data)
-            elif form_data['format'] == 'text/csv':
-                response = csv_file_response(filename, data)
-            else:
-                response = make_response("Invalid media type.", 415)
+            name = metadata['name'].replace(' ', '_')
+            time_range = f"{params['start']}-{params['end']}"
+            filename = f'{name}_{time_range}'
+        if form_data['format'] == 'application/json':
+            response = json_file_response(filename, data)
+        elif form_data['format'] == 'text/csv':
+            response = csv_file_response(filename, data)
+        else:
+            response = make_response("Invalid media type.", 415)
         return response
