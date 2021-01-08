@@ -34,4 +34,15 @@
       </div>
     </footer>
   </body>
+  <script>
+    if (window.navigator.userAgent.match(/MSIE|Trident/) !== null) {
+      var main = document.getElementsByTagName("main")[0];
+      var firstContainer = main.getElementsByClassName("container")[0];
+      var ieBanner = document.createElement("div");
+      ieBanner.className = "iebanner alert-warning";
+      ieBanner.innerText = 'Internet Explorer detected, some features may not \
+                            work. We recommend using Firefox, Chrome or Edge.'
+      main.insertBefore(ieBanner, firstContainer);
+    }
+  </script>
 </html>

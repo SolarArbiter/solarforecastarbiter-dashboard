@@ -812,3 +812,8 @@ div.report-header {
 a#ref-clear {
   color: #007bff;
 }
+
+.iebanner {
+  padding: 1em;
+  text-align: center;
+}
