@@ -1,5 +1,7 @@
 from flask import (Blueprint, render_template, request,
                    url_for, redirect, session, flash)
+
+
 from sfa_dash.api_interface import (
     sites, observations, forecasts,
     cdf_forecast_groups, roles, users,
@@ -84,9 +86,11 @@ class AdminView(BaseView):
 # Users Views
 class UserListing(AdminView):
     def get(self):
-        users_list = users.list_metadata()
-        if 'errors' in users_list:
-            users_list = None
+        try:
+            users_list = users.list_metadata()
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+            users_list = []
         self.set_template_args()
         return render_template('forms/admin/users.html',
                                table_data=users_list,
@@ -271,7 +275,11 @@ class RoleView(AdminView):
                                if k in permission_map}
 
         # Create a dict of users indexed on user uuid
-        user_list = users.list_metadata()
+        try:
+            user_list = users.list_metadata()
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+            user_list = []
         user_map = {user['user_id']: user
                     for user in user_list}
 
@@ -344,9 +352,12 @@ class RoleGrant(AdminView):
             url_for('admin.role_view', uuid=uuid))
         try:
             users.add_role_by_email(user_email, uuid)
-        except DataRequestException:
-            # flash a message that grant failed
-            flash('Failed to grant role.', 'error')
+        except DataRequestException as e:
+            if e.status_code == 500:
+                self.flash_api_errors(e.errors)
+            else:
+                # flash a message that grant failed
+                flash('Failed to grant role.', 'error')
             try:
                 role = roles.get_metadata(uuid)
             except DataRequestException as e:

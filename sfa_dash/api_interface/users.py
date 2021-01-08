@@ -1,13 +1,31 @@
+from requests.exceptions import HTTPError
+
+
 from sfa_dash.api_interface import get_request, post_request, delete_request
+from sfa_dash.errors import DataRequestException
 
 
 def get_metadata(user_id):
-    req = get_request(f'/users/{user_id}')
+    try:
+        req = get_request(f'/users/{user_id}')
+    except HTTPError as e:
+        if e.response.status_code == 500:
+            raise DataRequestException(500, {
+                "errors": ["Failed to load user info, please wait a minute "
+                           "and try again."]
+            })
     return req
 
 
 def list_metadata():
-    req = get_request('/users/')
+    try:
+        req = get_request('/users/')
+    except HTTPError as e:
+        if e.response.status_code == 500:
+            raise DataRequestException(500, {
+                "errors": ["Failed to load user list, please wait a minute "
+                           "and try again."]
+            })
     return req
 
 
@@ -27,23 +45,51 @@ def remove_role(user_id, role_id):
 
 
 def get_metadata_by_email(email):
-    req = get_request(f'/users-by-email/{email}')
+    try:
+        req = get_request(f'/users-by-email/{email}')
+    except HTTPError as e:
+        if e.response.status_code == 500:
+            raise DataRequestException(500, {
+                "errors": ["Failed to retrieve user by email, please wait a "
+                           "minute and try again."]
+            })
     return req
 
 
 def add_role_by_email(email, role_id):
-    req = post_request(f'/users-by-email/{email}/roles/{role_id}',
-                       payload=None)
+    try:
+        req = post_request(f'/users-by-email/{email}/roles/{role_id}',
+                           payload=None)
+    except HTTPError as e:
+        if e.response.status_code == 500:
+            raise DataRequestException(500, {
+                "errors": ["Failed to grant role by email, please wait a "
+                           "minute and try again."]
+            })
     return req
 
 
 def remove_role_by_email(email, role_id):
-    req = delete_request(f'/users-by-email/{email}/roles/{role_id}')
+    try:
+        req = delete_request(f'/users-by-email/{email}/roles/{role_id}')
+    except HTTPError as e:
+        if e.response.status_code == 500:
+            raise DataRequestException(500, {
+                "errors": ["Failed to remove role by email, please wait a "
+                           "minute and try again."]
+            })
     return req
 
 
 def get_email(user_id):
-    req = get_request(f'/users/{user_id}/email')
+    try:
+        req = get_request(f'/users/{user_id}/email')
+    except HTTPError as e:
+        if e.response.status_code == 500:
+            raise DataRequestException(500, {
+                "errors": ["Failed to look up user email, please wait a "
+                           "minute and try again."]
+            })
     return req
 
 
