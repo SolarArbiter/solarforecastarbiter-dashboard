@@ -5,6 +5,7 @@ from functools import partial
 from flask import url_for, render_template, request, flash, current_app
 from flask.views import MethodView
 import pandas as pd
+from sentry_sdk import capture_exception
 
 from sfa_dash.api_interface import sites, aggregates
 from sfa_dash.blueprints.util import timeseries_adapter
@@ -163,6 +164,10 @@ class BaseView(MethodView):
         """
         start_dt = pd.Timestamp(form_data['start'], tz='utc')
         end_dt = pd.Timestamp(form_data['end'], tz='utc')
+        if (pd.isnull(start_dt) or pd.isnull(end_dt)):
+          err = ValueError("Invalid datetimes received from download form")
+          capture_exception(err)
+          raise err
         params = {
             'start': start_dt.isoformat(),
             'end': end_dt.isoformat(),

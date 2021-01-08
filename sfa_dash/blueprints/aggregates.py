@@ -385,4 +385,10 @@ class AggregateView(BaseView):
     def post(self, uuid):
         """Download endpoint.
         """
-        return download_timeseries(self, uuid)
+        try:
+            data_response = download_timeseries(self, uuid)
+        except DataRequestException as e:
+            self.flash_api_errors(e)
+            return self.get(uuid)
+        else:
+            return data_response
