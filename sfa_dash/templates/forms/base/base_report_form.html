@@ -23,26 +23,9 @@
          <input type="text" class="form-control  name-field" required="" name="name" {{ form.name_validation() }} value="{% if form_data %}{{form_data['report_parameters']['name']}}{% else %}{%endif%}"/>
        </div>
      </div>
-	 <div class="form-element">
-       <label for="start">Start (UTC):</label><br/>
-       <div class="input-wrapper">
-         <input type="text" name="period-start" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data %}value="{{form_data['report_parameters']['period-start']}}"{% endif %}>
-       </div>
-       {{ form.help_button('period-start') }}
-       <span class="period-start-help-text form-text text-muted help-text collapse" aria-hidden>
-           The start of the analysis period as an ISO 8601 datetime.
-       </span>
-     </div>
-     <div class="form-element">
-       <label for="end">End (UTC)</label><br/>
-       <div class="input-wrapper">
-         <input type="text" name="period-end" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data %}value="{{form_data['report_parameters']['period-end']}}"{% endif %}>
-       </div>
-       {{ form.help_button('period-end') }}
-       <span class="period-end-help-text form-text text-muted help-text collapse" aria-hidden>
-           The end of the analysis period as an ISO 8601 datetime.
-       </span>
-     </div>
+     {% include "data/time_inputs.html" %}
+     <input type="text" hidden required name="period-start" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data %}value="{{form_data['report_parameters']['period-start']}}"{% endif %}>
+     <input type="text" hidden required name="period-end" class="form-control" placeholder="YYYY-MM-DDTHH:MMZ" required {% if form_data %}value="{{form_data['report_parameters']['period-end']}}"{% endif %}>
      {# The following empty list is a target for the javascript found in report-handling.js
         list items are added dynamically on page load #}
 
