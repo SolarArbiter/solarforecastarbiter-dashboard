@@ -1,0 +1,7 @@
+{% import "forms/form_macros.jinja" as form %}
+
+<div class="form-group mt-3">
+{% include "data/time_inputs.html" %}
+<input type="text" class="start" name="period-start" hidden>
+<input type="text" class="end" name="period-end" hidden>
+<script src="/static/js/timerange-handling.js"></script>
