@@ -610,8 +610,8 @@ class ReportConverter(FormConverter):
         report_params['metrics'] = form_dict.getlist('metrics')
         report_params['categories'] = form_dict.getlist('categories')
         report_params['filters'] = cls.parse_form_filters(form_dict)
-        report_params['start'] = form_dict['period-start']
-        report_params['end'] = form_dict['period-end']
+        report_params['start'] = form_dict['start']
+        report_params['end'] = form_dict['end']
         report_params['forecast_fill_method'] = cls.parse_fill_method(
             form_dict)
         report_params = cls.apply_crps(report_params)

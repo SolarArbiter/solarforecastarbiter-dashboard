@@ -937,8 +937,6 @@ $(document).ready(function() {
     pair_selector = createPairSelector();
     pair_control_container.append($('<a role="button" class="full-width object-pair-button collapser-button collapsed" data-toggle="collapse" data-target=".pair-selector-wrapper">Create Forecast Evaluation pairs</a>'));
     pair_control_container.append(pair_selector);
-    report_utils.registerDatetimeValidator('period-start');
-    report_utils.registerDatetimeValidator('period-end');
     unpack_constant_values();
     report_utils.fill_existing_pairs();
     report_utils.register_uncertainty_handler('#observation-select');

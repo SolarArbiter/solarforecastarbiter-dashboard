@@ -336,10 +336,8 @@ class AggregateView(BaseView):
                 cdf_forecasts_url=url_for(
                     'data_dashboard.cdf_forecast_groups',
                     aggregate_id=self.metadata['aggregate_id'])),
-            'period_start_date': start.strftime('%Y-%m-%d'),
-            'period_start_time': start.strftime('%H:%M'),
-            'period_end_date': end.strftime('%Y-%m-%d'),
-            'period_end_time': end.strftime('%H:%M'),
+            'start': start.isoformat(),
+            'end': end.isoformat(),
         })
         self.template_args.update(kwargs)
 

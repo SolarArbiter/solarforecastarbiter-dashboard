@@ -290,51 +290,21 @@ report_utils.validateReport = function(){
      * Callback before the report form is submitted. Any js validation should
      * occur here.
      */
-
     // remove any existing errors
     $('#form-errors').empty();
-    var errors = 0;
+
+    // Parse Start and End time
+    validateAndParseDatetimes();
 
     // assert at least one pair was selected.
     if ($('.object-pair').length == 0){
         report_utils.insertErrorMessage(
             "Analysis Pairs",
             "Must specify at least one Observation, Forecast pair.");
-        errors++;
     }
-    if (errors){
+    if ($("#form-errors li").length > 0){
         return false;
     }
-}
-report_utils.validateDatetime = function(dt_string, enforce_utc=true){
-    if (enforce_utc){
-        var iso_re = /(((\d{4})-(\d{2})-(\d{2}))|((\d{4})(\d{2})(\d{2})))[T ](((\d{2})(\d{2})?(\d{2})?)|((\d{2})(:\d{2})?(:\d{2})?))(Z|\+00:?00)$/g;
-    } else {
-        var iso_re = /(((\d{4})-(\d{2})-(\d{2}))|((\d{4})(\d{2})(\d{2})))[T ](((\d{2})(\d{2})?(\d{2})?)|((\d{2})(:\d{2})?(:\d{2})?))(Z|(\+|\-)\d{2}:?\d{2})?$/g;
-    }
-    return dt_string.match(iso_re);
-}
-report_utils.registerDatetimeValidator = function(input_name){
-    /*
-     * Applies a regex validator to ensure ISO8601 compliance. This is however, very strict. We
-     * will need a better solution.
-     *
-     * @param {string} input_name - The name attribute of the input that needs
-     *                              validation.
-     */
-    $(`[name="${input_name}"]`).keyup(function (){
-        if(report_utils.validateDatetime($(`[name="${input_name}"]`).val())) {
-              $(`[name="${input_name}"]`)[0].setCustomValidity("");
-        } else {
-              $(`[name="${input_name}"]`)[0].setCustomValidity(
-                  'Please enter a datetime in ISO 8601 format with timezone ' +
-                  'Z or offset +00:00 and no units smaller than minutes, e.g ' +
-                  '"2020-01-01T12:00Z');
-        }
-    });
-    $(`[name="${input_name}"]`).change(function() {
-        this.reportValidity();
-    });
 }
 
 report_utils.searchSelect = function(inputSelector, selectSelector, offset=0){

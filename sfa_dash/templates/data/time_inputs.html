@@ -1,0 +1,156 @@
+<!--
+Modified from Solar Performance Insight dashboard/src/components/jobs/parameters/DatetimeField.vue
+
+See LICENSES/SOLARPERFORMANCEINSIGHT_LICENSE
+-->
+<div class="datetime-field-container">
+  <label>Start (UTC):</label><br/>
+  <div class="datetime-container">
+    <span class="date-fields start">
+      <span class="date-field-wrapper">
+        <input
+          class="datetime-field date-field year"
+          required
+          name="start year"
+          type="number"
+          maxlength="4"
+          max="2037"
+          min="1901"
+          placeholder="YYYY"
+          value="{{ period_start_year }}"
+          />
+      </span>
+      <span class="date-field-wrapper">
+        <input
+          class="datetime-field date-field month"
+          required
+          name="start month"
+          type="number"
+          maxlength="2"
+          max="12"
+          min="1"
+          placeholder="MM"
+          value="{{ period_start_month }}"
+        />
+      </span>
+      <span class="date-field-wrapper">
+        <input
+          class="datetime-field date-field day"
+          required
+          name="start day"
+          type="number"
+          maxlength="4"
+          max="31"
+          min="1"
+          placeholder="DD"
+          value="{{ period_start_day }}"
+        />
+      </span>
+    </span>
+    <span class="time-fields start">
+      <span class="time-field-wrapper">
+        <input
+          class="datetime-field time-field hour"
+          required
+          name="start hour"
+          type="number"
+          max="23"
+          min="0"
+          placeholder="HH"
+          value="{{ period_start_hour}}"
+        />
+      </span>
+      <span class="time-field-wrapper">
+        <input
+          class="datetime-field time-field minute"
+          required
+          name="start minute"
+          type="number"
+          maxlength="4"
+          max="59"
+          min="0"
+          placeholder="MM"
+          value="{{ period_start_minute }}"
+        />
+      </span>
+    </span>
+  </div>
+  
+</div>
+<div class="datetime-field-container">
+  <label>End (UTC):</label><br />
+  <div class="datetime-container">
+    <span class="date-fields end">
+      <span class="date-field-wrapper">
+        <input
+          class="datetime-field date-field year"
+          required
+          name="end year"
+          type="number"
+          maxlength="4"
+          max="2037"
+          min="1901"
+          placeholder="YYYY"
+          value="{{ period_end_year }}"
+        />
+      </span>
+      <span class="date-field-wrapper">
+        <input
+          class="datetime-field date-field month"
+          required
+          name="end month"
+          type="number"
+          maxlength="2"
+          max="12"
+          min="1"
+          placeholder="MM"
+          value="{{ period_end_month }}"
+        />
+      </span>
+      <span class="date-field-wrapper">
+        <input
+          class="datetime-field date-field day"
+          required
+          name="end day"
+          type="number"
+          maxlength="4"
+          max="31"
+          min="1"
+          placeholder="DD"
+          value="{{ period_end_day }}"
+        />
+      </span>
+    </span>
+    <span class="time-fields end">
+      <span class="time-field-wrapper">
+        <input
+          class="datetime-field time-field hour"
+          required
+          name="end hour"
+          type="number"
+          max="23"
+          min="0"
+          placeholder="HH"
+          value="{{ period_end_hour }}"
+        />
+      </span>
+      <span class="time-field-wrapper">
+        <input
+          class="datetime-field time-field minute"
+          required
+          name="end minute"
+          type="number"
+          maxlength="4"
+          max="59"
+          min="0"
+          placeholder="MM"
+          value="{{ period_end_minute }}"
+        />
+      </span>
+    </span>
+  </div>
+</div>
+<div id="datetime-start-errors">
+</div>
+<div id="datetime-end-errors">
+</div>

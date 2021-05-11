@@ -19,7 +19,7 @@
 {{ bokeh_script | safe }}
 {% endif %}
 {# Time widgets are used for either setting the bounds of the plot or download #}
-{% include "data/time_widgets.html" %}
+{% include "data/timerange_widgets.html" %}
 </div>
 {% endif %}
 {% if is_allowed('write_values') %}

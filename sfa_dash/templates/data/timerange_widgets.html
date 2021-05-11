@@ -10,16 +10,7 @@ or download data. A maximum of one year of data may be downloaded.{% endif %}
 {# TODO: generate a message about the correct plotting limit based on current
          metadata #}
 <div class="form-group mt-3">
-<div class="form-element">
-  <label for="start">Start (UTC):</label><br/>
-  <input type="date" id="start-date" name="period-start-date" value="{{ period_start_date }}" required>
-  <input type="time" id="start-time" name="period-start-time" value="{{ period_start_time }}" required>
-</div>
-<div class="form-element">
-  <label for="end">End (UTC)</label><br/>
-  <input type="date" id="end-date" name="period-end-date" value="{{ period_end_date }}" required>
-  <input type="time" id="end-time" name="period-end-time" value="{{ period_end_time }}" required>
-</div>
+{% include "data/time_inputs.html" %}
 {# form makes a post request to download data #}
 <div class="form-element full-width">
   <button type="submit" id="plot-range-adjust-submit" form="plot-range-adjust" value="Submit" class="btn btn-primary mt-2">Update graph</button>
@@ -31,8 +22,8 @@ or download data. A maximum of one year of data may be downloaded.{% endif %}
   <input type="radio" name="format" value="text/csv" checked>CSV
   <input type="radio" name="format" value="application/json">JSON
   &lpar;<a href="https://solarforecastarbiter.org/datamodel/#downloads" target="_blank">format examples</a>&rpar;
-  <input type="text" class="start" name="start" hidden>
-  <input type="text" class="end" name="end" hidden>
+  <input type="text" class="start" name="start" hidden value="{{ start }}">
+  <input type="text" class="end" name="end" hidden value="{{ end }}">
   {{ form.token() }}
   </form>
   {% endif %}
@@ -45,8 +36,8 @@ or download data. A maximum of one year of data may be downloaded.{% endif %}
 </div>
 {# Form reloads the page with start and end query parameters #}
 <form action="" method="get" id="plot-range-adjust" onsubmit="ParseStartEnd()">
-<input type="text" class="start" name="start" hidden>
-<input type="text" class="end" name="end" hidden>
+<input type="text" class="start" name="start" hidden value="{{ start }}">
+<input type="text" class="end" name="end" hidden value="{{ end }}">
 </form>
 <div id="form-errors"></div>
 <script src="/static/js/timerange-handling.js"></script>

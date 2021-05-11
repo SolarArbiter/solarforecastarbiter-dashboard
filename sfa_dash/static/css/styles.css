@@ -817,3 +817,48 @@ a#ref-clear {
   padding: 1em;
   text-align: center;
 }
+
+input.datetime-field {
+  font-family: monospace;
+}
+
+.datetime-container {
+  border: 1px solid #ccc;
+  width: fit-content;
+  padding: 5px;
+  display: inline;
+}
+.datetime-field.year {
+  width: 2.5em;
+}
+.datetime-field {
+  width: 1.5em;
+  border: 0;
+  text-align: right;
+}
+span.date-fields,
+span.time-fields {
+  display: inline-block;
+}
+span.date-field-wrapper:not(:last-child)::after {
+  content: "/";
+}
+span.time-field-wrapper:first-child::after {
+  content: ":";
+}
+/* Remove adjustment up/down arrows from number fields */
+input.datetime-field::-webkit-outer-spin-button,
+input.datetime-field::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"].datetime-field {
+  -moz-appearance: textfield;
+}
+.datetime-component {
+  margin-top: 0.5em;
+}
+.datetime-field-container {
+  display: inline-block;
+  min-width: 49%;
+}

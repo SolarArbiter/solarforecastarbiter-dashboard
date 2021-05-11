@@ -383,8 +383,8 @@ def test_aggregate_converter_formdata_to_payload():
 def test_report_converter_formdata_to_payload(report):
     form_data = ImmutableMultiDict([
         ('name', 'NREL MIDC OASIS GHI Forecast Analysis'),
-        ('period-start', '2019-04-01T07:00Z'),
-        ('period-end', '2019-06-01T06:59Z'),
+        ('start', '2019-04-01T07:00Z'),
+        ('end', '2019-06-01T06:59Z'),
         ('forecast-id-0', '11c20780-76ae-4b11-bef1-7a75bdc784e3'),
         ('truth-id-0', '123e4567-e89b-12d3-a456-426655440000'),
         ('truth-type-0', 'observation'),
@@ -462,8 +462,8 @@ def test_report_converter_payload_to_formdata_defaults(report):
 def test_report_converter_formdata_to_payload_costs(report):
     form_data = ImmutableMultiDict([
         ('name', 'NREL MIDC OASIS GHI Forecast Analysis'),
-        ('period-start', '2019-04-01T07:00Z'),
-        ('period-end', '2019-06-01T06:59Z'),
+        ('start', '2019-04-01T07:00Z'),
+        ('end', '2019-06-01T06:59Z'),
         ('forecast-id-0', '11c20780-76ae-4b11-bef1-7a75bdc784e3'),
         ('truth-id-0', '123e4567-e89b-12d3-a456-426655440000'),
         ('truth-type-0', 'observation'),
