@@ -1,6 +1,13 @@
-/* The MAX_DATA_RANGE_DAYS and MAX_PLOT_DATAPOINTS variables are expected to
+/*
+ * Contains modified code from Solar Performance Insight
+ *  dashboard/src/components/jobs/parameters/DatetimeField.vue
+ *
+ * See LICENSES/SOLARPERFORMANCEINSIGHT_LICENSE
+ *
+ *  The MAX_DATA_RANGE_DAYS and MAX_PLOT_DATAPOINTS variables are expected to
  * exist as global variables injected by flask.
  */
+
 function ParseStartEnd(){
     // Parse all inputs and place values into hidden fields if applicable
     const start = parseAndValidateStart();
