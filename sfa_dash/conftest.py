@@ -663,7 +663,7 @@ def report():
                          'resample_threshold_percentage': resample_threshold,
                          },
                         {'quality_flags': ['STALE VALUES'],
-                         'discard_before_resample': False,
+                         'discard_before_resample': True,
                          'resample_threshold_percentage': resample_threshold,
                          }],
             'metrics': ['mae', 'rmse'],
