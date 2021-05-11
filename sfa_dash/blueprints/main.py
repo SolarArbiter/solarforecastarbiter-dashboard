@@ -192,18 +192,8 @@ class SingleObjectView(DataDashView):
             allowed = users.actions_on(self.metadata['parent'])
             g.allowed_actions = allowed['actions']
 
-        self.template_args['period_start_year'] = start.year
-        self.template_args['period_start_month'] = start.month
-        self.template_args['period_start_day'] = start.day
-        self.template_args['period_start_hour'] = start.hour
-        self.template_args['period_start_minute'] = start.minute
-
-        self.template_args['period_end_year'] = end.year
-        self.template_args['period_end_month'] = end.month
-        self.template_args['period_end_day'] = end.day
-
-        self.template_args['period_end_hour'] = end.hour
-        self.template_args['period_end_minute'] = end.minute
+        self.template_args['start'] = start.isoformat()
+        self.template_args['end'] = end.isoformat()
 
         self.template_args['data_type'] = self.data_type
         self.template_args.update(kwargs)
