@@ -1,4 +1,5 @@
 Flask==1.0.2
+jinja2==2.10
 Flask-SeaSurf==0.2.2
 requests==2.21.0
 flask-dance
@@ -18,3 +19,4 @@ prometheus_flask_exporter
 sentry_sdk
 blinker
 jsonschema==3.0.1
+werkzeug==1.0.1
