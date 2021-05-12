@@ -1,5 +1,5 @@
 Flask==1.0.2
-jinja2==2.10
+jinja2==2.11.3
 Flask-SeaSurf==0.2.2
 requests==2.21.0
 flask-dance
