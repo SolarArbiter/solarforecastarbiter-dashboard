@@ -551,7 +551,10 @@ th.selection-column {
 
 /* add pseudo elements so possible anchors clear sticky header */
 @media (min-width: 768px){
-  #report-block [id]:before{
+  #report-block h1[id]:before,
+  #report-block h2[id]:before,
+  #report-block h3[id]:before,
+  #report-block h4[id]:before{
       display: block;
       content: " ";
       margin-top: -7rem;
