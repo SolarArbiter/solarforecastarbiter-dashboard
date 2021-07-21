@@ -832,7 +832,7 @@ input.datetime-field {
   display: inline;
 }
 .datetime-field.year {
-  width: 2.5em;
+  width: 3em;
 }
 .datetime-field {
   width: 1.5em;
