@@ -644,7 +644,7 @@ def test_report_converter_payload_to_formdata_timezone_null(report):
 
 @pytest.mark.parametrize("tz,expected", [
     ("", None),
-    ("America/Pheonix", "America/Pheonix")
+    ("America/Phoenix", "America/Phoenix")
 ])
 def test_report_converter_formdata_to_payload(report, tz, expected):
     form_data = ImmutableMultiDict([
