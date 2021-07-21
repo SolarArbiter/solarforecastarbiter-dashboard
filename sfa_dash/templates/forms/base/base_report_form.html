@@ -24,6 +24,19 @@
          <input type="text" class="form-control  name-field" required="" name="name" {{ form.name_validation() }} value="{% if form_data %}{{form_data['report_parameters']['name']}}{% else %}{%endif%}"/>
        </div>
      </div>
+     <!--- TIMEZONE STUFF -->
+     <div class="form-element full-width">
+       <label>Timezone</label>
+       <div class="input-wrapper">
+         <select class="form-control timezone-field" name="timezone">
+           <option value="">Infer timezone from selections</option>
+           {% for option, option_label in timezone_options.items() %}
+           <option value="{{ option }}" {% if option == form_data.get(name)  %} selected="selected"{% endif %}>{{ option_label }}</option>
+           {% endfor %}
+         </select>
+       </div>
+     </div>
+     <!-- END TIMEZONE STUFF  -->
      <div class="form-element full-width">
        {% include "data/time_inputs.html" %}
        <input type="text" hidden required name="start" class="form-control"  required {% if form_data %}value="{{form_data['report_parameters']['period-start']}}"{% endif %}>
