@@ -31,7 +31,7 @@
          <select class="form-control timezone-field" name="timezone">
            <option value="">Infer timezone from selections</option>
            {% for option, option_label in timezone_options.items() %}
-           <option value="{{ option }}" {% if option == form_data.get(name)  %} selected="selected"{% endif %}>{{ option_label }}</option>
+           <option value="{{ option }}" {% if option == form_data['report_parameters']['timezone']  %} selected="selected"{% endif %}>{{ option_label }}</option>
            {% endfor %}
          </select>
        </div>
