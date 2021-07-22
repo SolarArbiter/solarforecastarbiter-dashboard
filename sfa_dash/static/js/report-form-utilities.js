@@ -1512,7 +1512,7 @@ report_utils.register_timezone_handlers = function (){
       if (timezone == '') {
           timezone = 'UTC';
       }
-      $('.datetime-start-label').text('Start('+timezone+')');
+      $('.datetime-start-label').text('Start ('+timezone+')');
       $('.datetime-end-label').text('End ('+timezone+')');
   });
   if (tzSelect.val() != '') {
