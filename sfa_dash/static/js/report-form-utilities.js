@@ -1504,3 +1504,18 @@ report_utils.remove_pair = function(fxid, obsid, reffxid, dblabel, dbvalue){
         x => !report_utils.compare_object_pairs(pair_object, x)
     )
 }
+
+report_utils.register_timezone_handlers = function (){
+  let tzSelect = $('select[name=timezone]')
+  tzSelect.change(function (){
+      let timezone = this.value;
+      if (timezone == '') {
+          timezone = 'UTC';
+      }
+      $('.datetime-start-label').text('Start('+timezone+')');
+      $('.datetime-end-label').text('End ('+timezone+')');
+  });
+  if (tzSelect.val() != '') {
+      tzSelect.change();
+  }
+}
