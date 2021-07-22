@@ -844,7 +844,7 @@ span.time-fields {
   display: inline-block;
 }
 span.date-field-wrapper:not(:last-child)::after {
-  content: "/";
+  content: "-";
 }
 span.time-field-wrapper:first-child::after {
   content: ":";
