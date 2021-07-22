@@ -622,6 +622,11 @@ class ReportConverter(FormConverter):
             cost_name = None
         for pair in report_params['object_pairs']:
             pair.update({'cost': cost_name})
+
+        tz = form_dict.get('timezone')
+        if tz == '':
+            tz = None
+        report_params['timezone'] = tz
         return report_dict
 
     @classmethod
@@ -644,6 +649,10 @@ class ReportConverter(FormConverter):
         # see sfa_dash/static/js/report-utilities.js fill_object_pairs function
         form_params['object_pairs'] = report_parameters['object_pairs']
         form_params.update(cls.parse_api_filters(report_parameters))
+        tz = report_parameters.get('timezone')
+        if tz is None:
+            tz = ""
+        form_params['timezone'] = tz
         return {'report_parameters': form_params}
 
 

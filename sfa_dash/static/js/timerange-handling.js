@@ -109,13 +109,17 @@ function getStartValue() {
     const minute= $('[name="start minute"]').val();
 
     if (year && month && day && hour && minute) {
+        let timezoneInput = $('select[name=timezone]').val();
+        let timezone = timezoneInput ? timezoneInput : "UTC";
+
         return luxon.DateTime.fromObject({
            year: year,
            month: month,
            day: day,
            hour: hour,
            minute: minute,
-           zone: "UTC"
+        },{
+           zone: timezone
         });
     } else {
         return null;
@@ -130,13 +134,17 @@ function getEndValue() {
     const minute = $('[name="end minute"]').val();
 
     if (year && month && day && hour && minute) {
+        let timezoneInput = $('select[name=timezone]').val();
+        let timezone = timezoneInput ? timezoneInput : "UTC";
+
         return luxon.DateTime.fromObject({
             year: year,
             month: month,
             day: day,
             hour: hour,
             minute: minute,
-            zone: "UTC"
+        },{
+            zone: timezone
         });
     } else {
         return null;
@@ -156,6 +164,7 @@ function initDatetimeValues() {
     let end = $("[name=end]").val();
     let startObject;
     let endObject;
+    let timezone = $('select[name=timezone]').val();
     if (start != "") {
         try {
           startObject = luxon.DateTime.fromISO(start, {zone: "UTC"});
@@ -171,6 +180,9 @@ function initDatetimeValues() {
         }
     }
     if (startObject) {
+        if (timezone) {
+            startObject = startObject.setZone(timezone);
+        }
         $('[name="start year"]').val(startObject.year);
         $('[name="start month"]').val(startObject.month);
         $('[name="start day"]').val(startObject.day);
@@ -178,6 +190,9 @@ function initDatetimeValues() {
         $('[name="start minute"]').val(startObject.minute);
     }
     if (endObject) {
+        if (timezone) {
+            endObject = endObject.setZone(timezone);
+        }
         $('[name="end year"]').val(endObject.year);
         $('[name="end month"]').val(endObject.month);
         $('[name="end day"]').val(endObject.day);
