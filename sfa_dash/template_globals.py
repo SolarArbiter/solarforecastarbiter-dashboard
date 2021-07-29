@@ -17,6 +17,8 @@ from solarforecastarbiter.datamodel import (
 )
 from solarforecastarbiter.metrics.deterministic import _REQ_REF_FX as DETREF
 from solarforecastarbiter.metrics.probabilistic import _REQ_REF_FX as PROBREF
+from solarforecastarbiter.metrics.event import _REQ_REF_FX as EVENTREF
+
 
 
 TIMEZONES = pytz.country_timezones('US') + list(
@@ -60,7 +62,7 @@ INTERVAL_LABEL_OPTIONS = {
     'event': 'Event',
 }
 
-REQ_REF_FX = DETREF + PROBREF
+REQ_REF_FX = DETREF + PROBREF + EVENTREF
 
 
 def is_allowed(action):
