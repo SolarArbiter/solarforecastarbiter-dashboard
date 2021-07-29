@@ -14,9 +14,11 @@ object_pairs = [];
 
 // List of reference forecast dependent metric JQuery selectors to toggle
 // messages for in the toggle_reference_dependent_metrics function.
-reference_dependent_metrics = ['[name=metrics][value=s]',
-                               '[name=metrics][value=bss]',
-                               '[name=metrics][value=qss]'];
+reference_dependent_metrics = sfa_dash_config.METRICS_REQ_REF.map(
+    function(metricName){
+        return '[name=metrics][value=' + metricName + ']';
+    }
+);
 
 report_utils.fill_existing_pairs = function(){
     /*
@@ -147,7 +149,7 @@ report_utils.toggle_reference_dependent_metrics = function(){
             let metric = $(metric_selector);
             if (metric.length){
                 // hide skill, insert warning
-                if ($('.reference-warning.warning-message').length == 0){
+                if (metric.next().next().is('br')) {
                     $(`<span class="reference-warning warning-message">
                        (Requires reference forecast selection)</span>`
                      ).insertAfter(metric.next());

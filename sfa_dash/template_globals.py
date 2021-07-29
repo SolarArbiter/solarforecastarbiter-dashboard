@@ -15,6 +15,9 @@ from solarforecastarbiter.datamodel import (
     ALLOWED_VARIABLES,
     COMMON_NAMES,
 )
+from solarforecastarbiter.metrics.deterministic import _REQ_REF_FX as DETREF
+from solarforecastarbiter.metrics.probabilistic import _REQ_REF_FX as PROBREF
+
 
 TIMEZONES = pytz.country_timezones('US') + list(
     filter(lambda x: 'GMT' in x, pytz.all_timezones))
@@ -56,6 +59,8 @@ INTERVAL_LABEL_OPTIONS = {
     'instant': 'Instant',
     'event': 'Event',
 }
+
+REQ_REF_FX = DETREF + PROBREF
 
 
 def is_allowed(action):
@@ -115,4 +120,5 @@ def template_variables():
         'variable_unit_map': ALLOWED_VARIABLES,
         'interval_label_options': INTERVAL_LABEL_OPTIONS,
         'can_create': can_create,
+        'REQ_REF_FX': REQ_REF_FX
     }
