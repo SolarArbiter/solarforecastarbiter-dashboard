@@ -35,10 +35,14 @@
     {% for uuid, obj in permission['objects'].items() %}
       <tr>
         {% if dashboard_type in ['role', 'permission', 'user']%}
-        <td><a href="{{ url_for('admin.'+dashboard_type+'_view', uuid=uuid) }}">{% if dashboard_type == 'permission' %}{{ obj['description'] }}{% elif dashboard_type == 'user'%}{{ obj['user_id'] }}{% else %}{{ obj['name'] }}{% endif %} </a></td>
+          <td><a href="{{ url_for('admin.'+dashboard_type+'_view', uuid=uuid) }}">{% if dashboard_type == 'permission' %}{{ obj['description'] }}{% elif dashboard_type == 'user'%}{{ obj['user_id'] }}{% else %}{{ obj['name'] }}{% endif %} </a></td>
         {% else %}
           {% if (permission['object_type'] == 'reports' and obj['status'] != 'complete') %}
             <td>{{ obj['name'] }}</td>
+          {% elif permission['object_type'] == "cdf_forecasts" %}
+            {# cdf_forecasts as a permission object_type refers to
+               cdf_forecast_groups #}
+            <td><a href="{{ url_for('data_dashboard.cdf_forecast_group_view', uuid=uuid) }}">{% if dashboard_type == 'permission' %}{{ obj['description'] }}{% elif dashboard_type == 'user'%}{{ obj['user_id'] }}{% else %}{{ obj['name'] }}{% endif %} </a></td>
           {% else %}
             <td><a href="{{ url_for('data_dashboard.'+dashboard_type+'_view', uuid=uuid) }}">{{ obj['name'] }}</a></td>
           {% endif %}
