@@ -13,5 +13,6 @@
       <label>Quality Flag Filters</label><br>
         <p>Observation data flagged with any of the checked quality flags is excluded from analysis. The corresponding forecast data is also excluded.</p>
           <input type="checkbox" name="quality_flags" value="USER FLAGGED" {% if form_data %}{% if 'USER FLAGGED' in form_data['report_parameters']['quality_flags'] %}checked{% endif %}{%endif %}> USER FLAGGED<br/>
+          <input type="checkbox" name="quality_flags" value="NIGHTTIME" {% if form_data %}{% if 'NIGHTTIME' in form_data['report_parameters']['quality_flags'] %}checked{% endif %}{%endif %}> NIGHTTIME<br/>
 </div>
 {% endblock %}
