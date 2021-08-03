@@ -357,7 +357,11 @@ class RoleGrant(AdminView):
                 self.flash_api_errors(e.errors)
             else:
                 # flash a message that grant failed
-                flash('Failed to grant role.', 'error')
+                flash(
+                    'Failed to grant role. Confirm with the user that they '
+                    'are registered and affiliated with an SFA organization.',
+                    'error'
+                )
             try:
                 role = roles.get_metadata(uuid)
             except DataRequestException as e:

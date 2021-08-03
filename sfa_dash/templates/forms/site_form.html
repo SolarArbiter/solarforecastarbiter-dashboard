@@ -37,9 +37,11 @@
   {{ form.help_button('site_type') }}
   <span class="site_type-help-text form-text text-muted help-text collapse" aria-hidden>
      Choose Weather Station if the Site will only be used for observations and
-     forecasts of irradiance and other weather variables. Choose Power Plant to
-     specify PV system modeling parameters and enable observations and
-     forecasts of power.
+     forecasts of irradiance and other weather variables. Choose Power Plant
+     to specify PV system modeling parameters and enable observations and
+     forecasts of power.<br><br>For load or wind power plants, choose Power Plant,
+     set DC Capacity to be equal to AC capacity, and set temperature
+     coefficient, surface tilt, and surface azimuth to 0.
   </span>
 </div>
 <div class="pv-model-params">
@@ -110,7 +112,8 @@
       </div>
       <div class="form-element">
         {{ form.input('Ground coverage ratio', 'number', 'ground_coverage_ratio',
-                      help_text='Azimuth angle of the tracker axis, degrees East of North.', form_data=form_data,
+                      help_text='Ratio of total width of modules on a tracker to the distance between tracker axes. For example, for trackers with two modules of 1m width, and a spacing between tracker axes of 7m, the ground coverage ratio is 0.286(=2/7).',
+                      form_data=form_data,
                       units='&deg;', required=True) }}
       </div>
       <div class="form-element">
