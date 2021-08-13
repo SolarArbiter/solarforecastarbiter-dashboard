@@ -3,6 +3,9 @@
 {% if update_link is defined and is_allowed('update') %}
   <a role="button" class="btn btn-primary btn-sm" href="{{ update_link }}">Update</a>
 {% endif %}
+{% if can_create('cdf_forecasts') and ('site' in metadata or 'aggregate' in metadata) %}
+<a role="button" class="btn btn-primary btn-sm" href="{{ url_for('forms.clone_cdf_forecast_group', uuid=metadata['forecast_id'] ) }}">Clone Metadata</a>
+{% endif %}
 {% if delete_link is defined and is_allowed('delete') %}
   <a role="button" class="btn btn-danger btn-sm" href="{{ delete_link }}">Delete</a>
 {% endif %}

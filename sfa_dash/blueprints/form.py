@@ -288,7 +288,7 @@ class CloneForm(CreateForm):
                     flash('Could not read site metadata. Cloning failed.',
                           'error')
                     return redirect(
-                        url_for(f'data_dashboard.{self.data_type}', uuid=uuid))
+                        url_for(f'data_dashboard.{self.data_type}_view', uuid=uuid))
         return render_template(self.template, **self.template_args)
 
 
