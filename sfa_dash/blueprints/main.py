@@ -175,6 +175,7 @@ class SingleObjectView(DataDashView):
             self.metadata_template,
             **self.metadata)
         self.template_args['metadata'] = self.safe_metadata()
+        self.template_args['uuid'] = self.metadata[self.id_key]
         self.template_args['upload_link'] = url_for(
             f'forms.upload_{self.data_type}_data',
             uuid=self.metadata[self.id_key])
