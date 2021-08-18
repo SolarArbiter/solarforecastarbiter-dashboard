@@ -1422,11 +1422,13 @@ report_utils.init_cost_parameters_toggle = function(){
         cost_metric.change();
     }
 }
+
 report_utils.help_popup = function(help_name, help_text){
     var help_button = $(`<a data-toggle="collapse" data-target=".${help_name}-help-text" role="button" href="" class="help-button">?</a>`);
     var help_box = $(`<span class="${help_name}-help-text form-text text-muted help-text collapse" aria-hidden="">${help_text}</span>`);
     return [help_button, help_box]
 }
+
 report_utils.register_forecast_fill_method_validator = function(
     forecast_type='deterministic'){
     var forecast_fill = $('[name=forecast_fill_method]')
@@ -1520,4 +1522,171 @@ report_utils.register_timezone_handlers = function (){
   if (tzSelect.val() != '') {
       tzSelect.change();
   }
+}
+
+/*
+ * Quality Flag Filter objects
+ */
+class QualityFlagFilter {
+    constructor({
+            discard_before_resample=false,
+            quality_flags=[],
+            resample_threshold_percentage=10.0
+        } = {}
+    ){
+        this.discard_before_resample = discard_before_resample;
+        this.quality_flags = quality_flags;
+        this.resample_threshold_percentage = resample_threshold_percentage;
+    }   
+}
+/*
+ * Primary quality flag entrypoint. Initializes the quality flag inputs inside the
+ * container with id `quality-flag-container`
+ */
+report_utils.insert_quality_flag_widget = function(){
+    /* Creates a widget for defining quality flag filters.
+     */
+    // only create quality flag widgets if the container contains no html
+    if (!$.trim($('#quality-flag-container').html())){
+        report_utils.initialize_quality_flags();
+
+        // add a container that holds all of the inputs for defining a quality flag
+        // filter, and a button for adding that filter to the list
+        var widget_div = $('<div>')
+            .addClass('quality-flag-definition');
+        
+        widget_div.append('<b>Quality Flags</b><br/>');
+        // Create radio buttons for selecting the quality_flags
+        for (const quality_flag in sfa_dash_config.QUALITY_FLAGS) {
+            widget_div.append($('<input>')
+                .attr('type', 'checkbox')
+                .attr('name', 'quality-flags')
+                .css('padding-left', '1em')
+                .attr('value', quality_flag));
+            widget_div.append(' '+sfa_dash_config.QUALITY_FLAGS[quality_flag]);
+            widget_div.append('<br/>');
+        }
+        widget_div.append($('<label>')
+            .text('Discard before resample? ')
+            .append($('<input>')
+                .attr('type', 'checkbox')
+                .attr('name', 'discard-before-resample')
+            )
+            
+        );
+        widget_div.append('<br/>');
+        widget_div.append($('<label>')
+            .text('Resample threshold percentage ')
+            .append($('<input>')
+                .attr('type', 'number')
+                .attr('step', 'any')
+                .attr('name', 'resample-threshold-percentage')
+                .attr('min', 0)
+                .attr('max', 100)
+                .css('width', '100px')
+                .val('10.0')
+            )
+            
+        );   
+        widget_div.append('<br/>');
+        widget_div.append($('<ul>')
+            .addClass('quality-flag-errors')
+        );
+
+        widget_div.append($('<a>')
+            .attr('role', 'button')
+            .addClass('btn btn-primary btn-sm')
+            .html('Add Filter')
+            .click(function () {
+                $('.quality-flag-errors').empty();
+                let quality_flags = $.map($('[name=quality-flags]:checked'), (x) => x.value);
+                let discard_before = $('[name=discard-before-resample]').prop('checked');
+                let resample_threshold = $('[name=resample-threshold-percentage]').val();
+                
+                let errors = [];
+                if (quality_flags.length < 1) {
+                    errors.push("At least one quality flag must be selected.");
+                }
+                if (resample_threshold <= 0 || resample_threshold >= 100) {
+                    errors.push(
+                        "Resample threshold percentage must be greater than 0 " +
+                        "and less than or equal to 100."
+                    );
+                }
+                let new_filter = new QualityFlagFilter({
+                    quality_flags: quality_flags,
+                    discard_before_resample: discard_before,
+                    resample_threshold_percentage: resample_threshold
+                });
+                if (errors.length > 0) {
+                    for (error of errors) {
+                        $('.quality-flag-errors').append($('<li>')
+                            .addClass('alert alert-danger')
+                            .html(error)
+                        );
+
+                    }
+                } else{
+                    report_utils.push_filter(new_filter);
+                }
+            })
+        );
+        $('#quality-flag-container').append(widget_div);
+    }
+}
+
+report_utils.push_filter = function(qff){
+    let filter_representation = $('<li>')
+        .addClass('qf-filter-container qf-definition')
+        .append(`<b>Flags:</b> ${qff.quality_flags.join(', ')}`)
+        .append('<br/>')
+        .append(`<b>Discard Before Resample:</b> ${qff.discard_before_resample}`)
+        .append('<br/>')
+        .append(`<b>Resample Threshold Percentage:</b> ${qff.resample_threshold_percentage}`)
+        .append('<br/>')
+        .append($('<input>')
+            .attr('hidden', true)
+            .attr('name', `quality_flags`)
+            .val(qff.quality_flags.join(','))
+        )
+        .append($('<input>')
+            .attr('hidden', true)
+            .attr('name', `discard_before_resample`)
+            .val(qff.discard_before_resample)
+        )
+        .append($('<input>')
+            .attr('hidden', true)
+            .attr('name', `resample_threshold_percentage`)
+            .val(qff.resample_threshold_percentage)
+        );
+
+
+    let removal_button = $(
+        '<a role="button" class="qf-filter-delete-button">remove</a>');
+    removal_button.click(function(){
+        $(this).parent().remove();
+        if ($('.qf-filter-container.qf-definition').length == 0){
+            $('li.no-quality-filters-warning').removeAttr('hidden');
+        }
+    });
+    filter_representation.append(removal_button);
+    $('ul.quality-filter-list').append(filter_representation);
+    $('li.no-quality-filters-warning').attr('hidden', true)
+}
+
+report_utils.initialize_quality_flags = function(){
+    /* Initialize global cost var from api costs.*/
+    if (typeof quality_flags === 'undefined'){
+        try{
+            var quality_flags = form_data['report_parameters']['filters'];
+        } catch(error) {
+            // Continue, to allow setting cost to a new Cost object.
+        }
+        if (typeof quality_flags !== 'undefined' && quality_flags.length > 0){
+            // only handling one cost to start
+            quality_flags.forEach((qff) => report_utils.push_filter(qff));
+        } else {
+            quality_flags = []
+        }
+    }
 }
