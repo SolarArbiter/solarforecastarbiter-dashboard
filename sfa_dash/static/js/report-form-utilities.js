@@ -1555,40 +1555,83 @@ report_utils.insert_quality_flag_widget = function(){
         var widget_div = $('<div>')
             .addClass('quality-flag-definition');
         
-        widget_div.append('<b>Quality Flags</b><br/>');
+        const [qf_help_button, qf_help_text] = report_utils.help_popup(
+            'quality_flags',
+            "Which Quality Flags should be used to exclude observation data from the analysis?"
+        )
+        widget_div.append($('<div>')
+            .css('position', 'relative')
+            .append($('<b>Quality Flags</b>'))
+            .append(qf_help_button)
+            .append(qf_help_text)
+        );
+        
+        
+        let qf_table = $('<table>')
+            .addClass('table report-form-quality-flag-table')
+            .append($('<thead>')
+                .append($('<tr>')
+                    .append($('<th>'))
+                    .append($('<th>Quality flag</th>'))
+                    .append($('<th>Discard before resample recommendation</th>'))
+                )
+            );
+        let qf_rows = $('<tbody>'); 
         // Create radio buttons for selecting the quality_flags
         for (const quality_flag in sfa_dash_config.QUALITY_FLAGS) {
-            widget_div.append($('<input>')
+            let row = $('<tr>');
+            row.append($('<td>').append($('<input>')
                 .attr('type', 'checkbox')
                 .attr('name', 'quality-flags')
                 .css('padding-left', '1em')
-                .attr('value', quality_flag));
-            widget_div.append(' '+sfa_dash_config.QUALITY_FLAGS[quality_flag]);
-            widget_div.append('<br/>');
+                .attr('value', quality_flag)
+            ));
+            row.append($('<td>').html(sfa_dash_config.QUALITY_FLAGS[quality_flag]));
+            row.append($('<td>').html(sfa_dash_config.DISCARD_BEFORE_RESAMPLE.includes(quality_flag)));
+            qf_rows.append(row);
         }
-        widget_div.append($('<label>')
-            .text('Discard before resample? ')
-            .append($('<input>')
-                .attr('type', 'checkbox')
-                .attr('name', 'discard-before-resample')
+        qf_table.append(qf_rows);
+        widget_div.append(qf_table);
+
+        const [discard_help_button, discard_help_text] = report_utils.help_popup(
+            'discard_help',
+            "Should flagged values be removed from the timeseries before resampling?"
+        )
+        widget_div.append($('<div>')
+            .css('position', 'relative')
+            .append($('<label>')
+                .text('Discard before resample? ')
+                .append($('<input>')
+                    .attr('type', 'checkbox')
+                    .attr('name', 'discard-before-resample')
+                )
+                .append(discard_help_button)
+                .append(discard_help_text)
             )
-            
         );
-        widget_div.append('<br/>');
-        widget_div.append($('<label>')
-            .text('Resample threshold percentage ')
-            .append($('<input>')
-                .attr('type', 'number')
-                .attr('step', 'any')
-                .attr('name', 'resample-threshold-percentage')
-                .attr('min', 0)
-                .attr('max', 100)
-                .css('width', '100px')
-                .val('10.0')
+
+        const [threshold_help_button, threshold_help_text] = report_utils.help_popup(
+            'threshold_help',
+            "Percentage of points in the resampled interval that must include the flags " +
+            "in order to flag the entire interval."
+        )
+        widget_div.append($('<div>')
+            .css('position', 'relative')
+            .append($('<label>')
+                .text('Resample threshold percentage ')
+                .append($('<input>')
+                    .attr('type', 'number')
+                    .attr('step', 'any')
+                    .attr('name', 'resample-threshold-percentage')
+                    .attr('min', 0)
+                    .attr('max', 100)
+                    .css('width', '100px')
+                    .val('10.0')
+                )
             )
-            
+            .append(threshold_help_button)
+            .append(threshold_help_text)
         );   
-        widget_div.append('<br/>');
         widget_div.append($('<ul>')
             .addClass('quality-flag-errors')
         );

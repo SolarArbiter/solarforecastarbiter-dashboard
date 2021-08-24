@@ -15,6 +15,8 @@ from solarforecastarbiter.datamodel import (
     ALLOWED_VARIABLES,
     COMMON_NAMES,
 )
+from solarforecastarbiter.validation.quality_mapping import (
+    DISCARD_BEFORE_RESAMPLE)
 from solarforecastarbiter.metrics.deterministic import _REQ_REF_FX as DETREF
 from solarforecastarbiter.metrics.probabilistic import _REQ_REF_FX as PROBREF
 from solarforecastarbiter.metrics.event import _REQ_REF_FX as EVENTREF
@@ -114,6 +116,7 @@ def template_variables():
         'probabilistic_metrics': ALLOWED_PROBABILISTIC_METRICS,
         'all_metrics': ALL_METRICS,
         'quality_flags': ALLOWED_QUALITY_FLAGS,
+        'discard_before_resample': DISCARD_BEFORE_RESAMPLE,
         'is_allowed': is_allowed,
         'current_path': request.path,
         'MAX_DATA_RANGE_DAYS': current_app.config['MAX_DATA_RANGE_DAYS'].days,
