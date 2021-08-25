@@ -398,16 +398,6 @@ class ReportConverter(FormConverter):
         return pairs
 
     @classmethod
-    def parse_api_filters(cls, report_parameters):
-        quality_flags = []
-        for f in report_parameters.get('filters', []):
-            if 'quality_flags' in f.keys():
-                quality_flags = quality_flags + f['quality_flags']
-        return {
-            'quality_flags': quality_flags
-        }
-
-    @classmethod
     def extract_tods(cls, value):
         """Parses time of day values from a csv string"""
         return [v.strip() for v in value.split(',')]
