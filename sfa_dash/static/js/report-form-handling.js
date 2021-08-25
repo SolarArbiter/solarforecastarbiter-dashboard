@@ -621,7 +621,7 @@ $(document).ready(function() {
     report_utils.fill_existing_pairs();
     report_utils.register_uncertainty_handler('#observation-select');
     report_utils.insert_cost_widget();
-    report_utils.insert_quality_flag_widget();
+    report_utils.insert_quality_flag_widget(sfa_dash_config.QUALITY_FLAGS);
     report_utils.register_forecast_fill_method_validator('deterministic');
     report_utils.register_timezone_handlers();
 });

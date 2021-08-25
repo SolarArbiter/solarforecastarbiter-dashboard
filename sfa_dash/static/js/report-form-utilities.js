@@ -1543,7 +1543,7 @@ class QualityFlagFilter {
  * Primary quality flag entrypoint. Initializes the quality flag inputs inside the
  * container with id `quality-flag-container`
  */
-report_utils.insert_quality_flag_widget = function(){
+report_utils.insert_quality_flag_widget = function(quality_flags){
     /* Creates a widget for defining quality flag filters.
      */
     // only create quality flag widgets if the container contains no html
@@ -1578,7 +1578,7 @@ report_utils.insert_quality_flag_widget = function(){
             );
         let qf_rows = $('<tbody>'); 
         // Create radio buttons for selecting the quality_flags
-        for (const quality_flag in sfa_dash_config.QUALITY_FLAGS) {
+        for (const quality_flag in quality_flags) {
             let row = $('<tr>');
             row.append($('<td>').append($('<input>')
                 .attr('type', 'checkbox')

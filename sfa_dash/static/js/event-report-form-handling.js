@@ -288,5 +288,9 @@ $(document).ready(function() {
     pair_control_container.append($('<a role="button" class="full-width collapser-button collapsed" data-toggle="collapse" data-target=".pair-selector-wrapper">Create Forecast Evaluation pairs</a>'));
     pair_control_container.append(pair_selector);
     report_utils.fill_existing_pairs();
+    report_utils.insert_quality_flag_widget({
+        'USER FLAGGED': 'USER FLAGGED',
+        'NIGHTTIME': 'NIGHTTIME'
+    });
     report_utils.register_forecast_fill_method_validator('event');
 });
