@@ -1561,7 +1561,7 @@ report_utils.insert_quality_flag_widget = function(quality_flags){
         )
         widget_div.append($('<div>')
             .css('position', 'relative')
-            .append($('<b>Quality Flags</b>'))
+            .append($('<b>Quality Flags </b>'))
             .append(qf_help_button)
             .append(qf_help_text)
         );
@@ -1569,6 +1569,8 @@ report_utils.insert_quality_flag_widget = function(quality_flags){
         
         let qf_table = $('<table>')
             .addClass('table report-form-quality-flag-table')
+            .css('display', 'block')
+            .css('padding-left', '1em')
             .append($('<thead>')
                 .append($('<tr>')
                     .append($('<th>'))
@@ -1587,7 +1589,12 @@ report_utils.insert_quality_flag_widget = function(quality_flags){
                 .attr('value', quality_flag)
             ));
             row.append($('<td>').html(sfa_dash_config.QUALITY_FLAGS[quality_flag]));
-            row.append($('<td>').html(sfa_dash_config.DISCARD_BEFORE_RESAMPLE.includes(quality_flag)));
+            row.append($('<td>')
+                .html(
+                    // Titlecase a boolean value to string
+                    sfa_dash_config.DISCARD_BEFORE_RESAMPLE.includes(quality_flag) ? "True" : "False"
+                )
+            );
             qf_rows.append(row);
         }
         qf_table.append(qf_rows);
@@ -1605,6 +1612,7 @@ report_utils.insert_quality_flag_widget = function(quality_flags){
                     .attr('type', 'checkbox')
                     .attr('name', 'discard-before-resample')
                 )
+                .append('&nbsp;')
                 .append(discard_help_button)
                 .append(discard_help_text)
             )
@@ -1629,6 +1637,7 @@ report_utils.insert_quality_flag_widget = function(quality_flags){
                     .val('10.0')
                 )
             )
+            .append('&nbsp;')
             .append(threshold_help_button)
             .append(threshold_help_text)
         );   
