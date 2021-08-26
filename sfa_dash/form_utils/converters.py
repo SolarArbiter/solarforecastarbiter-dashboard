@@ -539,11 +539,12 @@ class ReportConverter(FormConverter):
         discards = form_data.getlist('discard_before_resample')
         resamples = form_data.getlist('resample_threshold_percentage')
 
-        for i in range(len(quality_flags)):
+    
+        for qf, disc, rt in zip(quality_flags, discards, resamples):
             filters.append({
-                'quality_flags': quality_flags[i].split(','),
-                'discard_before_resample': discards[i],
-                'resample_threshold_percentage': float(resamples[i])
+                'quality_flags': qf.split(','),
+                'discard_before_resample': disc,
+                'resample_threshold_percentage': float(rt)
             })
         return filters
 
