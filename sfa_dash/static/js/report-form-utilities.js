@@ -1543,8 +1543,11 @@ class QualityFlagFilter {
  * Primary quality flag entrypoint. Initializes the quality flag inputs inside the
  * container with id `quality-flag-container`
  */
-report_utils.insert_quality_flag_widget = function(quality_flags){
+report_utils.insert_quality_flag_widget = function(quality_flag_options){
     /* Creates a widget for defining quality flag filters.
+     *
+     * quality_flag_options should be an object mapping quality flags as recognized
+     * by the api to the text to display to users.
      */
     // only create quality flag widgets if the container contains no html
     if (!$.trim($('#quality-flag-container').html())){
@@ -1580,7 +1583,7 @@ report_utils.insert_quality_flag_widget = function(quality_flags){
             );
         let qf_rows = $('<tbody>'); 
         // Create radio buttons for selecting the quality_flags
-        for (const quality_flag in quality_flags) {
+        for (const quality_flag in quality_flag_options) {
             let row = $('<tr>');
             row.append($('<td>').append($('<input>')
                 .attr('type', 'checkbox')
@@ -1651,22 +1654,22 @@ report_utils.insert_quality_flag_widget = function(quality_flags){
             .html('Add Filter')
             .click(function () {
                 $('.quality-flag-errors').empty();
-                let quality_flags = $.map($('[name=quality-flags]:checked'), (x) => x.value);
+                let selected_quality_flags = $.map($('[name=quality-flags]:checked'), (x) => x.value);
                 let discard_before = $('[name=discard-before-resample]').prop('checked');
                 let resample_threshold = $('[name=resample-threshold-percentage]').val();
                 
                 let errors = [];
-                if (quality_flags.length < 1) {
+                if (selected_quality_flags.length < 1) {
                     errors.push("At least one quality flag must be selected.");
                 }
-                if (resample_threshold <= 0 || resample_threshold >= 100) {
+                if (resample_threshold <= 0 || resample_threshold > 100) {
                     errors.push(
                         "Resample threshold percentage must be greater than 0 " +
                         "and less than or equal to 100."
                     );
                 }
                 let new_filter = new QualityFlagFilter({
-                    quality_flags: quality_flags,
+                    quality_flags: selected_quality_flags,
                     discard_before_resample: discard_before,
                     resample_threshold_percentage: resample_threshold
                 });
