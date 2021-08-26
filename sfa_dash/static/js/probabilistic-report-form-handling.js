@@ -939,6 +939,7 @@ $(document).ready(function() {
     pair_control_container.append(pair_selector);
     unpack_constant_values();
     report_utils.fill_existing_pairs();
+    report_utils.insert_quality_flag_widget(sfa_dash_config.QUALITY_FLAGS);
     report_utils.register_uncertainty_handler('#observation-select');
     report_utils.register_forecast_fill_method_validator('probabilistic');
 });

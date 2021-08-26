@@ -72,7 +72,9 @@ Solar Forecast Arbiter Dashboard
       DETERMINISTIC_METRICS: JSON.parse('{{ deterministic_metrics | tojson }}'),
       ALL_METRICS: JSON.parse('{{ all_metrics | tojson }}'),
       TIMEZONES: JSON.parse('{{ timezone_options | tojson }}'),
-      METRICS_REQ_REF: JSON.parse('{{ REQ_REF_FX | tojson }}')
+      METRICS_REQ_REF: JSON.parse('{{ REQ_REF_FX | tojson }}'),
+      QUALITY_FLAGS: JSON.parse('{{ quality_flags | tojson }}'),
+      DISCARD_BEFORE_RESAMPLE: JSON.parse('{{ discard_before_resample | tojson }}'),
     }
 </script>
 {# inject the page_data json variable if provided by jinja #}

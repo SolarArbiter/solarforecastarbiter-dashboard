@@ -398,16 +398,6 @@ class ReportConverter(FormConverter):
         return pairs
 
     @classmethod
-    def parse_api_filters(cls, report_parameters):
-        quality_flags = []
-        for f in report_parameters.get('filters', []):
-            if 'quality_flags' in f.keys():
-                quality_flags = quality_flags + f['quality_flags']
-        return {
-            'quality_flags': quality_flags
-        }
-
-    @classmethod
     def extract_tods(cls, value):
         """Parses time of day values from a csv string"""
         return [v.strip() for v in value.split(',')]
@@ -546,11 +536,15 @@ class ReportConverter(FormConverter):
         """
         filters = []
         quality_flags = form_data.getlist('quality_flags')
-        for flag in quality_flags:
+        discards = form_data.getlist('discard_before_resample')
+        resamples = form_data.getlist('resample_threshold_percentage')
+
+    
+        for qf, disc, rt in zip(quality_flags, discards, resamples):
             filters.append({
-                'quality_flags': [flag],
-                'discard_before_resample': flag in DISCARD_BEFORE_RESAMPLE,
-                'resample_threshold_percentage': QFF.resample_threshold_percentage,  # noqa: E501
+                'quality_flags': qf.split(','),
+                'discard_before_resample': disc,
+                'resample_threshold_percentage': float(rt)
             })
         return filters
 
@@ -648,7 +642,7 @@ class ReportConverter(FormConverter):
         # Objects pairs are left in the api format for parsing in javascript
         # see sfa_dash/static/js/report-utilities.js fill_object_pairs function
         form_params['object_pairs'] = report_parameters['object_pairs']
-        form_params.update(cls.parse_api_filters(report_parameters))
+        form_params['filters'] = report_parameters['filters']
         tz = report_parameters.get('timezone')
         if tz is None:
             tz = ""

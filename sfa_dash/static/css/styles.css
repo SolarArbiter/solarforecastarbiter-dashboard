@@ -205,9 +205,10 @@ ul.data-metadata-fields {
 }
 
 /* Forms */
-div.pair-container {
+div.pair-container, ul.quality-filter-list, li.qf-filter-container {
   list-style: none;
   padding: 0.5em 1em;
+  padding-top: 1em;
   position: relative;
   border: 1px solid rgb(206, 212, 218);
   border-radius: 5px;
@@ -234,10 +235,11 @@ ul.pair-attribute-list {
 }
 
 a.object-pair-delete-button,
-a.error-band-delete-button {
+a.error-band-delete-button,
+a.qf-filter-delete-button {
   position: absolute;
-  top: 5px;
-  right: 20px;
+  top: 0px;
+  right: 5px;
   color: #a00 !important;
 }
 
@@ -864,4 +866,23 @@ input[type="number"].datetime-field {
 .datetime-field-container {
   display: inline-block;
   min-width: 49%;
+}
+
+#quality-flag-container {
+    padding: 1em;
+}
+
+table.report-form-quality-flag-table td,
+table.report-form-quality-flag-table th{
+    padding: 0;
+}
+
+table.report-form-quality-flag-table tr td:first-child,
+table.report-form-quality-flag-table tr th:first-child {
+    width: 2em;
+}
+
+table.report-form-quality-flag-table tr td:nth-child(3), 
+table.report-form-quality-flag-table tr th:nth-child(3) {
+    text-align: center;
 }

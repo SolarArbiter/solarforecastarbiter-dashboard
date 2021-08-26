@@ -93,14 +93,23 @@
      {% endif %}
 
      {% block quality_flag_field %}
-     <div class="form-element full-width">
+      <div class="form-element full-width">
        <label>Quality Flag Filters</label><br>
-       <p>Observation data flagged with any of the checked quality flags is excluded from analysis. The corresponding forecast data is also excluded.</p>
-       {% for flag, label in quality_flags.items() %}
-       <input type="checkbox" name="quality_flags" value="{{ flag }}" {% if form_data %}{% if flag in form_data['report_parameters']['quality_flags'] %}checked{% endif %}{%endif %}> {{ label }}<br/>
-       {% endfor %}
+       <p>Quality Flag Filters may be defined to exclude observation data from reports. The filters operate on
+          quality status flags set by the <a href="https://solarforecastarbiter.org/documentation/dashboard/working-with-data/#data-validation">data validation toolkit</a>. See
+          the <a href="https://solarforecastarbiter.org/documentation/dashboard/working-with-data/#quality-flag-filters">quality flag filter documentation</a> for more information.
+       </p>
+       <ul class="quality-filter-list">
+         <li class="no-quality-filters-warning qf-filter-container">No quality filters applied</li>
+       </ul>
+       
+     <a role="button" id="cost-param-collapse" data-toggle="collapse" data-target="#quality-flag-container" class="collapser-button collapsed" aria-expanded="true">Add Quality flag filter</a>
+     <fieldset id="quality-flag-container" class="collapse">
+     </fieldset>
+      
      </div>
      {% endblock %}
+
      {% block forecast_fill_method_field %}
      <div class="form-element full-width">
        <label>Forecast Fill Method</label><br>
