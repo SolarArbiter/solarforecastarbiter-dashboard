@@ -314,10 +314,8 @@ class SingleCDFForecastGroupView(SingleObjectView):
             f'forms.update_cdf_forecast_group',
             uuid=self.metadata['forecast_id'])
 
-        self.template_args['period_start_date'] = start.strftime('%Y-%m-%d')
-        self.template_args['period_start_time'] = start.strftime('%H:%M')
-        self.template_args['period_end_date'] = end.strftime('%Y-%m-%d')
-        self.template_args['period_end_time'] = end.strftime('%H:%M')
+        self.template_args['start'] = start.isoformat()
+        self.template_args['end'] = end.isoformat()
 
     def get(self, uuid, **kwargs):
         try:

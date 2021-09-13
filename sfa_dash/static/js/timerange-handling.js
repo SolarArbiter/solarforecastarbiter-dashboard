@@ -53,8 +53,8 @@ function validateAndParseDatetimes(){
         let miliseconds = end.diff(start);
         const days = miliseconds / (1000 * 60 * 60 * 24);
         if (days > 0){
-            // Check for download button, if exists not a report form.
-            if ($('#download-submit').length) {
+            // Check for plot range button, if exists not a report form.
+            if ($('#plot-range-adjust-submit').length) {
                 // limit maximum amount of data to download
                 if (days > sfa_dash_config.MAX_DATA_RANGE_DAYS){
                     // disable download and plot update
