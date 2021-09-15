@@ -2,7 +2,7 @@
 {% import "forms/form_macros.jinja" as form %}
 
 {% block content %}
-
+<div class="ctrl-buttons">
 {% if update_link is defined and is_allowed('update') %}
 <a role="button" class="btn btn-primary btn-sm" href="{{update_link}}">Update Metadata</a>
 {% endif %}
@@ -18,7 +18,7 @@
 {% if delete_link is defined and is_allowed('delete') %}
 <a role="button" class="btn btn-danger btn-sm" href="{{ delete_link }}">Delete</a>
 {% endif %}
-
+</div>
 {% if plot is not none %}
 <div class="row data-plots-wrapper">
 {{ plot | safe }}
