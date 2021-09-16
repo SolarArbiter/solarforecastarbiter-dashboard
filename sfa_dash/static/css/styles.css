@@ -886,3 +886,7 @@ table.report-form-quality-flag-table tr td:nth-child(3),
 table.report-form-quality-flag-table tr th:nth-child(3) {
     text-align: center;
 }
+
+.ctrl-buttons a.btn {
+    margin: 2px 0;
+}
