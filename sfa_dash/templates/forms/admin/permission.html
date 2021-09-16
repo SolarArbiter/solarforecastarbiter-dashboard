@@ -4,6 +4,7 @@
 {% if permission is defined %}
 {% include 'data/metadata/permission_metadata.html' %}
 
+<div class="ctrl-buttons">
 {% set update_allowed = is_allowed('update') %}
 {% if not permission['applies_to_all']
    and update_allowed
@@ -14,6 +15,7 @@
 {% if is_allowed('delete') %}
 <a role="button" class="btn btn-danger btn-sm" href="{{ url_for('admin.delete_permission', uuid=permission['permission_id']) }}">Delete</a>
 {% endif %}
+</div>
 {% if permission['action'] != 'create' %}
 <h3 class="my-3">{{ permission['object_type'] | title }}</h3>
 <div class="tools {{ table_type }}-tools mt-1">
