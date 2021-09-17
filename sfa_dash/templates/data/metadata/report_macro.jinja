@@ -9,6 +9,10 @@
 <ul class="data-metadata-fields col-md-6 col-sm-12">
   {{ macro.li('Start', metadata['report_parameters']['start'] | format_datetime)}}
   {{ macro.li('End', metadata['report_parameters']['end'] | format_datetime)}}
+  {{ macro.li('Forecast Fill Method',
+              metadata['report_parameters']['forecast_fill_method']
+     )
+  }}
   <li class="metadata-field"><span class="data-metadata-label">Metrics:</span>
       <ul>
         {% for metric in metadata['report_parameters']['metrics'] %}
