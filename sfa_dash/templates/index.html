@@ -26,15 +26,13 @@ throughout the United States. A suite of
 <a href="https://solarforecastarbiter.org/benchmarks/">benchmark forecasts</a>
 are provided alongside these reference observations.</p>
 
-<p>
-Returning users can
-<a href="{{ url_for('auth0.login') }}">log in</a> to access the dashboard.</p>
-
 <p>To get started with the reference dataset, follow the '<i>Sign up</i>' link
 at the bottom of the <a href="{{url_for('auth0.login') }}">log in form.</a> See
 <a href="https://solarforecastarbiter.org/documentation/dashboard/getting-started/">
 Getting Started</a> for more information on how to access the rest of the
 Solar Forecast Arbiter's features.</p>
+
+<p><b><a href="{{ url_for('auth0.login') }}">Log in</a> to access the dashboard.</b></p>
 
 {% else %}
 <p>Use the links in the sidebar on the left to access data.</p>

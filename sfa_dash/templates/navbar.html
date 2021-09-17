@@ -23,21 +23,23 @@
 	  <ul class="navbar-nav navbar-right">
 		<li class="nav-item account-link navbar-right">
           <div class="dropdown">
+          {% if current_user is none %}
+            {# display login if no current user #}
+            <a id="dropdownMenuButton" class="btn btn-secondary"  href="{{ url_for('auth0.login') }}">Log in</a>
+          {% else %}
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               Account
             </button>
             <div class="dropdown-menu account-menu" aria-labelledby="dropdownMenuButton">
-              {% if current_user is not none %}
               <div class= "dropdown-item"><b>Logged in as:</b><br/> {{ current_user['name'] }}</div>
               <a class="dropdown-item" href="{{ url_for('admin.admin') }}">User Administration</a>
               <a class="dropdown-item" href="{{ url_for('logout') }}">Log out</a>
-              {% else %}
-              <a class="dropdown-item" href="{{ url_for('auth0.login') }}">Log in</a>
-              {% endif %}
+              
 
             </div>
+          {% endif %}
           </div>
-		</li>
+        </li>
       </ul>
     </div>
   </div>
