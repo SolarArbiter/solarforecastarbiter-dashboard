@@ -7,7 +7,7 @@ $(document).ready(function(){
         document.getElementsByName('name')[0].addEventListener(
             'invalid', function(){
                 this.setCustomValidity(
-                    `Name may only contain characters a-zA-Z0-9(), -'_.`);
+                    `Name may only contain characters a-zA-Z0-9(), -'_`);
             }
         );
         // clear any invalid state and check for validity to trigger an invalid
