@@ -1624,7 +1624,8 @@ report_utils.insert_quality_flag_widget = function(quality_flag_options){
         const [threshold_help_button, threshold_help_text] = report_utils.help_popup(
             'threshold_help',
             "Percentage of points in the resampled interval that must include the flags " +
-            "in order to flag the entire interval."
+            "in order to flag the entire interval. A threshold of 0.0 can be used to " +
+            "discard an interval if any points are flagged."
         )
         widget_div.append($('<div>')
             .css('position', 'relative')
@@ -1643,7 +1644,13 @@ report_utils.insert_quality_flag_widget = function(quality_flag_options){
             .append('&nbsp;')
             .append(threshold_help_button)
             .append(threshold_help_text)
-        );   
+            .append($('<p>')
+                .html(
+                    "A resample threshold percentage of 0.0 can be used to discard " +
+                    "intervals that contain <i>any</i> of the selected flags."
+                )
+            )
+        );
         widget_div.append($('<ul>')
             .addClass('quality-flag-errors')
         );
