@@ -873,20 +873,55 @@ input[type="number"].datetime-field {
 }
 
 #quality-flag-container {
-    padding: 1em;
+  padding: 1em;
 }
 
 table.report-form-quality-flag-table td,
 table.report-form-quality-flag-table th{
-    padding: 0;
+  padding: 0;
 }
 
 table.report-form-quality-flag-table tr td:first-child,
 table.report-form-quality-flag-table tr th:first-child {
-    width: 2em;
+  width: 2em;
 }
 
 table.report-form-quality-flag-table tr td:nth-child(3), 
 table.report-form-quality-flag-table tr th:nth-child(3) {
-    text-align: center;
+  text-align: center;
+}
+
+h1, .h1 {
+  font-size: 1.8rem;
+}
+
+h2, .h2 {
+  font-size: 1.6rem;
+}
+
+h3, .h3 {
+  font-size: 1.4rem;
+}
+
+h4, .h4 {
+  font-size: 1.2rem;
+}
+
+h5, .h5 {
+  font-size: 1rem;
+}
+
+.h2.link {
+  color: #007bff;
+}
+
+.site-menu .nav-item {
+  font-weight: 500;
+}
+
+.site-menu .nav-item:hover {
+  background-color: #eee;
+}
+.navbar-nav .nav-item {
+  margin: 0 1em;
 }

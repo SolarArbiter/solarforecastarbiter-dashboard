@@ -11,7 +11,7 @@ class SitesListingView(SiteDashView):
     template = 'data/table.html'
 
     def breadcrumb_html(self, site=None, **kwargs):
-        breadcrumb_format = '/<a href="{url}">{text}</a>'
+        breadcrumb_format = '/<a class="h2 link" href="{url}">{text}</a>'
         breadcrumb = breadcrumb_format.format(
             url=url_for('data_dashboard.sites'),
             text='Sites')
@@ -42,7 +42,7 @@ class SingleSiteView(SiteDashView):
     template = 'data/site.html'
 
     def breadcrumb_html(self, **kwargs):
-        bc_format = '/<a href="{url}">{text}</a>'
+        bc_format = '/<a class="h2 link" href="{url}">{text}</a>'
         bc = ''
         bc += bc_format.format(
             url=url_for('data_dashboard.sites'),

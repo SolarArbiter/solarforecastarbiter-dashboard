@@ -220,7 +220,7 @@ class BaseView(MethodView):
         """
         breadcrumb = ''
         for (link_text, href) in breadcrumb_list:
-            breadcrumb += f'/<a href="{href}">{link_text}</a>'
+            breadcrumb += f'/<a class="h2 link" href="{href}">{link_text}</a>'
         return breadcrumb
 
     def get_breadcrumb(self):
