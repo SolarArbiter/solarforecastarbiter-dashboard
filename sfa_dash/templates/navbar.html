@@ -13,6 +13,12 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
       <ul class="navbar-nav mr-auto">
+        {% if sidebar is not defined %}
+           {% set sidebar = True %}
+        {% endif %}
+        {% if sidebar %}
+          {% include "sidebar.html" %}
+        {% endif %}
         <li class="nav-item">
             <a class="nav-link" href="https://solarforecastarbiter.org/changelog/">Changelog</a>
         </li>

@@ -7,24 +7,17 @@
   <body class="d-flex flex-column h-100">
     <header class="fixed-top">
       {% include "navbar.html" %}
+      
     </header>
     <main role="main" class="flex-shrink-0">
       <div class="container">
-	  	<!-- Content Block -->
-		  <div class="row">
-            {% if sidebar is not defined %}
-            {% set sidebar = True %}
-            {% endif %}
-			{% if sidebar %}
-		    {% include "sidebar.html" %} 
-		    <div class="content col-md-9 col-sm-12">
-			{% else %}
-			<div class="content col-md-12">
-			{% endif %}
-			  {% block dash %}
-			  {% endblock %}
-		    </div>
-		  </div>
+        <!-- Content Block -->
+        <div class="row">
+          <div class="content col-md-12">
+            {% block dash %}
+            {% endblock %}
+          </div>
+        </div>
       </div>
     </main>
 
