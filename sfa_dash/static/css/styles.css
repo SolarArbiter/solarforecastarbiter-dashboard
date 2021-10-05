@@ -913,11 +913,49 @@ h5, .h5 {
 .h2.link {
   color: #007bff;
 }
-
-.site-menu .nav-item {
-  font-weight: 500;
-}
-
-.navbar-nav .nav-item {
-  margin: 0 1em;
+@media(min-width: 769px){
+  nav.navbar {
+    align-items: stretch;
+    padding: 0;
+  }
+  #navbarCollapse.collapse {
+    height: 100%;
+  }
+  ul.site-menu {
+    flex: 1;
+    display: flex;
+    height: 100%;
+  }
+  ul.site-menu .nav-item {
+    font-weight: 500;
+    margin: 0 0;
+    padding: 0;
+    display: flex;
+    align-items: stretch;
+  }
+  ul.site-menu .nav-item a.nav-link {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    color: #68696a;
+    border-left: 1px solid #e8e9ea;
+    padding: 1em;
+    transition: background-color .2s, color .2s, text-shadow .2s;
+  }
+  ul.site-menu .nav-item:last-child a.nav-link {
+    border-right: 1px solid #e8e9ea;
+  }
+  ul.site-menu .nav-item a.nav-link:hover {
+    background-color: #e8e9ea;
+    color: #fff;
+    text-shadow:
+        1px 1px 0 #b8b9ba,
+      -1px -1px 0 #b8b9ba,
+       1px -1px 0 #b8b9ba,
+       -1px 1px 0 #b8b9ba,
+        1px 1px 0 #b8b9ba;
+  }
+  .navbar-nav .nav-item {
+    margin: 0 1em;
+  }
 }
