@@ -1,3 +1,7 @@
+* {
+  font-size: 14px;
+}
+
 /* Bootstrap overrides */
 @media (min-width: 768px) {
   .fixed-top {
@@ -49,7 +53,7 @@ main {
 
 @media (min-width: 768px) {
   main {
-    margin-top: 6rem;
+    margin-top: 4rem;
   }
 }
 
@@ -73,8 +77,8 @@ ul.sidebar-menu {
   padding-left: 0;
 }
 
-.logo-wrap {
-  width: 200px;
+.logo-wrap  img {
+  height: 3em;
 }
 
 .logo-wrap h1 {
@@ -559,8 +563,8 @@ th.selection-column {
   #report-block h4[id]:before{
       display: block;
       content: " ";
-      margin-top: -7rem;
-      height: 7rem;
+      margin-top: -5rem;
+      height: 5rem;
       visibility: hidden;
   }
 }
@@ -572,7 +576,6 @@ th.selection-column {
 }
 
 table.obsfx-table td {
-  font-size: 0.75rem;
   padding: 0.5rem;
 }
 
@@ -869,22 +872,91 @@ input[type="number"].datetime-field {
 }
 
 #quality-flag-container {
-    padding: 1em;
+  padding: 1em;
 }
 
 table.report-form-quality-flag-table td,
 table.report-form-quality-flag-table th{
-    padding: 0;
+  padding: 0;
 }
 
 table.report-form-quality-flag-table tr td:first-child,
 table.report-form-quality-flag-table tr th:first-child {
-    width: 2em;
+  width: 2em;
 }
 
 table.report-form-quality-flag-table tr td:nth-child(3), 
 table.report-form-quality-flag-table tr th:nth-child(3) {
-    text-align: center;
+  text-align: center;
+}
+
+h1, .h1 {
+  font-size: 1.8rem;
+}
+
+h2, .h2 {
+  font-size: 1.6rem;
+}
+
+h3, .h3 {
+  font-size: 1.4rem;
+}
+
+h4, .h4 {
+  font-size: 1.2rem;
+}
+
+h5, .h5 {
+  font-size: 1rem;
+}
+
+.h2.link {
+  color: #007bff;
+}
+@media(min-width: 769px){
+  nav.navbar {
+    align-items: stretch;
+    padding: 0;
+  }
+  #navbarCollapse.collapse {
+    height: 100%;
+  }
+  ul.site-menu {
+    flex: 1;
+    display: flex;
+    height: 100%;
+  }
+  ul.site-menu .nav-item {
+    font-weight: 500;
+    margin: 0 0;
+    padding: 0;
+    display: flex;
+    align-items: stretch;
+  }
+  ul.site-menu .nav-item a.nav-link {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    color: #68696a;
+    padding: 1em;
+    transition: background-color .2s, color .2s, text-shadow .2s;
+  }
+  ul.site-menu .nav-item a.nav-link.active {
+    border-bottom: 2px solid #552288;
+  }
+  ul.site-menu .nav-item a.nav-link:hover {
+    background-color: #e8e9ea;
+    color: #fff;
+    text-shadow:
+        1px 1px 0 #b8b9ba,
+      -1px -1px 0 #b8b9ba,
+       1px -1px 0 #b8b9ba,
+       -1px 1px 0 #b8b9ba,
+        1px 1px 0 #b8b9ba;
+  }
+  .navbar-nav .nav-item {
+    margin: 0 1em;
+  }
 }
 
 .ctrl-buttons a.btn {

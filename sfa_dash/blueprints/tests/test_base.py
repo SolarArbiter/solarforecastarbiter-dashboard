@@ -101,9 +101,11 @@ def test_parse_start_end_one_request_arg(
 
 @pytest.mark.parametrize('bc_list,expected', [
     ([('dashboard', 'https://dashboard')],
-     '/<a href="https://dashboard">dashboard</a>'),
+     '/<a class="h2 link" href="https://dashboard">dashboard</a>'),
     ([('a', 'b'), ('c', 'd'), ('e', 'f')],
-     '/<a href="b">a</a>/<a href="d">c</a>/<a href="f">e</a>'),
+     '/<a class="h2 link" href="b">a</a>'
+     '/<a class="h2 link" href="d">c</a>'
+     '/<a class="h2 link" href="f">e</a>'),
 ])
 def test_breadcrumb_html(app, bc_list, expected):
     with app.test_request_context():

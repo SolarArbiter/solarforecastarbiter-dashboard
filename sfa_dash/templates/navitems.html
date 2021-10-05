@@ -1,0 +1,29 @@
+{# Site navigation items #}
+{% if current_user is not none %}
+{# set the active path #}
+{% set current_path = request.path|string() %}
+{% set active = "" %}
+
+{% if "forecasts" in current_path or "observations" in current_path %}
+  {% set active = "fxobs" %}
+{% elif "aggregates" in current_path %}
+  {% set active = "agg" %}
+{% elif "sites" in current_path %}
+  {% set active = "sites" %}
+{% elif "reports" in current_path %}
+  {% set active = "reports" %}
+{% endif %}
+
+<li class="nav-item">
+  <a class="nav-link{% if active == "sites" %} active{% endif %}" href="{{ url_for('data_dashboard.sites') }}">Sites</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link{% if active == "agg" %} active{% endif %}" href="{{ url_for('data_dashboard.aggregates')}}">Aggregates</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link{% if active == "reports" %} active{% endif %}" href="{{ url_for('data_dashboard.reports') }}">Reports</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link{% if active == "fxobs" %} active{% endif %}" href="{{ url_for('data_dashboard.observations') }}">Forecasts and Observations</a>
+</li>
+{% endif %}

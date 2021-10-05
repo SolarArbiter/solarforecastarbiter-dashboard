@@ -212,6 +212,7 @@ $(document).ready(function() {
     createFilterOptions('object-type');
     createFilterOptions('applies-to-all');
     createFilterOptions('climate-zones');
+    createFilterOptions('status');
 
     /*
      * Register DOM element callbacks
