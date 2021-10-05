@@ -53,7 +53,7 @@ main {
 
 @media (min-width: 768px) {
   main {
-    margin-top: 6rem;
+    margin-top: 4rem;
   }
 }
 
@@ -77,8 +77,8 @@ ul.sidebar-menu {
   padding-left: 0;
 }
 
-.logo-wrap {
-  width: 200px;
+.logo-wrap  img {
+  height: 3em;
 }
 
 .logo-wrap h1 {
@@ -563,8 +563,8 @@ th.selection-column {
   #report-block h4[id]:before{
       display: block;
       content: " ";
-      margin-top: -7rem;
-      height: 7rem;
+      margin-top: -5rem;
+      height: 5rem;
       visibility: hidden;
   }
 }
@@ -938,12 +938,11 @@ h5, .h5 {
     align-items: center;
     font-weight: 700;
     color: #68696a;
-    border-left: 1px solid #e8e9ea;
     padding: 1em;
     transition: background-color .2s, color .2s, text-shadow .2s;
   }
-  ul.site-menu .nav-item:last-child a.nav-link {
-    border-right: 1px solid #e8e9ea;
+  ul.site-menu .nav-item a.nav-link.active {
+    border-bottom: 2px solid #552288;
   }
   ul.site-menu .nav-item a.nav-link:hover {
     background-color: #e8e9ea;
