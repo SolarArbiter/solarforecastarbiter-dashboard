@@ -6,8 +6,11 @@ del get_versions
 import os  # NOQA
 
 
-from flask import (Flask, redirect, url_for, render_template, session, request,  # NOQA
-                   g)  # NOQA
+from flask import (
+    Flask, redirect, url_for, render_template,
+    session, request, send_from_directory,
+    g
+)  # NOQA
 from flask_seasurf import SeaSurf  # NOQA
 import sentry_sdk  # NOQA
 from sentry_sdk.integrations.flask import FlaskIntegration  # NOQA
@@ -74,6 +77,10 @@ def create_app(config=None):
     @app.route('/changelog/')
     def changelog():
         return render_template('changelog.html')
+
+    @app.route('/robots.txt')
+    def robots():
+        return send_from_directory('static', 'robots.txt')
 
     @app.context_processor
     def inject_globals():

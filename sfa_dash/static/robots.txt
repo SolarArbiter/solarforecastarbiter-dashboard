@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /sites*
+Disallow: /forecasts*
+Disallow: /observations*
+Disallow: /reports*
+Disallow: /aggregates*
+Disallow: /admin*
