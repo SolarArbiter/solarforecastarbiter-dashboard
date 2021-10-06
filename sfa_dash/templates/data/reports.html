@@ -27,7 +27,7 @@
           <a href="{{ url_for('data_dashboard.report_view', uuid=report['report_id']) }}">{{ report['report_parameters']['name'] }}</a>
         </td>
         <td>
-            <div class="report-details-expander btn-sm btn-primary">Metadata</div>
+            <button class="report-details-expander btn btn-sm btn-primary">Metadata</button>
             {# start report details block #}
             <div class="report-metadata-popup" hidden>
             {{ meta_macro.report_metadata(report, all_metrics, metric_categories) }}
