@@ -9,7 +9,7 @@ trigger:
 jobs:
 - job: 'Test'
   pool:
-    vmImage: 'Ubuntu-16.04'
+    vmImage: 'Ubuntu-latest'
   strategy:
     matrix:
       Python37:
