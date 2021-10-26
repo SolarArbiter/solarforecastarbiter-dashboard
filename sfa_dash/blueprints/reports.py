@@ -146,19 +146,25 @@ class ReportView(BaseView):
         pfxobs = raw_report['processed_forecasts_observations']
         total_data_points = 0
 
-        seen_ref_fx = []
+        seen_fx = []
         seen_obs = []
         seen_aggs = []
         for fxobs in pfxobs:
-            # Check for probabilistic forecasts. Valid point count will only
-            # be supplied for a single timeseries, so we need to multiply by
-            # the number of constant values.
-            if "constant_values" in fxobs["original"].get("forecast", {}):
-                expected_forecast_series_count = len(
-                    fxobs["original"]["forecast"]["constant_values"]
-                )
+            # Only count forecasts we haven't already seen
+            fx = fxobs["original"].get("forecast")
+            if fx["forecast_id"] in seen_fx:
+                expected_forecast_series_count = 0
             else:
-                expected_forecast_series_count = 1
+                # Check for probabilistic forecasts. Valid point count will
+                # only be supplied for a single timeseries, so we need to
+                # multiply by the number of constant values.
+                if "constant_values" in fx:
+                    expected_forecast_series_count = len(
+                        fxobs["original"]["forecast"]["constant_values"]
+                    )
+                else:
+                    expected_forecast_series_count = 1
+                seen_fx.append(fx["forecast_id"])
 
             # account for the observation and reference forecast, if not
             # already seen
@@ -169,11 +175,11 @@ class ReportView(BaseView):
                 other_series_count += 1
             agg = fxobs["original"].get("aggregate")
             if (agg and agg["aggregate_id"] not in seen_aggs):
-                seen_obs.append(agg["aggregate_id"])
+                seen_aggs.append(agg["aggregate_id"])
                 other_series_count += 1
             ref_fx = fxobs["original"].get("reference_forecast")
-            if (ref_fx and ref_fx["forecast_id"] not in seen_ref_fx):
-                seen_obs.append(ref_fx["forecast_id"])
+            if (ref_fx and ref_fx["forecast_id"] not in seen_fx):
+                seen_fx.append(ref_fx["forecast_id"])
                 other_series_count += 1
 
             # determine total data points for the forecast, observation pair
