@@ -137,13 +137,45 @@ class ReportView(BaseView):
     template = 'data/report.html'
 
     def should_include_timeseries(self):
+        """Determines if we should try to display a timeseries plot based on
+        if the report is complete and the total number of points to plot.
+        """
         if self.metadata['status'] != 'complete':
             return False
         raw_report = self.metadata['raw_report']
         pfxobs = raw_report['processed_forecasts_observations']
         total_data_points = 0
+
+        seen_fx = []
+        seen_obs = []
+        seen_aggs = []
         for fxobs in pfxobs:
-            fxobs_data_points = fxobs['valid_point_count'] * 2
+            fxobs_original = fxobs["original"]
+            series_count = 0
+            # Only count forecasts we haven't already seen
+            fx = fxobs_original.get("forecast")
+            if fx and fx["forecast_id"] not in seen_fx:
+                # Check for probabilistic forecasts. Valid point count will
+                # only be supplied for a single timeseries, so we need to
+                # multiply by the number of constant values.
+                if "constant_values" in fx:
+                    series_count += len(fx["constant_values"])
+                else:
+                    series_count += 1
+                seen_fx.append(fx["forecast_id"])
+
+            # account for the observations or aggregates not already seen
+            obs = fxobs_original.get("observation")
+            if obs and obs["observation_id"] not in seen_obs:
+                seen_obs.append(obs["observation_id"])
+                series_count += 1
+            agg = fxobs_original.get("aggregate")
+            if agg and agg["aggregate_id"] not in seen_aggs:
+                seen_aggs.append(agg["aggregate_id"])
+                series_count += 1
+
+            # determine total data points for the forecast, observation pair
+            fxobs_data_points = fxobs['valid_point_count'] * series_count
             total_data_points = total_data_points + fxobs_data_points
         return total_data_points < current_app.config['REPORT_DATA_LIMIT']
 
