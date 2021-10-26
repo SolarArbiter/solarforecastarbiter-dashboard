@@ -137,13 +137,48 @@ class ReportView(BaseView):
     template = 'data/report.html'
 
     def should_include_timeseries(self):
+        """Determines if we should try to display a timeseries plot based on
+        if the report is complete and the total number of points to plot.
+        """
         if self.metadata['status'] != 'complete':
             return False
         raw_report = self.metadata['raw_report']
         pfxobs = raw_report['processed_forecasts_observations']
         total_data_points = 0
+
+        seen_ref_fx = []
+        seen_obs = []
+        seen_aggs = []
         for fxobs in pfxobs:
-            fxobs_data_points = fxobs['valid_point_count'] * 2
+            # Check for probabilistic forecasts. Valid point count will only
+            # be supplied for a single timeseries, so we need to multiply by
+            # the number of constant values.
+            if "constant_values" in fxobs["original"].get("forecast", {}):
+                expected_forecast_series_count = len(
+                    fxobs["original"]["forecast"]["constant_values"]
+                )
+            else:
+                expected_forecast_series_count = 1
+
+            # account for the observation and reference forecast, if not
+            #  already seen
+            other_series_count = 0
+            obs = fxobs["original"].get("observation")
+            if (obs and obs["observation_id"] not in seen_obs):
+                seen_obs.append(obs["observation_id"])
+                other_series_count += 1
+            agg = fxobs["original"].get("aggregate")
+            if (agg and agg["aggregate_id"] not in seen_aggs):
+                seen_obs.append(agg["aggregate_id"])
+                other_series_count += 1
+            ref_fx = fxobs["original"].get("reference_forecast")
+            if (ref_fx and ref_fx["forecast_id"] not in seen_ref_fx):
+                seen_obs.append(ref_fx["forecast_id"])
+                other_series_count += 1
+
+            # determine total data points for the forecast, observation pair
+            series_count = expected_forecast_series_count + other_series_count
+            fxobs_data_points = fxobs['valid_point_count'] * series_count
             total_data_points = total_data_points + fxobs_data_points
         return total_data_points < current_app.config['REPORT_DATA_LIMIT']
 
