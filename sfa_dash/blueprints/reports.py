@@ -161,7 +161,7 @@ class ReportView(BaseView):
                 expected_forecast_series_count = 1
 
             # account for the observation and reference forecast, if not
-            #  already seen
+            # already seen
             other_series_count = 0
             obs = fxobs["original"].get("observation")
             if (obs and obs["observation_id"] not in seen_obs):
