@@ -2,8 +2,10 @@ from flask import Blueprint, render_template, url_for, request, g
 
 
 from sfa_dash.api_interface import (users, observations, forecasts,
-                                    cdf_forecasts, cdf_forecast_groups)
+                                    cdf_forecasts, cdf_forecast_groups,
+                                    outages)
 from sfa_dash.blueprints.aggregates import AggregatesView, AggregateView
+from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.dash import DataDashView
 from sfa_dash.blueprints.data_listing import DataListingView
 from sfa_dash.blueprints.delete import DeleteConfirmation
@@ -327,6 +329,19 @@ class SingleCDFForecastGroupView(SingleObjectView):
         return render_template(self.template, **self.template_args)
 
 
+class SystemOutageView(BaseView):
+    template = "outages.html"
+
+    def set_template_args(self):
+        self.template_args = {}
+        try:
+            system_outages = outages.list_outages()
+        except DataRequestException as e:
+            self.template_args['errors'] = e.errors
+        else:
+            self.template_args['outages'] = system_outages
+    
+
 class AccessView(DataDashView):
     template = 'data/access.html'
 
@@ -429,3 +444,8 @@ data_dash_blp.add_url_rule(
     '/aggregates/<uuid>/delete',
     view_func=DeleteConfirmation.as_view(
         'delete_aggregate', data_type='aggregate'))
+
+# Outage information
+data_dash_blp.add_url_rule(
+    '/outages',
+    view_func=SystemOutageView.as_view('outages'))

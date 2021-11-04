@@ -1,0 +1,20 @@
+{% extends "dash/data.html" %}
+{% set page_title="Arbiter System Outages" %}
+{% block content %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Start</th>
+      <th>End</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for outage in outages %}
+    <tr>
+      <td>{{ outage['start'] }}</td>
+      <td>{{ outage['end'] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</ul>
+{% endblock %}

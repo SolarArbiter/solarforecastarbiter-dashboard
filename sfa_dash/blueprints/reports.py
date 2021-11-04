@@ -513,3 +513,30 @@ class ReportCloneView(ReportForm):
             self.set_template()
             self.set_template_args()
             return render_template(self.template, **self.template_args)
+
+
+class ReportOutageView(BaseView):
+    """.
+    """
+    template = "data/report_outages.html"
+
+    def set_template_args(self):
+        self.template_args = {}
+        try:
+            outages = reports.recompute(uuid)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+        else:
+            flash('')
+        return redirect(url_for('data_dashboard.report_view',
+                                uuid=uuid))
+
+class ReportOutageForm(BaseView):
+    """
+    """
+    template = "forms/report_outage_form.html"
+    def get(self, uuid):
+        return redirect(url_for('data_dashboard.report_view',
+                                uuid=uuid))
+
+
