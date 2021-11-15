@@ -1,0 +1,46 @@
+{% extends "dash/data.html" %}
+{% block content %}
+{% if metadata is defined %}
+{% set outages = metadata['outages'] %}
+<div>
+<p>
+    Below is a list of outage periods for the report. Any forecast submissions
+    that fall between the start and end of an outage will not be included in
+    report analysis.
+</p>
+<h3>Report Outages</h3>
+<div class="tools report-outage-tools mt-1">
+  {% if is_allowed('update') %}
+    <a role="button" class="btn btn-primary btn-sm" href="{{ url_for('forms.report_outage_form',uuid=metadata['report_id']) }}">
+      Create new Outage
+    </a>
+  {% endif %}
+</div>
+<table class="report-outage-table table">
+  <thead class="report-thead">
+    <th>Start</th>
+    <th>End</th>
+    <th></th>
+  </thead>
+  <tbody>
+  {% if outages |length > 0 %}
+    {% for outage in outages %}
+    <tr>
+      <td>{{ outage['start'] }}</td>
+      <td>{{ outage['end'] }}</td>
+      <td><a role="button" class="btn btn-danger btn-sm" href="{{ url_for('forms.delete_report_outage',uuid=metadata['report_id'], outage_id=outage['outage_id']) }}">
+      Delete
+    </a></td>
+    </tr>
+    {% endfor %}
+  {% else %}
+    <tr>
+    <td colspan="3">
+      No outages for this report.
+    </td>
+  {% endif %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

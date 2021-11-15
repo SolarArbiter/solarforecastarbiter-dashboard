@@ -520,23 +520,103 @@ class ReportOutageView(BaseView):
     """
     template = "data/report_outages.html"
 
-    def set_template_args(self):
+    def set_template_args(self, uuid=None):
         self.template_args = {}
         try:
-            outages = reports.recompute(uuid)
+            report = reports.get_metadata(uuid)
         except DataRequestException as e:
             self.flash_api_errors(e.errors)
         else:
-            flash('')
-        return redirect(url_for('data_dashboard.report_view',
-                                uuid=uuid))
+            self.template_args['page_title'] = report['report_parameters']['name']
+            self.template_args['metadata'] = report
+
 
 class ReportOutageForm(BaseView):
     """
     """
     template = "forms/report_outage_form.html"
-    def get(self, uuid):
-        return redirect(url_for('data_dashboard.report_view',
-                                uuid=uuid))
+
+    def set_template_args(self, uuid):
+        self.template_args = {}
+        try:
+            report = reports.get_metadata(uuid)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+        else:
+            self.template_args['metadata'] = report
+
+    def get(self, uuid=None):
+        self.set_template_args(uuid)
+        return render_template(self.template, **self.template_args)
+
+    def post(self, uuid=None):
+        form_data = request.form
+        converter = converters.ReportOutageConverter       
+        formatted = converter.formdata_to_payload(form_data)
+        try:
+            outage_id = reports.post_outage(uuid, formatted)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+            self.set_template_args(uuid)
+            return render_template(
+                self.template,
+                form_data=form_data,
+                **self.template_args
+            )
+        else:
+            return redirect(url_for(
+                "data_dashboard.report_outage_view",
+                uuid=uuid
+            ))
 
 
+class ReportOutageDeletionForm(BaseView):
+    """
+    """
+    template = "forms/report_outage_deletion_form.html"
+
+    def set_template_args(self, uuid, outage_id):
+        self.template_args = {}
+        try:
+            report = reports.get_metadata(uuid)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+        else:
+            outage = None
+            for report_outage in report['outages']:
+                if report_outage['outage_id'] == outage_id:
+                    outage = report_outage
+                    break
+            if outage is None:
+                self.flash_api_errors({
+                    "404": [
+                        "The requested object could not be found. "
+                        "You may need to request access from the "
+                        "data owner."
+                    ],
+                })
+            else:
+                self.template_args['metadata'] = report
+                self.template_args['outage'] = outage
+
+    def get(self, uuid=None, outage_id=None):
+        self.set_template_args(uuid, outage_id)
+        return render_template(self.template, **self.template_args)
+
+    def post(self, uuid=None, outage_id=None):
+        try:
+            reports.delete_outage(uuid, outage_id)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+            self.set_template_args(uuid)
+            return render_template(
+                self.template,
+                form_data=form_data,
+                **self.template_args
+            )
+        else:
+            flash("Deleted outage successfully.")
+            return redirect(url_for(
+                "data_dashboard.report_outage_view",
+                uuid=uuid
+            ))

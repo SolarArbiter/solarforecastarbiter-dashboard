@@ -1,0 +1,20 @@
+{% set page_tite = "Delete Report Outage" %}
+{% import "forms/form_macros.jinja" as form %}
+{% extends "dash/data.html" %}
+{% block content %}
+{% if metadata is defined %}
+{% include "data/metadata/report_metadata.html" %}
+{% if is_allowed('update') %}
+<form action="" method="post" enctype='{{ form_enc }}' id="report-outage-deletion-form">
+  <div class="form-element full-width">
+    Are you sure you want to delete the outage from <b>{{ outage['start'] | format_datetime }}</b> to <b>{{ outage['end'] | format_datetime }}</b>?
+  </div>
+{{ form.token() }}
+<button type="submit" form="report-outage-deletion-form" value="submit" class="btn btn-danger">Yes</button>
+<a href="{{ url_for('data_dashboard.report_outage_view', uuid=metadata['report_id'])}}" class="btn btn-primary">No</a>
+</form>
+{% else %}
+<p>You do not have update permissions on this report, and cannot delete it's outages.</p>
+{% endif %}
+{% endif %}
+{% endblock %}

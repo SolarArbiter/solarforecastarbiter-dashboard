@@ -1,0 +1,20 @@
+{% set page_tite = "Add Report Outage" %}
+{% import "forms/form_macros.jinja" as form %}
+{% extends "dash/data.html" %}
+{% if report is defined %}
+{% endif %}
+{% block content %}
+{% if metadata is defined %}
+{% include "data/metadata/report_metadata.html" %}
+<form action="" method="post" enctype='{{ form_enc }}' id="report-outage-form">
+  <div class="form-element full-width">
+    {% include "data/time_inputs.html" %}
+    <input type="text" hidden required name="start" class="form-control"  required {% if form_data %}value="{{form_data['start']}}"{% endif %}>
+    <input type="text" hidden required name="end" class="form-control" required {% if form_data %}value="{{form_data['end']}}"{% endif %}>
+  </div>
+{{ form.token() }}
+<button type="submit" form="report-outage-form" value="Submit" class="btn btn-primary">Submit</button>
+</form>
+<script src="/static/js/timerange-handling.js"></script>
+{% endif %}
+{% endblock %}

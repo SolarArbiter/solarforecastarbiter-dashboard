@@ -32,7 +32,7 @@ def get_outages(report_id):
 
 
 def post_outage(report_id, outage_dict):
-    outage_id = post_request(f'/reports/{report_id}/outages')   
+    outage_id = post_request(f'/reports/{report_id}/outages', outage_dict)
     return outage_id
 
 

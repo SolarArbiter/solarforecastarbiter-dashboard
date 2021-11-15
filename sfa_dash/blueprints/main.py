@@ -10,6 +10,7 @@ from sfa_dash.blueprints.dash import DataDashView
 from sfa_dash.blueprints.data_listing import DataListingView
 from sfa_dash.blueprints.delete import DeleteConfirmation
 from sfa_dash.blueprints.reports import (ReportsView, ReportView,
+                                         ReportOutageView,
                                          DeleteReportView,
                                          DownloadReportView)
 from sfa_dash.blueprints.sites import SingleSiteView, SitesListingView
@@ -449,3 +450,7 @@ data_dash_blp.add_url_rule(
 data_dash_blp.add_url_rule(
     '/outages',
     view_func=SystemOutageView.as_view('outages'))
+
+data_dash_blp.add_url_rule(
+    '/reports/<uuid>/outages',
+    view_func=ReportOutageView.as_view('report_outage_view'))

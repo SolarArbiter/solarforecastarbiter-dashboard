@@ -13,7 +13,8 @@ from sfa_dash.blueprints.aggregates import (AggregateObservationAdditionForm,
                                             AggregateObservationDeletionForm)
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.reports import (ReportForm, RecomputeReportView,
-                                         ReportCloneView)
+                                         ReportCloneView, ReportOutageForm,
+                                         ReportOutageDeletionForm)
 from sfa_dash.errors import DataRequestException
 from sfa_dash.form_utils import converters, utils
 
@@ -478,6 +479,13 @@ forms_blp.add_url_rule('/reports/probabilistic/create',
 forms_blp.add_url_rule('/reports/<uuid>/recompute',
                        view_func=RecomputeReportView.as_view(
                            'recompute_report'))
+forms_blp.add_url_rule('/reports/<uuid>/outages/add',
+                       view_func=ReportOutageForm.as_view(
+                           'report_outage_form'))
+forms_blp.add_url_rule('/reports/<uuid>/outages/<outage_id>',
+                       view_func=ReportOutageDeletionForm.as_view(
+                           'delete_report_outage'))
+
 # Aggregate specific forms
 forms_blp.add_url_rule('/aggregates/<uuid>/add',
                        view_func=AggregateObservationAdditionForm.as_view(
@@ -506,3 +514,4 @@ forms_blp.add_url_rule('/forecasts/cdf/<uuid>/update',
                        view_func=UpdateForm.as_view(
                            'update_cdf_forecast_group',
                            data_type='cdf_forecast_group'))
+

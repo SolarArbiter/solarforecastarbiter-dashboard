@@ -741,3 +741,26 @@ class AggregateUpdateConverter(AggregateConverter):
                      for key in cls.direct_keys
                      if form_dict.get(key) is not None}
         return formatted
+
+
+class ReportOutageConverter(FormConverter):
+    form = "forms/updates/report_outage_form.html"
+
+    @classmethod
+    def formdata_to_payload(cls, form_dict):
+        """Converts report outage form data to an appropriate api outage object.
+
+        Parameters
+        ----------
+        form_dict: dict
+            The posted form data parsed into a dict.
+
+        Returns
+        -------
+        dict
+            Form data formatted to API spec.
+        """
+        return {
+            "start": form_dict['start'],
+            "end": form_dict['end']
+        }

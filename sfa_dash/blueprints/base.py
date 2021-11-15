@@ -361,6 +361,6 @@ class BaseView(MethodView):
             subnav = self.subnav
         else:
             subnav = {}
-        self.set_template_args()
+        self.set_template_args(**kwargs)
         return render_template(self.template, subnav=subnav,
                                **self.template_args, **kwargs)
