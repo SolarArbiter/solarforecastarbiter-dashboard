@@ -608,6 +608,8 @@ class ReportConverter(FormConverter):
         report_params['end'] = form_dict['end']
         report_params['forecast_fill_method'] = cls.parse_fill_method(
             form_dict)
+        system_outages = 'exclude_system_outages' in form_dict
+        report_params['exclude_system_outages'] = system_outages
         report_params = cls.apply_crps(report_params)
         report_dict = {'report_parameters': report_params}
         if len(costs) > 0:
@@ -647,6 +649,10 @@ class ReportConverter(FormConverter):
         if tz is None:
             tz = ""
         form_params['timezone'] = tz
+        form_params['exclude_system_outages'] = report_parameters.get(
+            'exclude_system_outages',
+            False
+        )
         return {'report_parameters': form_params}
 
 

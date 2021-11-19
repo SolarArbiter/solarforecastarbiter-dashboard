@@ -126,6 +126,23 @@
        <input name="provided_forecast_fill_method" type="number" step="any" required {% if selected_fill_method | is_number %}value="{{selected_fill_method}}"{% else %}disabled{% endif %}>
      </div>
      {% endblock %}
+     <div class="form-element full-width">
+       <label>Outages</label><br>
+       <p>
+         The Solar Forecast Arbiter keeps track of system outages
+         (API and dashboard downtime). By checking the box below,
+         the report will automatically exclude forecast submissions
+         that fall within outages reported <b>by system
+         administrators</b> from analysis.
+       <p>
+         Users may elect to add their own outage periods after 
+         report creation. If the checkbox below is checked,
+         both administrator reported outages and user reported
+         outages will be excluded.
+       </p>
+        {{ form_data['report_parameters']['exclude_system_outages'] }}
+       <input name="exclude_system_outages" type="checkbox" {% if form_data['report_parameters']['exclude_system_outages'] %}checked{% endif %}> exclude system outages
+     </div>
     {{ form.token() }}
   </div>
 </form>

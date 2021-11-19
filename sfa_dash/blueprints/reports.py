@@ -528,7 +528,19 @@ class ReportOutageView(BaseView):
             self.flash_api_errors(e.errors)
         else:
             self.template_args['page_title'] = report['report_parameters']['name']
+            outages = report['outages']
+            system_outages = list(filter(
+                lambda x: x['report_id'] is None,
+                outages
+            ))
+            report_outages = list(filter(
+                lambda x: x['report_id'] is not None,
+                outages
+            ))
+            self.template_args['system_outages'] = system_outages
+            self.template_args['report_outages'] = report_outages
             self.template_args['metadata'] = report
+            
 
 
 class ReportOutageForm(BaseView):
