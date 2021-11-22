@@ -140,8 +140,7 @@
          both administrator reported outages and user reported
          outages will be excluded.
        </p>
-        {{ form_data['report_parameters']['exclude_system_outages'] }}
-       <input name="exclude_system_outages" type="checkbox" {% if form_data['report_parameters']['exclude_system_outages'] %}checked{% endif %}> exclude system outages
+       <input name="exclude_system_outages" type="checkbox" {% if form_data and form_data['report_parameters']['exclude_system_outages'] %}checked{% endif %}> exclude system outages
      </div>
     {{ form.token() }}
   </div>
