@@ -82,7 +82,7 @@ class ReportForm(BaseView):
             'aggregates': aggregate_list
         }
 
-    def set_template_args(self):
+    def set_template_args(self, **kwargs):
         self.template_args = {
             "page_data": self.get_pairable_objects(),
             "report_type": self.report_type,
