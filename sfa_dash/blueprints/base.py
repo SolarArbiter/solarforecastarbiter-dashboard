@@ -165,9 +165,9 @@ class BaseView(MethodView):
         start_dt = pd.Timestamp(form_data['start'], tz='utc')
         end_dt = pd.Timestamp(form_data['end'], tz='utc')
         if (pd.isnull(start_dt) or pd.isnull(end_dt)):
-          err = ValueError("Invalid datetimes received from download form")
-          capture_exception(err)
-          raise err
+            err = ValueError("Invalid datetimes received from download form")
+            capture_exception(err)
+            raise err
         params = {
             'start': start_dt.isoformat(),
             'end': end_dt.isoformat(),

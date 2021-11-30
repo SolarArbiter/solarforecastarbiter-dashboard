@@ -1,4 +1,4 @@
-from sfa_dash.api_interface import get_request, post_request, delete_request
+from sfa_dash.api_interface import get_request
 
 
 def list_outages():

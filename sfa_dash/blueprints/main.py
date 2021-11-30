@@ -341,7 +341,7 @@ class SystemOutageView(BaseView):
             self.template_args['errors'] = e.errors
         else:
             self.template_args['outages'] = system_outages
-    
+
 
 class AccessView(DataDashView):
     template = 'data/access.html'

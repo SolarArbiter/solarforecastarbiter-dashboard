@@ -10,11 +10,6 @@ from functools import reduce
 from math import isinf
 
 
-from solarforecastarbiter.validation.quality_mapping import (
-    DISCARD_BEFORE_RESAMPLE)
-from solarforecastarbiter.datamodel import QualityFlagFilter as QFF
-
-
 from sfa_dash.form_utils import utils
 
 
@@ -539,7 +534,6 @@ class ReportConverter(FormConverter):
         discards = form_data.getlist('discard_before_resample')
         resamples = form_data.getlist('resample_threshold_percentage')
 
-    
         for qf, disc, rt in zip(quality_flags, discards, resamples):
             filters.append({
                 'quality_flags': qf.split(','),

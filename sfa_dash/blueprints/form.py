@@ -289,7 +289,11 @@ class CloneForm(CreateForm):
                     flash('Could not read site metadata. Cloning failed.',
                           'error')
                     return redirect(
-                        url_for(f'data_dashboard.{self.data_type}_view', uuid=uuid))
+                        url_for(
+                            f'data_dashboard.{self.data_type}_view',
+                            uuid=uuid
+                        )
+                    )
         return render_template(self.template, **self.template_args)
 
 
@@ -514,4 +518,3 @@ forms_blp.add_url_rule('/forecasts/cdf/<uuid>/update',
                        view_func=UpdateForm.as_view(
                            'update_cdf_forecast_group',
                            data_type='cdf_forecast_group'))
-

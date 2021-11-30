@@ -527,7 +527,8 @@ class ReportOutageView(BaseView):
         except DataRequestException as e:
             self.flash_api_errors(e.errors)
         else:
-            self.template_args['page_title'] = report['report_parameters']['name']
+            report_params = report['report_parameters']
+            self.template_args['page_title'] = report_params['name']
             outages = report['outages']
             system_outages = list(filter(
                 lambda x: x['report_id'] is None,
@@ -540,12 +541,10 @@ class ReportOutageView(BaseView):
             self.template_args['system_outages'] = system_outages
             self.template_args['report_outages'] = report_outages
             self.template_args['metadata'] = report
-            
 
 
 class ReportOutageForm(BaseView):
-    """
-    """
+    """Form for creating report outage."""
     template = "forms/report_outage_form.html"
 
     def set_template_args(self, uuid):
@@ -563,10 +562,10 @@ class ReportOutageForm(BaseView):
 
     def post(self, uuid=None):
         form_data = request.form
-        converter = converters.ReportOutageConverter       
+        converter = converters.ReportOutageConverter
         formatted = converter.formdata_to_payload(form_data)
         try:
-            outage_id = reports.post_outage(uuid, formatted)
+            reports.post_outage(uuid, formatted)
         except DataRequestException as e:
             self.flash_api_errors(e.errors)
             self.set_template_args(uuid)
@@ -623,7 +622,6 @@ class ReportOutageDeletionForm(BaseView):
             self.set_template_args(uuid)
             return render_template(
                 self.template,
-                form_data=form_data,
                 **self.template_args
             )
         else:
