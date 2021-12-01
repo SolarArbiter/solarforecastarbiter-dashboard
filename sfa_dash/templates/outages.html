@@ -1,0 +1,30 @@
+{% extends "dash/data.html" %}
+{% set page_title="Arbiter System Outages" %}
+{% block content %}
+<p>
+  Below is a table of Solar Forecast Arbiter downtime. During an outage one or
+  both of the Solar Forecast Arbiter Dashboard or API was unavailable. For
+  detailed outage reports see the
+  <a href="https://solarforecastarbiter.org/blog/">Solar Forecast Arbiter Blog</a>.
+</p>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Start</th>
+      <th>End</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if outages | length > 0 %}
+    {% for outage in outages %}
+    <tr>
+      <td>{{ outage['start'] }}</td>
+      <td>{{ outage['end'] }}</td>
+    </tr>
+    {% endfor %}
+    {% else %}
+    <tr><td colspan="2">No system outages.</td></tr>
+    {% endif %}
+  </tbody>
+</table>
+{% endblock %}

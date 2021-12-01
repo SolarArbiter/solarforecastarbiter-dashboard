@@ -82,7 +82,7 @@ class ReportForm(BaseView):
             'aggregates': aggregate_list
         }
 
-    def set_template_args(self):
+    def set_template_args(self, **kwargs):
         self.template_args = {
             "page_data": self.get_pairable_objects(),
             "report_type": self.report_type,
@@ -513,3 +513,120 @@ class ReportCloneView(ReportForm):
             self.set_template()
             self.set_template_args()
             return render_template(self.template, **self.template_args)
+
+
+class ReportOutageView(BaseView):
+    """View that lists report outages for a specific report.
+    """
+    template = "data/report_outages.html"
+
+    def set_template_args(self, uuid=None):
+        self.template_args = {}
+        try:
+            report = reports.get_metadata(uuid)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+        else:
+            self.template_args['page_title'] = "Report Outages"
+            outages = report['outages']
+            system_outages = list(filter(
+                lambda x: x['report_id'] is None,
+                outages
+            ))
+            report_outages = list(filter(
+                lambda x: x['report_id'] is not None,
+                outages
+            ))
+            self.template_args['system_outages'] = system_outages
+            self.template_args['report_outages'] = report_outages
+            self.template_args['metadata'] = report
+
+
+class ReportOutageForm(BaseView):
+    """Form for creating report outage."""
+    template = "forms/report_outage_form.html"
+
+    def set_template_args(self, uuid):
+        self.template_args = {}
+        self.template_args['page_title'] = "Add Report Outage"
+        try:
+            report = reports.get_metadata(uuid)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+        else:
+            self.template_args['metadata'] = report
+
+    def get(self, uuid=None):
+        self.set_template_args(uuid)
+        return render_template(self.template, **self.template_args)
+
+    def post(self, uuid=None):
+        form_data = request.form
+        converter = converters.ReportOutageConverter
+        formatted = converter.formdata_to_payload(form_data)
+        try:
+            reports.post_outage(uuid, formatted)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+            self.set_template_args(uuid)
+            return render_template(
+                self.template,
+                form_data=form_data,
+                **self.template_args
+            )
+        else:
+            return redirect(url_for(
+                "data_dashboard.report_outage_view",
+                uuid=uuid
+            ))
+
+
+class ReportOutageDeletionForm(BaseView):
+    """Form for deleting a single report outage.
+    """
+    template = "forms/report_outage_deletion_form.html"
+
+    def set_template_args(self, uuid, outage_id):
+        self.template_args = {}
+        try:
+            report = reports.get_metadata(uuid)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+        else:
+            outage = None
+            for report_outage in report['outages']:
+                if report_outage['outage_id'] == outage_id:
+                    outage = report_outage
+                    break
+            if outage is None:
+                self.flash_api_errors({
+                    "404": [
+                        "The requested object could not be found. "
+                        "You may need to request access from the "
+                        "data owner."
+                    ],
+                })
+            else:
+                self.template_args['metadata'] = report
+                self.template_args['outage'] = outage
+
+    def get(self, uuid=None, outage_id=None):
+        self.set_template_args(uuid, outage_id)
+        return render_template(self.template, **self.template_args)
+
+    def post(self, uuid=None, outage_id=None):
+        try:
+            reports.delete_outage(uuid, outage_id)
+        except DataRequestException as e:
+            self.flash_api_errors(e.errors)
+            self.set_template_args(uuid)
+            return render_template(
+                self.template,
+                **self.template_args
+            )
+        else:
+            flash("Deleted outage successfully.")
+            return redirect(url_for(
+                "data_dashboard.report_outage_view",
+                uuid=uuid
+            ))

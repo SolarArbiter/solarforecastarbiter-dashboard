@@ -1,0 +1,19 @@
+{% set data_type = "Report" %}
+{% extends "data/metadata/meta_container.html" %}
+{% import "data/metadata/meta_macro.jinja" as macro %}
+{% block metadata %}
+<ul class="data-metadata-fields col-md-6 col-sm-12">
+  {{ macro.li('Name', metadata['report_parameters']['name']) }}
+  {{ macro.uuid(metadata['report_id']) }}
+  {{ macro.li('Organization', metadata['provider']) }}
+  {{ macro.li('Status', metadata['status']) }}
+</ul>
+<ul class="data-metadata-fields col-md-6 col-sm-12">
+  {{ macro.li('Start', metadata['report_parameters']['start'] | format_datetime)}}
+  {{ macro.li('End', metadata['report_parameters']['end'] | format_datetime)}}
+  {{ macro.li('Forecast Fill Method',
+              metadata['report_parameters']['forecast_fill_method']
+     )
+  }}
+</ul>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "dash/data.html" %}
+{% block content %}
+{% if metadata is defined %}
+{% include "data/metadata/report_metadata_short.html" %}
+{% if is_allowed('read') %}
+<a class="btn btn-primary btn-sm" href="{{url_for('data_dashboard.report_view', uuid=metadata['report_id'])}}">Back to report</a>
+{% endif %}
+<div>
+<p>
+    Below is a list of outage periods for the report. Any forecast submissions
+    that fall on or between the start and end of an outage will not be included in
+    report analysis.
+</p>
+<h3>System Outages</h3>
+{% if metadata['report_parameters']['exclude_system_outages'] %}
+<p>
+    System outages are defined by Solar Forecast Arbiter administrators and
+    cannot be edited. If you do not wish to exclude these periods, recreate
+    the report and uncheck the <i>exclude system outages</i> option.
+</p>
+<table class="report-outage-table table">
+  <thead class="report-thead">
+    <th>Start</th>
+    <th>End</th>
+  </thead>
+  <tbody>
+  {% if system_outages |length > 0 %}
+    {% for outage in system_outages %}
+    <tr>
+      <td>{{ outage['start'] | format_datetime }}</td>
+      <td>{{ outage['end'] | format_datetime }}</td>
+    </tr>
+    {% endfor %}
+  {% else %}
+    <tr>
+    <td colspan="2">
+      No system outages.
+    </td>
+  {% endif %}
+  </tbody>
+</table>
+{% else %}
+<p class="alert alert-info">
+    This report is not configured to include arbiter system outages. To include
+    system outages, you may clone the report parameters and check the
+    <b>exclude system outages</b> option.
+</p>
+{% endif %}
+
+<h3>Report Outages</h3>
+<p>
+    Report outages may be be added and deleted freely, but this report
+    will need to be recomputed to reflect any changes.
+</p>
+<div class="tools report-outage-tools mt-1">
+  {% if is_allowed('update') %}
+    <a role="button" class="btn btn-primary btn-sm" href="{{ url_for('forms.report_outage_form',uuid=metadata['report_id']) }}">
+      Create new Outage
+    </a>
+  {% endif %}
+</div>
+<div>
+<table class="report-outage-table table">
+  <thead class="report-thead">
+    <th>Start</th>
+    <th>End</th>
+    <th></th>
+  </thead>
+  <tbody>
+  {% if report_outages |length > 0 %}
+    {% for outage in report_outages %}
+    <tr>
+      <td>{{ outage['start'] | format_datetime }}</td>
+      <td>{{ outage['end'] | format_datetime }}</td>
+      <td><a role="button" class="btn btn-danger btn-sm" href="{{ url_for('forms.delete_report_outage',uuid=metadata['report_id'], outage_id=outage['outage_id']) }}">
+      Delete
+    </a></td>
+    </tr>
+    {% endfor %}
+  {% else %}
+    <tr>
+    <td colspan="3">
+      No outages for this report.
+    </td>
+  {% endif %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

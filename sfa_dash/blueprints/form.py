@@ -13,7 +13,8 @@ from sfa_dash.blueprints.aggregates import (AggregateObservationAdditionForm,
                                             AggregateObservationDeletionForm)
 from sfa_dash.blueprints.base import BaseView
 from sfa_dash.blueprints.reports import (ReportForm, RecomputeReportView,
-                                         ReportCloneView)
+                                         ReportCloneView, ReportOutageForm,
+                                         ReportOutageDeletionForm)
 from sfa_dash.errors import DataRequestException
 from sfa_dash.form_utils import converters, utils
 
@@ -288,7 +289,11 @@ class CloneForm(CreateForm):
                     flash('Could not read site metadata. Cloning failed.',
                           'error')
                     return redirect(
-                        url_for(f'data_dashboard.{self.data_type}_view', uuid=uuid))
+                        url_for(
+                            f'data_dashboard.{self.data_type}_view',
+                            uuid=uuid
+                        )
+                    )
         return render_template(self.template, **self.template_args)
 
 
@@ -478,6 +483,13 @@ forms_blp.add_url_rule('/reports/probabilistic/create',
 forms_blp.add_url_rule('/reports/<uuid>/recompute',
                        view_func=RecomputeReportView.as_view(
                            'recompute_report'))
+forms_blp.add_url_rule('/reports/<uuid>/outages/add',
+                       view_func=ReportOutageForm.as_view(
+                           'report_outage_form'))
+forms_blp.add_url_rule('/reports/<uuid>/outages/<outage_id>',
+                       view_func=ReportOutageDeletionForm.as_view(
+                           'delete_report_outage'))
+
 # Aggregate specific forms
 forms_blp.add_url_rule('/aggregates/<uuid>/add',
                        view_func=AggregateObservationAdditionForm.as_view(

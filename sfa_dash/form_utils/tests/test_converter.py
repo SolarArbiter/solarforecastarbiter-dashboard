@@ -623,13 +623,14 @@ def test_report_converter_stringify_infinity(error_range, expected):
          'forecast_type': 'probabilistic_forecast',
          },
          ['crps'],
-    ),({'observation': 'a',
+    ),
+    ({'observation': 'a',
         'forecast': 'b',
         'reference_forecast': 'c',
         'forecast_type': 'probabilistic_forecast',
-       },
-       ['crps', 'crpss'],
-    ),
+      },
+     ['crps', 'crpss'],
+     ),
 ])
 def test_report_converter_apply_crps_crpss(pair, expected_metrics):
     params = {'object_pairs': [pair], 'metrics': []}

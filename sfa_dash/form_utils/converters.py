@@ -10,11 +10,6 @@ from functools import reduce
 from math import isinf
 
 
-from solarforecastarbiter.validation.quality_mapping import (
-    DISCARD_BEFORE_RESAMPLE)
-from solarforecastarbiter.datamodel import QualityFlagFilter as QFF
-
-
 from sfa_dash.form_utils import utils
 
 
@@ -539,7 +534,6 @@ class ReportConverter(FormConverter):
         discards = form_data.getlist('discard_before_resample')
         resamples = form_data.getlist('resample_threshold_percentage')
 
-    
         for qf, disc, rt in zip(quality_flags, discards, resamples):
             filters.append({
                 'quality_flags': qf.split(','),
@@ -608,6 +602,8 @@ class ReportConverter(FormConverter):
         report_params['end'] = form_dict['end']
         report_params['forecast_fill_method'] = cls.parse_fill_method(
             form_dict)
+        system_outages = 'exclude_system_outages' in form_dict
+        report_params['exclude_system_outages'] = system_outages
         report_params = cls.apply_crps(report_params)
         report_dict = {'report_parameters': report_params}
         if len(costs) > 0:
@@ -647,6 +643,10 @@ class ReportConverter(FormConverter):
         if tz is None:
             tz = ""
         form_params['timezone'] = tz
+        form_params['exclude_system_outages'] = report_parameters.get(
+            'exclude_system_outages',
+            False
+        )
         return {'report_parameters': form_params}
 
 
@@ -741,3 +741,26 @@ class AggregateUpdateConverter(AggregateConverter):
                      for key in cls.direct_keys
                      if form_dict.get(key) is not None}
         return formatted
+
+
+class ReportOutageConverter(FormConverter):
+    form = "forms/updates/report_outage_form.html"
+
+    @classmethod
+    def formdata_to_payload(cls, form_dict):
+        """Converts report outage form data to an appropriate api outage object.
+
+        Parameters
+        ----------
+        form_dict: dict
+            The posted form data parsed into a dict.
+
+        Returns
+        -------
+        dict
+            Form data formatted to API spec.
+        """
+        return {
+            "start": form_dict['start'],
+            "end": form_dict['end']
+        }
