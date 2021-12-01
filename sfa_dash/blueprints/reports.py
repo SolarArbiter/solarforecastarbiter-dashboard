@@ -516,7 +516,7 @@ class ReportCloneView(ReportForm):
 
 
 class ReportOutageView(BaseView):
-    """.
+    """View that lists report outages for a specific report.
     """
     template = "data/report_outages.html"
 
@@ -582,7 +582,7 @@ class ReportOutageForm(BaseView):
 
 
 class ReportOutageDeletionForm(BaseView):
-    """
+    """Form for deleting a single report outage.
     """
     template = "forms/report_outage_deletion_form.html"
 
