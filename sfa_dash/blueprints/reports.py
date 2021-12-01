@@ -527,8 +527,7 @@ class ReportOutageView(BaseView):
         except DataRequestException as e:
             self.flash_api_errors(e.errors)
         else:
-            report_params = report['report_parameters']
-            self.template_args['page_title'] = report_params['name']
+            self.template_args['page_title'] = "Report Outages"
             outages = report['outages']
             system_outages = list(filter(
                 lambda x: x['report_id'] is None,
@@ -549,6 +548,7 @@ class ReportOutageForm(BaseView):
 
     def set_template_args(self, uuid):
         self.template_args = {}
+        self.template_args['page_title'] = "Add Report Outage"
         try:
             report = reports.get_metadata(uuid)
         except DataRequestException as e:

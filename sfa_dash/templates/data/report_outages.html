@@ -1,7 +1,7 @@
 {% extends "dash/data.html" %}
 {% block content %}
 {% if metadata is defined %}
-{% include "data/metadata/report_metadata.html" %}
+{% include "data/metadata/report_metadata_short.html" %}
 {% if is_allowed('read') %}
 <a class="btn btn-primary btn-sm" href="{{url_for('data_dashboard.report_view', uuid=metadata['report_id'])}}">Back to report</a>
 {% endif %}
