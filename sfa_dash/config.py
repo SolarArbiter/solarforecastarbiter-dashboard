@@ -28,10 +28,8 @@ class BaseConfig(object):
 
 
 class LocalConfig(BaseConfig):
-    #SFA_API_URL = 'https://api.solarforecastarbiter.org'
     SFA_API_URL = 'http://localhost:5000'
     TEMPLATES_AUTO_RELOAD = True
-    REPORT_DATA_LIMIT = 22000
 
 
 class TestConfig(BaseConfig):
