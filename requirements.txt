@@ -19,4 +19,4 @@ prometheus_flask_exporter
 sentry_sdk
 blinker
 jsonschema==3.0.1
-werkzeug==1.0.1
+werkzeug==2.2.3
